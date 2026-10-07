@@ -1,16 +1,52 @@
+export interface ServiceCenterConfig {
+  serviceHours: {
+    startTime: string; // '10:30'
+    endTime: string;   // '18:10'
+    displayEn: string;
+    displayGu: string;
+  };
+  lunchBreak: {
+    startTime: string; // '13:30'
+    endTime: string;   // '14:00'
+    displayEn: string;
+    displayGu: string;
+  };
+  workingDays: number[]; // [1, 2, 3, 4, 5, 6]
+  defaultCapacityPerHour: number;
+  sourceReference: string;
+}
+
+export interface CounterDefinition {
+  number: number;
+  nameGu: string;
+  nameEn: string;
+  officerName: string;
+  services: string[];
+  capacityPerHour?: number;
+}
+
+export interface ServiceCenter {
+  id: string;
+  nameGu: string;
+  nameEn: string;
+  centerType: 'jan_seva_kendra' | 'mamlatdar_office' | 'taluka_seva_sadan' | 'sub_registrar';
+  distanceKm: number;
+  addressGu: string;
+  addressEn: string;
+  availabilityNoteGu?: string;
+  availabilityNoteEn?: string;
+  config: ServiceCenterConfig;
+  counters: CounterDefinition[];
+}
+
 export interface TalukaOffice {
   id: string;
   nameGu: string;
   nameEn: string;
   officeNameGu: string;
   officeNameEn: string;
-  counters: Array<{
-    number: number;
-    nameGu: string;
-    nameEn: string;
-    officerName: string;
-    services: string[];
-  }>;
+  serviceCenters?: ServiceCenter[];
+  counters: CounterDefinition[];
 }
 
 export interface DistrictItem {
@@ -589,6 +625,60 @@ export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
   }
 ];
 
+// Helper to get service centers for a given taluka
+export function getTalukaServiceCenters(taluka: TalukaOffice): ServiceCenter[] {
+  if (taluka.serviceCenters && taluka.serviceCenters.length > 0) {
+    return taluka.serviceCenters;
+  }
+
+  const defaultConfig: ServiceCenterConfig = {
+    serviceHours: {
+      startTime: '10:30',
+      endTime: '18:10',
+      displayEn: '10:30 AM – 06:10 PM',
+      displayGu: '૧૦:૩૦ સવારે – ૦૬:૧૦ સાંજે'
+    },
+    lunchBreak: {
+      startTime: '13:30',
+      endTime: '14:00',
+      displayEn: '01:30 PM – 02:00 PM',
+      displayGu: '૦૧:૩૦ બપોરે – ૦૨:૦૦ બપોરે'
+    },
+    workingDays: [1, 2, 3, 4, 5, 6],
+    defaultCapacityPerHour: 5,
+    sourceReference: 'Revenue & Panchayats Department Center Schedule'
+  };
+
+  return [
+    {
+      id: `${taluka.id}-jsk`,
+      nameGu: `જન સેવા કેન્દ્ર • ${taluka.nameGu}`,
+      nameEn: `Jan Seva Kendra • ${taluka.nameEn}`,
+      centerType: 'jan_seva_kendra',
+      distanceKm: 8.4,
+      addressGu: `તાલુકા પંચાયત કમ્પાઉન્ડ, ${taluka.nameGu}`,
+      addressEn: `Taluka Panchayat Compound, ${taluka.nameEn}`,
+      availabilityNoteGu: 'સંપૂર્ણ ૩૯ સરકારી સેવાઓ ઉપલબ્ધ',
+      availabilityNoteEn: 'Full 39 government services available',
+      config: defaultConfig,
+      counters: taluka.counters
+    },
+    {
+      id: `${taluka.id}-mamlatdar`,
+      nameGu: `મામલતદાર કચેરી / સેવા સદન • ${taluka.nameGu}`,
+      nameEn: `Mamlatdar Office / Seva Sadan • ${taluka.nameEn}`,
+      centerType: 'mamlatdar_office',
+      distanceKm: 10.1,
+      addressGu: `કોર્ટ રોડ, સરકારી સેવા સદન, ${taluka.nameGu}`,
+      addressEn: `Court Road, Government Seva Sadan, ${taluka.nameEn}`,
+      availabilityNoteGu: 'મહેસૂલ & પ્રમાણપત્ર સેવાઓ ઉપલબ્ધ',
+      availabilityNoteEn: 'Revenue & Certificate services available',
+      config: defaultConfig,
+      counters: taluka.counters
+    }
+  ];
+}
+
 // Helper to determine the best counter for a scheme category or keyword
 export function getAutoRoutedCounter(schemeId: string, category: string = ''): { counterNumber: number; reasonGu: string; reasonEn: string } {
   const idLower = schemeId.toLowerCase();
@@ -641,7 +731,26 @@ export function getAutoRoutedCounter(schemeId: string, category: string = ''): {
   };
 }
 
-export function getRecommendedCounter(schemeId: string, category: string = ''): { counterNumber: number; reasonGu: string; reasonEn: string } {
+export function getRecommendedCounter(
+  schemeId: string, 
+  category: string = '', 
+  serviceCenter?: ServiceCenter
+): { counterNumber: number; reasonGu: string; reasonEn: string } {
+  if (serviceCenter && serviceCenter.counters && serviceCenter.counters.length > 0) {
+    const idLower = schemeId.toLowerCase();
+    const catLower = category.toLowerCase();
+    const matched = serviceCenter.counters.find(c => 
+      c.services.some(s => idLower.includes(s) || catLower.includes(s))
+    );
+    if (matched) {
+      return {
+        counterNumber: matched.number,
+        reasonGu: `${matched.nameGu} માટે કાઉન્ટર ${matched.number} ફાળવેલ છે (${matched.officerName}).`,
+        reasonEn: `Routed to Counter ${matched.number} (${matched.nameEn}) based on service center configuration.`
+      };
+    }
+  }
+
   return getAutoRoutedCounter(schemeId, category);
 }
 

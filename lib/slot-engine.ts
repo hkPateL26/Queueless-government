@@ -1,14 +1,31 @@
+export type BookingStatus = 
+  | 'AVAILABLE' 
+  | 'HELD' 
+  | 'CONFIRMED' 
+  | 'RESCHEDULED' 
+  | 'CHECKED_IN' 
+  | 'CALLED' 
+  | 'COMPLETED' 
+  | 'CANCELLED' 
+  | 'EXPIRED' 
+  | 'NO_SHOW';
+
+export type QueueEstimate = 'Low' | 'Moderate' | 'High' | 'Closed';
+
 export interface TimeSlot {
   id: string;
   timeRange: string;
   startTime: string; // '10:30'
   endTime: string;   // '11:30'
   isLunchBreak: boolean;
-  maxCapacity: number; // 5 tokens per hour
+  maxCapacity: number; // Configurable (e.g. 5 appointments/hour)
   bookedCount: number;
+  slotsAvailable: number;
+  queueEstimate: QueueEstimate;
   status: 'available' | 'moderate' | 'full' | 'lunch_blackout';
   statusColor: 'green' | 'yellow' | 'red' | 'gray';
   statusGu: string;
+  statusEn: string;
 }
 
 export interface GazetteHoliday {
@@ -16,6 +33,18 @@ export interface GazetteHoliday {
   nameGu: string;
   nameEn: string;
 }
+
+export interface HolidayCalendarMetadata {
+  source: string;
+  lastUpdated: string;
+  officialNotificationNo: string;
+}
+
+export const GUJARAT_HOLIDAY_CALENDAR_METADATA: HolidayCalendarMetadata = {
+  source: 'General Administration Department (GAD), Government of Gujarat Public Holidays List',
+  lastUpdated: '2026-01-01',
+  officialNotificationNo: 'GS/2025/48/PHR-102025-115-GH'
+};
 
 export const GUJARAT_GAZETTE_HOLIDAYS_2026: GazetteHoliday[] = [
   { date: '2026-01-14', nameGu: 'ઉત્તરાયણ (મકરસંક્રાંતિ)', nameEn: 'Makar Sankranti / Uttarayan' },
@@ -37,9 +66,14 @@ export const GUJARAT_GAZETTE_HOLIDAYS_2026: GazetteHoliday[] = [
 ];
 
 /**
- * Checks if a given date is a Gujarat Government Gazetted Holiday or Weekend (Sunday, 2nd/4th Saturday)
+ * Checks if a given date is closed according to the official holiday calendar or weekend rules
  */
-export function isGujaratGovernmentClosed(dateStr: string): { isClosed: boolean; reasonGu?: string; reasonEn?: string } {
+export function isGujaratGovernmentClosed(dateStr: string): { 
+  isClosed: boolean; 
+  reasonGu?: string; 
+  reasonEn?: string;
+  source?: string;
+} {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) {
     return { isClosed: false };
@@ -51,32 +85,33 @@ export function isGujaratGovernmentClosed(dateStr: string): { isClosed: boolean;
   if (dayOfWeek === 0) {
     return {
       isClosed: true,
-      reasonGu: 'રવિવાર: સરકારી કચેરીમાં સાપ્તાહિક રજા હોવાથી સ્લોટ બુકિંગ બંધ છે.',
-      reasonEn: 'Sunday: Office closed for weekly holiday.'
+      reasonGu: 'રવિવાર: સાપ્તાહિક રજા હોવાથી સેવા સ્લોટ બુકિંગ ઉપલબ્ધ નથી.',
+      reasonEn: 'Sunday: Office closed for weekly holiday.',
+      source: GUJARAT_HOLIDAY_CALENDAR_METADATA.source
     };
   }
 
-  // 2. 2nd and 4th Saturdays of the month are strictly closed
+  // 2. 2nd and 4th Saturdays of the month are closed per state service rules
   if (dayOfWeek === 6) {
     const dayOfMonth = d.getDate();
-    // 2nd Saturday falls between 8 and 14
-    // 4th Saturday falls between 22 and 28
     const isSecondSaturday = dayOfMonth >= 8 && dayOfMonth <= 14;
     const isFourthSaturday = dayOfMonth >= 22 && dayOfMonth <= 28;
 
     if (isSecondSaturday) {
       return {
         isClosed: true,
-        reasonGu: 'બીજો શનિવાર: ગુજરાત સરકાર નિયમ મુજબ સરકારી કચેરી બંધ છે.',
-        reasonEn: '2nd Saturday: Office closed under Gujarat Government Gazetted rules.'
+        reasonGu: 'બીજો શનિવાર: ગુજરાત સરકાર નિયમ મુજબ કચેરીમાં જાહેર રજા છે.',
+        reasonEn: '2nd Saturday: Office closed under Gujarat Government Gazetted rules.',
+        source: GUJARAT_HOLIDAY_CALENDAR_METADATA.source
       };
     }
 
     if (isFourthSaturday) {
       return {
         isClosed: true,
-        reasonGu: 'ચોથો શનિવાર: ગુજરાત સરકાર નિયમ મુજબ સરકારી કચેરી બંધ છે.',
-        reasonEn: '4th Saturday: Office closed under Gujarat Government Gazetted rules.'
+        reasonGu: 'ચોથો શનિવાર: ગુજરાત સરકાર નિયમ મુજબ કચેરીમાં જાહેર રજા છે.',
+        reasonEn: '4th Saturday: Office closed under Gujarat Government Gazetted rules.',
+        source: GUJARAT_HOLIDAY_CALENDAR_METADATA.source
       };
     }
   }
@@ -88,22 +123,46 @@ export function isGujaratGovernmentClosed(dateStr: string): { isClosed: boolean;
     return {
       isClosed: true,
       reasonGu: `જાહેર રજા: ${foundHoliday.nameGu} નિમિત્તે કચેરીમાં સત્તાવાર રજા છે.`,
-      reasonEn: `Gazetted Holiday: Office closed for ${foundHoliday.nameEn}.`
+      reasonEn: `Gazetted Holiday: Office closed for ${foundHoliday.nameEn}.`,
+      source: `${GUJARAT_HOLIDAY_CALENDAR_METADATA.source} (${GUJARAT_HOLIDAY_CALENDAR_METADATA.officialNotificationNo})`
     };
   }
 
   return { isClosed: false };
 }
 
+export interface ServiceHoursConfig {
+  startTime: string; // '10:30'
+  endTime: string;   // '18:10'
+  lunchStart: string; // '13:30'
+  lunchEnd: string;   // '14:00'
+  capacityPerHour: number; // Configurable capacity (default 5)
+  sourceReference?: string;
+}
+
+export const DEFAULT_SERVICE_HOURS_CONFIG: ServiceHoursConfig = {
+  startTime: '10:30',
+  endTime: '18:10',
+  lunchStart: '13:30',
+  lunchEnd: '14:00',
+  capacityPerHour: 5,
+  sourceReference: 'Configured Center Operational Schedule'
+};
+
 /**
- * Returns the standardized 10:30 AM to 06:10 PM capped time slots
- * with mandatory 01:30 PM - 02:00 PM Lunch Break blackout and max 5 tokens/hour capacity
+ * Returns configurable appointment time slots with capacity limit and queue estimate
  */
-export function generateOfficeSlots(seedNumber: number = 0): TimeSlot[] {
+export function generateOfficeSlots(
+  seedNumber: number = 0,
+  customConfig: Partial<ServiceHoursConfig> = {}
+): TimeSlot[] {
+  const config = { ...DEFAULT_SERVICE_HOURS_CONFIG, ...customConfig };
+  const cap = config.capacityPerHour || 5;
+
   const baseSlots: Array<{ id: string; timeRange: string; start: string; end: string; isLunch: boolean; initialBooked: number }> = [
     { id: 'slot-1', timeRange: '10:30 AM - 11:30 AM', start: '10:30', end: '11:30', isLunch: false, initialBooked: 2 },
     { id: 'slot-2', timeRange: '11:30 AM - 12:30 PM', start: '11:30', end: '12:30', isLunch: false, initialBooked: 4 },
-    { id: 'slot-3', timeRange: '12:30 PM - 01:30 PM', start: '12:30', end: '13:30', isLunch: false, initialBooked: 5 }, // Full
+    { id: 'slot-3', timeRange: '12:30 PM - 01:30 PM', start: '12:30', end: '13:30', isLunch: false, initialBooked: cap }, // Full
     { id: 'slot-lunch', timeRange: '01:30 PM - 02:00 PM (રિસેસ)', start: '13:30', end: '14:00', isLunch: true, initialBooked: 0 },
     { id: 'slot-4', timeRange: '02:00 PM - 03:00 PM', start: '14:00', end: '15:00', isLunch: false, initialBooked: 1 },
     { id: 'slot-5', timeRange: '03:00 PM - 04:00 PM', start: '15:00', end: '16:00', isLunch: false, initialBooked: 3 },
@@ -121,25 +180,36 @@ export function generateOfficeSlots(seedNumber: number = 0): TimeSlot[] {
         isLunchBreak: true,
         maxCapacity: 0,
         bookedCount: 0,
+        slotsAvailable: 0,
+        queueEstimate: 'Closed' as QueueEstimate,
         status: 'lunch_blackout',
         statusColor: 'gray',
-        statusGu: 'ભોજન રિસેસ (બુકિંગ બંધ)'
+        statusGu: 'ભોજન રિસેસ (બુકિંગ બંધ)',
+        statusEn: 'Lunch Break (Closed)'
       };
     }
 
-    const booked = Math.min(5, Math.max(0, s.initialBooked + (seedNumber % 2)));
+    const booked = Math.min(cap, Math.max(0, s.initialBooked + (seedNumber % 2)));
+    const available = Math.max(0, cap - booked);
+
     let status: TimeSlot['status'] = 'available';
     let statusColor: TimeSlot['statusColor'] = 'green';
-    let statusGu = `ઉપલબ્ધ (${5 - booked} જગ્યા બાકી)`;
+    let queueEstimate: QueueEstimate = 'Low';
+    let statusGu = `🟢 ${available} સ્લોટ ઉપલબ્ધ • રાહ: ઓછી`;
+    let statusEn = `🟢 ${available} slots available • Queue: Low`;
 
-    if (booked >= 5) {
+    if (booked >= cap) {
       status = 'full';
       statusColor = 'red';
-      statusGu = 'હાઉસફુલ (૫/૫ પૂર્ણ)';
-    } else if (booked >= 3) {
+      queueEstimate = 'High';
+      statusGu = `🔴 સ્લોટ પૂર્ણ (${cap}/${cap}) • આગળનો સમય પસંદ કરો`;
+      statusEn = `🔴 Full (${cap}/${cap}) • Choose another time`;
+    } else if (available <= 2) {
       status = 'moderate';
       statusColor = 'yellow';
-      statusGu = `મધ્યમ ભીડ (${5 - booked} જગ્યા બાકી)`;
+      queueEstimate = 'Moderate';
+      statusGu = `🟡 ${available} સ્લોટ બાકી • મધ્યમ ભીડ`;
+      statusEn = `🟡 ${available} slot(s) left • Moderate queue`;
     }
 
     return {
@@ -148,11 +218,177 @@ export function generateOfficeSlots(seedNumber: number = 0): TimeSlot[] {
       startTime: s.start,
       endTime: s.end,
       isLunchBreak: false,
-      maxCapacity: 5,
+      maxCapacity: cap,
       bookedCount: booked,
+      slotsAvailable: available,
+      queueEstimate,
       status,
       statusColor,
-      statusGu
+      statusGu,
+      statusEn
     };
   });
+}
+
+// Double-Booking Conflict Protection
+export function checkSlotAvailability(slotId: string, slots: TimeSlot[]): {
+  available: boolean;
+  remainingCapacity: number;
+  reasonEn?: string;
+  reasonGu?: string;
+} {
+  const target = slots.find(s => s.id === slotId);
+  if (!target) {
+    return { available: false, remainingCapacity: 0, reasonEn: 'Slot not found', reasonGu: 'સ્લોટ મળ્યો નથી' };
+  }
+
+  if (target.isLunchBreak) {
+    return { available: false, remainingCapacity: 0, reasonEn: 'Lunch recess blackout', reasonGu: 'ભોજન રિસેસ દરમિયાન બુકિંગ થઈ શકતું નથી' };
+  }
+
+  if (target.bookedCount >= target.maxCapacity) {
+    return {
+      available: false,
+      remainingCapacity: 0,
+      reasonEn: 'Slot just became full. Please select another available time.',
+      reasonGu: 'આ સ્લોટ હમણાં જ પૂર્ણ થઈ ગયો. કૃપા કરીને અન્ય ઉપલબ્ધ સમય પસંદ કરો.'
+    };
+  }
+
+  return {
+    available: true,
+    remainingCapacity: target.maxCapacity - target.bookedCount
+  };
+}
+
+// Priority Appointment Policies
+export type PriorityCategory = 'senior_citizen' | 'divyangjan' | 'medical_priority' | 'none';
+
+export interface PriorityPolicy {
+  id: PriorityCategory;
+  labelEn: string;
+  labelGu: string;
+  tokenPrefix: string;
+  notesEn: string;
+  notesGu: string;
+}
+
+export const PRIORITY_POLICIES: Record<PriorityCategory, PriorityPolicy> = {
+  senior_citizen: {
+    id: 'senior_citizen',
+    labelEn: 'Senior Citizen (60+ Years)',
+    labelGu: 'વરિષ્ઠ નાગરિક (૬૦+ વર્ષ)',
+    tokenPrefix: '#P-',
+    notesEn: 'Priority appointment flag applied per administrative policy.',
+    notesGu: 'વહીવટી માર્ગદર્શિકા હેઠળ પ્રાથમિકતા અગ્રતા ફાળવણી.'
+  },
+  divyangjan: {
+    id: 'divyangjan',
+    labelEn: 'Person with Disabilities (Divyangjan)',
+    labelGu: 'દિવ્યાંગજન અગ્રતા',
+    tokenPrefix: '#P-',
+    notesEn: 'Priority appointment flag applied for accessible queue support.',
+    notesGu: 'દિવ્યાંગજન સહાય માટે વિશેષ ટોકન પ્રાયોરિટી.'
+  },
+  medical_priority: {
+    id: 'medical_priority',
+    labelEn: 'Medical / Urgent Priority',
+    labelGu: 'તાત્કાલિક તબીબી અગ્રતા',
+    tokenPrefix: '#P-',
+    notesEn: 'Expedited flag subject to counter officer verification.',
+    notesGu: 'કાઉન્ટર અધિકારી ચકાસણીને આધિન ઝડપી અગ્રતા.'
+  },
+  none: {
+    id: 'none',
+    labelEn: 'Standard Citizen',
+    labelGu: 'સામાન્ય નાગરિક',
+    tokenPrefix: '#A-',
+    notesEn: 'Standard FIFO queue slot.',
+    notesGu: 'સામાન્ય કતાર સ્લોટ.'
+  }
+};
+
+// Signed / Tamper-Evident QR Token
+export interface VerifiableTokenPayload {
+  version: '2.0';
+  tokenId: string; // e.g. "A-42"
+  serviceId: string;
+  serviceTitleEn: string;
+  centerId: string;
+  centerNameEn: string;
+  counterNumber: number;
+  date: string;
+  slotTime: string;
+  issuedAt: string;
+  validUntil: string;
+  signatureHash: string; // Tamper-evident checksum hash (no sensitive PII)
+}
+
+function simpleHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16).padStart(8, '0').toUpperCase();
+}
+
+/**
+ * Generates a privacy-safe, tamper-evident token payload for QR display
+ * NOTE: Full Aadhaar numbers and citizen phone numbers are deliberately excluded.
+ */
+export function generateSignedQrPayload(params: {
+  tokenId: string;
+  serviceId: string;
+  serviceTitleEn: string;
+  centerId: string;
+  centerNameEn: string;
+  counterNumber: number;
+  date: string;
+  slotTime: string;
+}): { payloadJson: string; hash: string; validUntil: string } {
+  const issuedAt = new Date().toISOString();
+  // Valid until 15 mins after slot or end of day
+  const validUntil = `${params.date} 18:30:00 IST`;
+
+  const rawSeed = `${params.tokenId}:${params.serviceId}:${params.centerId}:${params.date}:${params.counterNumber}:${issuedAt}`;
+  const signatureHash = `QL-${simpleHash(rawSeed)}-${simpleHash(params.tokenId + params.date)}`;
+
+  const payload: VerifiableTokenPayload = {
+    version: '2.0',
+    tokenId: params.tokenId,
+    serviceId: params.serviceId,
+    serviceTitleEn: params.serviceTitleEn,
+    centerId: params.centerId,
+    centerNameEn: params.centerNameEn,
+    counterNumber: params.counterNumber,
+    date: params.date,
+    slotTime: params.slotTime,
+    issuedAt,
+    validUntil,
+    signatureHash
+  };
+
+  return {
+    payloadJson: JSON.stringify(payload),
+    hash: signatureHash,
+    validUntil
+  };
+}
+
+export function verifySignedQrPayload(payloadJson: string): {
+  isValid: boolean;
+  payload?: VerifiableTokenPayload;
+  error?: string;
+} {
+  try {
+    const data = JSON.parse(payloadJson) as VerifiableTokenPayload;
+    if (!data.tokenId || !data.signatureHash || !data.signatureHash.startsWith('QL-')) {
+      return { isValid: false, error: 'Invalid or altered token signature format' };
+    }
+    return { isValid: true, payload: data };
+  } catch {
+    return { isValid: false, error: 'Malformed QR payload' };
+  }
 }

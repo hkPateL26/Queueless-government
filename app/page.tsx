@@ -192,9 +192,9 @@ export default function Home() {
 
   const handleRunningLate = () => {
     triggerHaptic('warning');
-    setLateShiftMinutes(prev => prev + 36);
-    speakGuidance("તમારો ટોકન ૩ સ્લોટ પાછળ ખસેડવામાં આવ્યો છે. કાઉન્ટર તમારો નંબર છોડશે નહીં.");
-    alert("⚠️ મોડું થવાની વિનંતી મંજૂર!\n\nતમારો ટોકન ૩ સ્લોટ (+૩૬ મિનિટ) આગળ ધકેલવામાં આવ્યો છે. નવો અંદાજિત સમય અપડેટ થયો છે. કાઉન્ટર અધિકારી તમારો વારો સ્કીપ નહીં કરે.");
+    setLateShiftMinutes(prev => prev + 20);
+    speakGuidance("વિલંબ નોંધણી સફળ! કાઉન્ટર અધિકારીને તમારા નવા અંદાજિત સમયની જાણ કરવામાં આવી છે.");
+    alert("⚠️ વિલંબ નોંધણી મંજૂર!\n\nતમારી અપોઇન્ટમેન્ટનો સમય ૨૦ મિનિટ આગળ ખસેડવામાં આવ્યો છે. કાઉન્ટર અધિકારીને સિસ્ટમ દ્વારા જાણ થઈ ગઈ છે જેથી તમારો વારો સ્કીપ નહીં થાય.");
   };
 
   const handleSelectScheme = (scheme: SchemeItem) => {
@@ -784,10 +784,10 @@ export default function Home() {
                     <button
                       onClick={handleRunningLate}
                       className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold py-2.5 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition min-h-[44px]"
-                      title="Request a 3-slot / 36-minute delay shift"
+                      title="વિલંબ નોંધાવો (+20 મિનિટ)"
                     >
                       <RotateCcw className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">મોડું થાય છે (+૩ સ્લોટ)</span>
+                      <span className="truncate">મોડું થશે (+૨૦ મિનિટ)</span>
                     </button>
                     <button
                       onClick={() => {

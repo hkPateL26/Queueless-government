@@ -36,8 +36,8 @@ Queueless-government/
 │   ├── SchemesCatalog.tsx        <-- [TRACK 1: main] ૩૯ સત્તાવાર યોજનાઓ કેટાલોગ
 │   ├── SchemeDrawer.tsx          <-- [TRACK 1: main] યોજના જરૂરી દસ્તાવેજ ડ્રોઅર
 │   ├── CameraScannerModal.tsx    <-- [TRACK 1: main] Document OCR & Pre-Verification (Client-Side OCR + Rule Engine)
-│   ├── SlotBookingModal.tsx      <-- [TRACK 1: main] ૩૩ જિલ્લા સરકારી સ્લોટ બુકિંગ શીટ
-│   ├── DigitalTokenPass.tsx      <-- [TRACK 1: main] ત્રિરંગા QR ડિજિટલ પાસ + મોડું થાય છે
+│   ├── SlotBookingModal.tsx      <-- [TRACK 1: main] અધિકારક્ષેત્ર, સેવા કેન્દ્ર & કેપેસિટી સ્લોટ બુકિંગ
+│   ├── DigitalTokenPass.tsx      <-- [TRACK 1: main] સહી કરેલ QR પાસ, વિલંબ એડજસ્ટમેન્ટ & ઑફલાઇન એક્સેસ
 │   └── admin/                    <-- [TRACK 2: dev-hari] EXCLUSIVE ADMIN COMPONENTS
 │       ├── CounterDesk.tsx       <-- કોલ નેક્સ્ટ, માર્ક કમ્પ્લીટ, સ્કીપ કંટ્રોલ પેનલ
 │       ├── CollectorHeatmap.tsx  <-- ૩૩ જિલ્લા લાઈવ ભીડ & ટ્રાફિક ગેજ
@@ -45,8 +45,8 @@ Queueless-government/
 │       └── DocumentReviewer.tsx  <-- નાગરિકે અપલોડ કરેલા કાગળોનું સ્ક્રીન પ્રિવ્યૂ
 │
 └── lib/                          <-- [SHARED CORE LAYER: બંને બ્રાન્ચ ઉપયોગ કરશે]
-    ├── jurisdiction-data.ts      <-- ૩૩ જિલ્લા, ૨૫૦+ તાલુકા, જન સેવા કેન્દ્રો & કાઉન્ટર ૧-૬
-    ├── slot-engine.ts            <-- ૧૦:૩૦-૧૮:૧૦ કેપ્ડ સ્લોટ્સ, લંચ બ્રેક & ૨૦૨૬ રજાઓ
+    ├── jurisdiction-data.ts      <-- ૩૩ જિલ્લા, તાલુકા, સેવા કેન્દ્રો & કાઉન્ટર રાઉટીંગ
+    ├── slot-engine.ts            <-- કોન્ફિગરેબલ સેવા કલાકો, કેપેસિટી લિમિટ, હોલિડે કેલેન્ડર & સાઇન્ડ QR
     ├── schemes-data.ts           <-- ૩૯ સત્તાવાર ગુજરાત સરકારી યોજનાઓની વિગતો
     ├── ocr-validator.ts          <-- Client-Side OCR + Rule Engine (ઓટોમેટેડ પ્રી-ચેક)
     ├── realtime-bus.ts           <-- User & Admin વચ્ચેનું લાઈવ સિંક્રોનાઇઝેશન એન્જિન
@@ -74,7 +74,19 @@ Queueless-government/
   - **Aadhaar Privacy Masking & Identity Check:** માસ્ક્ડ આધાર (`XXXX-XXXX-8842` છેલ્લા ૪ આંકડા) અને Citizen Identity Check (મોબાઇલ OTP + આધાર લાસ્ટ-૪).
   - **CamScanner Viewfinder & Demo Cloud Import:** ગુણવત્તા માર્ગદર્શિકા (sharpness, lighting, framing) અને સ્પષ્ટ "Cloud Import — Demo" / "DigiLocker Import — Demo".
   - **ડિફેન્સિબલ પિચ ધ્યેય (Pitch Goal):** *"Our goal is to reduce avoidable counter rejections by helping citizens identify missing, unreadable, or potentially outdated documents before they visit the office."*
-- [x] **Phase 3:** ૩૩ જિલ્લા & તાલુકા જન સેવા કેન્દ્ર ઓટો-કાઉન્ટર રાઉટીંગ, સરકારી કેપ્ડ સ્લોટ એન્જિન (૫ ટોકન/કલાક), લંચ રિસેસ & રજાઓ બ્લોકર, સત્તાવાર ડિજિટલ પાસ (QR), "+૩ સ્લોટ / ૩૬ મિનિટ મોડું થાય છે" શિફ્ટર, ઑફલાઇન LocalStorage કૅશ, વોટ્સએપ બોટ સિમ્યુલેટર.
+- [x] **Phase 3: Jurisdiction Routing, Appointment Scheduling & Digital Token Pass:**
+  - **અધિકારક્ષેત્ર & સેવા કેન્દ્ર પસંદગી (Jurisdiction & Center Selection):** Citizen Location ➔ District ➔ Taluka ➔ Applicable Service Center (જન સેવા કેન્દ્ર / મામલતદાર સેવા સદન with distance km) ➔ કાઉન્ટર રાઉટીંગ.
+  - **કોન્ફિગરેબલ સેવા કલાકો & ક્ષમતા મર્યાદા (Configurable Hours & Capacity):** કેન્દ્ર મુજબ કામકાજના કલાકો (serviceHours, lunchBreak, workingDays) અને પ્રતિ કલાક કેપેસિટી લિમિટ (દા.ત. 5 એપોઇન્ટમેન્ટ/કલાક) દ્વારા અપેક્ષિત ભીડ નિયંત્રણ.
+  - **સ્લોટ પ્રાપ્યતા & કતાર અંદાજ (Slot Availability Details):** `🟢 3 slots available • Queue: Low`, `🟡 1 slot left • Moderate queue`, `🔴 Full • Choose another time`, ભોજન રિસેસ બ્લેકઆઉટ.
+  - **સત્તાવાર સ્ત્રોત આધારિત રજા કેલેન્ડર (Source-Based Holidays):** GAD જાહેર રજા યાદી આધારે માન્ય (રવિવાર, ૨જા/૪થા શનિવાર અને ૨૦૨૬ જાહેર રજાઓ બ્લોકર).
+  - **પ્રાથમિકતા અપોઇન્ટમેન્ટ સપોર્ટ (Priority Appointment Support):** વરિષ્ઠ નાગરિકો (૬૦+) અને દિવ્યાંગજનો માટે વહીવટી માર્ગદર્શિકા હેઠળ `#P-` ટોકન ફ્લેગ.
+  - **ડબલ-બુકિંગ કોન્ફ્લિક્ટ પ્રોટેક્શન (Conflict Protection):** કન્ફર્મેશન પહેલાં રિયલ-ટાઇમ સ્લોટ કેપેસિટી ચકાસણી.
+  - **સહી કરેલ ટેમ્પર-એવિડન્ટ QR ટોકન (Signed / Tamper-Evident QR Token):** પ્રાઇવસી-સુરક્ષિત સહી ચેકસમ (કોઈ આધાર નંબર કે ખાનગી વિગતો QR માં શામેલ નથી).
+  - **લાઇવ ટોકન વેલિડિટી & ઑફલાઇન પાસ (Live Indicator & Offline Pass):** લોકલ સ્ટોરેજમાં સેવ થયેલ પાસ (ઇન્ટરનેટ વગર ઓપન કરી શકાય), લાઈવ સેકન્ડ્સ ક્લોક ઇન્ડિકેટર.
+  - **ડાયનેમિક વિલંબ નોંધણી (Dynamic Running Late):** +૧૦/+૨૦/+૩૦ મિનિટ વિકલ્પ સાથે અધિકારી HUD પર નવી ETA અપડેટ.
+  - **રિશિડ્યુલ & કેન્સલેશન (Rescheduling & Cancellation):** નવો સ્લોટ પસંદ કરવાની સુવિધા અને સ્લોટ મુક્ત કરવા માટે રદ કરવાનો વિકલ્પ.
+  - **મલ્ટી-ચેનલ ટચપોઇન્ટ્સ (Multi-Channel Touchpoints):** SMS Notification (Demo), WhatsApp Service Assistant (Demo), Add to Google Calendar લિંક, Gate Security Kiosk સિમ્યુલેશન.
+  - **ડિફેન્સિબલ પિચ ધ્યેય (Pitch Claims):** *"Reduces the need for early-morning physical queuing by allowing citizens to reserve available service capacity in advance, with configurable capacity limits helping administrations manage expected footfall."*
 - [x] **Phase 4:** ૧૦૦% મોબાઈલ રિસ્પોન્સિવ (૩૨૦px iPhone SE/Android ફિટ, ઝીરો વર્ડ કટ), બુલેટપ્રૂફ બેકગ્રાઉન્ડ બોડી સ્ક્રોલ લોક, આઉટસાઇડ ટેપ ક્લોઝ, નેટિવ બોટમ નેવિગેશન બાર, 48px ટચ ટાર્ગેટ્સ.
 - [x] **Phase 5A:** કાઉન્ટર ઓપરેટર ડેસ્ક (`app/admin/counter/page.tsx`), GSWAN ઓફિસર HUD, વરિષ્ઠ નાગરિક (#P-XX) અગ્રતા સોર્ટિંગ, AI OCR દસ્તાવેજ નિરીક્ષક, GRTSA ૧૫m કાનૂની SLA ક્લોક, કાઉન્ટર ટ્રાન્સફર, લંચ રિસેસ ટોગલ.
 - [x] **Phase 5B:** કલેક્ટર & DDO કમાન્ડ સેન્ટર (`app/admin/collector/page.tsx`), ગુજરાત ૩૩ જિલ્લા લાઈવ ભીડ હીટમેપ, GRTSA SLA વોચડોગ, પીક અવર્સ ચાર્ટ, દૈનિક MIS રિપોર્ટ એક્સપોર્ટ.
