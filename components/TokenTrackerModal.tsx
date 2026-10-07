@@ -226,7 +226,7 @@ export function TokenTrackerModal({
                 #{tokenData.token}
               </h3>
               <p className="text-xs font-bold text-slate-700 mt-1">
-                {tokenData.name}
+                {tokenData.token === 'A-42' ? (isGu ? 'હરિ પટેલ' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'Hari Patel') : tokenData.name}
               </p>
               <p className="text-[11px] text-slate-500">
                 {tokenData.center}

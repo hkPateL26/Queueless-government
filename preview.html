@@ -138,11 +138,11 @@
           </button>
         </div>
 
-        <div id="authUserPill" class="hidden flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Rajesh" alt="Avatar" class="w-6 h-6 rounded-full bg-amber-200">
+        <div id="authUserPill" class="hidden flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+          <span class="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded border border-emerald-300 whitespace-nowrap">પ્રમાણિત નાગરિક</span>
           <div class="text-left text-xs leading-none">
-            <p id="userNameDisplay" class="font-extrabold text-[#003366]">Hari Patel (હરિ પટેલ)</p>
-            <p id="userRoleDisplay" class="text-[9.5px] text-[#FF9933] font-bold">Citizen • Rajkot Rural</p>
+            <p id="userNameDisplay" class="font-extrabold text-[#003366] whitespace-nowrap">હરિ પટેલ</p>
+            <p id="userRoleDisplay" class="text-[9.5px] text-[#005A9C] font-bold whitespace-nowrap">નાગરિક • રાજકોટ ગ્રામ્ય</p>
           </div>
           <button onclick="resetDemoSession()" class="ml-1 text-slate-400 hover:text-red-500 text-xs" title="Logout">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -1723,9 +1723,9 @@
               <i class="fa-solid fa-volume-high"></i> સાંભળો
             </button>
           </label>
-          <div class="flex">
-            <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-300 bg-[#F5F7FA] text-slate-500 text-xs font-bold">+91</span>
-            <input type="tel" id="loginPhoneInput" value="9876543210" maxlength="10" class="w-full text-xs font-medium rounded-r-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C]">
+          <div class="flex items-stretch">
+            <span class="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-300 bg-[#F5F7FA] text-slate-700 text-xs font-black shrink-0 whitespace-nowrap select-none">+91</span>
+            <input type="tel" id="loginPhoneInput" value="9876543210" maxlength="10" class="w-full text-xs font-bold rounded-r-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C] tracking-wider">
           </div>
         </div>
 

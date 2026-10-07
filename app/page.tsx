@@ -48,6 +48,25 @@ export default function Home() {
     } catch {}
   }, []);
 
+  // Localized Citizen Identity Helpers (Dynamic for all 4 languages)
+  const getCitizenDisplayName = (l: Language) => {
+    switch (l) {
+      case 'gu': return 'હરિ પટેલ';
+      case 'hi': return 'हरि पटेल';
+      case 'mr': return 'हरी पटेल';
+      case 'en': default: return 'Hari Patel';
+    }
+  };
+
+  const getCitizenRoleArea = (l: Language) => {
+    switch (l) {
+      case 'gu': return 'નાગરિક • રાજકોટ ગ્રામ્ય';
+      case 'hi': return 'नागरिक • राजकोट ग्रामीण';
+      case 'mr': return 'नागरिक • राजकोट ग्रामीण';
+      case 'en': default: return 'Citizen • Rajkot Rural';
+    }
+  };
+
   // Language switch handler with persistence
   const handleSelectLang = (newLang: Language) => {
     triggerHaptic('tap');
@@ -168,9 +187,9 @@ export default function Home() {
 
     const userObj = role === 'farmer' 
       ? {
-          name: 'Hari Patel',
-          role: 'Citizen',
-          area: 'Rajkot Rural',
+          name: getCitizenDisplayName(lang),
+          role: lang === 'gu' ? 'નાગરિક' : lang === 'hi' ? 'नागरिक' : lang === 'mr' ? 'नागरिक' : 'Citizen',
+          area: lang === 'gu' ? 'રાજકોટ ગ્રામ્ય' : lang === 'hi' ? 'राजकोट ग्रामीण' : lang === 'mr' ? 'राजकोट ग्रामीण' : 'Rajkot Rural',
           token: '#A-42',
         }
       : {
@@ -204,9 +223,9 @@ export default function Home() {
     setAuthModalOpen(false);
     
     const userObj = {
-      name: 'Hari Patel',
-      role: 'Citizen',
-      area: pendingSlotBooking ? `${pendingSlotBooking.taluka.nameGu}, ${pendingSlotBooking.district.nameGu}` : 'Rajkot Rural',
+      name: getCitizenDisplayName(lang),
+      role: lang === 'gu' ? 'નાગરિક' : lang === 'hi' ? 'नागरिक' : lang === 'mr' ? 'नागरिक' : 'Citizen',
+      area: pendingSlotBooking ? `${pendingSlotBooking.taluka.nameGu}, ${pendingSlotBooking.district.nameGu}` : (lang === 'gu' ? 'રાજકોટ ગ્રામ્ય' : lang === 'hi' ? 'राजकोट ग्रामीण' : lang === 'mr' ? 'राजकोट ग्रामीण' : 'Rajkot Rural'),
       token: pendingSlotBooking ? pendingSlotBooking.tokenNumber : '#A-42',
     };
     setCurrentUser(userObj);
@@ -714,20 +733,16 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl">
-                <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Hari"
-                  alt="Avatar"
-                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-200 shrink-0"
-                />
+
                 <div className="text-left text-xs leading-none">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                       {lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen'}
                     </span>
-                    <p className="font-extrabold text-[#003366] text-[11px] sm:text-xs truncate max-w-[120px] sm:max-w-none">{currentUser.name}</p>
+                    <p className="font-extrabold text-[#003366] text-xs sm:text-sm whitespace-nowrap">{getCitizenDisplayName(lang)}</p>
                   </div>
-                  <p className="text-[9px] text-[#005A9C] font-bold hidden sm:block mt-0.5">{currentUser.role} • {currentUser.area}</p>
+                  <p className="text-[9px] text-[#005A9C] font-bold hidden sm:block mt-0.5 whitespace-nowrap">{getCitizenRoleArea(lang)}</p>
                 </div>
                 <button 
                   onClick={resetSession} 
@@ -933,14 +948,9 @@ export default function Home() {
                 
                 {/* Citizen Profile Pill */}
                 <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                  <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Hari"
-                    alt="Citizen Avatar"
-                    className="w-7 h-7 rounded-full bg-amber-100 border border-amber-300 shrink-0"
-                  />
                   <div className="text-left text-xs leading-tight">
-                    <p className="font-extrabold text-[#003366]">{currentUser?.name || 'હરિ પટેલ (Hari Patel)'}</p>
-                    <p className="text-[10px] text-slate-500 font-medium">{currentUser?.role || 'નાગરિક'} • {currentUser?.area || 'રાજકોટ ગ્રામ્ય'}</p>
+                    <p className="font-extrabold text-[#003366] whitespace-nowrap">{getCitizenDisplayName(lang)}</p>
+                    <p className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{getCitizenRoleArea(lang)}</p>
                   </div>
                 </div>
               </div>
@@ -966,7 +976,7 @@ export default function Home() {
                     </span>
                   </div>
                   <h2 className="text-lg sm:text-xl font-black text-white mt-1">
-                    {currentUser?.name || 'હરિ પટેલ (Hari Patel)'} • {activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}
+                    {getCitizenDisplayName(lang)} • {activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}
                   </h2>
                   <p className="text-xs text-blue-100 mt-0.5">
                     {activeBooking 
@@ -1036,7 +1046,7 @@ export default function Home() {
                   {/* 📷 AUTHENTIC HIGH-RES SCANNABLE QR CODE */}
                   <div className="py-2 flex justify-center">
                     <AuthenticQrCode
-                      payload={`https://queueless.gujarat.gov.in/verify?token=${encodeURIComponent(activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42'))}&citizen=${encodeURIComponent(currentUser?.name || 'Hari Patel')}&office=RajkotGondal&sig=QL-GUJ-8F3A29`}
+                      payload={`https://queueless.gujarat.gov.in/verify?token=${encodeURIComponent(activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42'))}&citizen=${encodeURIComponent(getCitizenDisplayName(lang))}&office=RajkotGondal&sig=QL-GUJ-8F3A29`}
                       tokenId={activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}
                       size={180}
                       label={lang === 'gu' ? 'સત્તાવાર સુરક્ષિત QR ટોકન' : lang === 'hi' ? 'आधिकारिक सुरक्षित QR टोकन' : lang === 'mr' ? 'अधिकृत सुरक्षित QR टोकन' : 'Official Secure QR Token'}
@@ -1585,8 +1595,8 @@ export default function Home() {
                     <Volume2 className="w-3.5 h-3.5" /> {t('listenBtnLabel', lang)}
                   </button>
                 </label>
-                <div className="flex">
-                  <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-300 bg-[#F5F7FA] text-slate-500 text-xs font-bold">
+                <div className="flex items-stretch">
+                  <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-300 bg-[#F5F7FA] text-slate-700 text-xs font-black shrink-0 whitespace-nowrap select-none">
                     +91
                   </span>
                   <input
@@ -1594,16 +1604,18 @@ export default function Home() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     maxLength={10}
-                    className="w-full text-xs font-medium rounded-r-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C]"
+                    className="w-full text-xs font-bold rounded-r-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C] tracking-wider"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                  <span>{t('aadhaarLast4Label', lang)}</span>
-                  <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Aadhaar Masking</span>
-                </label>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-xs font-bold text-slate-700 whitespace-nowrap">{t('aadhaarLast4Label', lang)}</span>
+                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0 whitespace-nowrap">
+                    {lang === 'gu' ? '🔒 સુરક્ષિત આધાર માસ્કિંગ' : lang === 'hi' ? '🔒 सुरक्षित आधार मास्किंग' : lang === 'mr' ? '🔒 सुरक्षित आधार मास्किंग' : '🔒 Secure Aadhaar Masking'}
+                  </span>
+                </div>
                 <input
                   type="password"
                   value={aadhaar4}
@@ -1682,7 +1694,7 @@ export default function Home() {
             <DigitalTokenPass
               booking={activeBooking}
               scheme={activeScheme}
-              citizenName={currentUser?.name || 'હરિ પટેલ (Hari Patel)'}
+              citizenName={getCitizenDisplayName(lang)}
               onClose={() => setTokenPassModalOpen(false)}
               lang={lang}
             />
