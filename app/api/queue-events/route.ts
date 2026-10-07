@@ -11,8 +11,15 @@ interface StoredEvent {
   payload?: any;
 }
 
-// In-memory backend event store across server requests
-const globalEventStore: StoredEvent[] = [];
+// In-memory backend event store across server requests (persists across hot-reloads)
+const globalForEvents = globalThis as unknown as {
+  globalEventStore?: StoredEvent[];
+};
+
+const globalEventStore: StoredEvent[] = globalForEvents.globalEventStore || [];
+if (!globalForEvents.globalEventStore) {
+  globalForEvents.globalEventStore = globalEventStore;
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
