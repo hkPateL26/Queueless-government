@@ -29,7 +29,6 @@ export default function Home() {
   const [view, setView] = useState<'landing' | 'dashboard' | 'services'>('landing');
   const [lang, setLang] = useState<Language>('gu');
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [demoMenuOpen, setDemoMenuOpen] = useState(false);
   const [loginMenuOpen, setLoginMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
@@ -64,9 +63,6 @@ export default function Home() {
       const target = e.target as HTMLElement;
       if (!target.closest('[data-dropdown="lang"]')) {
         setLangMenuOpen(false);
-      }
-      if (!target.closest('[data-dropdown="demo"]')) {
-        setDemoMenuOpen(false);
       }
       if (!target.closest('[data-dropdown="login"]')) {
         setLoginMenuOpen(false);
@@ -156,18 +152,17 @@ export default function Home() {
         else if (authModalOpen) setAuthModalOpen(false);
         else if (helpModalOpen) setHelpModalOpen(false);
         else if (tokenTrackerModalOpen) setTokenTrackerModalOpen(false);
-        else if (demoMenuOpen) setDemoMenuOpen(false);
+        else if (loginMenuOpen) setLoginMenuOpen(false);
         else if (langMenuOpen) setLangMenuOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tokenPassModalOpen, slotModalOpen, scannerOpen, drawerOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, demoMenuOpen, langMenuOpen]);
+  }, [tokenPassModalOpen, slotModalOpen, scannerOpen, drawerOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, loginMenuOpen, langMenuOpen]);
 
   // 1-Click Demo Fill Handlers
   const loginAsDemo = (role: 'farmer' | 'officer') => {
     triggerHaptic('success');
-    setDemoMenuOpen(false);
     setAuthModalOpen(false);
 
     const userObj = role === 'farmer' 
@@ -262,7 +257,6 @@ export default function Home() {
     setActiveBooking(null);
     setLateShiftMinutes(0);
     setLoginPromptReason(null);
-    setDemoMenuOpen(false);
     setLoginMenuOpen(false);
     setView('landing');
   };
@@ -540,88 +534,6 @@ export default function Home() {
                     </div>
                   </div>
                 </>
-              )}
-            </div>
-
-            {/* ⚡ ONE-CLICK DEMO PERSONAS */}
-            <div className="relative" data-dropdown="demo">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  triggerHaptic('tap');
-                  setDemoMenuOpen(!demoMenuOpen);
-                }}
-                aria-expanded={demoMenuOpen}
-                aria-haspopup="true"
-                aria-label="Toggle One-Click Demo Personas Menu"
-                className="bg-[#FF9933] hover:bg-amber-600 text-slate-900 font-extrabold px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-[11px] shadow-sm flex items-center gap-1 transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-white"
-                title="One-Click Demo Personas for Evaluation"
-              >
-                <span>{t('demoPersonasBtn', lang)}</span>
-                <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              </button>
-
-              {demoMenuOpen && (
-                <div 
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute right-0 mt-1 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 text-[#1F2937] text-left"
-                >
-                  <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-[#003366] uppercase">
-                    {t('demoMenuTitle', lang)}
-                  </div>
-                  <p className="px-3 pb-1 text-[10px] text-slate-500 leading-tight">
-                    {t('demoMenuSubtitle', lang)}
-                  </p>
-                  <button
-                    onClick={() => {
-                      loginAsDemo('farmer');
-                      setDemoMenuOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-amber-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C]"
-                  >
-                    <span className="w-7 h-7 rounded-lg bg-amber-100 text-[#FF9933] flex items-center justify-center text-xs shrink-0 font-bold">👤</span>
-                    <div>
-                      <p className="font-bold leading-tight">{t('citizenPersonaTitle', lang)}</p>
-                      <p className="text-[10px] text-slate-500">Mohanbhai Patel • Token #A-42 • Rajkot Rural</p>
-                    </div>
-                  </button>
-                  <Link
-                    href="/admin/counter"
-                    onClick={() => setDemoMenuOpen(false)}
-                    className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-blue-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C] border-t border-slate-100"
-                  >
-                    <span className="w-7 h-7 rounded-lg bg-blue-100 text-[#005A9C] flex items-center justify-center text-xs shrink-0 font-bold">🏛️</span>
-                    <div>
-                      <p className="font-bold leading-tight text-[#003366]">{t('officerPersonaTitle', lang)}</p>
-                      <p className="text-[10px] text-slate-500">Counter 1 Operator • Gondal Jan Seva Kendra</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5 leading-tight">
-                        Designed to fit naturally into existing government-service environments.
-                      </p>
-                    </div>
-                  </Link>
-                  <Link
-                    href="/admin/collector"
-                    onClick={() => setDemoMenuOpen(false)}
-                    className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-amber-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C] border-t border-slate-100"
-                  >
-                    <span className="w-7 h-7 rounded-lg bg-amber-100 text-[#FF9933] flex items-center justify-center text-xs shrink-0 font-bold">👑</span>
-                    <div>
-                      <p className="font-bold leading-tight text-[#003366]">{t('collectorPersonaTitle', lang)}</p>
-                      <p className="text-[10px] text-slate-500">33 Districts Heatmap & SLA Watchdog</p>
-                    </div>
-                  </Link>
-                  <div className="border-t border-slate-100 my-1" />
-                  <button
-                    onClick={() => {
-                      resetSession();
-                      setDemoMenuOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 text-[11px] text-red-600 hover:bg-red-50 font-bold flex items-center gap-2"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>{t('resetSessionBtn', lang)}</span>
-                  </button>
-                </div>
               )}
             </div>
           </div>
@@ -908,7 +820,6 @@ export default function Home() {
                 onOpenTokenTracker={() => setTokenTrackerModalOpen(true)}
                 onOpenSlotModal={() => setSlotModalOpen(true)}
                 onOpenTokenPassModal={() => setTokenPassModalOpen(true)}
-                onLoginDemo={() => loginAsDemo('farmer')}
                 lang={lang}
               />
             </div>
