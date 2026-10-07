@@ -339,6 +339,16 @@ export default function Home() {
                       <p className="text-[10px] text-slate-400">GSWAN Live Operator Screen</p>
                     </div>
                   </Link>
+                  <Link
+                    href="/admin/collector"
+                    className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-amber-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C] border-t border-slate-100"
+                  >
+                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-[#FF9933] flex items-center justify-center text-xs">👑</span>
+                    <div>
+                      <p className="font-bold leading-tight text-[#003366]">કલેક્ટર કમાન્ડ સેન્ટર ➔</p>
+                      <p className="text-[10px] text-slate-400">33 Districts Heatmap & SLA Watchdog</p>
+                    </div>
+                  </Link>
                   <div className="border-t border-slate-100 my-1" />
                   <button
                     onClick={resetSession}
@@ -1150,13 +1160,19 @@ export default function Home() {
           <p className="text-[11px] text-slate-400">
             GRTSA 2013 Compliant • Designed for 33 Districts, 250+ Talukas, and 18,000+ Villages
           </p>
-          <div className="pt-2">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
             <Link
               href="/admin/counter"
               className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-[#003366] rounded-lg font-bold text-xs transition"
             >
               <Building className="w-3.5 h-3.5 text-[#005A9C]" />
-              <span>🏛️ કાઉન્ટર ઓપરેટર કન્સોલ (Officer Desk)</span>
+              <span>🏛️ કાઉન્ટર ઓપરેટર કન્સોલ</span>
+            </Link>
+            <Link
+              href="/admin/collector"
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg font-bold text-xs transition"
+            >
+              <span>👑 કલેક્ટર કમાન્ડ સેન્ટર</span>
             </Link>
           </div>
         </div>

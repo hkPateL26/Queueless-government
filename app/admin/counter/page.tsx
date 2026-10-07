@@ -357,8 +357,15 @@ export default function CounterOperatorDesk() {
             </div>
           </div>
 
-          {/* Officer Profile Badge */}
-          <div className="flex items-center gap-3">
+          {/* Officer Profile Badge & Collector Link */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/admin/collector"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-[#FF9933] border border-[#FF9933]/50 text-[11px] sm:text-xs font-black transition flex items-center gap-1"
+              title="કલેક્ટર કમાન્ડ સેન્ટર"
+            >
+              <span>👑 કલેક્ટર ડેશબોર્ડ</span>
+            </Link>
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black text-white">શ્રી કે. એમ. ત્રિવેદી</p>
               <p className="text-[10px] text-blue-200 font-mono">નાયબ મામલતદાર (વર્ગ-૨) • GUJ-REV-8492</p>
