@@ -15,8 +15,8 @@ import { BookingDetails } from './SlotBookingModal';
 import { SchemeItem } from '@/lib/schemes-data';
 import { BookingStatus } from '@/lib/slot-engine';
 import { GovLogo } from '@/components/GovLogo';
-
 import { Language } from '@/lib/translations';
+import { getLocalizedSchemeTitle } from '@/lib/scheme-translations';
 
 interface DigitalTokenPassProps {
   booking: BookingDetails;
@@ -33,6 +33,11 @@ export function DigitalTokenPass({
   onClose,
   lang = 'gu'
 }: DigitalTokenPassProps) {
+  const isEn = lang === 'en';
+  const isHi = lang === 'hi';
+  const isMr = lang === 'mr';
+  const isGu = lang === 'gu';
+
   // Booking state (Requirement 22: Booking States)
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status || 'CONFIRMED');
   const [currentSlotTime, setCurrentSlotTime] = useState<string>(booking.slot.timeRange);
@@ -81,7 +86,7 @@ export function DigitalTokenPass({
           status: currentStatus,
           slotTime: currentSlotTime
         },
-        schemeTitle: scheme?.titleGu || 'જન સેવા',
+        schemeTitle: scheme ? getLocalizedSchemeTitle(scheme, lang) : (isEn ? 'Jan Seva' : isHi ? 'जन सेवा' : isMr ? 'जन सेवा' : 'જન સેવા'),
         citizenName,
         cachedAt: new Date().toISOString()
       }));
@@ -249,20 +254,20 @@ export function DigitalTokenPass({
                           : 'bg-green-500 text-white animate-pulse'
                   }`}>
                     <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
-                    {currentStatus === 'CONFIRMED' && 'કન્ફર્મ (CONFIRMED)'}
-                    {currentStatus === 'RESCHEDULED' && 'રિશિડ્યુલ થયેલ (RESCHEDULED)'}
-                    {currentStatus === 'CANCELLED' && 'રદ થયેલ (CANCELLED)'}
-                    {currentStatus === 'CALLED' && 'હાજર થાઓ (NOW SERVING)'}
+                    {currentStatus === 'CONFIRMED' && (isEn ? 'CONFIRMED' : isHi ? 'पुष्ट (CONFIRMED)' : isMr ? 'निश्चित (CONFIRMED)' : 'કન્ફર્મ (CONFIRMED)')}
+                    {currentStatus === 'RESCHEDULED' && (isEn ? 'RESCHEDULED' : isHi ? 'पुनर्निर्धारित' : isMr ? 'पुन्हा नियोजित' : 'રિશિડ્યુલ થયેલ (RESCHEDULED)')}
+                    {currentStatus === 'CANCELLED' && (isEn ? 'CANCELLED' : isHi ? 'रद्द' : isMr ? 'रद्द' : 'રદ થયેલ (CANCELLED)')}
+                    {currentStatus === 'CALLED' && (isEn ? 'NOW SERVING' : isHi ? 'उपस्थित हों' : isMr ? 'हजर राहा' : 'હાજર થાઓ (NOW SERVING)')}
                   </span>
 
                   {booking.isPriority && (
                     <span className="bg-[#FF9933] text-slate-900 font-extrabold text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
-                      ⭐ પ્રાયોરિટી અપોઇન્ટમેન્ટ (#P)
+                      ⭐ {isEn ? 'Priority Appointment (#P)' : isHi ? 'प्राथमिकता अपॉइंटमेंट (#P)' : isMr ? 'प्राधान्य अपॉइंटमेंट (#P)' : 'પ્રાયોરિટી અપોઇન્ટમેન્ટ (#P)'}
                     </span>
                   )}
                 </div>
                 <h2 className="text-sm sm:text-lg font-bold text-white mt-0.5 truncate">
-                  ઈ-જન સેવા ટોકન પાસ (QueueLess Kacheri)
+                  {isEn ? 'E-Jan Seva Token Pass (QueueLess)' : isHi ? 'ई-जन सेवा टोकन पास (QueueLess)' : isMr ? 'ई-जन सेवा टोकन पास (QueueLess)' : 'ઈ-જન સેવા ટોકન પાસ (QueueLess Kacheri)'}
                 </h2>
                 <p className="text-[10px] sm:text-xs text-blue-100 truncate">
                   {centerName}
@@ -273,7 +278,9 @@ export function DigitalTokenPass({
             {/* TOKEN CHIP & CLOSE BUTTON */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <div className="text-right">
-                <span className="text-[9px] sm:text-[10px] uppercase font-bold text-blue-200 block">ટોકન ક્રમાંક</span>
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold text-blue-200 block">
+                  {isEn ? 'Token No.' : isHi ? 'टोकन संख्या' : isMr ? 'टोकन क्रमांक' : 'ટોકન ક્રમાંક'}
+                </span>
                 <span className="text-xl sm:text-3xl font-extrabold font-mono text-[#FF9933] drop-shadow-sm">
                   {booking.tokenNumber}
                 </span>
@@ -298,7 +305,7 @@ export function DigitalTokenPass({
         {isCalledByOfficer && (
           <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white p-3 sm:p-4 text-center animate-pulse flex items-center justify-center gap-2 font-black text-xs sm:text-sm border-b-2 border-emerald-700 shadow-inner">
             <Radio className="w-4 h-4 sm:w-5 sm:h-5 animate-ping shrink-0" />
-            <span>🔔 આપનો વારો આવી ગયો છે! તુરંત કાઉન્ટર {booking.counterNumber} પર પહોંચો. (NOW SERVING)</span>
+            <span>🔔 {isEn ? `Your turn has arrived! Please proceed immediately to Counter ${booking.counterNumber}.` : isHi ? `आपकी बारी आ गई है! तुरंत काउंटर ${booking.counterNumber} पर पहुंचें।` : isMr ? `तुमची पाळी आली आहे! लगेच काउंटर ${booking.counterNumber} वर जावे.` : `આપનો વારો આવી ગયો છે! તુરંત કાઉન્ટર ${booking.counterNumber} પર પહોંચો. (NOW SERVING)`}</span>
           </div>
         )}
 
@@ -306,7 +313,7 @@ export function DigitalTokenPass({
         {currentStatus === 'CANCELLED' && (
           <div className="bg-red-50 border-b border-red-200 p-3 text-center text-xs font-bold text-red-900 flex items-center justify-center gap-2">
             <CalendarX2 className="w-4 h-4 text-red-600" />
-            <span>આ અપોઇન્ટમેન્ટ નાગરિક દ્વારા રદ કરવામાં આવી છે. આ સ્લોટ હવે અન્ય નાગરિકો માટે મુક્ત છે.</span>
+            <span>{isEn ? 'This appointment has been cancelled by citizen. The slot has been released.' : isHi ? 'यह अपॉइंटमेंट नागरिक द्वारा रद्द की गई है। स्लॉट अब अन्य नागरिकों के लिए उपलब्ध है।' : isMr ? 'ही अपॉइंटमेंट नागरिकाद्वारे रद्द केली गेली आहे. स्लॉट आता इतर नागरिकांसाठी उपलब्ध आहे.' : 'આ અપોઇન્ટમેન્ટ નાગરિક દ્વારા રદ કરવામાં આવી છે. આ સ્લોટ હવે અન્ય નાગરિકો માટે મુક્ત છે.'}</span>
           </div>
         )}
 
@@ -317,13 +324,17 @@ export function DigitalTokenPass({
           <div className="bg-slate-50 border-2 border-blue-900/20 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
               <div>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">અપોઇન્ટમેન્ટ સારાંશ</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                  {isEn ? 'Appointment Summary' : isHi ? 'अपॉइंटमेंट सारांश' : isMr ? 'अपॉइंटमेंट सारांश' : 'અપોઇન્ટમેન્ટ સારાંશ'}
+                </span>
                 <h3 className="text-sm sm:text-base font-black text-[#003366]">
-                  {scheme ? scheme.titleGu : 'જન સેવા પ્રમાણપત્ર'}
+                  {scheme ? getLocalizedSchemeTitle(scheme, lang) : (isEn ? 'Jan Seva Service' : isHi ? 'जन सेवा प्रमाण पत्र' : isMr ? 'जन सेवा प्रमाणपत्र' : 'જન સેવા પ્રમાણપત્ર')}
                 </h3>
               </div>
               <div className="text-right">
-                <span className="text-[9px] text-slate-500 uppercase block">ટોકન</span>
+                <span className="text-[9px] text-slate-500 uppercase block">
+                  {isEn ? 'Token' : isHi ? 'टोकन' : isMr ? 'टोकन' : 'ટોકન'}
+                </span>
                 <span className="text-lg font-black font-mono text-[#005A9C]">{booking.tokenNumber}</span>
               </div>
             </div>
@@ -331,7 +342,7 @@ export function DigitalTokenPass({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="bg-white p-2.5 rounded-xl border border-slate-200">
                 <span className="text-[10px] text-slate-500 font-semibold block flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#005A9C]" /> કેન્દ્ર
+                  <MapPin className="w-3 h-3 text-[#005A9C]" /> {isEn ? 'Center' : isHi ? 'केंद्र' : isMr ? 'केंद्र' : 'કેન્દ્ર'}
                 </span>
                 <span className="font-bold text-slate-800 text-[11px] truncate block mt-0.5">
                   {centerName}
@@ -340,7 +351,7 @@ export function DigitalTokenPass({
 
               <div className="bg-white p-2.5 rounded-xl border border-slate-200">
                 <span className="text-[10px] text-slate-500 font-semibold block flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-[#005A9C]" /> તારીખ
+                  <Calendar className="w-3 h-3 text-[#005A9C]" /> {isEn ? 'Date' : isHi ? 'दिनांक' : isMr ? 'दिनांक' : 'તારીખ'}
                 </span>
                 <span className="font-bold text-slate-800 text-[11px] block mt-0.5">
                   {selectedDate}
@@ -349,7 +360,7 @@ export function DigitalTokenPass({
 
               <div className="bg-white p-2.5 rounded-xl border border-slate-200">
                 <span className="text-[10px] text-slate-500 font-semibold block flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-[#005A9C]" /> સમય સ્લોટ
+                  <Clock className="w-3 h-3 text-[#005A9C]" /> {isEn ? 'Time Slot' : isHi ? 'समय स्लॉट' : isMr ? 'वेळ स्लॉट' : 'સમય સ્લોટ'}
                 </span>
                 <span className="font-bold text-slate-800 text-[11px] block mt-0.5">
                   {currentSlotTime}
@@ -358,10 +369,10 @@ export function DigitalTokenPass({
 
               <div className="bg-white p-2.5 rounded-xl border border-slate-200">
                 <span className="text-[10px] text-slate-500 font-semibold block flex items-center gap-1">
-                  <UserCheck className="w-3 h-3 text-[#005A9C]" /> કાઉન્ટર
+                  <UserCheck className="w-3 h-3 text-[#005A9C]" /> {isEn ? 'Counter' : isHi ? 'काउंटर' : isMr ? 'काउंटर' : 'કાઉન્ટર'}
                 </span>
                 <span className="font-bold text-[#003366] text-[11px] block mt-0.5">
-                  કાઉન્ટર {booking.counterNumber} ({booking.counterNameGu})
+                  {isEn ? `Counter ${booking.counterNumber} (${booking.counterNameEn || booking.counterNameGu})` : `કાઉન્ટર ${booking.counterNumber} (${booking.counterNameGu})`}
                 </span>
               </div>
             </div>

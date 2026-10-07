@@ -13,6 +13,13 @@ import {
   getSchemeStructuredBenefit,
   getProcessingTimelineInfo
 } from '@/lib/schemes-data';
+import { 
+  getLocalizedSchemeTitle,
+  getLocalizedSchemeCategory,
+  getLocalizedSchemeBenefit,
+  getLocalizedSchemeDepartment,
+  getLocalizedSchemeEligibility
+} from '@/lib/scheme-translations';
 import { triggerHaptic } from '@/lib/haptics';
 import { GovLogo } from '@/components/GovLogo';
 import { Language } from '@/lib/translations';
@@ -62,7 +69,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
     },
     { 
       id: 'welfare', 
-      label: isEn ? '🏛️ Civic & Revenue (8)' : isHi ? '🏛️ नागरिक एवं राजस्व प्रमाण पत्र (८)' : isMr ? '🏛️ नागरिक आणि महसूल दाखले (८)' : '🏛️ દાખલા અને મહેસૂલી સેવાઓ (૮)', 
+      label: isEn ? '🏛️ Civic & Revenue (8)' : isHi ? '🏛️ नागरिक एवं राजस्व प्रमाण पत्र (८)' : isMr ? '🏛️ नागरी आणि महसूल दाखले (८)' : '🏛️ દાખલા અને મહેસૂલી સેવાઓ (૮)', 
       icon: '🏛️' 
     },
   ], [isEn, isHi, isMr]);
@@ -70,25 +77,25 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
   const personaFilters = useMemo(() => [
     { 
       id: 'farmer', 
-      label: isEn ? 'Farmer (ખેડૂત)' : isHi ? 'किसान (Farmer)' : isMr ? 'शेतकरी (Farmer)' : 'ખેડૂત (Farmer)', 
+      label: isEn ? 'Farmer' : isHi ? 'किसान (Farmer)' : isMr ? 'शेतकरी (Farmer)' : 'ખેડૂત (Farmer)', 
       icon: '🌾', 
       category: 'agriculture' 
     },
     { 
       id: 'student', 
-      label: isEn ? 'Student (વિદ્યાર્થી)' : isHi ? 'छात्र (Student)' : isMr ? 'विद्यार्थी (Student)' : 'વિદ્યાર્થી (Student)', 
+      label: isEn ? 'Student' : isHi ? 'छात्र (Student)' : isMr ? 'विद्यार्थी (Student)' : 'વિદ્યાર્થી (Student)', 
       icon: '🎓', 
       category: 'education' 
     },
     { 
       id: 'woman', 
-      label: isEn ? 'Women / Mothers' : isHi ? 'महिला / माता (Women)' : isMr ? 'महिला / माता (Women)' : 'મહિલા / માતા (Women)', 
+      label: isEn ? 'Women / Mothers' : isHi ? 'महिला / माता' : isMr ? 'महिला / माता' : 'મહિલા / માતા', 
       icon: '👩', 
       category: 'healthcare' 
     },
     { 
       id: 'citizen', 
-      label: isEn ? 'Certificates / Civic' : isHi ? 'नागरिक प्रमाण पत्र' : isMr ? 'दाखले / प्रमाणपत्रे (Civic)' : 'દાખલા / રેકોર્ડ્સ (Civic)', 
+      label: isEn ? 'Certificates / Civic' : isHi ? 'नागरिक प्रमाण पत्र' : isMr ? 'दाखले / प्रमाणपत्रे' : 'દાખલા / રેકોર્ડ્સ', 
       icon: '📄', 
       category: 'welfare' 
     },
@@ -98,21 +105,30 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
     return ALL_YOJANAS.filter(scheme => {
       // Category match
       const catMatch = selectedCategory === 'all' || scheme.category === selectedCategory;
-      
-      // Search match (Gujarati, Hindi, Marathi, or English)
-      const q = searchQuery.toLowerCase().trim();
-      const searchMatch = !q || 
-        scheme.titleGu.toLowerCase().includes(q) ||
-        scheme.titleEn.toLowerCase().includes(q) ||
-        scheme.benefitGu.toLowerCase().includes(q) ||
-        scheme.benefit.toLowerCase().includes(q) ||
-        scheme.department.toLowerCase().includes(q) ||
-        (scheme.categoryGu && scheme.categoryGu.toLowerCase().includes(q)) ||
-        (scheme.categoryEn && scheme.categoryEn.toLowerCase().includes(q));
+      if (!catMatch) return false;
 
-      return catMatch && searchMatch;
+      // Search match across English, Gujarati, Hindi, Marathi titles and categories
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const localizedTitle = getLocalizedSchemeTitle(scheme, lang).toLowerCase();
+        const localizedCat = getLocalizedSchemeCategory(scheme, lang).toLowerCase();
+        const localizedDept = getLocalizedSchemeDepartment(scheme, lang).toLowerCase();
+
+        return (
+          scheme.titleGu.toLowerCase().includes(q) ||
+          scheme.titleEn.toLowerCase().includes(q) ||
+          localizedTitle.includes(q) ||
+          localizedCat.includes(q) ||
+          localizedDept.includes(q) ||
+          scheme.department.toLowerCase().includes(q) ||
+          scheme.categoryGu.toLowerCase().includes(q) ||
+          scheme.categoryEn.toLowerCase().includes(q)
+        );
+      }
+
+      return true;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, lang]);
 
   const displayedSchemes = useMemo(() => {
     if (searchQuery.trim()) {
@@ -150,7 +166,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                 : isHi 
                 ? `योजना खोज एवं दस्तावेज़ पूर्व-सत्यापन (${ALL_YOJANAS.length} सेवाएं)` 
                 : isMr 
-                ? `योजना शोध आणि दस्तऐवज पूर्व-तपासणी (${ALL_YOJANAS.length} सेवा)` 
+                ? `योजना शोध आणि कागदपत्रे पूर्व-तपासणी (${ALL_YOJANAS.length} सेवा)` 
                 : `યોજના શોધ & દસ્તાવેજ પૂર્વ-ચકાસણી (${ALL_YOJANAS.length} સેવાઓ)`}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -247,13 +263,14 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
           const benefit = getSchemeStructuredBenefit(scheme);
           const timelineInfo = getProcessingTimelineInfo(scheme);
 
-          const displayTitle = isEn ? scheme.titleEn : scheme.titleGu;
+          const displayTitle = getLocalizedSchemeTitle(scheme, lang);
           const displaySecondaryTitle = isEn ? scheme.titleGu : scheme.titleEn;
-          const displayCategory = isEn ? scheme.categoryEn : scheme.categoryGu;
-          const displayBenefitHeadline = isEn ? benefit.headlineEn : benefit.headlineGu;
-          const displayBenefit = isEn ? scheme.benefit : scheme.benefitGu;
-          const displayEligibility = isEn ? eligibility.en : eligibility.gu;
-          const displayTimeline = isEn ? timelineInfo.formattedTimeEn : timelineInfo.formattedTimeGu;
+          const displayCategory = getLocalizedSchemeCategory(scheme, lang);
+          const displayBenefitHeadline = isEn ? benefit.headlineEn : isMr ? 'शासकीय योजना लाभ' : isHi ? 'सरकारी योजना लाभ' : benefit.headlineGu;
+          const displayBenefit = getLocalizedSchemeBenefit(scheme, lang);
+          const displayEligibility = getLocalizedSchemeEligibility(scheme, lang);
+          const displayDepartment = getLocalizedSchemeDepartment(scheme, lang);
+          const displayTimeline = isEn ? timelineInfo.formattedTimeEn : isMr ? timelineInfo.formattedTimeGu.replace('દિવસ', 'दिवस').replace('તે જ દિવસે', 'त्याच दिवशी') : timelineInfo.formattedTimeGu;
 
           return (
             <div
@@ -276,8 +293,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-[10px] font-bold text-[#138808] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                       {scheme.fee === 0 
-                        ? (isEn ? 'Govt Fee: ₹0 (Free)' : isHi ? 'सरकारी शुल्क: ₹० (मुफ्त)' : 'સરકારી ફી: ₹૦ (મફત)') 
-                        : (isEn ? `Govt Fee: ₹${scheme.fee}` : isHi ? `सरकारी शुल्क: ₹${scheme.fee}` : `સરકારી ફી: ₹${scheme.fee}`)}
+                        ? (isEn ? 'Govt Fee: ₹0 (Free)' : isHi ? 'सरकारी शुल्क: ₹० (मुफ्त)' : isMr ? 'शासकीय शुल्क: ₹० (मोफत)' : 'સરકારી ફી: ₹૦ (મફત)') 
+                        : (isEn ? `Govt Fee: ₹${scheme.fee}` : isHi ? `सरकारी शुल्क: ₹${scheme.fee}` : isMr ? `शासकीय शुल्क: ₹${scheme.fee}` : `સરકારી ફી: ₹${scheme.fee}`)}
                     </span>
                   </div>
                 </div>
@@ -291,7 +308,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                     {displaySecondaryTitle}
                   </p>
                   <p className="text-[10px] text-slate-500 font-semibold mt-1">
-                    {isEn ? `Department: ${scheme.department}` : `વિભાગ: ${scheme.department}`}
+                    {isEn ? `Department: ${displayDepartment}` : isHi ? `विभाग: ${displayDepartment}` : isMr ? `विभाग: ${displayDepartment}` : `વિભાગ: ${scheme.department}`}
                   </p>
                 </div>
 
@@ -306,6 +323,10 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   <p className="text-[9.5px] text-slate-400 italic">
                     {isEn 
                       ? '(Amount/eligibility depends on category rules)' 
+                      : isMr
+                      ? '(पात्रता व अटी शासकीय नियमांनुसार लागू)'
+                      : isHi
+                      ? '(पात्रता एवं शर्तें सरकारी नियमों के अनुसार)'
                       : '(પાત્રતા અને નિયમો સંબંધિત સરકારી જોગવાઈ અનુસાર)'}
                   </p>
                 </div>
@@ -319,6 +340,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                         ? 'Can I Apply? (Eligibility Criteria):' 
                         : isHi 
                         ? 'क्या मैं आवेदन कर सकता हूँ? (पात्रता):' 
+                        : isMr
+                        ? 'मी अर्ज करू शकतो का? (पात्रता निकष):'
                         : 'હું અરજી કરી શકું? (Can I Apply?):'}
                     </p>
                     <p className="text-[10.5px] text-slate-600 line-clamp-2 leading-tight mt-0.5">
@@ -333,7 +356,9 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   <div className="flex items-start justify-between gap-1.5">
                     <span className="font-bold text-slate-600 flex items-center gap-1 shrink-0">
                       <Clock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
-                      <span>{isEn ? 'Expected Delivery:' : isHi ? 'अपेक्षित डिलीवरी:' : 'અપેક્ષિત ડિલિવરી:'}</span>
+                      <span>
+                        {isEn ? 'Expected Delivery:' : isHi ? 'अपेक्षित डिलीवरी:' : isMr ? 'अपेक्षित वितरण:' : 'અપેક્ષિત ડિલિવરી:'}
+                      </span>
                     </span>
                     <span className="font-black text-[#003366] text-right">
                       {timelineInfo.isVaries ? (
@@ -342,6 +367,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                             ? 'Varies (Confirm at office)' 
                             : isHi 
                             ? 'कार्यालय अनुसार अलग (जांचें)' 
+                            : isMr
+                            ? 'कार्यालयनिहाय वेगळे (तपासा)'
                             : 'અલગ હોઈ શકે છે (કચેરીએ ચકાસો)'}
                         </span>
                       ) : (
@@ -353,19 +380,19 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   {/* SLA Type Tag (Only statutory for GRTSA) */}
                   <div className="flex items-center justify-between text-[9.5px]">
                     <span className="text-slate-400">
-                      {isEn ? 'Timeline Standard:' : isHi ? 'समय-सीमा मानक:' : 'સમયમર્યાદા ધોરણ:'}
+                      {isEn ? 'Timeline Standard:' : isHi ? 'समय-सीमा मानक:' : isMr ? 'वेळ-मर्यादा मानक:' : 'સમયમર્યાદા ધોરણ:'}
                     </span>
                     {scheme.slaType === 'statutory_grtsa' ? (
                       <span className="font-extrabold text-blue-700 bg-blue-100/70 px-1.5 py-0.5 rounded border border-blue-200">
-                        {isEn ? '⚖️ GRTSA 2013 Statutory' : isHi ? '⚖️ GRTSA २०१३ अधिसूचित' : '⚖️ GRTSA ૨૦૧૩ અધિસૂચિત'}
+                        {isEn ? '⚖️ GRTSA 2013 Statutory' : isHi ? '⚖️ GRTSA २०१३ अधिसूचित' : isMr ? '⚖️ GRTSA २०१३ अधिसूचित' : '⚖️ GRTSA ૨૦૧૩ અધિસૂચિત'}
                       </span>
                     ) : scheme.slaType === 'departmental_norm' ? (
                       <span className="font-bold text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">
-                        {isEn ? '🏛️ Citizen Charter' : isHi ? '🏛️ सिटीजन चार्टर' : '🏛️ સિટીઝન ચાર્ટર'}
+                        {isEn ? '🏛️ Citizen Charter' : isHi ? '🏛️ सिटीजन चार्टर' : isMr ? '🏛️ सिटिझन चार्टर' : '🏛️ સિટીઝન ચાર્ટર'}
                       </span>
                     ) : (
                       <span className="font-medium text-slate-500 bg-slate-200/60 px-1.5 py-0.5 rounded">
-                        {isEn ? '📋 Scheme Cycle / Quota' : isHi ? '📋 योजना चक्र / कोटा' : '📋 યોજના ચક્ર / ક્વોટા'}
+                        {isEn ? '📋 Scheme Cycle / Quota' : isHi ? '📋 योजना चक्र / कोटा' : isMr ? '📋 योजना चक्र / कोटा' : '📋 યોજના ચક્ર / ક્વોટા'}
                       </span>
                     )}
                   </div>
@@ -373,20 +400,20 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   {/* Appointment Waiting Time distinction */}
                   <div className="flex items-center justify-between text-[9.5px] text-slate-500 pt-0.5 border-t border-slate-200/60">
                     <span>
-                      {isEn ? '🏢 Office Counter Wait:' : isHi ? '🏢 काउंटर प्रतीक्षा अवधि:' : '🏢 કચેરી કાઉન્ટર પ્રતીક્ષા:'}
+                      {isEn ? '🏢 Office Counter Wait:' : isHi ? '🏢 काउंटर प्रतीक्षा अवधि:' : isMr ? '🏢 कार्यालय काउंटर प्रतीक्षा:' : '🏢 કચેરી કાઉન્ટર પ્રતીક્ષા:'}
                     </span>
                     <span className="font-bold text-slate-700">
-                      {isEn ? '~15-20 min' : '~૧૫-૨૦ મિનિટ'}
+                      {isEn ? '~15-20 min' : isHi ? '~१५-२० मिनट' : isMr ? '~१५-२० मिनिटे' : '~૧૫-૨૦ મિનિટ'}
                     </span>
                   </div>
 
                   {/* Official Source & Updated */}
                   <div className="pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-400">
                     <span className="truncate max-w-[150px]" title={scheme.officialSource}>
-                      {isEn ? 'Source: ' : isHi ? 'स्रोत: ' : 'સ્ત્રોત: '}{scheme.officialSource}
+                      {isEn ? 'Source: ' : isHi ? 'स्रोत: ' : isMr ? 'स्रोत: ' : 'સ્ત્રોત: '}{scheme.officialSource}
                     </span>
                     <span>
-                      {isEn ? 'Updated: ' : isHi ? 'अपडेट: ' : 'અપડેટ: '}{scheme.lastUpdated}
+                      {isEn ? 'Updated: ' : isHi ? 'अपडेट: ' : isMr ? 'अद्यतन: ' : 'અપડેટ: '}{scheme.lastUpdated}
                     </span>
                   </div>
                 </div>
@@ -401,13 +428,15 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                       ? `${scheme.requiredDocs.length} Docs Required` 
                       : isHi 
                       ? `${scheme.requiredDocs.length} दस्तावेज आवश्यक` 
+                      : isMr 
+                      ? `${scheme.requiredDocs.length} कागदपत्रे आवश्यक` 
                       : `${scheme.requiredDocs.length} કાગળો જરૂરી`}
                   </span>
                 </span>
 
                 <span className="text-[#005A9C] group-hover:text-[#003366] flex items-center gap-1 text-[11px] font-extrabold">
                   <span>
-                    {isEn ? 'Pre-Check Docs' : isHi ? 'दस्तावेज़ प्री-चेक' : 'દસ્તાવેજ પ્રી-ચેક'}
+                    {isEn ? 'Pre-Check Docs' : isHi ? 'दस्तावेज़ प्री-चेक' : isMr ? 'कागदपत्रे पूर्व-तपासणी' : 'દસ્તાવેજ પ્રી-ચેક'}
                   </span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition" />
                 </span>
@@ -428,6 +457,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   ? `Showing top ${displayedSchemes.length} of ${filteredSchemes.length} public services` 
                   : isHi 
                   ? `शीर्ष ${displayedSchemes.length} सेवाएं प्रदर्शित (कुल ${filteredSchemes.length} में से)` 
+                  : isMr 
+                  ? `प्रमुख ${displayedSchemes.length} सेवा दर्शविल्या आहेत (एकूण ${filteredSchemes.length} पैकी)` 
                   : `મુખ્ય ${displayedSchemes.length} સેવાઓ દર્શાવેલ છે (કુલ ${filteredSchemes.length} સેવાઓમાંથી)`}
               </h4>
               <p className="text-xs text-slate-500">
@@ -435,6 +466,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   ? 'Access full directory with document checklists, official forms & online tracking.' 
                   : isHi 
                   ? 'सभी सरकारी सेवाओं, आवश्यक दस्तावेजों और ट्रैकिंग के लिए पूर्ण निर्देशिका खोलें।' 
+                  : isMr 
+                  ? 'सर्व शासकीय सेवा, आवश्यक कागदपत्रे आणि ट्रॅकिंगसाठी संपूर्ण निर्देशिका उघडा.' 
                   : 'બધા સરકારી દાખલા, જરૂરી પુરાવા અને યોજનાઓની વિગતવાર યાદી જોવા માટે અહીં ક્લિક કરો.'}
               </p>
             </div>
@@ -448,7 +481,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#003366] hover:bg-[#002244] text-white font-extrabold text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2 shrink-0 cursor-pointer"
           >
             <span>
-              {isEn ? 'Explore All 39 Public Services →' : isHi ? 'सभी ३९ सरकारी सेवाएं देखें →' : 'તમામ ૩૯ સરકારી સેવાઓ જુઓ →'}
+              {isEn ? 'Explore All 39 Public Services →' : isHi ? 'सभी ३९ सरकारी सेवाएं देखें →' : isMr ? 'सर्व ३९ शासकीय सेवा पहा →' : 'તમામ ૩૯ સરકારી સેવાઓ જુઓ →'}
             </span>
           </button>
         </div>
@@ -461,12 +494,14 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
               triggerHaptic('tap');
               setVisibleCount(prev => Math.min(prev + 9, filteredSchemes.length));
             }}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-[#003366] font-bold text-xs shadow-xs transition"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-[#003366] font-bold text-xs shadow-xs transition cursor-pointer"
           >
             {isEn 
               ? `Load More (+9) • Showing ${displayedSchemes.length} of ${filteredSchemes.length}` 
               : isHi 
               ? `और देखें (+९) • ${displayedSchemes.length} / ${filteredSchemes.length}` 
+              : isMr 
+              ? `आणखी पहा (+९) • ${displayedSchemes.length} / ${filteredSchemes.length}` 
               : `વધુ ૯ યોજનાઓ જુઓ (+૯ વધુ) • ${displayedSchemes.length}/${filteredSchemes.length}`}
           </button>
           <button
@@ -474,9 +509,9 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
               triggerHaptic('tap');
               setVisibleCount(filteredSchemes.length);
             }}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005A9C] font-extrabold text-xs border border-blue-200 transition"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005A9C] font-extrabold text-xs border border-blue-200 transition cursor-pointer"
           >
-            {isEn ? 'View All (39)' : isHi ? 'सभी ३९ देखें' : 'બધી ૩૯ યોજનાઓ જુઓ'}
+            {isEn ? 'View All (39)' : isHi ? 'सभी ३९ देखें' : isMr ? 'सर्व ३९ पहा' : 'બધી ૩૯ યોજનાઓ જુઓ'}
           </button>
         </div>
       )}
@@ -484,13 +519,15 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
       {filteredSchemes.length === 0 && (
         <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 p-8 space-y-2">
           <p className="text-base font-extrabold text-[#003366]">
-            {isEn ? 'No schemes or services found' : isHi ? 'कोई सेवा या योजना नहीं मिली' : 'કોઈ સેવા કે યોજના મળી નથી'}
+            {isEn ? 'No schemes or services found' : isHi ? 'कोई सेवा या योजना नहीं मिली' : isMr ? 'कोणतीही योजना किंवा सेवा आढळली नाही' : 'કોઈ સેવા કે યોજના મળી નથી'}
           </p>
           <p className="text-xs text-slate-500">
             {isEn 
               ? 'Please try a different search keyword or category filter.' 
               : isHi 
               ? 'कृपया अन्य कीवर्ड या श्रेणी फ़िल्टर आज़माएं।' 
+              : isMr 
+              ? 'कृपया वेगळा कीवर्ड किंवा श्रेणी फिल्टर वापरून पहा.' 
               : 'કૃપા કરીને અન્ય કીવર્ડ અથવા કેટેગરી ફિલ્ટર અજમાવો.'}
           </p>
         </div>

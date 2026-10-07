@@ -21,7 +21,7 @@ import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { CitizenHelpModal } from '@/components/CitizenHelpModal';
 import { TokenTrackerModal } from '@/components/TokenTrackerModal';
-import { GovHeroShowcase } from '@/components/GovHeroShowcase';
+import { GovJanSevaGateway } from '@/components/GovJanSevaGateway';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
 
@@ -326,7 +326,7 @@ export default function Home() {
             <span className="flex items-center gap-1.5 font-semibold text-white text-[10px] sm:text-xs truncate">
               <span className="w-2 h-2 rounded-full bg-[#138808] animate-pulse shrink-0" />
               <span className="hidden sm:inline">{t('topBarStatusLive', lang)}</span>
-              <span className="sm:hidden">{lang === 'gu' ? 'નેટવર્ક • લાઈવ' : lang === 'hi' ? 'नेटवर्क • लाइव' : 'Network • Live'}</span>
+              <span className="sm:hidden">{lang === 'gu' ? 'નેટવર્ક • લાઈવ' : lang === 'hi' ? 'नेटवर्क • लाइव' : lang === 'mr' ? 'नेटवर्क • लाइव्ह' : 'Network • Live'}</span>
             </span>
             <span className="text-blue-300/40 hidden md:inline">|</span>
             <span className="text-blue-200 hidden md:inline font-mono text-[11px]">{t('topBarFramework', lang)}</span>
@@ -769,9 +769,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: Gujarat Government Showcase (How-it-Works Video Guide + Citizen Testimonials + Action Desk) */}
+            {/* Right: Official Jan Seva Kendra Administrative Appointment & Jurisdiction Gateway */}
             <div className="lg:col-span-5 flex justify-center w-full">
-              <GovHeroShowcase
+              <GovJanSevaGateway
                 currentUser={currentUser}
                 activeBooking={activeBooking}
                 onOpenTokenTracker={() => setTokenTrackerModalOpen(true)}
@@ -881,8 +881,8 @@ export default function Home() {
                 🇮🇳
               </span>
               <div className="text-[10px] leading-tight">
-                <p className="font-bold text-white">{lang === 'gu' ? 'નાગરિક પોર્ટલ' : lang === 'hi' ? 'नागरिक पोर्टल' : 'Citizen Portal'}</p>
-                <p className="text-blue-200">{lang === 'gu' ? 'ગુજરાત સરકાર પ્રેરિત ડિઝાઇન' : lang === 'hi' ? 'गुजरात सरकार प्रेरित डिज़ाइन' : 'Gov-Inspired Design System'}</p>
+                <p className="font-bold text-white">{lang === 'gu' ? 'નાગરિક પોર્ટલ' : lang === 'hi' ? 'नागरिक पोर्टल' : lang === 'mr' ? 'नागरिक पोर्टल' : 'Citizen Portal'}</p>
+                <p className="text-blue-200">{lang === 'gu' ? 'ગુજરાત સરકાર પ્રેરિત ડિઝાઇન' : lang === 'hi' ? 'गुजरात सरकार प्रेरित डिज़ाइन' : lang === 'mr' ? 'गुजरात शासन प्रेरित डिझाइन' : 'Gov-Inspired Design System'}</p>
               </div>
             </div>
           </aside>
@@ -998,7 +998,9 @@ export default function Home() {
                             ? `Hello ${currentUser?.name || 'Mohanbhai'}, your token number ${tokenStr} is active. Please proceed to the counter on time.`
                             : lang === 'hi'
                               ? `नमस्ते ${currentUser?.name || 'मोहनभाई'}, आपका टोकन नंबर ${tokenStr} सक्रिय है। कृपया समय पर काउंटर पर पहुंचें।`
-                              : `નમસ્તે ${currentUser?.name || 'મોહનભાઈ'}, તમારો ટોકન નંબર ${tokenStr} સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`
+                              : lang === 'mr'
+                                ? `नमस्कार ${currentUser?.name || 'मोहनभाई'}, तुमचा टोकन क्रमांक ${tokenStr} सक्रिय आहे. कृपया वेळेवर काउंटरवर जावे.`
+                                : `નમસ્તે ${currentUser?.name || 'મોહનભાઈ'}, તમારો ટોકન નંબર ${tokenStr} સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`
                         );
                       }}
                       className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2.5 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition min-h-[44px]"
@@ -1111,7 +1113,7 @@ export default function Home() {
                   <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-center">
                     <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-4">
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{t('liveWaitEst', lang)}</p>
-                      <h4 className="text-3xl sm:text-4xl font-black text-[#138808] mt-1">{lang === 'gu' ? '૧૮ મિનિટ' : lang === 'hi' ? '१८ मिनट' : '18 mins'}</h4>
+                      <h4 className="text-3xl sm:text-4xl font-black text-[#138808] mt-1">{lang === 'gu' ? '૧૮ મિનિટ' : lang === 'hi' ? '१८ मिनट' : lang === 'mr' ? '१८ मिनिटे' : '18 mins'}</h4>
                       <p className="text-xs text-slate-600 font-semibold mt-1">{t('estServiceTime', lang)}</p>
                       <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-[#005A9C] bg-blue-50 p-2 rounded-lg border border-blue-100">
                         <span>{t('routeBufferDesc', lang)}</span>
@@ -1493,7 +1495,7 @@ export default function Home() {
                 <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                   <span>{t('phoneLabel', lang)}</span>
                   <button
-                    onClick={() => speakGuidance(lang === 'gu' ? "કૃપા કરીને તમારો દસ આંકડાનો મોબાઈલ નંબર દાખલ કરો." : lang === 'hi' ? "कृपया अपना दस अंकों का मोबाइल नंबर दर्ज करें।" : "Please enter your 10-digit mobile number.")}
+                    onClick={() => speakGuidance(lang === 'gu' ? "કૃપા કરીને તમારો દસ આંકડાનો મોબાઈલ નંબર દાખલ કરો." : lang === 'hi' ? "कृपया अपना दस अंकों का मोबाइल नंबर दर्ज करें।" : lang === 'mr' ? "कृपया तुमचा १० अंकी मोबाइल क्रमांक प्रविष्ट करा." : "Please enter your 10-digit mobile number.")}
                     className="text-[#005A9C] text-[11px] hover:underline flex items-center gap-1"
                   >
                     <Volume2 className="w-3.5 h-3.5" /> {t('listenBtnLabel', lang)}
@@ -1623,7 +1625,7 @@ export default function Home() {
       />
 
       {/* PWA 1-CLICK INSTALL BANNER (Floating corner widget with close icon) */}
-      <PwaInstallBanner />
+      <PwaInstallBanner lang={lang} />
 
       {/* SCREEN READER ACCESSIBLE LIVE REGION FOR QUEUE UPDATES */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">

@@ -15,6 +15,14 @@ import {
   getSchemeStructuredBenefit,
   getProcessingTimelineInfo
 } from '@/lib/schemes-data';
+import { 
+  getLocalizedSchemeTitle,
+  getLocalizedSchemeCategory,
+  getLocalizedSchemeBenefit,
+  getLocalizedSchemeDepartment,
+  getLocalizedSchemeEligibility,
+  getLocalizedDocName
+} from '@/lib/scheme-translations';
 import { GovLogo } from '@/components/GovLogo';
 import { Language } from '@/lib/translations';
 
@@ -43,41 +51,47 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 
   const isEn = lang === 'en';
   const isHi = lang === 'hi';
+  const isMr = lang === 'mr';
+  const isGu = lang === 'gu';
 
   const totalDocs = scheme.requiredDocs.length;
   const verifiedCount = Object.values(checkedDocs).filter(Boolean).length;
   const progressPercent = Math.round((verifiedCount / totalDocs) * 100);
-  const eligibility = getSchemeEligibility(scheme);
   const sourceInfo = getSchemeOfficialSource(scheme);
   const benefit = getSchemeStructuredBenefit(scheme);
   const timelineInfo = getProcessingTimelineInfo(scheme);
 
-  const toggleDoc = (docName: string) => {
+  const toggleDoc = (docKey: string) => {
     triggerHaptic('tap');
-    setCheckedDocs(prev => ({ ...prev, [docName]: !prev[docName] }));
+    setCheckedDocs(prev => ({ ...prev, [docKey]: !prev[docKey] }));
   };
+
+  const displayTitle = getLocalizedSchemeTitle(scheme, lang);
+  const displaySecondaryTitle = isEn ? scheme.titleGu : scheme.titleEn;
+  const displayCategory = getLocalizedSchemeCategory(scheme, lang);
+  const displayBenefit = getLocalizedSchemeBenefit(scheme, lang);
+  const displayEligibility = getLocalizedSchemeEligibility(scheme, lang);
+  const displayDepartment = getLocalizedSchemeDepartment(scheme, lang);
+  const displayTimeline = isEn ? timelineInfo.formattedTimeEn : isMr ? timelineInfo.formattedTimeGu.replace('દિવસ', 'दिवस').replace('તે જ દિવસે', 'त्याच दिवशी') : timelineInfo.formattedTimeGu;
 
   const handleShareWhatsApp = () => {
     triggerHaptic('success');
-    const docList = scheme.requiredDocs.map((d, i) => `${i + 1}. ${isEn ? d.nameEn : d.nameGu}`).join('\n');
+    const docList = scheme.requiredDocs.map((d, i) => `${i + 1}. ${getLocalizedDocName(d, lang)}`).join('\n');
     const deliveryText = timelineInfo.isVaries 
-      ? (isEn ? 'Varies across offices (Confirm at center)' : isHi ? 'कार्यालय अनुसार अलग (जांचें)' : 'પ્રક્રિયા સમય અલગ હોઈ શકે છે (કચેરી ખાતે ચકાસો)')
-      : (isEn ? timelineInfo.formattedTimeEn : timelineInfo.formattedTimeGu);
+      ? (isEn ? 'Varies across offices (Confirm at center)' : isHi ? 'कार्यालय अनुसार अलग (जांचें)' : isMr ? 'कार्यालयनिहाय वेगळे (तपासा)' : 'પ્રક્રિયા સમય અલગ હોઈ શકે છે (કચેરી ખાતે ચકાસો)')
+      : displayTimeline;
 
     const message = isEn
-      ? `🏛️ *${scheme.titleEn}*\nBefore You Visit Guidance:\n\n📄 Required Documents:\n${docList}\n\n⏱️ Expected Delivery Time: ${deliveryText}\n🏢 Office Counter Waiting Time: ~15-20 min\n💰 Govt Fee: ${scheme.fee === 0 ? '₹0 (Free)' : `₹${scheme.fee}`}\n🏛️ Dept: ${scheme.department}\n🔗 Source: ${scheme.officialSource} (Updated: ${scheme.lastUpdated})\n\nℹ️ Automated pre-check guidance. Final verification by authorized government officer.`
-      : `🏛️ *${scheme.titleGu}*\nકચેરીએ જતાં પહેલાં માર્ગદર્શિકા (Before You Visit):\n\n📄 જરૂરી કાગળો:\n${docList}\n\n⏱️ અપેક્ષિત ડિલિવરી સમય: ${deliveryText}\n🏢 કાઉન્ટર મુલાકાત પ્રતીક્ષા: ~૧૫-૨૦ મિનિટ\n💰 સરકારી ફી: ${scheme.fee === 0 ? '₹૦ (મફત)' : `₹${scheme.fee}`}\n🏛️ વિભાગ: ${scheme.department}\n🔗 સત્તાવાર સ્ત્રોત: ${scheme.officialSource} (અપડેટ: ${scheme.lastUpdated})\n\nℹ️ આ ઓટોમેટેડ પૂર્વ-માર્ગદર્શન છે. આખરી ચકાસણી અધિકૃત સરકારી અધિકારી દ્વારા કરવામાં આવે છે.`;
+      ? `🏛️ *${scheme.titleEn}*\nBefore You Visit Guidance:\n\n📄 Required Documents:\n${docList}\n\n⏱️ Expected Delivery Time: ${deliveryText}\n🏢 Office Counter Waiting Time: ~15-20 min\n💰 Govt Fee: ${scheme.fee === 0 ? '₹0 (Free)' : `₹${scheme.fee}`}\n🏛️ Dept: ${displayDepartment}\n🔗 Source: ${scheme.officialSource}\n\nℹ️ Automated pre-check guidance. Final verification by authorized government officer.`
+      : isMr
+      ? `🏛️ *${displayTitle}*\nकार्यालयात जाण्यापूर्वी मार्गदर्शक माहिती:\n\n📄 आवश्यक कागदपत्रे:\n${docList}\n\n⏱️ अपेक्षित वितरण वेळ: ${deliveryText}\n🏢 कार्यालय काउंटर प्रतीक्षा: ~१५-२० मिनिटे\n💰 शासकीय शुल्क: ${scheme.fee === 0 ? '₹० (मोफत)' : `₹${scheme.fee}`}\n🏛️ विभाग: ${displayDepartment}\n🔗 स्रोत: ${scheme.officialSource}\n\nℹ️ स्वयंचलित पूर्व-मार्गदर्शन. अंतिम तपासणी अधिकृत शासकीय अधिकाऱ्याकडून केली जाईल.`
+      : isHi
+      ? `🏛️ *${displayTitle}*\nकार्यालय जाने से पहले मार्गदर्शन:\n\n📄 आवश्यक दस्तावेज:\n${docList}\n\n⏱️ अपेक्षित समय: ${deliveryText}\n🏢 कार्यालय काउंटर प्रतीक्षा: ~१५-२० मिनट\n💰 सरकारी शुल्क: ${scheme.fee === 0 ? '₹० (मुफ्त)' : `₹${scheme.fee}`}\n🏛️ विभाग: ${displayDepartment}\n🔗 स्रोत: ${scheme.officialSource}\n\nℹ️ स्वचालित पूर्व-मार्गदर्शन। अंतिम सत्यापन अधिकृत सरकारी अधिकारी द्वारा किया जाएगा।`
+      : `🏛️ *${scheme.titleGu}*\nકચેરીએ જતાં પહેલાં માર્ગદર્શિકા (Before You Visit):\n\n📄 જરૂરી કાગળો:\n${docList}\n\n⏱️ અપેક્ષિત ડિલિવરી સમય: ${deliveryText}\n🏢 કાઉન્ટર મુલાકાત પ્રતીક્ષા: ~૧૫-૨૦ મિનિટ\n💰 સરકારી ફી: ${scheme.fee === 0 ? '₹૦ (મફત)' : `₹${scheme.fee}`}\n🏛️ વિભાગ: ${scheme.department}\n🔗 સત્તાવાર સ્ત્રોત: ${scheme.officialSource}\n\nℹ️ આ ઓટોમેટેડ પૂર્વ-માર્ગદર્શન છે. આખરી ચકાસણી અધિકૃત સરકારી અધિકારી દ્વારા કરવામાં આવે છે.`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
-
-  const displayTitle = isEn ? scheme.titleEn : scheme.titleGu;
-  const displaySecondaryTitle = isEn ? scheme.titleGu : scheme.titleEn;
-  const displayCategory = isEn ? scheme.categoryEn : scheme.categoryGu;
-  const displayBenefit = isEn ? scheme.benefit : scheme.benefitGu;
-  const displayEligibility = isEn ? eligibility.en : eligibility.gu;
-  const displayTimeline = isEn ? timelineInfo.formattedTimeEn : timelineInfo.formattedTimeGu;
 
   return (
     <div 
@@ -94,7 +108,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md mt-0.5" />
             <div className="space-y-1 min-w-0">
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF9933] bg-[#002244] px-2.5 py-0.5 rounded-full border border-blue-800 inline-block truncate max-w-full">
-                {displayCategory} • {scheme.department}
+                {displayCategory} • {displayDepartment}
               </span>
               <h2 className="text-xl font-black text-white mt-1 leading-tight">
                 {displayTitle}
@@ -126,11 +140,13 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                     ? 'Before You Visit Guidance (Official Info)' 
                     : isHi 
                     ? 'कार्यालय जाने से पहले मार्गदर्शन' 
+                    : isMr
+                    ? 'कार्यालयात जाण्यापूर्वी मार्गदर्शक माहिती'
                     : 'કચેરીએ જતાં પહેલાં માર્ગદર્શિકા (Before You Visit Guidance)'}
                 </h3>
               </div>
               <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">
-                {isEn ? 'Official Info' : isHi ? 'आधिकारिक विवरण' : 'સત્તાવાર વિગતો'}
+                {isEn ? 'Official Info' : isHi ? 'आधिकारिक विवरण' : isMr ? 'अधिकृत माहिती' : 'સત્તાવાર વિગતો'}
               </span>
             </div>
 
@@ -142,7 +158,9 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                   <div className="flex items-center justify-between">
                     <p className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
                       <Clock className="w-3 h-3 text-[#FF9933]" />
-                      <span>{isEn ? 'Expected Processing Time' : isHi ? 'अपेक्षित प्रक्रिया समय' : 'અપેક્ષિત પ્રક્રિયા / ડિલિવરી સમય'}</span>
+                      <span>
+                        {isEn ? 'Expected Processing Time' : isHi ? 'अपेक्षित प्रक्रिया समय' : isMr ? 'अपेक्षित प्रक्रिया वेळ' : 'અપેક્ષિત પ્રક્રિયા / ડિલિવરી સમય'}
+                      </span>
                     </p>
                   </div>
                   <p className="font-extrabold text-[#003366] text-sm mt-1 leading-snug">
@@ -152,6 +170,8 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                           ? 'Processing time varies — confirm with the concerned office' 
                           : isHi 
                           ? 'प्रक्रिया समय अलग हो सकता है — कार्यालय में जांचें' 
+                          : isMr
+                          ? 'प्रक्रिया वेळ वेगळी असू शकते — कार्यालयात तपासा'
                           : 'પ્રક્રિયા સમય અલગ હોઈ શકે છે — સંબંધિત કચેરી ખાતે ચકાસો'}
                       </span>
                     ) : (
@@ -159,7 +179,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                     )}
                   </p>
                   <p className="text-[9px] text-slate-400 mt-0.5">
-                    {timelineInfo.isVaries ? '(Varies across offices / batch cycles)' : `(${isEn ? timelineInfo.formattedTimeGu : timelineInfo.formattedTimeEn})`}
+                    {timelineInfo.isVaries ? '(Varies across offices)' : `(${displayTimeline})`}
                   </p>
                 </div>
 
@@ -168,21 +188,25 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                   {scheme.slaType === 'statutory_grtsa' ? (
                     <div className="bg-blue-50 border border-blue-200 rounded p-1.5 text-[9px] text-blue-900 font-medium">
                       <span className="font-extrabold text-[#005A9C] block">
-                        {isEn ? '⚖️ GRTSA 2013 Statutory Service' : isHi ? '⚖️ GRTSA २०१३ अधिसूचित समय-सीमा' : '⚖️ GRTSA ૨૦૧૩ અધિસૂચિત કાનૂની સમયમર્યાદા'}
+                        {isEn ? '⚖️ GRTSA 2013 Statutory Service' : isHi ? '⚖️ GRTSA २०१३ अधिसूचित समय-सीमा' : isMr ? '⚖️ GRTSA २०१३ अधिसूचित मुदत' : '⚖️ GRTSA ૨૦૧૩ અધિસૂચિત કાનૂની સમયમર્યાદા'}
                       </span>
                       <p className="text-[8.5px] text-blue-800 mt-0.5">
                         {isEn 
                           ? 'Legally notified public service standard under Gujarat Public Services Act.' 
+                          : isMr
+                          ? 'गुजरात लोकसेवा हक्क कायदा २०१३ अंतर्गत कायदेशीर मुदत.'
+                          : isHi
+                          ? 'गुजरात लोक सेवा अधिकार अधिनियम २०१३ के अंतर्गत वैधानिक समय-सीमा।'
                           : scheme.statutorySlaNoteGu || 'ગુજરાત જાહેર સેવા હક્ક અધિનિયમ ૨૦૧૩ હેઠળ કાયદેસર સમયમર્યાદા.'}
                       </p>
                     </div>
                   ) : scheme.slaType === 'departmental_norm' ? (
                     <div className="bg-emerald-50 border border-emerald-200 rounded p-1 text-[9px] text-emerald-800 font-medium">
-                      {isEn ? '🏛️ Departmental Citizen Charter Standard' : isHi ? '🏛️ सिटीजन चार्टर मानक' : '🏛️ સિટીઝન ચાર્ટર ધોરણ (વિભાગીય સમયગાળો)'}
+                      {isEn ? '🏛️ Departmental Citizen Charter Standard' : isHi ? '🏛️ सिटीजन चार्टर मानक' : isMr ? '🏛️ सिटिझन चार्टर मानक' : '🏛️ સિટીઝન ચાર્ટર ધોરણ (વિભાગીય સમયગાળો)'}
                     </div>
                   ) : (
                     <div className="bg-slate-100 rounded p-1 text-[9px] text-slate-600">
-                      {isEn ? '📋 Batch Scheme / Quota Cycle' : isHi ? '📋 योजना चक्र / कोटा' : '📋 યોજના આધારિત ચક્ર / ક્વોટા મંજૂરી (GRTSA લાગુ નથી)'}
+                      {isEn ? '📋 Batch Scheme / Quota Cycle' : isHi ? '📋 योजना चक्र / कोटा' : isMr ? '📋 योजना चक्र / कोटा' : '📋 યોજના આધારિત ચક્ર / ક્વોટા મંજૂરી (GRTSA લાગુ નથી)'}
                     </div>
                   )}
                 </div>
@@ -193,13 +217,15 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                 <div>
                   <p className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
                     <Building2 className="w-3 h-3 text-[#005A9C]" />
-                    <span>{isEn ? 'Office Counter Wait' : isHi ? 'कार्यालय काउंटर प्रतीक्षा' : 'કચેરી મુલાકાત પ્રતીક્ષા સમય'}</span>
+                    <span>
+                      {isEn ? 'Office Counter Wait' : isHi ? 'कार्यालय काउंटर प्रतीक्षा' : isMr ? 'कार्यालय काउंटर प्रतीक्षा' : 'કચેરી મુલાકાત પ્રતીક્ષા સમય'}
+                    </span>
                   </p>
                   <p className="font-extrabold text-slate-800 text-sm mt-1">
-                    {isEn ? '~15-20 min (Counter Duration)' : isHi ? '~१५-२० मिनट (काउंटर समय)' : '~૧૫-૨૦ મિનિટ (કાઉન્ટર સમય)'}
+                    {isEn ? '~15-20 min (Counter Duration)' : isHi ? '~१५-२० मिनट (काउंटर समय)' : isMr ? '~१५-२० मिनिटे (काउंटर वेळ)' : '~૧૫-૨૦ મિનિટ (કાઉન્ટર સમય)'}
                   </p>
                   <p className="text-[9px] text-slate-400 mt-0.5">
-                    {isEn ? 'Office Queue / Counter Waiting Time' : 'કાઉન્ટર પર સરેરાશ પ્રતીક્ષા સમય'}
+                    {isEn ? 'Office Queue / Counter Waiting Time' : isMr ? 'काउंटरवर सरासरी प्रतीक्षा वेळ' : 'કાઉન્ટર પર સરેરાશ પ્રતીક્ષા સમય'}
                   </p>
                 </div>
                 <div className="mt-2 pt-1.5 border-t border-slate-100 text-[9px] text-slate-500">
@@ -207,6 +233,8 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                     ? 'ℹ️ Arriving at your token slot guarantees line-free verification.' 
                     : isHi 
                     ? 'ℹ️ स्लॉट समय पर उपस्थित होने से बिना कतार सत्यापन संभव है।' 
+                    : isMr
+                    ? 'ℹ️ ठरलेल्या वेळेवर पोहोचल्यास रांगेविना त्वरित पडताळणी पूर्ण होते.'
                     : 'ℹ️ ટોકન સ્લોટ પર પહોંચવાથી લાઈન વગર નિર્ધારિત સમયમાં વેરિફિકેશન પૂર્ણ થાય છે.'}
                 </div>
               </div>
@@ -215,17 +243,19 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
               <div className="bg-white p-3 rounded-xl border border-amber-200">
                 <p className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
                   <IndianRupee className="w-3 h-3 text-[#138808]" />
-                  <span>{isEn ? 'Government Fee' : isHi ? 'सरकारी शुल्क' : 'સરકારી નિયત ફી'}</span>
+                  <span>
+                    {isEn ? 'Government Fee' : isHi ? 'सरकारी शुल्क' : isMr ? 'शासकीय शुल्क' : 'સરકારી નિયત ફી'}
+                  </span>
                 </p>
                 <p className="font-extrabold text-[#138808] text-base mt-1">
                   {scheme.fee === 0 
-                    ? (isEn ? '₹0 (Completely Free)' : isHi ? '₹० (पूर्णतः मुफ्त)' : '₹૦ (સંપૂર્ણ મફત)') 
+                    ? (isEn ? '₹0 (Completely Free)' : isHi ? '₹० (पूर्णतः मुफ्त)' : isMr ? '₹० (संपूर्ण मोफत)' : '₹૦ (સંપૂર્ણ મફત)') 
                     : `₹${scheme.fee}`}
                 </p>
                 <p className="text-[9px] text-slate-400">
                   {scheme.fee === 0 
-                    ? (isEn ? 'No government charge' : 'કોઈ સરકારી ચાર્જ નથી') 
-                    : (isEn ? 'Official government charge' : 'અધિકૃત સરકારી સેવા ફી')}
+                    ? (isEn ? 'No government charge' : isMr ? 'कोणतेही शासकीय शुल्क नाही' : isHi ? 'कोई सरकारी शुल्क नहीं' : 'કોઈ સરકારી ચાર્જ નથી') 
+                    : (isEn ? 'Official government charge' : isMr ? 'अधिकृत शासकीय सेवा शुल्क' : 'અધિકૃત સરકારી સેવા ફી')}
                 </p>
               </div>
 
@@ -233,17 +263,17 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
               <div className="bg-white p-3 rounded-xl border border-amber-200 flex flex-col justify-between">
                 <div>
                   <p className="text-[10px] text-slate-500 font-bold uppercase">
-                    {isEn ? 'Dept & Official Source' : isHi ? 'विभाग एवं आधिकारिक स्रोत' : 'વિભાગ અને સત્તાવાર સ્ત્રોત'}
+                    {isEn ? 'Dept & Official Source' : isHi ? 'विभाग एवं आधिकारिक स्रोत' : isMr ? 'विभाग आणि अधिकृत स्रोत' : 'વિભાગ અને સત્તાવાર સ્ત્રોત'}
                   </p>
                   <p className="font-bold text-[#003366] text-xs mt-1 leading-snug">
-                    {scheme.department}
+                    {displayDepartment}
                   </p>
                   <p className="text-[10px] text-slate-600 mt-1 truncate" title={scheme.officialSource}>
                     🔗 {scheme.officialSource}
                   </p>
                 </div>
                 <p className="text-[9px] text-slate-400 mt-1">
-                  {isEn ? 'Last verified: ' : isHi ? 'अद्यतन: ' : 'છેલ્લે અપડેટ: '}{scheme.lastUpdated}
+                  {isEn ? 'Last verified: ' : isHi ? 'अद्यतन: ' : isMr ? 'अद्यतन: ' : 'છેલ્લે અપડેટ: '}{scheme.lastUpdated}
                 </p>
               </div>
             </div>
@@ -251,9 +281,15 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             <div className="text-[11px] text-amber-900 bg-amber-100/60 p-2.5 rounded-xl flex items-start gap-2">
               <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                {isEn 
-                  ? <><strong>Please Note:</strong> The <em>Expected Processing Time</em> is the duration required from application submission until certificate/benefit issuance. The <em>Office Counter Time (~15-20 min)</em> is only for on-spot document verification.</>
-                  : <><strong>ધ્યાન રાખો:</strong> ઉપર દર્શાવેલ <em>અપેક્ષિત પ્રક્રિયા સમય</em> અરજી જમા થયા પછી પ્રમાણપત્ર/લાભ જારી થવાનો અપેક્ષિત સમય છે, જ્યારે <em>કચેરી મુલાકાત સમય (~૧૫-૨૦ મિ.)</em> ફક્ત કાઉન્ટર પર દસ્તાવેજ જમા/ચકાસણીનો સમય છે.</>}
+                {isEn ? (
+                  <><strong>Please Note:</strong> The <em>Expected Processing Time</em> is the duration required from application submission until certificate/benefit issuance. The <em>Office Counter Time (~15-20 min)</em> is only for on-spot document verification.</>
+                ) : isMr ? (
+                  <><strong>कृपया लक्षात घ्या:</strong> वर दिलेली <em>अपेक्षित प्रक्रिया वेळ</em> अर्ज सादर केल्यापासून प्रमाणपत्र/लाभ मिळेपर्यंतचा कालावधी आहे. <em>कार्यालयीन वेळ (~१५-२० मिनिटे)</em> ही फक्त काउंटरवर कागदपत्र पडताळणीसाठी आहे.</>
+                ) : isHi ? (
+                  <><strong>कृपया ध्यान दें:</strong> ऊपर उल्लिखित <em>अपेक्षित प्रक्रिया समय</em> आवेदन जमा करने से प्रमाण पत्र/लाभ जारी होने तक की अवधि है। <em>कार्यालय काउंटर समय (~१५-२० मिनट)</em> केवल सत्यापन के लिए है।</>
+                ) : (
+                  <><strong>ધ્યાન રાખો:</strong> ઉપર દર્શાવેલ <em>અપેક્ષિત પ્રક્રિયા સમય</em> અરજી જમા થયા પછી પ્રમાણપત્ર/લાભ જારી થવાનો અપેક્ષિત સમય છે, જ્યારે <em>કચેરી મુલાકાત સમય (~૧૫-૨૦ મિ.)</em> ફક્ત કાઉન્ટર પર દસ્તાવેજ જમા/ચકાસણીનો સમય છે.</>
+                )}
               </p>
             </div>
           </div>
@@ -263,31 +299,37 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-[#003366] flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4 text-[#005A9C]" />
-                <span>{isEn ? 'Who Can Apply? (Eligibility Criteria)' : isHi ? 'कौन आवेदन कर सकता है? (पात्रता)' : 'કોણ અરજી કરી શકે? (Eligibility Criteria)'}</span>
+                <span>
+                  {isEn ? 'Who Can Apply? (Eligibility Criteria)' : isHi ? 'कौन आवेदन कर सकता है? (पात्रता)' : isMr ? 'कोण अर्ज करू शकते? (पात्रता निकष)' : 'કોણ અરજી કરી શકે? (Eligibility Criteria)'}
+                </span>
               </span>
             </div>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">{displayEligibility}</p>
-            <p className="text-[11px] text-slate-500">{isEn ? eligibility.gu : eligibility.en}</p>
           </div>
 
           {/* 🌟 STRUCTURED BENEFIT */}
           <div className="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-4 space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
-                <span>{isEn ? '✨ Scheme Benefits' : isHi ? '✨ योजना लाभ' : '✨ યોજના લાભ (Benefits)'}</span>
+                <span>
+                  {isEn ? '✨ Scheme Benefits' : isHi ? '✨ योजना लाभ' : isMr ? '✨ योजनेचे लाभ' : '✨ યોજના લાભ (Benefits)'}
+                </span>
               </span>
               <button
                 onClick={() => speakGuidance(displayBenefit)}
                 className="text-[#003366] hover:text-[#005A9C] text-xs font-bold flex items-center gap-1 cursor-pointer"
               >
-                <Volume2 className="w-3.5 h-3.5" /> {isEn ? 'Listen' : isHi ? 'सुनें' : 'સાંભળો'}
+                <Volume2 className="w-3.5 h-3.5" /> {isEn ? 'Listen' : isHi ? 'सुनें' : isMr ? 'ऐका' : 'સાંભળો'}
               </button>
             </div>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">{displayBenefit}</p>
-            <p className="text-[11px] text-slate-500">{isEn ? scheme.benefitGu : scheme.benefit}</p>
             <p className="text-[10px] text-slate-400 italic pt-1">
               {isEn 
                 ? '*Actual subsidy amount and approval depends on applicable category norms.' 
+                : isMr
+                ? '*लाभाची रक्कम व मंजुरी संबंधित विभागाच्या नियमांनुसार राहील.'
+                : isHi
+                ? '*वास्तविक लाभ राशि संबंधित विभाग के नियमानुसार निर्धारित होगी।'
                 : '*વાસ્તવિક લાભની રકમ/મંજૂરી સંબંધિત વિભાગના વર્તમાન નિયમો અને પાત્રતા પર આધારિત છે.'}
             </p>
           </div>
@@ -296,10 +338,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 shadow-xs">
             <div className="flex items-center justify-between text-xs font-bold">
               <span className="text-[#003366]">
-                {isEn ? 'Document Readiness Score' : isHi ? 'दस्तावेज़ तत्परता स्कोर' : 'દસ્તાવેજ ઉપલબ્ધતા (Readiness Score)'}
+                {isEn ? 'Document Readiness Score' : isHi ? 'दस्तावेज़ तत्परता स्कोर' : isMr ? 'कागदपत्रे तयारी गुण (Score)' : 'દસ્તાવેજ ઉપલબ્ધતા (Readiness Score)'}
               </span>
               <span className={`${progressPercent === 100 ? 'text-[#138808]' : 'text-[#FF9933]'}`}>
-                {verifiedCount}/{totalDocs} {isEn ? 'docs ready' : 'કાગળો તૈયાર'} ({progressPercent}%)
+                {verifiedCount}/{totalDocs} {isEn ? 'docs ready' : isMr ? 'कागदपत्रे तयार' : isHi ? 'दस्तावेज तैयार' : 'કાગળો તૈયાર'} ({progressPercent}%)
               </span>
             </div>
             <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
@@ -311,6 +353,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             <p className="text-[10px] text-slate-500">
               {isEn 
                 ? 'Check documents you have or use the camera for automated pre-verification.' 
+                : isMr
+                ? 'तुमच्याकडे असलेल्या कागदपत्रांवर खूण करा किंवा कॅमेऱ्याद्वारे पूर्व-तपासणी करा.'
+                : isHi
+                ? 'उपलब्ध दस्तावेजों पर टिक करें या कैमरा से स्वचालित सत्यापन करें।'
                 : 'તમારી પાસે હાજર કાગળો પર ટિક કરો અથવા કેમેરા વડે પ્રી-ચેક કરો.'}
             </p>
           </div>
@@ -324,6 +370,8 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                   ? `Required Documents Checklist (${totalDocs} Documents)` 
                   : isHi 
                   ? `आवश्यक दस्तावेज़ चेकलिस्ट (${totalDocs} दस्तावेज़)` 
+                  : isMr
+                  ? `आवश्यक कागदपत्रांची यादी (${totalDocs} कागदपत्रे)`
                   : `જરૂરી દસ્તાવેજોનું ચેકલિસ્ટ (${totalDocs} Documents)`}
               </span>
             </h4>
@@ -331,7 +379,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             <div className="space-y-2">
               {scheme.requiredDocs.map((doc, idx) => {
                 const isChecked = !!checkedDocs[doc.nameGu];
-                const docPrimary = isEn ? doc.nameEn : doc.nameGu;
+                const docLocalized = getLocalizedDocName(doc, lang);
                 const docSecondary = isEn ? doc.nameGu : doc.nameEn;
 
                 return (
@@ -351,7 +399,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                         <Square className="w-4 h-4 text-slate-400 shrink-0" />
                       )}
                       <div>
-                        <p className="text-xs font-bold leading-tight">{docPrimary}</p>
+                        <p className="text-xs font-bold leading-tight">{docLocalized}</p>
                         <p className="text-[10px] text-slate-500">{docSecondary}</p>
                       </div>
                     </div>
@@ -359,11 +407,11 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                     <div className="flex items-center gap-1.5 shrink-0">
                       {doc.required ? (
                         <span className="text-[9px] font-bold bg-blue-50 text-[#005A9C] border border-blue-200 px-1.5 py-0.5 rounded">
-                          {isEn ? 'Mandatory' : isHi ? 'अनिवार्य' : 'ફરજિયાત'}
+                          {isEn ? 'Mandatory' : isHi ? 'अनिवार्य' : isMr ? 'अनिवार्य' : 'ફરજિયાત'}
                         </span>
                       ) : (
                         <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
-                          {isEn ? 'Optional' : isHi ? 'वैकल्पिक' : 'વૈકલ્પિક'}
+                          {isEn ? 'Optional' : isHi ? 'वैकल्पिक' : isMr ? 'पर्यायी' : 'વૈકલ્પિક'}
                         </span>
                       )}
                     </div>
@@ -376,12 +424,16 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           {/* Official Source & Reference Banner */}
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[10.5px] text-slate-500 space-y-1">
             <p className="font-bold text-slate-700">
-              {isEn ? 'Official Reference Source:' : isHi ? 'आधिकारिक सरकारी स्रोत:' : 'સત્તાવાર સરકારી સંદર્ભ (Official Source):'}
+              {isEn ? 'Official Reference Source:' : isHi ? 'आधिकारिक सरकारी स्रोत:' : isMr ? 'अधिकृत शासकीय स्रोत:' : 'સત્તાવાર સરકારી સંદર્ભ (Official Source):'}
             </p>
-            <p>{sourceInfo.source} • {isEn ? 'Last verified:' : 'છેલ્લી માહિતી:'} {sourceInfo.lastUpdated}</p>
+            <p>{sourceInfo.source} • {isEn ? 'Last verified:' : isMr ? 'शेवटचे अद्यतन:' : isHi ? 'अंतिम अद्यतन:' : 'છેલ્લી માહિતી:'} {sourceInfo.lastUpdated}</p>
             <p className="text-[9.5px] text-slate-400 italic">
               {isEn 
                 ? 'Reference information — confirm with the concerned department during formal submission.' 
+                : isMr
+                ? 'संदर्भ माहिती — अधिकृत अर्ज सादर करताना संबंधित विभागाशी पडताळणी करा.'
+                : isHi
+                ? 'संदर्भ जानकारी — अंतिम आवेदन के समय संबंधित विभाग से पुष्टि करें।'
                 : 'સંદર્ભ માહિતી — ઔપચારિક જમા કરતી વખતે સંબંધિત વિભાગ સાથે ચકાસો.'}
             </p>
           </div>
@@ -393,7 +445,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           >
             <Share2 className="w-3.5 h-3.5" />
             <span>
-              {isEn ? 'Share Checklist on WhatsApp' : isHi ? 'व्हाट्सएप पर चेकलिस्ट साझा करें' : 'વોટ્સએપ પર ચેકલિસ્ટ મોકલો (Share on WhatsApp)'}
+              {isEn ? 'Share Checklist on WhatsApp' : isHi ? 'व्हाट्सएप पर चेकलिस्ट साझा करें' : isMr ? 'व्हॉट्सॲपवर चेकलिस्ट पाठवा' : 'વોટ્સએપ પર ચેકલિસ્ટ મોકલો (Share on WhatsApp)'}
             </span>
           </button>
 
@@ -410,7 +462,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           >
             <Camera className="w-4 h-4 text-[#FF9933] shrink-0" />
             <span className="truncate">
-              {isEn ? 'Start Document Pre-Verification' : isHi ? 'दस्तावेज़ प्री-चेक शुरू करें' : 'દસ્તાવેજ પ્રી-ચેક શરૂ કરો (Start Pre-Verification)'}
+              {isEn ? 'Start Document Pre-Verification' : isHi ? 'दस्तावेज़ प्री-चेक शुरू करें' : isMr ? 'कागदपत्र पूर्व-तपासणी सुरू करा' : 'દસ્તાવેજ પ્રી-ચેક શરૂ કરો (Start Pre-Verification)'}
             </span>
             <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
@@ -427,14 +479,14 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                 <>
                   <CheckCircle2 className="w-4 h-4 text-[#138808] shrink-0" />
                   <span>
-                    {isEn ? 'Book Appointment Slot / Collect Token' : isHi ? 'कार्यालय टोकन प्राप्त करें' : 'કચેરી ટોકન કલેક્ટ કરો (Collect Live Token)'}
+                    {isEn ? 'Book Appointment Slot / Collect Token' : isHi ? 'कार्यालय टोकन प्राप्त करें' : isMr ? 'कार्यालयीन टोकन मिळवा / स्लॉट बुक करा' : 'કચેરી ટોકન કલેક્ટ કરો (Collect Live Token)'}
                   </span>
                 </>
               ) : (
                 <>
                   <Lock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                   <span>
-                    {isEn ? 'Login to Book Slot (Citizen Identity Check)' : isHi ? 'टोकन हेतु पहचान सत्यापन करें' : 'ટોકન મેળવવા લૉગિન કરો (Citizen Identity Check)'}
+                    {isEn ? 'Login to Book Slot (Citizen Identity Check)' : isHi ? 'टोकन हेतु पहचान सत्यापन करें' : isMr ? 'टोकनसाठी नागरिक ओळख पडताळणी करा' : 'ટોકન મેળવવા લૉગિન કરો (Citizen Identity Check)'}
                   </span>
                 </>
               )}

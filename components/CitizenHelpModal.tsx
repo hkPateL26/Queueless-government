@@ -26,6 +26,7 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
   const isGu = lang === 'gu';
   const isHi = lang === 'hi';
   const isMr = lang === 'mr';
+  const isEn = lang === 'en';
 
   const faqs = [
     {
@@ -40,6 +41,8 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         ? 'ના. QueueLess પોર્ટલ દ્વારા તમે ઘરેથી જ તમારો સ્લોટ અને ટોકન બુક કરી શકો છો. તમને ફાળવેલા સમયથી ૧૦ મિનિટ પહેલાં પહોંચીને પ્રવેશદ્વારે QR સ્કેન કરી સીધા કાઉન્ટર પર જઈ શકાય છે.'
         : isHi
         ? 'नहीं। QueueLess पोर्टल द्वारा आप घर बैठे स्लॉट और टोकन प्राप्त कर सकते हैं। अपने स्लॉट समय से 10 मिनट पहले पहुंचकर क्यूआर कोड स्कैन करें और काउंटर पर उपस्थित हों।'
+        : isMr
+        ? 'नाही. QueueLess पोर्टलद्वारे आपण घरबसल्या अधिकृत स्लॉट आणि टोकन मिळवू शकता. ठरलेल्या वेळेच्या १० मिनिटे आधी पोहोचून प्रवेशद्वारावर क्यूआर कोड स्कॅन करून थेट काउंटरवर जाता येते.'
         : 'No. You can book an official virtual token slot in advance. Arrive 10 minutes prior to your allocated slot and scan your digital QR pass at the entrance.'
     },
     {
@@ -47,11 +50,15 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         ? '૨. જો હું ટ્રાફિક કે અન્ય કારણસર મોડો પહોંચું તો શું મારો વારો રદ થશે?'
         : isHi
         ? '२. यदि मैं ट्रैफिक या व्यक्तिगत कारण से देर से पहुँचूँ तो क्या मेरा नंबर रद्द होगा?'
+        : isMr
+        ? '२. ट्रॅफिक किंवा इतर कारणामुळे मला उशीर झाल्यास माझा नंबर रद्द होईल का?'
         : '2. What if I arrive late due to traffic or emergencies? Will my turn be cancelled?',
       a: isGu
         ? 'ના, વારો રદ નહીં થાય. તમારા ડિજિટલ ટોકન પાસમાં "હું મોડો પડીશ (+૨૦ મિનિટ)" બટન ઉપલબ્ધ છે. તેને દબાવતાં કાઉન્ટર અધિકારીને સિસ્ટમ દ્વારા આપમેળે જાણ થાય છે અને તમારો વારો આગળ ખસેડાય છે.'
         : isHi
         ? 'नहीं, रद्द नहीं होगा। अपने डिजिटल टोकन पास पर "मैं देर से पहुँचूँगा (+20 मिनट)" बटन दबाएं। काउंटर अधिकारी को स्वचालित सूचना मिल जाएगी और आपका स्लॉट आगे स्थानांतरित हो जाएगा।'
+        : isMr
+        ? 'नाही, रद्द होणार नाही. आपल्या डिजिटल टोकन पासवर "मला उशीर होईल (+२० मिनिटे)" बटण आहे. त्यावर क्लिक केल्यास काउंटर अधिकाऱ्याला त्वरित माहिती मिळते आणि आपला नंबर पुढे सरकवला जातो.'
         : 'No. Use the "Running Late (+20 mins)" button on your digital pass to shift your queue slot safely without losing your appointment.'
     },
     {
@@ -59,11 +66,15 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         ? '૩. કચેરી મુલાકાત વખતે કયા મુખ્ય દસ્તાવેજો સાથે રાખવા જરૂરી છે?'
         : isHi
         ? '३. कार्यालय भ्रमण के समय कौन से आवश्यक दस्तावेज साथ रखने चाहिए?'
+        : isMr
+        ? '३. कार्यालयात जाताना कोणती मुख्य कागदपत्रे सोबत ठेवणे आवश्यक आहे?'
         : '3. Which mandatory documents should I carry during my office visit?',
       a: isGu
         ? 'અસલ આધાર કાર્ડ, રેશનકાર્ડ, ૨ પાસપોર્ટ સાઇઝ ફોટો અને પસંદ કરેલી યોજનાનું એપ્લિકેશન પ્રી-ચેક પ્રિન્ટ અથવા ડિજિટલ રસીદ. કેમેરા સ્કેનર દ્વારા તમે ઘરેથી જ દસ્તાવેજોની ચકાસણી કરી શકો છો.'
         : isHi
         ? 'मूल आधार कार्ड, राशन कार्ड, 2 पासपोर्ट फोटो और संबंधित सेवा का आवेदन पत्र। आप पोर्टल के कैमरा स्कैनर से घर बैठे दस्तावेजों की पूर्व-जांच कर सकते हैं।'
+        : isMr
+        ? 'मूळ आधार कार्ड, रेशनकार्ड, २ पासपोर्ट फोटो आणि संबंधित योजनेची डिजिटल पावती. पोर्टलवरील कॅमेरा स्कॅनरद्वारे आपण घरबसल्या कागदपत्रांची पूर्व-तपासणी करू शकता.'
         : 'Original Aadhaar Card, Ration Card, 2 passport size photographs, and pre-verified documents. You can run pre-validation using the Portal Camera Scanner.'
     },
     {
@@ -71,11 +82,15 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         ? '૪. ગુજરાત લોક સેવા હક્ક અધિનિયમ (GRTSA ૨૦૧૩) શું છે?'
         : isHi
         ? '४. गुजरात लोक सेवा अधिकार अधिनियम (GRTSA 2013) क्या है?'
+        : isMr
+        ? '४. गुजरात लोकसेवा हक्क कायदा (GRTSA २०१३) काय आहे?'
         : '4. What is the Gujarat Right to Public Services Act (GRTSA 2013)?',
       a: isGu
         ? 'આ કાયદા હેઠળ દરેક નાગરિકને નિશ્ચિત સમયમર્યાદા (SLA) માં સરકારી સેવા મેળવવાનો કાનૂની અધિકાર છે. જો નિયત સમયમાં સેવા ન મળે તો જવાબદાર અધિકારી વિરુદ્ધ કલેક્ટર કક્ષાએ આપમેળે એસ્કેલેશન થાય છે.'
         : isHi
         ? 'इस अधिनियम के तहत प्रत्येक नागरिक को समयबद्ध लोक सेवा प्राप्त करने का वैधानिक अधिकार है। समय पर सेवा न मिलने पर संबंधित प्राधिकारी के विरुद्ध स्वतः एस्केलेशन होता है।'
+        : isMr
+        ? 'या कायद्यानुसार प्रत्येक नागरिकाला विहित मुदतीत शासकीय सेवा मिळवण्याचा कायदेशीर हक्क आहे. मुदतीत सेवा न मिळाल्यास जिल्हाधिकारी स्तरावर तक्रार आपोआप दाखल होते.'
         : 'GRTSA 2013 legally guarantees time-bound service delivery for Gujarat citizens. Non-compliance automatically escalates to District Collector oversight.'
     }
   ];
@@ -98,15 +113,15 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider bg-blue-900/80 text-blue-200 px-2 py-0.5 rounded border border-blue-700">
-                  {isGu ? 'ગુજરાત સરકાર • GAD' : isHi ? 'गुजरात सरकार • GAD' : 'Govt of Gujarat • GAD'}
+                  {isGu ? 'ગુજરાત સરકાર • GAD' : isHi ? 'गुजरात सरकार • GAD' : isMr ? 'गुजरात शासन • GAD' : 'Govt of Gujarat • GAD'}
                 </span>
                 <span className="text-[10px] text-emerald-300 font-bold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {isGu ? 'સહાય ડેસ્ક કાર્યરત' : isHi ? 'हेल्प डेस्क सक्रिय' : 'Help Desk Active'}
+                  {isGu ? 'સહાય ડેસ્ક કાર્યરત' : isHi ? 'हेल्प डेस्क सक्रिय' : isMr ? 'मदत डेस्क कार्यरत' : 'Help Desk Active'}
                 </span>
               </div>
               <h2 className="text-base sm:text-lg font-black text-white tracking-tight mt-0.5">
-                {isGu ? 'નાગરિક સહાય અને ફરિયાદ નિવારણ ડેસ્ક' : isHi ? 'नागरिक सहायता एवं शिकायत निवारण डेस्क' : 'Citizen Help & Grievance Redressal Desk'}
+                {isGu ? 'નાગરિક સહાય અને ફરિયાદ નિવારણ ડેસ્ક' : isHi ? 'नागरिक सहायता एवं शिकायत निवारण डेस्क' : isMr ? 'नागरिक सहाय्य व तक्रार निवारण डेस्क' : 'Citizen Help & Grievance Redressal Desk'}
               </h2>
             </div>
           </div>
@@ -125,7 +140,7 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
           <div>
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-[#005A9C]" />
-              <span>{isGu ? 'સત્તાવાર ટોલ-ફ્રી હેલ્પલાઇન નંબરો' : isHi ? 'आधिकारिक टोल-फ्री हेल्पलाइन नंबर' : 'Official Toll-Free Helplines'}</span>
+              <span>{isGu ? 'સત્તાવાર ટોલ-ફ્રી હેલ્પલાઇન નંબરો' : isHi ? 'आधिकारिक टोल-फ्री हेल्पलाइन नंबर' : isMr ? 'अधिकृत टोल-फ्री हेल्पलाइन क्रमांक' : 'Official Toll-Free Helplines'}</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -135,14 +150,14 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-slate-600">
-                    {isGu ? 'જન સેવા કેન્દ્ર હેલ્પલાઇન (ટોલ ફ્રી)' : isHi ? 'जन सेवा केंद्र हेल्पलाइन (टोल फ्री)' : 'Jan Seva Kendra Helpline (Toll Free)'}
+                    {isGu ? 'જન સેવા કેન્દ્ર હેલ્પલાઇન (ટોલ ફ્રી)' : isHi ? 'जन सेवा केंद्र हेल्पलाइन (टोल फ्री)' : isMr ? 'जन सेवा केंद्र हेल्पलाइन (टोल फ्री)' : 'Jan Seva Kendra Helpline (Toll Free)'}
                   </p>
                   <a href="tel:18002335500" className="text-lg font-black text-[#003366] hover:underline block leading-tight">
                     1800-233-5500
                   </a>
                   <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-[#FF9933]" />
-                    <span>{isGu ? 'સોમ-શનિ • ૧૦:૩૦ AM થી ૦૬:૧૦ PM' : isHi ? 'सोम-शनि • 10:30 AM से 06:10 PM' : 'Mon-Sat • 10:30 AM to 06:10 PM'}</span>
+                    <Clock className="w-3.5 h-3.5 text-[#FF9933]" />
+                    <span>{isGu ? 'સોમ-શનિ • ૧૦:૩૦ AM થી ૦૬:૧૦ PM' : isHi ? 'सोम-शनि • 10:30 AM से 06:10 PM' : isMr ? 'सोम-शनि • १०:३० AM ते ०६:१० PM' : 'Mon-Sat • 10:30 AM to 06:10 PM'}</span>
                   </p>
                 </div>
               </div>
@@ -153,13 +168,13 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-slate-600">
-                    {isGu ? 'મુખ્યમંત્રી ફરિયાદ નિવારણ (CM Helpline)' : isHi ? 'मुख्यमंत्री शिकायत निवारण (CM Helpline)' : 'Chief Minister Grievance (CM Helpline)'}
+                    {isGu ? 'મુખ્યમંત્રી ફરિયાદ નિવારણ (CM Helpline)' : isHi ? 'मुख्यमंत्री शिकायत निवारण (CM Helpline)' : isMr ? 'मुख्यमंत्री तक्रार निवारण (CM Helpline)' : 'Chief Minister Grievance (CM Helpline)'}
                   </p>
                   <a href="tel:1076" className="text-lg font-black text-amber-950 hover:underline block leading-tight">
                     1076
                   </a>
                   <p className="text-[10px] text-slate-500 mt-0.5">
-                    {isGu ? '૨૪x૭ અવિરત નાગરિક સેવા' : isHi ? '24x7 निरंतर नागरिक सेवा' : '24x7 Round the Clock Service'}
+                    {isGu ? '૨૪x૭ અવિરત નાગરિક સેવા' : isHi ? '24x7 निरंतर नागरिक सेवा' : isMr ? '२४x७ अखंड नागरिक सेवा' : '24x7 Round the Clock Service'}
                   </p>
                 </div>
               </div>
@@ -171,7 +186,7 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
             <div className="flex items-center gap-2 mb-2">
               <Award className="w-4 h-4 text-[#138808]" />
               <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wide">
-                {isGu ? 'ગુજરાત લોક સેવા હક્ક અધિનિયમ (GRTSA ૨૦૧૩) બાંહેધરી' : isHi ? 'गुजरात लोक सेवा अधिकार अधिनियम (GRTSA 2013) गारंटी' : 'GRTSA 2013 Service Delivery Guarantee'}
+                {isGu ? 'ગુજરાત લોક સેવા હક્ક અધિનિયમ (GRTSA ૨૦૧૩) બાંહેધરી' : isHi ? 'गुजरात लोक सेवा अधिकार अधिनियम (GRTSA 2013) गारंटी' : isMr ? 'गुजरात लोकसेवा हक्क कायदा (GRTSA २०१३) हमी' : 'GRTSA 2013 Service Delivery Guarantee'}
               </h4>
             </div>
             <p className="text-xs text-slate-700 leading-relaxed">
@@ -179,6 +194,8 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
                 ? 'રાજ્ય સરકારના કાનૂની માળખા હેઠળ તમામ આવક દાખલા, જાતિ પ્રમાણપત્રો અને રેશન સેવાઓ સમયબદ્ધ SLA માં આપવી ફરજિયાત છે. જો સમયમર્યાદા ચૂકી જવાય તો જિલ્લા કલેક્ટરના સુપરવિઝન હેઠળ કેસ આપમેળે પ્રાયોરિટીમાં આવે છે.'
                 : isHi
                 ? 'राज्य सरकार के विधिक ढांचे के तहत आय प्रमाण पत्र, जाति प्रमाण पत्र व राशन सेवाएं समयबद्ध एसएलए में देना अनिवार्य है। विलंब होने पर जिला कलेक्टर पर्यवेक्षण में स्वतः प्राथमिकता मिलती है।'
+                : isMr
+                ? 'शासकीय नियमांनुसार सर्व उत्पन्न दाखले, जात प्रमाणपत्रे व शिधापत्रिका सेवा वेळेत देणे बंधनकारक आहे. मुदत उलटल्यास जिल्हाधिकारी यांच्या देखरेखीखाली प्रकरण आपोआप प्राधान्याने हाताळले जाते.'
                 : 'All certificates and civic services are legally bounded by strict SLA timelines. Delays trigger automatic priority escalation to District Collector monitoring.'}
             </p>
           </div>
@@ -187,7 +204,7 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
           <div>
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
               <HelpCircle className="w-3.5 h-3.5 text-[#FF9933]" />
-              <span>{isGu ? 'નાગરિક સામાન્ય પ્રશ્નોત્તરી (FAQs)' : isHi ? 'नागरिक सामान्य प्रश्नोत्तरी (FAQs)' : 'Citizen Frequently Asked Questions'}</span>
+              <span>{isGu ? 'નાગરિક સામાન્ય પ્રશ્નોત્તરી (FAQs)' : isHi ? 'नागरिक सामान्य प्रश्नोत्तरी (FAQs)' : isMr ? 'नागरिक नेहमी विचारले जाणारे प्रश्न (FAQs)' : 'Citizen Frequently Asked Questions'}</span>
             </h3>
 
             <div className="space-y-2.5">
@@ -208,13 +225,13 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         {/* MODAL FOOTER */}
         <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between text-xs shrink-0">
           <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
-            {isGu ? 'સામાન્ય વહીવટ વિભાગ • સચિવાલય, ગાંધીનગર' : isHi ? 'सामान्य प्रशासन विभाग • सचिवालय, गांधीनगर' : 'General Administration Dept • Sachivalaya, Gandhinagar'}
+            {isGu ? 'સામાન્ય વહીવટ વિભાગ • સચિવાલય, ગાંધીનગર' : isHi ? 'सामान्य प्रशासन विभाग • सचिवालय, गांधीनगर' : isMr ? 'सामान्य प्रशासन विभाग • सचिवालय, गांधीनगर' : 'General Administration Dept • Sachivalaya, Gandhinagar'}
           </span>
           <button
             onClick={handleClose}
             className="w-full sm:w-auto px-5 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white font-bold transition cursor-pointer"
           >
-            {isGu ? 'સમજાઈ ગયું (બંધ કરો)' : isHi ? 'समझ गया (बंद करें)' : 'Understood (Close)'}
+            {isGu ? 'સમજાઈ ગયું (બંધ કરો)' : isHi ? 'समझ गया (बंद करें)' : isMr ? 'समजले (बंद करा)' : 'Understood (Close)'}
           </button>
         </div>
       </div>

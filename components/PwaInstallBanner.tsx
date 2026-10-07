@@ -5,12 +5,18 @@ import { Download, CheckCircle2, Share2, PlusSquare, X, Smartphone, Sparkles, Sh
 import { triggerHaptic } from '@/lib/haptics';
 import { GovLogo } from '@/components/GovLogo';
 
+import { Language } from '@/lib/translations';
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
-export const PwaInstallBanner: React.FC = () => {
+interface PwaInstallBannerProps {
+  lang?: Language;
+}
+
+export const PwaInstallBanner: React.FC<PwaInstallBannerProps> = ({ lang = 'gu' }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -107,11 +113,13 @@ export const PwaInstallBanner: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-[9px] font-black uppercase text-[#FF9933] bg-[#003366] px-1.5 py-0.2 rounded tracking-wider">
-                  સત્તાવાર PWA એપ
+                  {lang === 'en' ? 'Official PWA App' : lang === 'hi' ? 'आधिकारिक PWA ऐप' : lang === 'mr' ? 'अधिकृत PWA ॲप' : 'સત્તાવાર PWA એપ'}
                 </span>
               </div>
               <h4 className="text-xs font-black text-[#003366] leading-tight truncate mt-0.5">
-                {installSuccess ? '🎉 ઇન્સ્ટોલ થઈ રહી છે...' : 'QueueLess Kacheri એપ'}
+                {installSuccess 
+                  ? (lang === 'en' ? '🎉 Installing...' : lang === 'hi' ? '🎉 इंस्टॉल हो रहा है...' : lang === 'mr' ? '🎉 इन्स्टॉल होत आहे...' : '🎉 ઇન્સ્ટોલ થઈ રહી છે...')
+                  : (lang === 'en' ? 'QueueLess Kacheri App' : lang === 'hi' ? 'QueueLess कचहरी ऐप' : lang === 'mr' ? 'QueueLess कचेरी ॲप' : 'QueueLess Kacheri એપ')}
               </h4>
             </div>
           </div>
@@ -123,7 +131,7 @@ export const PwaInstallBanner: React.FC = () => {
               setDismissed(true);
             }}
             className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center text-xs transition cursor-pointer shrink-0"
-            title="બંધ કરો (Close)"
+            title={lang === 'en' ? 'Close' : lang === 'hi' ? 'बंद करें' : lang === 'mr' ? 'बंद करा' : 'બંધ કરો (Close)'}
             aria-label="Close install prompt"
           >
             <X className="w-3.5 h-3.5" />
@@ -131,7 +139,13 @@ export const PwaInstallBanner: React.FC = () => {
         </div>
 
         <p className="text-[10.5px] text-slate-500 mb-2.5 leading-snug">
-          ૧-ક્લિકમાં ફોન કે કમ્પ્યુટરમાં ઇન્સ્ટોલ કરી ઓફલાઇન ટોકન અને ૩૯ સેવાઓ જુઓ.
+          {lang === 'en'
+            ? 'Install in 1-click on phone or computer to access offline tokens and 39 services.'
+            : lang === 'hi'
+            ? '१-क्लिक में फोन या कंप्यूटर पर इंस्टॉल कर ऑफलाइन टोकन व ३९ सेवाएं देखें।'
+            : lang === 'mr'
+            ? '१-क्लिकमध्ये फोन किंवा कॉम्प्युटरवर इन्स्टॉल करा आणि ऑफलाइन टोकन व ३९ सेवा पहा.'
+            : '૧-ક્લિકમાં ફોન કે કમ્પ્યુટરમાં ઇન્સ્ટોલ કરી ઓફલાઇન ટોકન અને ૩૯ સેવાઓ જુઓ.'}
         </p>
 
         <div className="flex items-center gap-2">
@@ -142,7 +156,7 @@ export const PwaInstallBanner: React.FC = () => {
             }}
             className="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold text-slate-500 hover:bg-slate-100 transition text-center cursor-pointer"
           >
-            પછીથી
+            {lang === 'en' ? 'Later' : lang === 'hi' ? 'बाद में' : lang === 'mr' ? 'नंतर' : 'પછીથી'}
           </button>
 
           <button
@@ -152,12 +166,12 @@ export const PwaInstallBanner: React.FC = () => {
             {installSuccess ? (
               <>
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-900" />
-                <span>ઇન્સ્ટોલ થઈ ગયું</span>
+                <span>{lang === 'en' ? 'Installed' : lang === 'hi' ? 'इंस्टॉल हो गया' : lang === 'mr' ? 'इन्स्टॉल झाले' : 'ઇન્સ્ટોલ થઈ ગયું'}</span>
               </>
             ) : (
               <>
                 <Download className="w-3.5 h-3.5 text-slate-900 animate-bounce" />
-                <span>ઇન્સ્ટોલ કરો</span>
+                <span>{lang === 'en' ? 'Install App' : lang === 'hi' ? 'इंस्टॉल करें' : lang === 'mr' ? 'इन्स्टॉल करा' : 'ઇન્સ્ટોલ કરો'}</span>
               </>
             )}
           </button>

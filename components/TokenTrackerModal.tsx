@@ -78,13 +78,14 @@ export function TokenTrackerModal({
   const isGu = lang === 'gu';
   const isHi = lang === 'hi';
   const isMr = lang === 'mr';
+  const isEn = lang === 'en';
 
   const cleanQuery = searchToken.trim().toUpperCase().replace('#', '');
   
   // Lookup from presets or generate dynamic result
   const tokenData: MockTokenInfo = PRESET_TOKENS[cleanQuery] || {
     token: cleanQuery || 'A-42',
-    name: activeBooking ? 'નાગરિક (Citizen)' : 'નોંધાયેલ નાગરિક (Verified Citizen)',
+    name: activeBooking ? (isMr ? 'नागरिक (Citizen)' : 'નાગરિક (Citizen)') : (isMr ? 'नोंदणीकृत नागरिक (Verified Citizen)' : 'નોંધાયેલ નાગરિક (Verified Citizen)'),
     center: activeBooking ? `${activeBooking.taluka.nameGu} કચેરી` : 'ગોંડલ જન સેવા કેન્દ્ર — રાજકોટ',
     counter: activeBooking ? `કાઉન્ટર ${activeBooking.counterNumber}` : 'કાઉન્ટર ૧ (સામાન્ય સેવા)',
     ahead: 3,
@@ -110,6 +111,8 @@ export function TokenTrackerModal({
     triggerHaptic('tap');
     const msg = isGu
       ? `ટોકન નંબર ${tokenData.token}, કૃપા કરીને ${tokenData.counter} પર પધારો.`
+      : isMr
+      ? `टोकन क्रमांक ${tokenData.token}, कृपया ${tokenData.counter} वर यावे.`
       : isHi
       ? `टोकन संख्या ${tokenData.token}, कृपया ${tokenData.counter} पर पधारें।`
       : `Token number ${tokenData.token}, please proceed to ${tokenData.counter}.`;
@@ -133,10 +136,10 @@ export function TokenTrackerModal({
             </div>
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-wider bg-blue-900/80 text-blue-200 px-2 py-0.5 rounded border border-blue-700">
-                {isGu ? 'લાઈવ કતાર સ્થિતિ' : isHi ? 'लाइव कतार स्थिति' : 'Live Queue Status'}
+                {isGu ? 'લાઈવ કતાર સ્થિતિ' : isHi ? 'लाइव कतार स्थिति' : isMr ? 'थेट रांग स्थिती' : 'Live Queue Status'}
               </span>
               <h2 className="text-base sm:text-lg font-black text-white tracking-tight mt-0.5">
-                {isGu ? 'ટોકન ટ્રેક કરો (Token Tracker)' : isHi ? 'टोकन ट्रैक करें (Token Tracker)' : 'Track Office Token'}
+                {isGu ? 'ટોકન ટ્રેક કરો (Token Tracker)' : isHi ? 'टोकन ट्रैक करें (Token Tracker)' : isMr ? 'टोकन ट्रॅक करा (Token Tracker)' : 'Track Office Token'}
               </h2>
             </div>
           </div>
@@ -157,7 +160,7 @@ export function TokenTrackerModal({
           {/* SEARCH FORM */}
           <form onSubmit={handleSearch} className="space-y-2">
             <label className="text-xs font-black text-slate-600 block">
-              {isGu ? 'તમારો ટોકન નંબર દાખલ કરો' : isHi ? 'अपनी टोकन संख्या दर्ज करें' : 'Enter Your Token Number'}
+              {isGu ? 'તમારો ટોકન નંબર દાખલ કરો' : isHi ? 'अपनी टोकन संख्या दर्ज करें' : isMr ? 'आपला टोकन क्रमांक प्रविष्ट करा' : 'Enter Your Token Number'}
             </label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
@@ -166,7 +169,7 @@ export function TokenTrackerModal({
                   type="text"
                   value={tokenInput}
                   onChange={(e) => setTokenInput(e.target.value)}
-                  placeholder="દા.ત. A-42, B-1247"
+                  placeholder={isMr ? 'उदा. A-42, B-1247' : isHi ? 'उदा. A-42, B-1247' : isEn ? 'e.g. A-42, B-1247' : 'દા.ત. A-42, B-1247'}
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 font-mono font-bold text-sm text-[#003366] focus:border-[#005A9C] focus:ring-2 focus:ring-blue-100 outline-none"
                 />
               </div>
@@ -174,7 +177,7 @@ export function TokenTrackerModal({
                 type="submit"
                 className="bg-[#005A9C] hover:bg-[#003366] text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95 cursor-pointer whitespace-nowrap"
               >
-                {isGu ? 'સ્થિતિ તપાસો' : isHi ? 'स्थिति जांचें' : 'Check Status'}
+                {isGu ? 'સ્થિતિ તપાસો' : isHi ? 'स्थिति जांचें' : isMr ? 'स्थिती तपासा' : 'Check Status'}
               </button>
             </div>
           </form>
@@ -182,7 +185,7 @@ export function TokenTrackerModal({
           {/* QUICK PRESETS CHIPS */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[10px] font-bold text-slate-400">
-              {isGu ? 'નમૂના ટોકન:' : isHi ? 'नमूना टोकन:' : 'Sample Tokens:'}
+              {isGu ? 'નમૂના ટોકન:' : isHi ? 'नमूना टोकन:' : isMr ? 'नमुना टोकन:' : 'Sample Tokens:'}
             </span>
             {['A-42', 'B-1247', 'C-809'].map((tok) => (
               <button
@@ -204,7 +207,7 @@ export function TokenTrackerModal({
           <div className="bg-slate-50 border-2 border-blue-200 rounded-2xl p-4 sm:p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-blue-100 text-[#003366]">
-                સત્તાવાર કતાર ટોકન
+                {isGu ? 'સત્તાવાર કતાર ટોકન' : isMr ? 'अधिकृत रांग टोकन' : isHi ? 'आधिकारिक कतार टोकन' : 'OFFICIAL QUEUE TOKEN'}
               </span>
               <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                 tokenData.status === 'called'
@@ -213,8 +216,8 @@ export function TokenTrackerModal({
               }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
                 {tokenData.status === 'called' 
-                  ? (isGu ? 'હવે બોલાવવામાં આવેલ' : 'अभी बुलाया गया') 
-                  : (isGu ? 'કતારમાં સક્રિય' : 'कतार में सक्रिय')}
+                  ? (isGu ? 'હવે બોલાવવામાં આવેલ' : isMr ? 'आता पाचारण केले' : isHi ? 'अभी बुलाया गया' : 'NOW CALLED') 
+                  : (isGu ? 'કતારમાં સક્રિય' : isMr ? 'रांगेत सक्रिय' : isHi ? 'कतार में सक्रिय' : 'WAITING IN QUEUE')}
               </span>
             </div>
 
@@ -232,13 +235,19 @@ export function TokenTrackerModal({
 
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">{isGu ? 'ફાળવેલ કાઉન્ટર' : 'आवंटित काउंटर'}</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase">
+                  {isGu ? 'ફાળવેલ કાઉન્ટર' : isMr ? 'नियुक्त काउंटर' : isHi ? 'आवंटित काउंटर' : 'Assigned Counter'}
+                </p>
                 <p className="text-sm font-black text-[#003366] mt-0.5">{tokenData.counter}</p>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">{isGu ? 'અંદાજિત પ્રતીક્ષા' : 'अनुमानित प्रतीक्षा'}</p>
-                <p className="text-sm font-black text-[#FF9933] mt-0.5">~{tokenData.estMinutes} મિનિટ</p>
+                <p className="text-[10px] font-bold text-slate-500 uppercase">
+                  {isGu ? 'અંદાજિત પ્રતીક્ષા' : isMr ? 'अंदाजित प्रतीक्षा' : isHi ? 'अनुमानित प्रतीक्षा' : 'Est. Wait'}
+                </p>
+                <p className="text-sm font-black text-[#FF9933] mt-0.5">
+                  ~{tokenData.estMinutes} {isMr ? 'मिनिटे' : isHi ? 'मिनट' : isEn ? 'min' : 'મિનિટ'}
+                </p>
               </div>
             </div>
 
@@ -247,17 +256,17 @@ export function TokenTrackerModal({
                 <Users className="w-4 h-4 text-[#005A9C]" />
                 <span className="text-slate-700 font-medium">
                   {tokenData.ahead === 0 
-                    ? (isGu ? 'તમારો વારો આવી ગયો છે!' : 'आपकी बारी आ चुकी है!') 
-                    : (isGu ? `તમારા આગળ માત્ર ${tokenData.ahead} નાગરિકો છે.` : `आपके आगे केवल ${tokenData.ahead} नागरिक हैं।`)}
+                    ? (isGu ? 'તમારો વારો આવી ગયો છે!' : isMr ? 'तुमचा नंबर आला आहे!' : isHi ? 'आपकी बारी आ चुकी है!' : 'Your turn is now!') 
+                    : (isGu ? `તમારા આગળ માત્ર ${tokenData.ahead} નાગરિકો છે.` : isMr ? `तुमच्या पुढे फक्त ${tokenData.ahead} नागरिक आहेत.` : isHi ? `आपके आगे केवल ${tokenData.ahead} नागरिक हैं।` : `${tokenData.ahead} citizens ahead of you.`)}
                 </span>
               </div>
               <button
                 onClick={handleVoiceCall}
                 className="px-2.5 py-1 rounded-lg bg-white border border-blue-300 text-[#003366] font-bold hover:bg-blue-100 flex items-center gap-1 transition active:scale-95 cursor-pointer text-[11px]"
-                title="ઓડિયો જાહેરાત સાંભળો"
+                title="ઓડિયો સાંભળો / Audio Announcement"
               >
                 <Volume2 className="w-3.5 h-3.5 text-[#FF9933]" />
-                <span>{isGu ? 'જાહેરાત' : 'घोषणा'}</span>
+                <span>{isGu ? 'જાહેરાત' : isMr ? 'घोषणा' : isHi ? 'घोषणा' : 'Audio'}</span>
               </button>
             </div>
           </div>
@@ -273,7 +282,9 @@ export function TokenTrackerModal({
             }}
             className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-[#003366] font-bold transition cursor-pointer flex items-center justify-center gap-1.5"
           >
-            <span>{isGu ? 'કચેરી રડારમાં લાઈવ જુઓ' : 'कचहरी रडार में लाइव देखें'}</span>
+            <span>
+              {isGu ? 'કચેરી રડારમાં લાઈવ જુઓ' : isMr ? 'कचेरी रडारमध्ये थेट पहा' : isHi ? 'कचहरी रडार में लाइव देखें' : 'View in Queue Radar'}
+            </span>
             <ArrowRight className="w-3 h-3" />
           </button>
 
@@ -286,7 +297,9 @@ export function TokenTrackerModal({
             className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white font-bold transition cursor-pointer flex items-center justify-center gap-1.5"
           >
             <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
-            <span>{isGu ? 'નવો સ્લોટ બુક કરો' : 'नया स्लॉट बुक करें'}</span>
+            <span>
+              {isGu ? 'નવો સ્લોટ બુક કરો' : isMr ? 'नवीन स्लॉट बुक करा' : isHi ? 'नया स्लॉट बुक करें' : 'Book New Slot'}
+            </span>
           </button>
         </div>
       </div>
