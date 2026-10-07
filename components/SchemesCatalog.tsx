@@ -111,6 +111,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
     <div className="space-y-6">
       
       {/* Header & Title */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-start gap-3.5">
           <GovLogo className="w-11 h-11 sm:w-12 sm:h-12 shrink-0 drop-shadow-md mt-1" />
           <div>
