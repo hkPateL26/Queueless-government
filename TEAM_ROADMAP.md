@@ -87,7 +87,18 @@ Queueless-government/
   - **રિશિડ્યુલ & કેન્સલેશન (Rescheduling & Cancellation):** નવો સ્લોટ પસંદ કરવાની સુવિધા અને સ્લોટ મુક્ત કરવા માટે રદ કરવાનો વિકલ્પ.
   - **મલ્ટી-ચેનલ ટચપોઇન્ટ્સ (Multi-Channel Touchpoints):** SMS Notification (Demo), WhatsApp Service Assistant (Demo), Add to Google Calendar લિંક, Gate Security Kiosk સિમ્યુલેશન.
   - **ડિફેન્સિબલ પિચ ધ્યેય (Pitch Claims):** *"Reduces the need for early-morning physical queuing by allowing citizens to reserve available service capacity in advance, with configurable capacity limits helping administrations manage expected footfall."*
-- [x] **Phase 4:** ૧૦૦% મોબાઈલ રિસ્પોન્સિવ (૩૨૦px iPhone SE/Android ફિટ, ઝીરો વર્ડ કટ), બુલેટપ્રૂફ બેકગ્રાઉન્ડ બોડી સ્ક્રોલ લોક, આઉટસાઇડ ટેપ ક્લોઝ, નેટિવ બોટમ નેવિગેશન બાર, 48px ટચ ટાર્ગેટ્સ.
+- [x] **Phase 4: Mobile-First Experience, Touch Accessibility & PWA:**
+  - **આર્કિટેક્ચર & ડિઝાઇન સિદ્ધાંતો (Architecture & Design Principles):**
+    - Viewport Target: **320px+ Mobile-First Responsive Layout** (ગ્રેસફુલી સ્કેલિંગ 320px, 360px, 390px થી ડેસ્કટોપ સુધી).
+    - Navigation Layer: **Mobile Bottom Navigation + Safe-Area Support** (PWA/વેબ નેવિગેશન કમ્પોનન્ટ with `env(safe-area-inset-bottom)`).
+    - Touch Target Standard: **Minimum ~44px Touch Targets for Primary Controls** (પ્રાથમિક ઇન્ટરેક્ટિવ બટનો અને કંટ્રોલ્સ).
+    - Accessibility Standard: **Gujarati-First Labels, High Contrast, Clear Focus States & Optional Haptic Feedback**.
+  - **રિસ્પોન્સિવ લેઆઉટ વેલિડેશન (Responsive Layout Validation):** 320px, 360px, 390px કટોકટી સ્ક્રીન ટેસ્ટિંગ, ફ્લેક્સિબલ કન્ટેનર્સ (`min-width: 0`), ટેક્સ્ટ રેપિંગ, નો-ફિક્સ્ડ મોબાઇલ વિડ્થ, અનિચ્છનીય હોરિઝોન્ટલ સ્ક્રોલ અને ક્લિપિંગ અટકાવેલ.
+  - **રિસ્પોન્સિવ ટાઇપોગ્રાફી & હાઇ કોન્ટ્રાસ્ટ:** ટોકન નંબર (`A-42`), સ્ટેટસ, કાઉન્ટર, વેઇટ ટાઇમ, તારીખ માત્ર રંગ પર આધાર રાખ્યા વગર આઇકોન + ગુજરાતી ટેક્સ્ટ સાથે મોટા, સ્પષ્ટ ફોન્ટમાં દર્શાવેલ.
+  - **મોબાઇલ બોટમ નેવિગેશન બાર (Mobile Bottom Navigation Bar):** ૪ નેવિગેશન આઇટમ્સ (🏠 હોમ, 📑 ૩૯ યોજનાઓ, 🎟️ ટોકન પાસ, 📡 કચેરી રડાર). જો સક્રિય ટોકન ન હોય તો ન્યુટ્રલ `ટોકન પાસ` (No active token), અને જો સક્રિય ટોકન હોય તો કેસરી હાઇલાઇટ સાથે ટોકન નંબર (દા.ત. `A-42`).
+  - **સેફ-એરિયા & ઓવરલેપ સુરક્ષા (Safe-Area Support):** `env(safe-area-inset-bottom)` પેડિંગ, બોડી કન્ટેન્ટ માટે પર્યાપ્ત બોટમ પેડિંગ (`pb-24`) જેથી બટનો, કાર્ડ્સ કે મોડલ્સ ઓવરલેપ ન થાય; ફ્લોટિંગ PWA બેનર બોટમ નેવની ઉપર (`bottom-[56px] md:bottom-0`).
+  - **કીબોર્ડ & ફોકસ સુલભતા (Keyboard & Focus Accessibility):** વિઝિબલ કીબોર્ડ ફોકસ રિંગ્સ (`*:focus-visible`), લોજિકલ ટેબ ઓર્ડર, આઇકોન કંટ્રોલ્સ માટે `aria-label`, ડેમો મેનૂ માટે `aria-expanded`, કતાર અપડેટ્સ માટે સ્ક્રીન રીડર `aria-live="polite"` રીજન, અને એસ્કેપ કી (`Escape`) દ્વારા ડાયલોગ/ડ્રોઅર ક્લોઝ.
+  - **વૈકલ્પિક હેપ્ટિક ફીડબેક (Optional Haptic Feedback):** સપોર્ટેડ ડિવાઇસીસ/બ્રાઉઝર્સ પર Web Vibration API (`tap`, `success`, `warning`, `error`) દ્વારા વૈકલ્પિક સ્પર્શ ખાતરી, જ્યારે તમામ ક્રિયાઓ માટે વિઝ્યુઅલ અને સાઉન્ડ ચાઇમ હંમેશા પ્રાથમિક સુનિશ્ચિત.
 - [x] **Phase 5A:** કાઉન્ટર ઓપરેટર ડેસ્ક (`app/admin/counter/page.tsx`), GSWAN ઓફિસર HUD, વરિષ્ઠ નાગરિક (#P-XX) અગ્રતા સોર્ટિંગ, AI OCR દસ્તાવેજ નિરીક્ષક, GRTSA ૧૫m કાનૂની SLA ક્લોક, કાઉન્ટર ટ્રાન્સફર, લંચ રિસેસ ટોગલ.
 - [x] **Phase 5B:** કલેક્ટર & DDO કમાન્ડ સેન્ટર (`app/admin/collector/page.tsx`), ગુજરાત ૩૩ જિલ્લા લાઈવ ભીડ હીટમેપ, GRTSA SLA વોચડોગ, પીક અવર્સ ચાર્ટ, દૈનિક MIS રિપોર્ટ એક્સપોર્ટ.
 - [x] **Phase 5C:** સીમલેસ ક્રોસ-નેવિગેશન લિંક્સ (Header, Demo menu, Footer).

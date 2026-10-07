@@ -308,7 +308,10 @@ export default function Home() {
                   triggerHaptic('tap');
                   setDemoMenuOpen(!demoMenuOpen);
                 }}
-                className="bg-[#FF9933] hover:bg-amber-600 text-slate-900 font-extrabold px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-[11px] shadow-sm flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                aria-expanded={demoMenuOpen}
+                aria-haspopup="true"
+                aria-label="Toggle One-Click Demo Personas Menu"
+                className="bg-[#FF9933] hover:bg-amber-600 text-slate-900 font-extrabold px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-[11px] shadow-sm flex items-center gap-1 transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-white"
                 title="One-Click Demo Personas for Evaluation"
               >
                 <span>⚡ Demo Personas</span>
@@ -1419,17 +1422,26 @@ export default function Home() {
       {/* PWA 1-CLICK INSTALL BANNER */}
       <PwaInstallBanner />
 
-      {/* NATIVE MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] px-3 flex items-center justify-around shadow-lg">
+      {/* SCREEN READER ACCESSIBLE LIVE REGION FOR QUEUE UPDATES */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {activeBooking ? `ટોકન નંબર ${activeBooking.tokenNumber} સક્રિય છે. કાઉન્ટર ${activeBooking.counterNumber} પર પ્રતીક્ષારત.` : ''}
+      </div>
+
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      <nav 
+        aria-label="Mobile Bottom Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3 flex items-center justify-around shadow-lg"
+      >
         <button
           onClick={() => {
             triggerHaptic('tap');
             setView('landing');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 ${
-            view === 'landing' ? 'text-[#005A9C]' : 'text-slate-500'
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+            view === 'landing' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
           }`}
+          aria-label="Home / હોમ"
         >
           <HomeIcon className="w-4 h-4" />
           <span>હોમ</span>
@@ -1441,9 +1453,10 @@ export default function Home() {
             setView('services');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 ${
-            view === 'services' ? 'text-[#005A9C]' : 'text-slate-500'
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+            view === 'services' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
           }`}
+          aria-label="39 Services / ૩૯ યોજનાઓ"
         >
           <Layers className="w-4 h-4" />
           <span>૩૯ યોજના</span>
@@ -1461,12 +1474,17 @@ export default function Home() {
               setAuthModalOpen(true);
             }
           }}
-          className="flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 text-[#FF9933]"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+            activeBooking ? 'text-[#FF9933]' : 'text-slate-500 hover:text-slate-700'
+          }`}
+          aria-label={activeBooking ? `ટોકન પાસ ${activeBooking.tokenNumber}` : 'ટોકન પાસ (કોઈ સક્રિય ટોકન નથી)'}
         >
-          <div className="w-8 h-8 -mt-3.5 rounded-full bg-[#003366] text-[#FF9933] flex items-center justify-center border-2 border-white shadow-md">
+          <div className={`w-8 h-8 -mt-3.5 rounded-full flex items-center justify-center border-2 border-white shadow-md transition ${
+            activeBooking ? 'bg-[#003366] text-[#FF9933]' : 'bg-slate-200 text-slate-600'
+          }`}>
             <Ticket className="w-4 h-4" />
           </div>
-          <span>ટોકન પાસ</span>
+          <span>{activeBooking ? activeBooking.tokenNumber : 'ટોકન પાસ'}</span>
         </button>
 
         <button
@@ -1475,9 +1493,10 @@ export default function Home() {
             setView('dashboard');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 ${
-            view === 'dashboard' ? 'text-[#005A9C]' : 'text-slate-500'
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+            view === 'dashboard' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
           }`}
+          aria-label="Queue Radar / કચેરી રડાર"
         >
           <Radio className="w-4 h-4" />
           <span>કચેરી રડાર</span>

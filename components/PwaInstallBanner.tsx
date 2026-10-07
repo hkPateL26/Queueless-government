@@ -10,9 +10,12 @@ export const PwaInstallBanner: React.FC = () => {
   if (dismissed) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 bg-white border-t-2 border-[#FF9933] shadow-2xl p-4 sm:p-5 z-40 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <aside 
+      aria-label="PWA Installation Banner"
+      className="fixed bottom-[56px] md:bottom-0 inset-x-0 bg-white border-t-2 border-[#FF9933] shadow-2xl p-3.5 sm:p-5 z-40 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+    >
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-2xl bg-[#003366] text-white flex items-center justify-center font-black text-lg shadow-md shrink-0 border border-[#FF9933]">
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#003366] text-white flex items-center justify-center font-black text-lg shadow-md shrink-0 border border-[#FF9933]">
           Q
         </div>
         <div>
@@ -31,7 +34,8 @@ export const PwaInstallBanner: React.FC = () => {
             triggerHaptic('tap');
             setDismissed(true);
           }}
-          className="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition"
+          className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition min-h-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#005A9C]"
+          aria-label="Dismiss install banner / પછીથી"
         >
           પછીથી (Later)
         </button>
@@ -41,12 +45,13 @@ export const PwaInstallBanner: React.FC = () => {
             alert('🎉 QueueLess Kacheri PWA installed! Offline cache activated.');
             setDismissed(true);
           }}
-          className="flex-1 sm:flex-none px-5 py-2 rounded-xl text-xs font-extrabold bg-[#FF9933] hover:bg-amber-600 text-slate-900 shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap"
+          className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs font-extrabold bg-[#FF9933] hover:bg-amber-600 text-slate-900 shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[44px] focus-visible:ring-2 focus-visible:ring-[#003366]"
+          aria-label="Install App / ઇન્સ્ટોલ કરો"
         >
           <Download className="w-3.5 h-3.5" />
           <span>ઇન્સ્ટોલ કરો (Install)</span>
         </button>
       </div>
-    </div>
+    </aside>
   );
 };
