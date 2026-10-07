@@ -1,6 +1,6 @@
 # 🏛️ QueueLess Kacheri (NagrikSeva AI) – Team Development Roadmap & Architecture
 
-> **Official Gujarat Government DPI Hackathon Project**  
+> **Gujarat Government–Inspired Design System & Citizen Service Framework**  
 > **Repository:** [hkPatel26/Queueless-government](https://github.com/hkPatel26/Queueless-government)  
 > **Target Deployments:** 33 Districts, 250+ Talukas, 18,000+ Villages across Gujarat  
 
@@ -50,8 +50,8 @@ Queueless-government/
     ├── schemes-data.ts           <-- ૩૯ સત્તાવાર ગુજરાત સરકારી યોજનાઓની વિગતો
     ├── ocr-validator.ts          <-- AI દસ્તાવેજ કાનૂની નિયમ ચકાસણી એન્જિન
     ├── realtime-bus.ts           <-- User & Admin વચ્ચેનું લાઈવ સિંક્રોનાઇઝેશન એન્જિન
-    ├── voice.ts                  <-- ગુજરાતી/હિન્દી/અંગ્રેજી TTS ઓડિયો ગાઈડન્સ
-    └── haptics.ts                <-- મોબાઈલ વાઇબ્રેશન ફીડબેક સિસ્ટમ
+    ├── voice.ts                  <-- ગુજરાતી Text-to-Speech (TTS via Web Speech API gu-IN)
+    └── haptics.ts                <-- Mobile Haptic Feedback સિસ્ટમ (Web Vibration API)
 ```
 
 ---
@@ -59,7 +59,12 @@ Queueless-government/
 ## 🚀 ૩. તબક્કાવાર રોડમેપ (Phase-wise Roadmap)
 
 ### ✅ Phase 1 થી 6 (સંપૂર્ણ પૂર્ણ થયેલ તબક્કા - 100% Completed)
-- [x] **Phase 1:** Next.js 14 App Router, લાઇવ કતાર રડાર, કાઉન્ટર ૧-૬ ટીવી સ્ક્રીન, Mohanbhai & Mamlatdar 1-Click ડેમો, ગુજરાતી વોઇસ & વાઇબ્રેશન.
+- [x] **Phase 1: Foundation & Citizen Experience:**
+  - **Gujarat Government–Inspired Design System:** Government-Service Visual Palette (`#003366` Navy Blue, `#005A9C` Royal Blue, `#FF9933` Saffron, `#138808` India Green). Designed to fit naturally into existing government-service environments and adaptable for government infrastructure.
+  - **Live Queue Visualization / Kacheri Radar:** Phase 1 queue display focus (waiting time, crowd gauge, capacity).
+  - **6 Detailed Counter Cards:** Counter 1 to 6 displaying Counter #, Department name, Officer name, Status with Color + Icon + Text (`🟢 OPEN`, `🟡 BUSY`, `🟡 LUNCH BREAK` with resume time), NOW SERVING, NEXT token, Waiting count, and Estimated wait time.
+  - **Gujarati-First Accessibility:** Multi-modal notification channels (Visual `🟢 NOW SERVING`, Web Audio `🔔 Notification Chime`, Voice `🗣️ Gujarati Text-to-Speech (TTS)` via `gu-IN`, Haptic `📳 Mobile Haptic Feedback` with tap 15ms / success 40ms / warning 80ms / error [50,100,50]).
+  - **One-Click Demo Personas:** Evaluation test personas (Mohanbhai Patel `#A-42`, Officer Counter 1, Reset Session) for instant evaluation without entering OTPs or phone numbers.
 - [x] **Phase 2:** ૩૯ ગુજરાત યોજનાઓ, AI OCR નિયમ એન્જિન (૨૦૨૬: <૨૦૨૩ એક્સપાયરી ચેક), CamScanner & Google Drive/Folder અપલોડ, 2FA સિવિક લોગિન.
 - [x] **Phase 3:** ૩૩ જિલ્લા & તાલુકા જન સેવા કેન્દ્ર ઓટો-કાઉન્ટર રાઉટીંગ, સરકારી કેપ્ડ સ્લોટ એન્જિન (૫ ટોકન/કલાક), લંચ રિસેસ & રજાઓ બ્લોકર, સત્તાવાર ડિજિટલ પાસ (QR), "+૩ સ્લોટ / ૩૬ મિનિટ મોડું થાય છે" શિફ્ટર, ઑફલાઇન LocalStorage કૅશ, વોટ્સએપ બોટ સિમ્યુલેટર.
 - [x] **Phase 4:** ૧૦૦% મોબાઈલ રિસ્પોન્સિવ (૩૨૦px iPhone SE/Android ફિટ, ઝીરો વર્ડ કટ), બુલેટપ્રૂફ બેકગ્રાઉન્ડ બોડી સ્ક્રોલ લોક, આઉટસાઇડ ટેપ ક્લોઝ, નેટિવ બોટમ નેવિગેશન બાર, 48px ટચ ટાર્ગેટ્સ.
@@ -71,8 +76,8 @@ Queueless-government/
   - **Local Sync Layer:** `BroadcastChannel API` દ્વારા એક જ ડિવાઇસ પર બ્રાઉઝર ટેબ્સ વચ્ચે ફાસ્ટ લોકલ સિંક.
   - **Fallback Layer:** `localStorage` `StorageEvent` ફોલબેક.
   - **Audio Engine:** `Web Audio API` દ્વારા સિન્થેસાઇઝ્ડ બે-ટોન નોટિફિકેશન ચાઇમ (C5 523.25Hz → E5 659.25Hz).
-  - **Voice Engine:** `Web Speech API` દ્વારા ગુજરાતી વોઇસ ઘોષણા.
-  - **Haptic Engine:** સપોર્ટેડ ડિવાઇસ પર `navigator.vibrate([100, 50, 100])` હેપ્ટિક પલ્સ.
+  - **Voice Engine:** `Web Speech API` દ્વારા ગુજરાતી Text-to-Speech (TTS gu-IN) ઘોષણા.
+  - **Haptic Engine:** `Mobile Haptic Feedback` સપોર્ટેડ ડિવાઇસ પર Web Vibration API (tap 15ms, success 40ms, warning 80ms, error [50, 100, 50]).
 
 ---
 

@@ -326,7 +326,7 @@ export default function CounterOperatorDesk() {
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-[#1F2937] flex flex-col">
-      {/* 🏛️ OFFICIAL GSWAN HEADER */}
+      {/* 🏛️ COUNTER OPERATOR CONSOLE HEADER */}
       <header className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white border-b-2 border-[#FF9933] shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -346,7 +346,7 @@ export default function CounterOperatorDesk() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black tracking-widest text-[#FF9933] uppercase bg-amber-950/40 border border-amber-800/40 px-1.5 py-0.5 rounded">
-                  GSWAN • સત્તાવાર અધિકારી ડેસ્ક
+                  જન સેવા અધિકારી ડેસ્ક • સરકારી સેવા ઇન્ટરફેસ
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-[10px] text-emerald-300 font-bold hidden md:inline">લાઇવ નેટવર્ક કનેક્ટેડ</span>
@@ -823,7 +823,7 @@ export default function CounterOperatorDesk() {
             </div>
 
             <div className="bg-blue-50 p-3 rounded-xl border border-blue-200 text-[11px] text-[#003366]">
-              <strong>મામલતદાર ઓથોરાઈઝેશન:</strong> આ દસ્તાવેજો GSWAN AI OCR સિક્યોર સર્વર દ્વારા પ્રમાણિત છે. અસલ સહી-સિક્કા વગર ડિજિટલ મંજૂરી માન્ય ગણાશે.
+              <strong>મામલતદાર ઓથોરાઈઝેશન:</strong> આ દસ્તાવેજો AI OCR સિક્યોર વેરિફિકેશન સિસ્ટમ દ્વારા ચકાસાયેલ છે. અસલ સહી-સિક્કા વગર ડિજિટલ મંજૂરી માન્ય ગણાશે.
             </div>
 
             <button

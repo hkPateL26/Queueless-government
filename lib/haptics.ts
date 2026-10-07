@@ -1,6 +1,7 @@
 /**
- * Global Haptic Vibration Utility (lib/haptics.ts)
- * Directly controls mobile vibration motors via Web Vibration API
+ * Mobile Haptic Feedback Utility (lib/haptics.ts)
+ * Provides tactile feedback via Web Vibration API on supported mobile devices.
+ * Note: Vibration feedback is available on supported browsers and hardware only.
  */
 export type HapticType = 'tap' | 'success' | 'warning' | 'error';
 
@@ -12,17 +13,17 @@ export const triggerHaptic = (type: HapticType = 'tap') => {
           navigator.vibrate(15);
           break;
         case 'success':
-          navigator.vibrate([20, 40, 20]);
+          navigator.vibrate(40);
           break;
         case 'warning':
-          navigator.vibrate([40, 60, 40]);
+          navigator.vibrate(80);
           break;
         case 'error':
-          navigator.vibrate([100, 50, 100]);
+          navigator.vibrate([50, 100, 50]);
           break;
       }
     } catch {
-      // Haptics suppressed by device policy
+      // Haptics suppressed or unsupported by device policy
     }
   }
 };

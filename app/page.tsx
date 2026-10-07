@@ -269,17 +269,17 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] pb-20 md:pb-0">
-      {/* TOP GOV BAR */}
+      {/* TOP GOV-SERVICE BAR (Government-Service Visual Palette: Navy Blue #003366, Saffron #FF9933, India Green #138808) */}
       <header className="bg-[#003366] text-white text-xs border-b border-blue-900 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-9 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <span className="flex items-center gap-1 font-semibold text-white text-[10px] sm:text-xs truncate">
               <span className="w-2 h-2 rounded-full bg-[#138808] animate-pulse shrink-0" />
-              <span className="hidden sm:inline">GSDC Gandhinagar • Live Synced</span>
-              <span className="sm:hidden">GSDC • Live</span>
+              <span className="hidden sm:inline">Citizen Service Network • Live Status</span>
+              <span className="sm:hidden">Network • Live</span>
             </span>
             <span className="text-blue-300/40 hidden md:inline">|</span>
-            <span className="text-blue-200 hidden md:inline font-mono text-[11px]">GRTSA 2013 Certified • 42ms</span>
+            <span className="text-blue-200 hidden md:inline font-mono text-[11px]">GRTSA Public Service Framework</span>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
@@ -301,7 +301,7 @@ export default function Home() {
               ))}
             </div>
 
-            {/* ⚡ 1-CLICK DEMO FILL */}
+            {/* ⚡ ONE-CLICK DEMO PERSONAS */}
             <div className="relative">
               <button
                 onClick={() => {
@@ -309,44 +309,51 @@ export default function Home() {
                   setDemoMenuOpen(!demoMenuOpen);
                 }}
                 className="bg-[#FF9933] hover:bg-amber-600 text-slate-900 font-extrabold px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-[11px] shadow-sm flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                title="One-Click Demo Personas for Evaluation"
               >
-                <span>⚡ Demo</span>
+                <span>⚡ Demo Personas</span>
                 <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </button>
 
               {demoMenuOpen && (
-                <div className="absolute right-0 mt-1 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50 text-[#1F2937] text-left">
+                <div className="absolute right-0 mt-1 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 text-[#1F2937] text-left">
                   <div className="px-3 py-1 text-[10px] font-bold tracking-wider text-[#003366] uppercase">
-                    ઝડપી લૉગિન (Quick Login)
+                    ઝડપી ડેમો પ્રોફાઇલ્સ (One-Click Demo Personas)
                   </div>
+                  <p className="px-3 pb-1 text-[10px] text-slate-500 leading-tight">
+                    For jury & test evaluation without manual OTPs or phone entry.
+                  </p>
                   <button
                     onClick={() => loginAsDemo('farmer')}
                     className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-amber-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C]"
                   >
-                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-[#FF9933] flex items-center justify-center text-xs">👤</span>
+                    <span className="w-7 h-7 rounded-lg bg-amber-100 text-[#FF9933] flex items-center justify-center text-xs shrink-0 font-bold">👤</span>
                     <div>
-                      <p className="font-bold leading-tight">નાગરિક લૉગિન (Nagrik Login)</p>
-                      <p className="text-[10px] text-slate-400">Mohanbhai Patel • Rajkot Rural</p>
+                      <p className="font-bold leading-tight">નાગરિક ડેમો પ્રોફાઇલ (Citizen Persona)</p>
+                      <p className="text-[10px] text-slate-500">Mohanbhai Patel • Token #A-42 • Rajkot Rural</p>
                     </div>
                   </button>
                   <Link
                     href="/admin/counter"
                     className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-blue-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C] border-t border-slate-100"
                   >
-                    <span className="w-6 h-6 rounded-lg bg-blue-100 text-[#005A9C] flex items-center justify-center text-xs">🏛️</span>
+                    <span className="w-7 h-7 rounded-lg bg-blue-100 text-[#005A9C] flex items-center justify-center text-xs shrink-0 font-bold">🏛️</span>
                     <div>
-                      <p className="font-bold leading-tight text-[#003366]">અધિકારી ડેસ્ક (Officer Console ➔)</p>
-                      <p className="text-[10px] text-slate-400">GSWAN Live Operator Screen</p>
+                      <p className="font-bold leading-tight text-[#003366]">અધિકારી ડેસ્ક (Officer Console Persona ➔)</p>
+                      <p className="text-[10px] text-slate-500">Counter 1 Operator • Gondal Jan Seva Kendra</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5 leading-tight">
+                        Designed to fit naturally into existing government-service environments.
+                      </p>
                     </div>
                   </Link>
                   <Link
                     href="/admin/collector"
                     className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-amber-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C] border-t border-slate-100"
                   >
-                    <span className="w-6 h-6 rounded-lg bg-amber-100 text-[#FF9933] flex items-center justify-center text-xs">👑</span>
+                    <span className="w-7 h-7 rounded-lg bg-amber-100 text-[#FF9933] flex items-center justify-center text-xs shrink-0 font-bold">👑</span>
                     <div>
                       <p className="font-bold leading-tight text-[#003366]">કલેક્ટર કમાન્ડ સેન્ટર ➔</p>
-                      <p className="text-[10px] text-slate-400">33 Districts Heatmap & SLA Watchdog</p>
+                      <p className="text-[10px] text-slate-500">33 Districts Heatmap & SLA Watchdog</p>
                     </div>
                   </Link>
                   <div className="border-t border-slate-100 my-1" />
@@ -386,7 +393,7 @@ export default function Home() {
               <span>Services (39 Yojanas)</span>
               <span className="text-[9px] bg-[#FF9933] text-slate-900 px-1.5 rounded-full font-bold">New</span>
             </button>
-            <button onClick={() => setView('dashboard')} className={view === 'dashboard' ? 'text-[#005A9C]' : 'hover:text-[#005A9C]'}>Offices Radar</button>
+            <button onClick={() => setView('dashboard')} className={view === 'dashboard' ? 'text-[#005A9C]' : 'hover:text-[#005A9C]'}>Queue Radar (કચેરી રડાર)</button>
             <button onClick={() => loginAsDemo('farmer')} className="hover:text-[#005A9C]">Track Token</button>
             <button onClick={() => triggerHaptic('tap')} className="text-slate-400 hover:text-slate-600">Help & Support</button>
           </div>
@@ -468,7 +475,7 @@ export default function Home() {
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#003366] text-xs font-semibold">
                 <ShieldCheck className="w-4 h-4 text-[#005A9C]" />
-                <span>Digital India • Trusted by Gujarat Govt Departments</span>
+                <span>Gujarat Government–Inspired Design System • Public Service Framework</span>
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#138808]" />
               </div>
 
@@ -570,7 +577,7 @@ export default function Home() {
                     onClick={() => loginAsDemo('farmer')}
                     className="w-full mt-4 bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5"
                   >
-                    <span>View Live Queue Radar</span>
+                    <span>કચેરી રડાર જુઓ (Live Queue Visualization)</span>
                     <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -641,13 +648,13 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-white text-sm">QueueLess Kacheri</h3>
-                  <p className="text-[10px] text-blue-200">GovTech | Digital Gujarat</p>
+                  <p className="text-[10px] text-blue-200">GovTech | Citizen Service Portal</p>
                 </div>
               </div>
 
               <nav className="p-3 space-y-1 text-xs font-bold">
                 <button className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl bg-[#005A9C] text-white">
-                  <span>Dashboard</span>
+                  <span>Dashboard (ડેશબોર્ડ)</span>
                 </button>
                 <button
                   onClick={() => {
@@ -673,8 +680,8 @@ export default function Home() {
                 🇮🇳
               </span>
               <div className="text-[10px] leading-tight">
-                <p className="font-bold text-white">Digital Gujarat</p>
-                <p className="text-blue-200">NIC & GSDC Standard</p>
+                <p className="font-bold text-white">Citizen Portal</p>
+                <p className="text-blue-200">Gov-Inspired Design System</p>
               </div>
             </div>
           </aside>
@@ -773,10 +780,11 @@ export default function Home() {
                   <div className="mt-5 grid grid-cols-2 gap-2">
                     <button
                       onClick={handleRunningLate}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold py-2 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition"
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold py-2.5 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition min-h-[44px]"
+                      title="Request a 3-slot / 36-minute delay shift"
                     >
                       <RotateCcw className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">મોડું થાય છે (+૩)</span>
+                      <span className="truncate">મોડું થાય છે (+૩ સ્લોટ)</span>
                     </button>
                     <button
                       onClick={() => {
@@ -784,10 +792,11 @@ export default function Home() {
                         const tokenStr = activeBooking ? activeBooking.tokenNumber : '#A-42';
                         speakGuidance(`નમસ્તે ${currentUser?.name || 'મોહનભાઈ'}, તમારો ટોકન નંબર ${tokenStr} સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`);
                       }}
-                      className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition"
+                      className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2.5 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition min-h-[44px]"
+                      title="Gujarati Text-to-Speech (TTS) Announcement via Web Speech API"
                     >
                       <Volume2 className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">સાંભળો (Audio)</span>
+                      <span className="truncate">સાંભળો (Gujarati TTS)</span>
                     </button>
                   </div>
 
@@ -807,10 +816,58 @@ export default function Home() {
                   )}
 
                   <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
-                    <span className="text-slate-500">Your Queue Position</span>
-                    <span className="text-xl font-black text-[#003366] bg-[#F5F7FA] px-3 py-1 rounded-xl">
+                    <span className="text-slate-500">Your Queue Position (કતાર સ્થાન)</span>
+                    <span className="text-xl font-black text-[#003366] bg-[#F5F7FA] px-3 py-1 rounded-xl font-mono">
                       {lateShiftMinutes > 0 ? '17' : '14'}
                     </span>
+                  </div>
+                </div>
+
+                {/* ♿ MULTI-MODAL ACCESSIBILITY CHANNELS (PHASE 1 INCLUSIVE DESIGN) */}
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">♿</span>
+                      <h4 className="text-xs font-black text-[#003366] uppercase tracking-wide">
+                        સુલભતા પ્રણાલી (Multi-Modal Accessibility)
+                      </h4>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                      Elderly & Rural
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
+                    Designed for elderly citizens, low literacy, and noisy environments with 4 synchronized notification channels:
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="bg-emerald-50/70 border border-emerald-200 p-2 rounded-xl flex items-center gap-1.5">
+                      <span className="text-sm">🟢</span>
+                      <div>
+                        <p className="text-[9px] font-bold text-emerald-800 uppercase">Visual</p>
+                        <p className="text-[10px] font-black text-slate-800 leading-tight">NOW SERVING</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 border border-blue-200 p-2 rounded-xl flex items-center gap-1.5">
+                      <span className="text-sm">🔔</span>
+                      <div>
+                        <p className="text-[9px] font-bold text-[#005A9C] uppercase">Chime</p>
+                        <p className="text-[10px] font-black text-slate-800 leading-tight">Web Audio</p>
+                      </div>
+                    </div>
+                    <div className="bg-purple-50 border border-purple-200 p-2 rounded-xl flex items-center gap-1.5">
+                      <span className="text-sm">🗣️</span>
+                      <div>
+                        <p className="text-[9px] font-bold text-purple-800 uppercase">Voice (TTS)</p>
+                        <p className="text-[10px] font-black text-slate-800 leading-tight">ગુજરાતી અવાજ</p>
+                      </div>
+                    </div>
+                    <div className="bg-amber-50 border border-amber-200 p-2 rounded-xl flex items-center gap-1.5">
+                      <span className="text-sm">📳</span>
+                      <div>
+                        <p className="text-[9px] font-bold text-amber-800 uppercase">Haptic</p>
+                        <p className="text-[10px] font-black text-slate-800 leading-tight">Mobile Vibrate</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -818,35 +875,47 @@ export default function Home() {
               {/* Right Column: Live Queue Radar + Waiting Room Display */}
               <div className="lg:col-span-7 space-y-4 sm:space-y-6">
                 
-                {/* Radar Card */}
+                {/* 📡 PHASE 1: LIVE QUEUE VISUALIZATION / KACHERI RADAR */}
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <h3 className="text-base font-extrabold text-[#003366]">Live Queue Radar</h3>
-                      <p className="text-xs font-bold text-slate-500 mt-0.5 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-[#FF9933]" />
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base sm:text-lg font-black text-[#003366]">
+                          Live Queue Visualization / Kacheri Radar
+                        </h3>
+                        <span className="text-xs bg-amber-50 text-[#FF9933] font-bold px-2 py-0.5 rounded border border-amber-200">
+                          કચેરી રડાર
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-slate-500 mt-1 flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                         <span>
-                          Current Office: {activeBooking ? `${activeBooking.taluka.officeNameGu}, ${activeBooking.district.nameGu}` : 'Gondal Jan Seva Kendra, Rajkot'}
+                          Current Office: {activeBooking ? `${activeBooking.taluka.officeNameGu}, ${activeBooking.district.nameGu}` : 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી ગોંડલ, રાજકોટ'}
                         </span>
                       </p>
                     </div>
-                    <span className="text-[10px] font-bold bg-[#F5F7FA] text-slate-600 px-2 py-1 rounded-lg">Real-Time</span>
+                    <span className="text-[10px] font-bold bg-[#F5F7FA] text-[#003366] border border-slate-200 px-2.5 py-1 rounded-lg">
+                      Queue Display • Phase 1
+                    </span>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-center">
                     <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-4">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Live Waiting Time</p>
-                      <h4 className="text-4xl font-black text-[#138808] mt-1">18 mins</h4>
-                      <p className="text-xs text-slate-500 font-semibold mt-1">Est. Service Time: 12:15 PM</p>
-                      <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-[#005A9C] bg-blue-50 p-2 rounded-lg">
-                        <span>OSRM Route: 4.2 km (9 mins drive)</span>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Live Waiting Time (અંદાજિત સમય)</p>
+                      <h4 className="text-3xl sm:text-4xl font-black text-[#138808] mt-1">18 mins</h4>
+                      <p className="text-xs text-slate-600 font-semibold mt-1">Est. Service Time: 12:15 PM</p>
+                      <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-[#005A9C] bg-blue-50 p-2 rounded-lg border border-blue-100">
+                        <span>Route Buffer: 4.2 km (9 mins drive)</span>
                       </div>
                     </div>
 
                     <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
                       <div className="flex items-center justify-between w-full mb-1">
-                        <span className="text-xs font-bold text-slate-500">Crowd Gauge</span>
-                        <span className="text-[10px] font-black bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">BUSY</span>
+                        <span className="text-xs font-bold text-slate-500">Crowd Gauge (ભીડ સ્તર)</span>
+                        <span className="text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span>🟡</span>
+                          <span>BUSY (મધ્યમ)</span>
+                        </span>
                       </div>
 
                       <div className="relative w-48 h-24 overflow-hidden">
@@ -863,71 +932,326 @@ export default function Home() {
                         </svg>
                         <div className="absolute bottom-0 inset-x-0 flex flex-col items-center">
                           <span className="text-2xl font-black text-[#003366] leading-none">75%</span>
-                          <span className="text-[10px] font-bold text-slate-400 mt-0.5">Capacity</span>
+                          <span className="text-[10px] font-bold text-slate-400 mt-0.5">Capacity (ક્ષમતા)</span>
                         </div>
                       </div>
 
                       <div className="mt-2 text-[11px] font-bold text-slate-600">
-                        <span>16 Counters Active</span> • <span className="text-[#FF9933] font-bold">Waiters: 94</span>
+                        <span>6 Counters Active</span> • <span className="text-[#003366] font-bold">Total Waiting: 35</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Live TV Waiting Room Display */}
+                {/* 📺 WAITING HALL DISPLAY & 6 DETAILED COUNTER CARDS */}
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
-                      <h4 className="text-sm font-extrabold text-[#003366]">Live TV Waiting Room Display</h4>
-                      <p className="text-[11px] text-slate-400 font-medium">Gondal Jan Seva Kendra • Real-time update: 10:55 AM</p>
+                      <h4 className="text-base font-black text-[#003366] flex items-center gap-2">
+                        <span>🏛️ Live Waiting Hall Display</span>
+                        <span className="text-xs bg-blue-50 text-[#005A9C] px-2 py-0.5 rounded-md font-bold">કચેરી પ્રતીક્ષા કક્ષ</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                        Gondal Jan Seva Kendra • 6 Counter Queue Overview (કાઉન્ટર ૧ થી ૬ વિગતવાર સ્થિતિ)
+                      </p>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-emerald-50 text-[#138808] border border-emerald-200 px-3 py-1 rounded-full text-xs font-black">
-                      <span className="w-2 h-2 rounded-full bg-[#138808] animate-ping" />
-                      <span>NOW SERVING</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                    <div className="border-2 border-[#138808]/70 bg-emerald-50/40 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 1</p>
-                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#A-40</p>
-                      <p className="text-[9px] sm:text-[10px] text-[#138808] font-bold mt-1">● Being Processed</p>
-                    </div>
-
-                    <div className="border-2 border-[#138808]/70 bg-emerald-50/40 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 2</p>
-                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#A-41</p>
-                      <p className="text-[9px] sm:text-[10px] text-[#138808] font-bold mt-1">● Being Processed</p>
-                    </div>
-
-                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 3</p>
-                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#A-39</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">● Signing Docs</p>
-                    </div>
-
-                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 4</p>
-                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#B-12</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">● Land 7/12</p>
-                    </div>
-
-                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 5</p>
-                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#B-14</p>
-                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">● Aadhaar Bio</p>
-                    </div>
-
-                    <div className="border-2 border-amber-300 bg-amber-50 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
-                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 6</p>
-                      <p className="text-base sm:text-lg font-black text-amber-900 mt-0.5">CALLING NEXT</p>
-                      <p className="text-[9px] sm:text-[10px] text-[#FF9933] font-bold mt-1">🔔 Ready for #A-42</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-bold border border-slate-200">
+                        🕒 10:55 AM Live
+                      </span>
                     </div>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-slate-100 flex justify-end">
-                    <button onClick={() => setView('landing')} className="text-xs font-bold text-[#005A9C] hover:text-[#003366]">
-                      ← Back to Home
+                  {/* 6 Rich Counter Cards Grid */}
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {/* COUNTER 1 */}
+                    <div className="rounded-2xl border-2 border-emerald-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
+                      <div>
+                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
+                          <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
+                            COUNTER 1 • કાઉન્ટર ૧
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-[#138808] border border-emerald-300">
+                            <span>🟢</span>
+                            <span>OPEN (ખુલ્લું છે)</span>
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-black text-slate-800 leading-tight">Social Welfare & Pension</p>
+                          <p className="text-[11px] font-bold text-[#005A9C] leading-tight mt-0.5">સમાજ કલ્યાણ & પેન્શન શાખા</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1">
+                            અધિકારી: <strong className="text-slate-800">શ્રી કે. એમ. ત્રિવેદી</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-3 grid grid-cols-2 gap-2">
+                        <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-emerald-800 tracking-wider">NOW SERVING</p>
+                          <p className="text-[8px] font-bold text-emerald-700">હાલનો વારો</p>
+                          <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">A-40</p>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">NEXT</p>
+                          <p className="text-[8px] font-bold text-slate-500">આગામી વારો</p>
+                          <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">A-41</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Users className="w-3 h-3 text-slate-400" />
+                          <span>8 people waiting</span>
+                        </span>
+                        <span className="text-[#005A9C] flex items-center gap-1 font-extrabold">
+                          <Clock className="w-3 h-3 text-[#FF9933]" />
+                          <span>Estimated wait: 24 min</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* COUNTER 2 */}
+                    <div className="rounded-2xl border-2 border-amber-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
+                      <div>
+                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
+                          <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
+                            COUNTER 2 • કાઉન્ટર ૨
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-300">
+                            <span>🟡</span>
+                            <span>BUSY (કાર્યરત)</span>
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-black text-slate-800 leading-tight">Certificates (Income/Caste)</p>
+                          <p className="text-[11px] font-bold text-[#005A9C] leading-tight mt-0.5">જન સેવા પ્રમાણપત્રો (આવક/જાતિ)</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1">
+                            અધિકારી: <strong className="text-slate-800">શ્રી પી. આર. જાડેજા</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-3 grid grid-cols-2 gap-2">
+                        <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-emerald-800 tracking-wider">NOW SERVING</p>
+                          <p className="text-[8px] font-bold text-emerald-700">હાલનો વારો</p>
+                          <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">A-41</p>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">NEXT</p>
+                          <p className="text-[8px] font-bold text-slate-500">આગામી વારો</p>
+                          <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">A-42</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Users className="w-3 h-3 text-slate-400" />
+                          <span>5 people waiting</span>
+                        </span>
+                        <span className="text-[#005A9C] flex items-center gap-1 font-extrabold">
+                          <Clock className="w-3 h-3 text-[#FF9933]" />
+                          <span>Estimated wait: 15 min</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* COUNTER 3: LUNCH BREAK */}
+                    <div className="rounded-2xl border-2 border-amber-300 bg-amber-50/40 p-3.5 flex flex-col justify-between shadow-xs">
+                      <div>
+                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-amber-200/60">
+                          <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
+                            COUNTER 3 • કાઉન્ટર ૩
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                            <span>🟡</span>
+                            <span>LUNCH BREAK</span>
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-black text-slate-800 leading-tight">Ration Card & Food Supply</p>
+                          <p className="text-[11px] font-bold text-[#005A9C] leading-tight mt-0.5">રેશનકાર્ડ & અન્ન પુરવઠા સેવા</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1">
+                            અધિકારી: <strong className="text-slate-800">શ્રી એસ. ટી. પટેલ</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-3 py-3 px-2.5 bg-amber-100/70 border border-amber-300 rounded-xl text-center">
+                        <div className="inline-flex items-center gap-1 text-xs font-black text-amber-900 mb-0.5">
+                          <span>🟡 LUNCH BREAK (ભોજન વિરામ)</span>
+                        </div>
+                        <p className="text-xs font-black text-slate-800">
+                          Resumes at 2:00 PM
+                        </p>
+                        <p className="text-[10px] font-bold text-amber-800">
+                          (બપોરે ૨:૦૦ વાગ્યે શરૂ થશે)
+                        </p>
+                        <div className="mt-2 pt-1 border-t border-amber-200/70 flex items-center justify-around text-[10px] font-bold text-slate-600">
+                          <span>આગામી: <strong className="font-mono text-slate-800">A-39</strong></span>
+                          <span>•</span>
+                          <span>3 people waiting</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-amber-200/60 flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Users className="w-3 h-3 text-slate-400" />
+                          <span>3 people waiting</span>
+                        </span>
+                        <span className="text-amber-800 flex items-center gap-1 font-extrabold">
+                          <Clock className="w-3 h-3 text-amber-600" />
+                          <span>Resumes in 25 min</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* COUNTER 4 */}
+                    <div className="rounded-2xl border-2 border-emerald-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
+                      <div>
+                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
+                          <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
+                            COUNTER 4 • કાઉન્ટર ૪
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-[#138808] border border-emerald-300">
+                            <span>🟢</span>
+                            <span>OPEN (ખુલ્લું છે)</span>
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-black text-slate-800 leading-tight">E-Dhara (7/12 & Land Records)</p>
+                          <p className="text-[11px] font-bold text-[#005A9C] leading-tight mt-0.5">ઈ-ધરા કેન્દ્ર (૭/૧૨ જમીન રેકોર્ડ)</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1">
+                            અધિકારી: <strong className="text-slate-800">શ્રી વી. કે. મહેતા</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-3 grid grid-cols-2 gap-2">
+                        <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-emerald-800 tracking-wider">NOW SERVING</p>
+                          <p className="text-[8px] font-bold text-emerald-700">હાલનો વારો</p>
+                          <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">B-12</p>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">NEXT</p>
+                          <p className="text-[8px] font-bold text-slate-500">આગામી વારો</p>
+                          <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">B-13</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Users className="w-3 h-3 text-slate-400" />
+                          <span>6 people waiting</span>
+                        </span>
+                        <span className="text-[#005A9C] flex items-center gap-1 font-extrabold">
+                          <Clock className="w-3 h-3 text-[#FF9933]" />
+                          <span>Estimated wait: 18 min</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* COUNTER 5 */}
+                    <div className="rounded-2xl border-2 border-amber-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
+                      <div>
+                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
+                          <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
+                            COUNTER 5 • કાઉન્ટર ૫
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-300">
+                            <span>🟡</span>
+                            <span>BUSY (કાર્યરત)</span>
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-black text-slate-800 leading-tight">Aadhaar Biometric Center</p>
+                          <p className="text-[11px] font-bold text-[#005A9C] leading-tight mt-0.5">આધાર કેન્દ્ર (બાયોમેટ્રિક અપડેટ)</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1">
+                            અધિકારી: <strong className="text-slate-800">શ્રી એ. જે. સોલંકી</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-3 grid grid-cols-2 gap-2">
+                        <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-emerald-800 tracking-wider">NOW SERVING</p>
+                          <p className="text-[8px] font-bold text-emerald-700">હાલનો વારો</p>
+                          <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">B-14</p>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">NEXT</p>
+                          <p className="text-[8px] font-bold text-slate-500">આગામી વારો</p>
+                          <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">B-15</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Users className="w-3 h-3 text-slate-400" />
+                          <span>11 people waiting</span>
+                        </span>
+                        <span className="text-[#005A9C] flex items-center gap-1 font-extrabold">
+                          <Clock className="w-3 h-3 text-[#FF9933]" />
+                          <span>Estimated wait: 32 min</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* COUNTER 6 */}
+                    <div className="rounded-2xl border-2 border-emerald-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
+                      <div>
+                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
+                          <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
+                            COUNTER 6 • કાઉન્ટર ૬
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-[#138808] border border-emerald-300">
+                            <span>🟢</span>
+                            <span>OPEN (ખુલ્લું છે)</span>
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-xs font-black text-slate-800 leading-tight">Housing Schemes & General Desk</p>
+                          <p className="text-[11px] font-bold text-[#005A9C] leading-tight mt-0.5">આવાસ યોજના & સામાન્ય પૂછપરછ</p>
+                          <p className="text-[10px] font-medium text-slate-500 mt-1">
+                            અધિકારી: <strong className="text-slate-800">શ્રી એન. બી. ચાવડા</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="my-3 grid grid-cols-2 gap-2">
+                        <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-emerald-800 tracking-wider">NOW SERVING</p>
+                          <p className="text-[8px] font-bold text-emerald-700">હાલનો વારો</p>
+                          <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">A-42</p>
+                        </div>
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">NEXT</p>
+                          <p className="text-[8px] font-bold text-slate-500">આગામી વારો</p>
+                          <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">A-43</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Users className="w-3 h-3 text-slate-400" />
+                          <span>2 people waiting</span>
+                        </span>
+                        <span className="text-[#005A9C] flex items-center gap-1 font-extrabold">
+                          <Clock className="w-3 h-3 text-[#FF9933]" />
+                          <span>Estimated wait: 6 min</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-[11px] text-slate-400 font-medium">
+                      Phase 1 Queue Visualization • Phase 6 provides Real-Time Synchronization across devices.
+                    </p>
+                    <button onClick={() => setView('landing')} className="text-xs font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1">
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>← Back to Home</span>
                     </button>
                   </div>
                 </div>
@@ -1156,9 +1480,9 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 text-center">
         <div className="max-w-7xl mx-auto px-4 space-y-2">
-          <p className="font-bold text-[#003366]">QueueLess / NagrikSeva AI © 2026 • Government of Gujarat DPI Initiative</p>
+          <p className="font-bold text-[#003366]">QueueLess / NagrikSeva AI © 2026 • Gujarat Government–Inspired Citizen Service Framework</p>
           <p className="text-[11px] text-slate-400">
-            GRTSA 2013 Compliant • Designed for 33 Districts, 250+ Talukas, and 18,000+ Villages
+            GRTSA Service Standard Compliant • Designed for 33 Districts, 250+ Talukas, and 18,000+ Villages
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
             <Link
