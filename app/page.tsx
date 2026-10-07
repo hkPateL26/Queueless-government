@@ -21,6 +21,7 @@ import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { CitizenHelpModal } from '@/components/CitizenHelpModal';
 import { TokenTrackerModal } from '@/components/TokenTrackerModal';
+import { GovHeroShowcase } from '@/components/GovHeroShowcase';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
 
@@ -768,202 +769,17 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: Floating Hero Card (Authenticated Citizen Token vs Guest Public Action Desk) */}
+            {/* Right: Gujarat Government Showcase (How-it-Works Video Guide + Citizen Testimonials + Action Desk) */}
             <div className="lg:col-span-5 flex justify-center w-full">
-              <div className="relative w-full max-w-[320px] sm:max-w-[380px]">
-                <div className="absolute -inset-3 bg-gradient-to-tr from-[#005A9C]/20 via-[#FF9933]/20 to-[#138808]/20 rounded-3xl blur-xl" />
-                
-                {currentUser || activeBooking ? (
-                  /* ================= AUTHENTICATED / ACTIVE BOOKING TOKEN PASS ================= */
-                  <div className="relative bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('virtualTokenTitle', lang)}</span>
-                        <span className="text-xs font-black text-[#003366]">{currentUser?.name || 'Mohanbhai Patel'}</span>
-                      </div>
-                      <span className="bg-emerald-50 text-[#138808] border border-emerald-200 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#138808] animate-ping" />
-                        {t('tokenActiveBadge', lang)}
-                      </span>
-                    </div>
-
-                    <div className="text-center py-2">
-                      <h2 className="text-5xl font-black text-[#003366] tracking-tight font-mono">
-                        {activeBooking?.tokenNumber || currentUser?.token || '#A-42'}
-                      </h2>
-                      <p className="text-xs font-bold text-slate-600 mt-1">
-                        {activeBooking ? `${activeBooking.taluka.nameGu} કચેરી • કાઉન્ટર ${activeBooking.counterNumber}` : currentUser?.area || t('tokenCenterDefault', lang)}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-center justify-between">
-                      <div>
-                        <p className="text-[11px] text-amber-800 font-semibold">{t('estimatedWaitLabel', lang)}</p>
-                        <p className="text-base font-black text-amber-950">
-                          {activeBooking ? `${activeBooking.slot.timeRange} (સમય સ્લોટ)` : t('estimatedWaitVal', lang)}
-                        </p>
-                      </div>
-                      <div className="w-9 h-9 rounded-xl bg-amber-100 text-[#FF9933] flex items-center justify-center">
-                        <Clock className="w-4 h-4" />
-                      </div>
-                    </div>
-
-                    <div className="mt-5 flex flex-col items-center">
-                      <div className="w-32 h-32 bg-[#003366] rounded-2xl p-2.5 shadow-inner flex items-center justify-center">
-                        <div className="w-full h-full bg-white rounded-xl p-2 flex flex-col justify-between">
-                          <div className="flex justify-between">
-                            <div className="w-5 h-5 border-4 border-[#003366] rounded-xs p-0.5"><div className="w-full h-full bg-[#003366]" /></div>
-                            <div className="w-5 h-5 border-4 border-[#003366] rounded-xs p-0.5"><div className="w-full h-full bg-[#003366]" /></div>
-                          </div>
-                          <div className="qr-pattern flex-1 my-1" />
-                          <div className="flex justify-between items-end">
-                            <div className="w-5 h-5 border-4 border-[#003366] rounded-xs p-0.5"><div className="w-full h-full bg-[#003366]" /></div>
-                            <span className="text-[7px] font-mono font-bold text-[#003366]">QLESS-GP</span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-[11px] font-bold text-slate-500 mt-2 flex items-center gap-1.5">
-                        <QrCode className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{t('scanAtEntryText', lang)}</span>
-                      </p>
-                    </div>
-
-                    <div className="mt-4 space-y-2">
-                      {activeBooking ? (
-                        <button
-                          onClick={() => {
-                            triggerHaptic('tap');
-                            setTokenPassModalOpen(true);
-                          }}
-                          className="w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
-                        >
-                          <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
-                          <span>ડિજિટલ પાસ પૂર્ણ સ્ક્રીનમાં જુઓ</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            triggerHaptic('tap');
-                            setView('dashboard');
-                          }}
-                          className="w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <span>{t('btnViewLiveRadar', lang)}</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  /* ================= GUEST CITIZEN PUBLIC ACTION DESK ================= */
-                  <div className="relative bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200">
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-                      <div className="flex items-center gap-2">
-                        <GovLogo className="w-6 h-6 shrink-0" />
-                        <div>
-                          <h3 className="text-xs font-black text-[#003366] uppercase tracking-wide">
-                            {t('guestDeskTitle', lang)}
-                          </h3>
-                          <p className="text-[10px] text-slate-500">
-                            {t('guestDeskSubtitle', lang)}
-                          </p>
-                        </div>
-                      </div>
-                      <span className="bg-blue-50 text-[#003366] border border-blue-200 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#138808] animate-pulse" />
-                        ૨૪/૭ સક્રિય
-                      </span>
-                    </div>
-
-                    {/* ACTION 1: LIVE TOKEN QUICK LOOKUP */}
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <label className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                          <Ticket className="w-3.5 h-3.5 text-[#005A9C]" />
-                          <span>{t('tabTrackToken', lang)}</span>
-                        </label>
-                        <span className="text-[9px] text-slate-400 font-mono">Realtime GPS/Queue</span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          placeholder={t('enterTokenPlaceholder', lang)}
-                          defaultValue="A-42"
-                          id="hero-token-input"
-                          className="flex-1 px-3 py-2 bg-white rounded-xl border border-slate-300 font-mono text-xs font-bold text-[#003366] focus:border-[#005A9C] outline-none"
-                        />
-                        <button
-                          onClick={() => {
-                            triggerHaptic('tap');
-                            setTokenTrackerModalOpen(true);
-                          }}
-                          className="px-3 py-2 bg-[#005A9C] hover:bg-[#003366] text-white text-xs font-bold rounded-xl transition active:scale-95 cursor-pointer whitespace-nowrap shadow-xs"
-                        >
-                          {t('btnTrackNow', lang)}
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                        <span className="text-[9px] text-slate-400 font-medium">ઝડપી સેમ્પલ:</span>
-                        {['A-42', 'B-1247', 'C-809'].map((sample) => (
-                          <button
-                            key={sample}
-                            onClick={() => {
-                              triggerHaptic('tap');
-                              setTokenTrackerModalOpen(true);
-                            }}
-                            className="text-[9px] font-mono font-bold px-1.5 py-0.5 bg-white hover:bg-blue-50 border border-slate-200 rounded text-[#003366] cursor-pointer"
-                          >
-                            #{sample}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* DIVIDER */}
-                    <div className="relative my-3 flex items-center justify-center">
-                      <div className="border-t border-slate-200 w-full" />
-                      <span className="bg-white px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider absolute">અથવા</span>
-                    </div>
-
-                    {/* ACTION 2: ONLINE SLOT BOOKING */}
-                    <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-3.5 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-[#003366] flex items-center gap-1.5">
-                          <Building className="w-3.5 h-3.5 text-[#FF9933]" />
-                          <span>સરકારી કચેરી સ્લોટ બુકિંગ</span>
-                        </span>
-                        <span className="text-[9px] bg-[#FF9933] text-slate-900 font-black px-1.5 py-0.2 rounded">GRTSA ૨૦૧૩</span>
-                      </div>
-                      <p className="text-[10px] text-slate-600 leading-tight">
-                        મામલતદાર, જન સેવા કેન્દ્ર કે તાલુકા પંચાયત માટે પસંદગીનો સમય સ્લોટ અગાઉથી મેળવો.
-                      </p>
-                      <button
-                        onClick={() => {
-                          triggerHaptic('tap');
-                          setSlotModalOpen(true);
-                        }}
-                        className="w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
-                      >
-                        <Calendar className="w-3.5 h-3.5 text-[#FF9933]" />
-                        <span>ઓનલાઇન સ્લોટ બુક કરો</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    </div>
-
-                    {/* 1-CLICK DEMO EVALUATION LINK */}
-                    <div className="mt-3 text-center">
-                      <button
-                        onClick={() => loginAsDemo('farmer')}
-                        className="text-[11px] text-amber-800 hover:text-amber-950 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>⚡ ટેસ્ટિંગ માટે મોહનભાઈ પટેલ (નાગરિક) તરીકે લૉગિન કરો</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <GovHeroShowcase
+                currentUser={currentUser}
+                activeBooking={activeBooking}
+                onOpenTokenTracker={() => setTokenTrackerModalOpen(true)}
+                onOpenSlotModal={() => setSlotModalOpen(true)}
+                onOpenTokenPassModal={() => setTokenPassModalOpen(true)}
+                onLoginDemo={() => loginAsDemo('farmer')}
+                lang={lang}
+              />
             </div>
           </section>
 

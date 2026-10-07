@@ -47,23 +47,31 @@ export const GovTelemetryMarquee: React.FC<GovTelemetryMarqueeProps> = ({ lang =
     coverage: lang === 'en' 
       ? 'State Coverage: 33 Districts | 250+ Talukas | 39 Public Services' 
       : lang === 'hi' 
-      ? 'राज्य कवरेज: ३३ जिले | २५०+ तहसील | ३૯ योजनाएं' 
+      ? 'राज्य कवरेज: ३३ जिले | २५०+ तहसील | ३९ योजनाएं' 
+      : lang === 'mr'
+      ? 'राज्य व्याप्ती: ३३ जिल्हे | २५०+ तालुके | ३९ सार्वजनिक सेवा'
       : 'રાજ્ય કવરેજ: ૩૩ જિલ્લા | ૨૫૦+ તાલુકા | ૩૯ સેવાઓ',
     uptime: lang === 'en'
       ? '99.98% System Uptime • GRTSA 2013 Statutory Compliance'
       : lang === 'hi'
       ? '99.98% अपटाइम • GRTSA २०१३ वैधानिक अनुपालन'
+      : lang === 'mr'
+      ? '९९.९८% अपटाइम • GRTSA २०१३ वैधानिक अनुपालन'
       : '99.98% અપટાઇમ • GRTSA ૨૦૧૩ સત્તાવાર માન્ય',
     version: 'v2.5.9 (સત્તાવાર અપડેટ) DPI',
     cloud: lang === 'en'
       ? 'DPI Cloud: Gujarat State Data Centre (GSDC) Active'
       : lang === 'hi'
       ? 'DPI क्लाउड: गुजरात राज्य डेटा केंद्र (GSDC) सक्रिय'
+      : lang === 'mr'
+      ? 'DPI क्लाऊड: गुजरात राज्य डेटा केंद्र (GSDC) सक्रिय'
       : 'DPI Cloud: ગુજરાત સ્ટેટ ડેટા સેન્ટર (GSDC) સક્રિય',
     portalStats: lang === 'en'
       ? `[DPI Portal] 39 Services | 36 Active Hubs | Served Today: ${liveServed.toLocaleString('en-IN')}`
       : lang === 'hi'
       ? `[DPI पोर्टल] ३९ सेवाएं | ३६ केंद्र | आज सेवा प्राप्त: ${liveServed.toLocaleString('en-IN')}`
+      : lang === 'mr'
+      ? `[DPI पोर्टल] ३९ सेवा | ३६ केंद्रे | आज सेवा लाभार्थी: ${liveServed.toLocaleString('en-IN')}`
       : `[DPI પોર્ટલ] કુલ સેવાઓ: ૩૯ | સક્રિય કચેરીઓ: ૩૬ | આજે સેવા મેળવી: ${liveServed.toLocaleString('en-IN')}`,
     security: lang === 'en' ? '256-Bit SSL Secured • NIC GSWAN' : '૨૫૬-બીટ SSL સુરક્ષિત • NIC GSWAN'
   };

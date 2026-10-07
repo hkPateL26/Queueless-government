@@ -77,6 +77,7 @@ export function TokenTrackerModal({
 
   const isGu = lang === 'gu';
   const isHi = lang === 'hi';
+  const isMr = lang === 'mr';
 
   const cleanQuery = searchToken.trim().toUpperCase().replace('#', '');
   

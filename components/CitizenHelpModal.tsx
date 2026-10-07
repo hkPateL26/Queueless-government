@@ -25,6 +25,7 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
 
   const isGu = lang === 'gu';
   const isHi = lang === 'hi';
+  const isMr = lang === 'mr';
 
   const faqs = [
     {
@@ -32,6 +33,8 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         ? '૧. શું મારે જન સેવા કેન્દ્ર પર સવારે વહેલા લાઈનમાં ઊભા રહેવું પડશે?' 
         : isHi 
         ? '१. क्या मुझे जन सेवा केंद्र पर सुबह जल्दी कतार में खड़ा रहना पड़ेगा?'
+        : isMr
+        ? '१. मला जन सेवा केंद्रावर सकाळी लवकर रांगेत उभे राहावे लागेल का?'
         : '1. Do I need to stand in physical lines early morning at Jan Seva Kendra?',
       a: isGu
         ? 'ના. QueueLess પોર્ટલ દ્વારા તમે ઘરેથી જ તમારો સ્લોટ અને ટોકન બુક કરી શકો છો. તમને ફાળવેલા સમયથી ૧૦ મિનિટ પહેલાં પહોંચીને પ્રવેશદ્વારે QR સ્કેન કરી સીધા કાઉન્ટર પર જઈ શકાય છે.'

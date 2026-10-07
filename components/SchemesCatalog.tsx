@@ -37,68 +37,69 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
 
   const isEn = lang === 'en';
   const isHi = lang === 'hi';
+  const isMr = lang === 'mr';
 
   const categories = useMemo(() => [
     { 
       id: 'all', 
-      label: isEn ? 'All Schemes (39)' : isHi ? 'सभी योजनाएं (३९)' : 'તમામ યોજનાઓ (All 39)', 
+      label: isEn ? 'All Schemes (39)' : isHi ? 'सभी योजनाएं (३९)' : isMr ? 'सर्व योजना (३९)' : 'તમામ યોજનાઓ (All 39)', 
       icon: '🏛️' 
     },
     { 
       id: 'agriculture', 
-      label: isEn ? '🌾 Agriculture (12)' : isHi ? '🌾 कृषि एवं किसान कल्याण (१२)' : '🌾 ખેતીવાડી (૧૨)', 
+      label: isEn ? '🌾 Agriculture (12)' : isHi ? '🌾 कृषि एवं किसान कल्याण (१२)' : isMr ? '🌾 शेती आणि शेतकरी कल्याण (१२)' : '🌾 ખેતીવાડી (૧૨)', 
       icon: '🌾' 
     },
     { 
       id: 'healthcare', 
-      label: isEn ? '🏥 Healthcare & Social (9)' : isHi ? '🏥 स्वास्थ्य एवं सामाजिक सुरक्षा (९)' : '🏥 આરોગ્ય અને કલ્યાણ (૯)', 
+      label: isEn ? '🏥 Healthcare & Social (9)' : isHi ? '🏥 स्वास्थ्य एवं सामाजिक सुरक्षा (९)' : isMr ? '🏥 आरोग्य आणि समाजकल्याण (९)' : '🏥 આરોગ્ય અને કલ્યાણ (૯)', 
       icon: '🏥' 
     },
     { 
       id: 'education', 
-      label: isEn ? '🎓 Education (10)' : isHi ? '🎓 शिक्षा एवं छात्रवृत्ति (१०)' : '🎓 શિક્ષણ અને શિષ્યવૃત્તિ (૧૦)', 
+      label: isEn ? '🎓 Education (10)' : isHi ? '🎓 शिक्षा एवं छात्रवृत्ति (१०)' : isMr ? '🎓 शिक्षण आणि शिष्यवृत्ती (१०)' : '🎓 શિક્ષણ અને શિષ્યવૃત્તિ (૧૦)', 
       icon: '🎓' 
     },
     { 
       id: 'welfare', 
-      label: isEn ? '🏛️ Civic & Revenue (8)' : isHi ? '🏛️ नागरिक एवं राजस्व प्रमाण पत्र (८)' : '🏛️ દાખલા અને મહેસૂલી સેવાઓ (૮)', 
+      label: isEn ? '🏛️ Civic & Revenue (8)' : isHi ? '🏛️ नागरिक एवं राजस्व प्रमाण पत्र (८)' : isMr ? '🏛️ नागरिक आणि महसूल दाखले (८)' : '🏛️ દાખલા અને મહેસૂલી સેવાઓ (૮)', 
       icon: '🏛️' 
     },
-  ], [isEn, isHi]);
+  ], [isEn, isHi, isMr]);
 
   const personaFilters = useMemo(() => [
     { 
       id: 'farmer', 
-      label: isEn ? 'Farmer (ખેડૂત)' : isHi ? 'किसान (Farmer)' : 'ખેડૂત (Farmer)', 
+      label: isEn ? 'Farmer (ખેડૂત)' : isHi ? 'किसान (Farmer)' : isMr ? 'शेतकरी (Farmer)' : 'ખેડૂત (Farmer)', 
       icon: '🌾', 
       category: 'agriculture' 
     },
     { 
       id: 'student', 
-      label: isEn ? 'Student (વિદ્યાર્થી)' : isHi ? 'छात्र (Student)' : 'વિદ્યાર્થી (Student)', 
+      label: isEn ? 'Student (વિદ્યાર્થી)' : isHi ? 'छात्र (Student)' : isMr ? 'विद्यार्थी (Student)' : 'વિદ્યાર્થી (Student)', 
       icon: '🎓', 
       category: 'education' 
     },
     { 
       id: 'woman', 
-      label: isEn ? 'Women / Mothers' : isHi ? 'महिला / माता (Women)' : 'મહિલા / માતા (Women)', 
+      label: isEn ? 'Women / Mothers' : isHi ? 'महिला / माता (Women)' : isMr ? 'महिला / माता (Women)' : 'મહિલા / માતા (Women)', 
       icon: '👩', 
       category: 'healthcare' 
     },
     { 
       id: 'citizen', 
-      label: isEn ? 'Certificates / Civic' : isHi ? 'नागरिक प्रमाण पत्र' : 'દાખલા / રેકોર્ડ્સ (Civic)', 
+      label: isEn ? 'Certificates / Civic' : isHi ? 'नागरिक प्रमाण पत्र' : isMr ? 'दाखले / प्रमाणपत्रे (Civic)' : 'દાખલા / રેકોર્ડ્સ (Civic)', 
       icon: '📄', 
       category: 'welfare' 
     },
-  ], [isEn, isHi]);
+  ], [isEn, isHi, isMr]);
 
   const filteredSchemes = useMemo(() => {
     return ALL_YOJANAS.filter(scheme => {
       // Category match
       const catMatch = selectedCategory === 'all' || scheme.category === selectedCategory;
       
-      // Search match (Gujarati or English)
+      // Search match (Gujarati, Hindi, Marathi, or English)
       const q = searchQuery.toLowerCase().trim();
       const searchMatch = !q || 
         scheme.titleGu.toLowerCase().includes(q) ||
@@ -138,6 +139,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   ? '39 Gujarat Public Services Directory • Structured Reference' 
                   : isHi 
                   ? '३९ गुजरात लोक सेवा निर्देशिका • संरचित संदर्भ' 
+                  : isMr 
+                  ? '३९ गुजरात लोक सेवा निर्देशिका • अधिकृत मार्गदर्शक'
                   : '39 ગુજરાત જાહેર સેવા નિર્દેશિકા • સત્તાવાર માર્ગદર્શિકા'}
               </span>
             </div>
@@ -146,6 +149,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                 ? `Schemes Discovery & Document Pre-Verification (${ALL_YOJANAS.length} Services)` 
                 : isHi 
                 ? `योजना खोज एवं दस्तावेज़ पूर्व-सत्यापन (${ALL_YOJANAS.length} सेवाएं)` 
+                : isMr 
+                ? `योजना शोध आणि दस्तऐवज पूर्व-तपासणी (${ALL_YOJANAS.length} सेवा)` 
                 : `યોજના શોધ & દસ્તાવેજ પૂર્વ-ચકાસણી (${ALL_YOJANAS.length} સેવાઓ)`}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -153,6 +158,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                 ? 'Verify scheme eligibility, required documents, statutory fees, and expected processing time before visiting the office.' 
                 : isHi 
                 ? 'कार्यालय जाने से पहले योजना की पात्रता, आवश्यक दस्तावेज, सरकारी शुल्क और अपेक्षित समय जांचें।' 
+                : isMr 
+                ? 'कार्यालयात जाण्यापूर्वी योजनेची पात्रता, आवश्यक कागदपत्रे, शासकीय शुल्क आणि अंदाजित वेळ तपासा.'
                 : 'કચેરીએ જતાં પહેલાં યોજનાની પાત્રતા, જરૂરી કાગળો, સરકારી ફી અને અંદાજિત સમય ચકાસો.'}
             </p>
           </div>
@@ -170,6 +177,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                 ? 'Search schemes: Tractor, MYSY, Income...' 
                 : isHi 
                 ? 'योजना खोजें: ट्रैक्टर, MYSY, आय प्रमाण पत्र...' 
+                : isMr 
+                ? 'योजना शोधा: ट्रॅक्टर, MYSY, उत्पन्न दाखला...' 
                 : 'યોજના અથવા સેવા શોધો: ટ્રેક્ટર, MYSY, આવક...'
             }
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-900 outline-none focus:border-[#005A9C] shadow-xs"
@@ -181,7 +190,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-bold text-slate-400 mr-1 flex items-center gap-1">
           <Filter className="w-3.5 h-3.5" /> 
-          {isEn ? 'Quick Filters:' : isHi ? 'त्वरित फ़िल्टर:' : 'ઝડપી ફિલ્ટર:'}
+          {isEn ? 'Quick Filters:' : isHi ? 'त्वरित फ़िल्टर:' : isMr ? 'त्वरित फिल्टर्स:' : 'ઝડપી ફિલ્ટર:'}
         </span>
         {personaFilters.map((p) => (
           <button
