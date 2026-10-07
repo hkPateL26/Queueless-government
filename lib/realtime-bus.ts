@@ -15,25 +15,37 @@
 
 export interface QueueEvent {
   id?: string;
-  type: 'TOKEN_CALLED' | 'TOKEN_COMPLETED' | 'TOKEN_SKIPPED' | 'LATE_SHIFTED' | 'OFFICER_STATUS';
+  type: 
+    | 'TOKEN_CALLED' 
+    | 'TOKEN_COMPLETED' 
+    | 'TOKEN_SKIPPED' 
+    | 'TOKEN_RECALLED'
+    | 'TOKEN_TRANSFERRED'
+    | 'TOKEN_CANCELLED'
+    | 'LATE_SHIFTED' 
+    | 'OFFICER_STATUS'
+    | 'OFFICER_STATUS_CHANGED'
+    | 'COUNTER_STATUS_CHANGED'
+    | 'QUEUE_UPDATED';
   tokenNumber: string;
   counterNumber?: number;
   counterNameGu?: string;
   talukaId?: string;
   timestamp: number;
+  sequence?: number;
   payload?: any;
 }
 
 const CHANNEL_NAME = 'qless-queue-realtime-bus';
 
 /**
- * 🔔 Zero-Asset Synthesized Notification Chime
- * Generates an official government-service-style two-tone notification chime
+ * 🔔 Zero-Asset Synthesized Queue Notification Chime
+ * Generates an ergonomic, audible two-tone notification chime
  * using the Web Audio API with zero external MP3 file dependencies.
  * - Tone 1: C5 (523.25 Hz)
  * - Tone 2: E5 (659.25 Hz) delayed by 220ms with exponential amplitude decay.
  */
-export const playOfficialGovChime = () => {
+export const playNotificationChime = () => {
   if (typeof window === 'undefined') return;
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
@@ -69,6 +81,9 @@ export const playOfficialGovChime = () => {
     console.warn('Web Audio notification chime unavailable:', err);
   }
 };
+
+/** Backwards-compatibility alias */
+export const playOfficialGovChime = playNotificationChime;
 
 /**
  * 📳 Haptic Notification

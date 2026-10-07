@@ -99,9 +99,34 @@ Queueless-government/
   - **સેફ-એરિયા & ઓવરલેપ સુરક્ષા (Safe-Area Support):** `env(safe-area-inset-bottom)` પેડિંગ, બોડી કન્ટેન્ટ માટે પર્યાપ્ત બોટમ પેડિંગ (`pb-24`) જેથી બટનો, કાર્ડ્સ કે મોડલ્સ ઓવરલેપ ન થાય; ફ્લોટિંગ PWA બેનર બોટમ નેવની ઉપર (`bottom-[56px] md:bottom-0`).
   - **કીબોર્ડ & ફોકસ સુલભતા (Keyboard & Focus Accessibility):** વિઝિબલ કીબોર્ડ ફોકસ રિંગ્સ (`*:focus-visible`), લોજિકલ ટેબ ઓર્ડર, આઇકોન કંટ્રોલ્સ માટે `aria-label`, ડેમો મેનૂ માટે `aria-expanded`, કતાર અપડેટ્સ માટે સ્ક્રીન રીડર `aria-live="polite"` રીજન, અને એસ્કેપ કી (`Escape`) દ્વારા ડાયલોગ/ડ્રોઅર ક્લોઝ.
   - **વૈકલ્પિક હેપ્ટિક ફીડબેક (Optional Haptic Feedback):** સપોર્ટેડ ડિવાઇસીસ/બ્રાઉઝર્સ પર Web Vibration API (`tap`, `success`, `warning`, `error`) દ્વારા વૈકલ્પિક સ્પર્શ ખાતરી, જ્યારે તમામ ક્રિયાઓ માટે વિઝ્યુઅલ અને સાઉન્ડ ચાઇમ હંમેશા પ્રાથમિક સુનિશ્ચિત.
-- [x] **Phase 5A:** કાઉન્ટર ઓપરેટર ડેસ્ક (`app/admin/counter/page.tsx`), GSWAN ઓફિસર HUD, વરિષ્ઠ નાગરિક (#P-XX) અગ્રતા સોર્ટિંગ, AI OCR દસ્તાવેજ નિરીક્ષક, GRTSA ૧૫m કાનૂની SLA ક્લોક, કાઉન્ટર ટ્રાન્સફર, લંચ રિસેસ ટોગલ.
-- [x] **Phase 5B:** કલેક્ટર & DDO કમાન્ડ સેન્ટર (`app/admin/collector/page.tsx`), ગુજરાત ૩૩ જિલ્લા લાઈવ ભીડ હીટમેપ, GRTSA SLA વોચડોગ, પીક અવર્સ ચાર્ટ, દૈનિક MIS રિપોર્ટ એક્સપોર્ટ.
-- [x] **Phase 5C:** સીમલેસ ક્રોસ-નેવિગેશન લિંક્સ (Header, Demo menu, Footer).
+- [x] **Phase 5: Administrative Portals & Real-Time Desk Operations:**
+  - **સત્તાવાર સારાંશ (Official Summary):** *Phase 5 provides the operational backbone for QueueLess Kacheri. Counter operators can manage live queues, call and complete tokens, handle missed citizens, transfer cases between counters, review document pre-check results, and record operational actions. Supervisory dashboards provide configurable queue, service-time, delay and workload analytics across offices. Administrative actions are permission-controlled and audit logged, while the realtime layer propagates queue events to connected citizen and administrative interfaces.*
+  - **Phase 5A: કાઉન્ટર ઓપરેટર ડેસ્ક (`app/admin/counter/page.tsx`):**
+    - **કોન્ફિગરેબલ સેવા કાઉન્ટર્સ (Configurable Service Counters):** કાઉન્ટર ૧ થી ૬ (મહેસૂલ, રેશન, જમીન રેકોર્ડ, સમાજ સુરક્ષા, આયુષ્માન, એટેસ્ટેશન) - દરેક કચેરી મુજબ વિભાગ, સેવાઓ અને ક્ષમતા કોન્ફિગરેબલ.
+    - **ડેમો ઓફિસર પર્સોના (Role-Based Access Control):** શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર) ડેમો પર્સોના સાથે સ્પષ્ટ `🟠 DEMO MODE` બેજ (વાસ્તવિક ડિપ્લોયમેન્ટ માટે RBAC ઓથેન્ટિકેશન આવશ્યક).
+    - **પ્રાથમિકતા કતાર નીતિ એન્જિન (Priority Queue Policy Engine):** વહીવટી માર્ગદર્શિકા મુજબ `#P-` ટોકન્સ (વરિષ્ઠ નાગરિકો ૬૦+, દિવ્યાંગજનો) નું કોન્ફિગરેબલ પ્રાયોરિટી ઇવેલ્યુએશન.
+    - **સેવા હેન્ડલિંગ સ્ટોપવોચ (Service SLA / Handling-Time Stopwatch):** કોન્ફિગરેબલ હેન્ડલિંગ ટાર્ગેટ (દા.ત. ૧૫ મિનિટ લક્ષ્ય, ૧૦ મિનિટ ચેતવણી) સાથે સ્પષ્ટ સ્થિતિ: `🟢 Within Target`, `🟡 Approaching Target`, `🔴 Target Exceeded`.
+    - **સમય વિભાજન મેટ્રિક્સ (Time Separation):** કતાર પ્રતીક્ષા સમય (Queue Waiting Time) અને ડેસ્ક સેવા સમય (Desk Handling Time) અલગ-અલગ ટ્રેકિંગ.
+    - **ડેસ્ક લાઇફસાઇકલ ક્રિયાઓ (Desk Action Suite):**
+      - `CALL NEXT`: ડબલ-કોલ કન્ફ્લિક્ટ પ્રોટેક્શન સાથે ટોકન બોલાવો, `TOKEN_CALLED` બ્રોડકાસ્ટ.
+      - `RE-CALL`: ગેરહાજર અથવા ધ્યાન ન આપેલ નાગરિકને ચાઇમ અને અવાજ સાથે પુનઃ ઘોષણા.
+      - `MARK COMPLETE`: સેવા સમય ઓડિટ સાથે સફળ નિકાલ, `TOKEN_COMPLETED` બ્રોડકાસ્ટ.
+      - `SKIP`: નાગરિક ગેરહાજરી નોંધણી (ઓડિટ રેકોર્ડ રહે છે, ડીલીટ થતો નથી), રી-કોલ માટે ઉપલબ્ધ.
+      - `TRANSFER`: સ્પષ્ટ મોડલ દ્વારા મૂળ કાઉન્ટર, નવું કાઉન્ટર, અધિકારી, કારણ અને નોંધ સાથે ટ્રાન્સફર.
+      - `LUNCH RECESS`: કોન્ફિગરેબલ ભોજન વિરામ (1:10 PM થી 2:00 PM) અને રિઝ્યુમ ટાઇમ પ્રદર્શન.
+    - **દસ્તાવેજ પ્રી-ચેક સમીક્ષા (Document Pre-Verification Reviewer):** નાગરિકે અપલોડ કરેલા કાગળો અને ઓટોમેટેડ પ્રી-ચેક પરિણામોનું નિરીક્ષણ (`✓ Pre-check Passed`, `Officer Review Required`, માસ્ક્ડ આધાર `XXXX-XXXX-8842`).
+    - **પ્રશાસનિક ઓડિટ લોગ (Administrative Audit Log):** અધિકારી દ્વારા લેવાયેલ દરેક પગલાં (CALLED, COMPLETED, SKIPPED, RECALLED, TRANSFERRED, LUNCH) નું ટાઈમસ્ટેમ્પ સાથે ઓટોમેટેડ ઓડિટ રેકોર્ડિંગ.
+    - **કતાર સૂચના ચાઇમ (Queue Notification Chime):** Web Audio API આધારિત સિન્થેસાઇઝ્ડ નોટિફિકેશન ચાઇમ (`playNotificationChime()`) અને ગુજરાતી વૉઇસ ઘોષણા.
+  - **Phase 5B: કલેક્ટર & DDO કમાન્ડ ડેશબોર્ડ (`app/admin/collector/page.tsx`):**
+    - **કોન્ફિગરેબલ ભીડ સૂચકાંક (Capacity-Relative Congestion Index):** કચેરી ક્ષમતાના ગુણોત્તર મુજબ ૩૩ જિલ્લા લાઈવ હીટમેપ (`OPTIMAL < 45%`, `MODERATE 45-80%`, `CONGESTED > 80%`).
+    - **કતાર વિલંબ વોચડોગ (Queue Delay Watchdog):** ૩૦+ મિનિટથી વધુ પ્રતીક્ષાવાળી અરજીઓ માટે `🔴 Delayed` ચેતવણી અને અરજદાર ડેટા સુરક્ષા.
+    - **એસ્કેલેટ — ડેમો (Create Escalation Alert):** ફેક SMS ના દાવા વગર વિગતવાર પ્રશાસનિક વિલંબ એલર્ટ જનરેશન.
+    - **વિસ્તૃત રાજ્ય મેટ્રિક્સ:** કુલ ટોકન્સ, નિકાલ દર, સરેરાશ કતાર પ્રતીક્ષા સમય, સરેરાશ ડેસ્ક સેવા સમય, નો-શો સંખ્યા, ટ્રાન્સફર સંખ્યા.
+    - **પીક અવર્સ સમયરેખા (Peak Queue Timeline):** નોંધાયેલ કતાર ડેટા આધારિત પીક અવર્સ (10:30 AM – 6:00 PM) ભીડ વિશ્લેષણ ચાર્ટ.
+    - **દૈનિક MIS રિપોર્ટ — ડેમો (Daily MIS Bulletin — Demo):** પ્રિન્ટ / PDF ડાઉનલોડ સાથે વહીવટી ડેમો સારાંશ.
+  - **Phase 5C: સીમલેસ ક્રોસ-નેવિગેશન & રીઅલ-ટાઇમ ક્રોસ-ટોક:**
+    - ડેમો પર્સોના સ્વિચિંગ (Citizen Mohanbhai Patel `#A-42` ↔ Officer K. M. Trivedi ↔ Collector Prabhatkumar Sharma).
+    - ઓફિસર ડેસ્ક પર `CALL NEXT` ક્લિક કરવાથી બેકએન્ડ રીઅલ-ટાઇમ લેયર મારફતે નાગરિક મોબાઇલ અને કલેક્ટર ડેશબોર્ડ પર તાત્કાલિક સિંક.
 - [x] **Phase 6: રીઅલ-ટાઇમ સિંક્રોનાઇઝેશન આર્કિટેક્ચર (Real-Time Synchronization Layer):**
   - **Cross-Device Layer:** બેકએન્ડ રીઅલ-ટાઇમ ટ્રાન્સપોર્ટ (`/api/queue-events`) દ્વારા અલગ-અલગ ડિવાઇસીસ (ફોન ↔ લેપટોપ) વચ્ચે ઇવેન્ટ સિંક્રોનાઇઝેશન.
   - **Local Sync Layer:** `BroadcastChannel API` દ્વારા એક જ ડિવાઇસ પર બ્રાઉઝર ટેબ્સ વચ્ચે ફાસ્ટ લોકલ સિંક.
@@ -115,27 +140,35 @@ Queueless-government/
 ## 🏆 ૪. હેકાથોન જજ સામે લાઈવ ડેમો સ્ક્રિપ્ટ (Judge Presentation Pitch)
 
 ```text
-                  QUEUELESS REALTIME LAYER
-
-        OFFICER CONSOLE
-          /admin/counter
-               │
-               │ TOKEN_CALLED
-               ▼
-      ┌─────────────────────┐
-      │  Realtime Backend   │
-      │   Event Transport   │
-      └──────────┬──────────┘
-                 │
-        ┌────────┴─────────┐
-        ▼                  ▼
- CITIZEN PORTAL      COLLECTOR DASHBOARD
-    Mobile              /admin/collector
-        │
-        ├── 🔔 Chime
-        ├── 🗣️ Gujarati Voice
-        ├── 📳 Vibration
-        └── 🟢 NOW SERVING
+                         ┌──────────────────────────┐
+                         │   AUTHENTICATED ADMIN    │
+                         │        USERS             │
+                         └────────────┬─────────────┘
+                                      │
+                         ┌────────────▼─────────────┐
+                         │   ROLE / PERMISSION      │
+                         │        LAYER             │
+                         └────────────┬─────────────┘
+                                      │
+              ┌───────────────────────┴──────────────────────┐
+              ▼                                              ▼
+     COUNTER OPERATOR DESK                         COLLECTOR DASHBOARD
+        /admin/counter                              /admin/collector
+              │                                              │
+              └──────────────────┬───────────────────────────┘
+                                 │
+                        AUTHORITATIVE BACKEND
+                                 │
+              ┌──────────────────┼──────────────────┐
+              ▼                  ▼                  ▼
+         Queue State         Audit Log        MIS / Analytics
+              │
+              ▼
+        REALTIME EVENT LAYER
+              │
+       ┌──────┼───────┐
+       ▼      ▼       ▼
+   Citizen  Radar  Admin Screens
 ```
 
 ```text

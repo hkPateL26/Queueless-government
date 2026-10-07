@@ -14,11 +14,18 @@ interface StoredEvent {
 // In-memory backend event store across server requests (persists across hot-reloads)
 const globalForEvents = globalThis as unknown as {
   globalEventStore?: StoredEvent[];
+  globalActiveTokens?: Record<string, { counterNumber: number; timestamp: number }>;
 };
 
 const globalEventStore: StoredEvent[] = globalForEvents.globalEventStore || [];
 if (!globalForEvents.globalEventStore) {
   globalForEvents.globalEventStore = globalEventStore;
+}
+
+const globalActiveTokens: Record<string, { counterNumber: number; timestamp: number }> = 
+  globalForEvents.globalActiveTokens || {};
+if (!globalForEvents.globalActiveTokens) {
+  globalForEvents.globalActiveTokens = globalActiveTokens;
 }
 
 export async function GET(req: NextRequest) {
@@ -30,6 +37,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     success: true,
     serverTime: Date.now(),
+    activeTokens: globalActiveTokens,
     events: newEvents
   });
 }
@@ -37,6 +45,27 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const tokenNumber = body.tokenNumber;
+    const counterNumber = body.counterNumber;
+
+    // Authoritative double-call / state-conflict validation
+    if (body.type === 'TOKEN_CALLED' && tokenNumber) {
+      const active = globalActiveTokens[tokenNumber];
+      // If token is currently active at another counter (within last 30 minutes)
+      if (active && active.counterNumber !== counterNumber && (Date.now() - active.timestamp < 30 * 60 * 1000)) {
+        return NextResponse.json({
+          success: false,
+          error: `Token ${tokenNumber} is already being handled by Counter ${active.counterNumber}.`
+        }, { status: 409 });
+      }
+      globalActiveTokens[tokenNumber] = {
+        counterNumber: counterNumber || 1,
+        timestamp: Date.now()
+      };
+    } else if (['TOKEN_COMPLETED', 'TOKEN_SKIPPED', 'TOKEN_TRANSFERRED', 'TOKEN_CANCELLED'].includes(body.type) && tokenNumber) {
+      delete globalActiveTokens[tokenNumber];
+    }
+
     const event: StoredEvent = {
       id: body.id || `evt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       type: body.type,

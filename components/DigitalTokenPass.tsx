@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
-import { playOfficialGovChime, broadcastQueueEvent, subscribeToQueueEvents, triggerHapticNotification } from '@/lib/realtime-bus';
+import { playNotificationChime, broadcastQueueEvent, subscribeToQueueEvents, triggerHapticNotification } from '@/lib/realtime-bus';
 import { BookingDetails } from './SlotBookingModal';
 import { SchemeItem } from '@/lib/schemes-data';
 import { BookingStatus } from '@/lib/slot-engine';
@@ -96,7 +96,7 @@ export function DigitalTokenPass({
         setEstimatedMinutes(0);
         triggerHaptic('success');
         triggerHapticNotification();
-        playOfficialGovChime();
+        playNotificationChime();
         speakGuidance(`ધ્યાન આપો, કાઉન્ટર ${booking.counterNumber} પર ટોકન નંબર ${booking.tokenNumber} નો વારો આવી ગયો છે.`);
       }
     });
