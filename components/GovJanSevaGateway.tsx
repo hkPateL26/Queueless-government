@@ -18,7 +18,7 @@ interface GovJanSevaGatewayProps {
   onOpenTokenTracker: () => void;
   onOpenSlotModal: () => void;
   onOpenTokenPassModal: () => void;
-  onLoginDemo: () => void;
+  onLoginDemo?: () => void;
   onExploreServices?: () => void;
   lang: Language;
 }
@@ -307,30 +307,6 @@ export function GovJanSevaGateway({
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#005A9C] group-hover:translate-x-0.5 transition shrink-0" />
           </button>
-
-          {/* Action 3: 1-Click Evaluation Persona */}
-          {!currentUser && (
-            <div className="pt-1 flex items-center justify-between gap-2">
-              <button
-                onClick={() => {
-                  triggerHaptic('tap');
-                  onLoginDemo();
-                }}
-                className="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 py-2 px-3 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-              >
-                <span>⚡</span>
-                <span>
-                  {isGu 
-                    ? '૧-ક્લિક ડેમો નાગરિક પ્રોફાઇલ (Mohanbhai)' 
-                    : isHi 
-                    ? '१-क्लिक डेमो नागरिक प्रोफाइल' 
-                    : isMr 
-                    ? '१-क्लिक डेमो नागरिक प्रोफाइल' 
-                    : '1-Click Demo Citizen Persona'}
-                </span>
-              </button>
-            </div>
-          )}
 
         </div>
 

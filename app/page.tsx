@@ -30,9 +30,11 @@ export default function Home() {
   const [lang, setLang] = useState<Language>('gu');
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [demoMenuOpen, setDemoMenuOpen] = useState(false);
+  const [loginMenuOpen, setLoginMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [tokenTrackerModalOpen, setTokenTrackerModalOpen] = useState(false);
+  const [pendingSlotBooking, setPendingSlotBooking] = useState<BookingDetails | null>(null);
   const [phone, setPhone] = useState('9876543210');
   const [aadhaar4, setAadhaar4] = useState('8842');
 
@@ -65,6 +67,9 @@ export default function Home() {
       }
       if (!target.closest('[data-dropdown="demo"]')) {
         setDemoMenuOpen(false);
+      }
+      if (!target.closest('[data-dropdown="login"]')) {
+        setLoginMenuOpen(false);
       }
     };
     window.addEventListener('click', handleOutsideClick);
@@ -205,10 +210,33 @@ export default function Home() {
     const userObj = {
       name: 'Mohanbhai Patel',
       role: 'Citizen',
-      area: 'Rajkot Rural',
-      token: '#A-42',
+      area: pendingSlotBooking ? `${pendingSlotBooking.taluka.nameGu}, ${pendingSlotBooking.district.nameGu}` : 'Rajkot Rural',
+      token: pendingSlotBooking ? pendingSlotBooking.tokenNumber : '#A-42',
     };
     setCurrentUser(userObj);
+
+    // Flow 1: Citizen was confirming a slot -> Automatically issue official token pass!
+    if (pendingSlotBooking) {
+      const confirmedDetails = pendingSlotBooking;
+      setPendingSlotBooking(null);
+      setLoginPromptReason(null);
+      setActiveBooking(confirmedDetails);
+      setTimeout(() => {
+        triggerHaptic('success');
+        speakGuidance(
+          lang === 'en'
+            ? `Mobile verified successfully! Your official token ${confirmedDetails.tokenNumber} is issued.`
+            : lang === 'hi'
+            ? `ओटीपी सत्यापन सफल! आपका आधिकारिक टोकन ${confirmedDetails.tokenNumber} जारी किया गया है।`
+            : lang === 'mr'
+            ? `मोबाइल पडताळणी यशस्वी! तुमचा अधिकृत टोकन ${confirmedDetails.tokenNumber} जारी झाला आहे.`
+            : `મોબાઈલ ચકાસણી સફળ! તમારો અધિકૃત ટોકન ${confirmedDetails.tokenNumber} જારી થઈ ગયો છે.`
+        );
+        setTokenPassModalOpen(true);
+        setView('dashboard');
+      }, 200);
+      return;
+    }
 
     if (pendingTokenScheme) {
       const targetScheme = pendingTokenScheme;
@@ -230,10 +258,12 @@ export default function Home() {
     triggerHaptic('warning');
     setCurrentUser(null);
     setPendingTokenScheme(null);
+    setPendingSlotBooking(null);
     setActiveBooking(null);
     setLateShiftMinutes(0);
     setLoginPromptReason(null);
     setDemoMenuOpen(false);
+    setLoginMenuOpen(false);
     setView('landing');
   };
 
@@ -298,6 +328,32 @@ export default function Home() {
 
   // Confirm Slot Booking from Modal
   const handleConfirmBooking = (details: BookingDetails) => {
+    // SECURITY GATEWAY: If citizen is NOT logged in, require Mobile OTP before issuing official token!
+    if (!currentUser) {
+      triggerHaptic('warning');
+      setPendingSlotBooking(details);
+      setSlotModalOpen(false);
+      const msg = lang === 'en' 
+        ? `🔒 Mobile OTP verification is required to confirm your official appointment slot at ${details.taluka.officeNameEn || details.taluka.officeNameGu}.`
+        : lang === 'hi'
+        ? `🔒 ${details.taluka.officeNameGu} में आधिकारिक अपॉइंटमेंट स्लॉट की पुष्टि के लिए मोबाइल ओटीपी सत्यापन आवश्यक है।`
+        : lang === 'mr'
+        ? `🔒 ${details.taluka.officeNameGu} येथे अधिकृत अपॉइंटमेंट स्लॉट निश्चित करण्यासाठी मोबाइल ओटीपी पडताळणी आवश्यक आहे.`
+        : `🔒 ${details.taluka.officeNameGu} ખાતે તમારો અધિકૃત સ્લોટ કન્ફર્મ કરવા માટે મોબાઈલ OTP ચકાસણી અનિવાર્ય છે.`;
+      setLoginPromptReason(msg);
+      speakGuidance(
+        lang === 'en'
+          ? "Please verify your mobile number via OTP to issue your official token."
+          : lang === 'hi'
+          ? "आधिकारिक टोकन जारी करने के लिए कृपया मोबाइल ओटीपी सत्यापित करें।"
+          : lang === 'mr'
+          ? "अधिकृत टोकन मिळवण्यासाठी कृपया मोबाइल ओटीपी पडताळणी करा."
+          : "સ્લોટ પસંદગી પૂર્ણ! અધિકૃત ટોકન જારી કરવા માટે કૃપા કરીને મોબાઈલ ઓટીપી ચકાસણી કરો."
+      );
+      setAuthModalOpen(true);
+      return;
+    }
+
     setActiveBooking(details);
     setSlotModalOpen(false);
     setCurrentUser(prev => prev ? {
@@ -640,33 +696,108 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/admin/counter"
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 text-xs font-black transition active:scale-95 shadow-xs"
-            >
-              <Building className="w-3.5 h-3.5 text-[#005A9C]" />
-              <span>{t('navOfficerDesk', lang)}</span>
-            </Link>
             {!currentUser ? (
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div 
+                className="relative" 
+                data-dropdown="login"
+                onMouseEnter={() => setLoginMenuOpen(true)}
+                onMouseLeave={() => setLoginMenuOpen(false)}
+              >
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     triggerHaptic('tap');
-                    setAuthModalOpen(true);
+                    setLoginMenuOpen(prev => !prev);
                   }}
-                  className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-[#003366] hover:bg-slate-100 border border-slate-200 cursor-pointer"
+                  aria-expanded={loginMenuOpen}
+                  aria-haspopup="true"
+                  aria-label="Portal Login Dropdown"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black bg-[#005A9C] hover:bg-[#003366] text-white shadow-sm flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
                 >
-                  {t('btnLogin', lang)}
+                  <Lock className="w-3.5 h-3.5 text-[#FF9933]" />
+                  <span>{t('btnLogin', lang)}</span>
+                  <ChevronDown className={`w-3 h-3 text-blue-200 transition-transform duration-200 ${loginMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
-                <button
-                  onClick={() => {
-                    triggerHaptic('tap');
-                    setAuthModalOpen(true);
-                  }}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-[#005A9C] hover:bg-[#003366] text-white shadow-sm active:scale-95 transition cursor-pointer"
-                >
-                  {t('btnGetStarted', lang)}
-                </button>
+
+                {loginMenuOpen && (
+                  <div 
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-0 mt-1.5 w-64 sm:w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 z-50 text-[#1F2937] text-left animate-in fade-in zoom-in-95"
+                  >
+                    <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                        {lang === 'en' ? 'Select Portal Access' : lang === 'hi' ? 'पोर्टल एक्सेस चुनें' : lang === 'mr' ? 'पोर्टल ऍक्सेस निवडा' : 'પોર્ટલ પ્રવેશ પસંદ કરો'}
+                      </p>
+                    </div>
+
+                    {/* 1. નાગરિક લૉગિન (Citizen Login) */}
+                    <button
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setLoginMenuOpen(false);
+                        setLoginPromptReason(null);
+                        setAuthModalOpen(true);
+                      }}
+                      className="w-full p-2.5 rounded-xl hover:bg-blue-50 transition flex items-start gap-2.5 text-left group cursor-pointer border border-transparent hover:border-blue-200"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#003366] group-hover:bg-[#003366] group-hover:text-white flex items-center justify-center shrink-0 transition">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-slate-900 group-hover:text-[#003366]">
+                            {lang === 'en' ? 'Citizen Login' : lang === 'hi' ? 'नागरिक लॉगिन' : lang === 'mr' ? 'नागरिक लॉगिन' : 'નાગરિક લૉગિન (Citizen)'}
+                          </p>
+                          <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded">
+                            OTP
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                          {lang === 'en' 
+                            ? 'Book slots & access digital token passes' 
+                            : lang === 'hi' 
+                            ? 'स्लॉट बुक करें व डिजिटल टोकन पास पाएं' 
+                            : lang === 'mr' 
+                            ? 'स्लॉट बुक करा आणि डिजिटल टोकन मिळवा' 
+                            : 'સ્લોટ બુકિંગ અને ડિજિટલ ટોકન પાસ'}
+                        </p>
+                      </div>
+                    </button>
+
+                    {/* 2. કચેરી / અધિકારી લૉગિન (Kacheri / Officer Login) */}
+                    <Link
+                      href="/admin/counter"
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setLoginMenuOpen(false);
+                      }}
+                      className="w-full p-2.5 rounded-xl hover:bg-amber-50 transition flex items-start gap-2.5 text-left group cursor-pointer border border-transparent hover:border-amber-200 mt-1"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-900 group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center shrink-0 transition">
+                        <Building className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-slate-900 group-hover:text-amber-950">
+                            {lang === 'en' ? 'Kacheri / Officer Login' : lang === 'hi' ? 'कचेरी / अधिकारी लॉगिन' : lang === 'mr' ? 'कचेरी / अधिकारी लॉगिन' : 'કચેરી / અધિકારી લૉગિન'}
+                          </p>
+                          <span className="text-[9px] bg-amber-100 text-amber-900 font-extrabold px-1.5 py-0.2 rounded">
+                            Gov
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                          {lang === 'en' 
+                            ? 'Counter Operator & Collector Console' 
+                            : lang === 'hi' 
+                            ? 'काउंटर ऑपरेटर व कलेक्टर डैशबोर्ड' 
+                            : lang === 'mr' 
+                            ? 'काउंटर ऑपरेटर आणि जिल्हाधिकारी डॅशबोर्ड' 
+                            : 'કાઉન્ટર ઓપરેટર અને કલેક્ટર ડેશબોર્ડ'}
+                        </p>
+                      </div>
+                    </Link>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl">
