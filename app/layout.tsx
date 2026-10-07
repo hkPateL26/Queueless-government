@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="gu">
+    <html lang="gu" suppressHydrationWarning>
       <head>
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <link rel="apple-touch-icon" href="/icon.svg" />
@@ -36,18 +36,14 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                    console.log('ServiceWorker registered with scope:', reg.scope);
-                  }).catch(function(err) {
-                    console.warn('SW registration skipped:', err);
-                  });
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
                 });
               }
             `,
           }}
         />
       </head>
-      <body className="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+      <body suppressHydrationWarning className="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
         {children}
       </body>
     </html>

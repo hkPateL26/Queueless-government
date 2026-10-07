@@ -15,6 +15,7 @@ export const PwaInstallBanner: React.FC = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [showIosGuide, setShowIosGuide] = useState(false);
+  const [showDesktopGuide, setShowDesktopGuide] = useState(false);
   const [isIos, setIsIos] = useState(false);
   const [installSuccess, setInstallSuccess] = useState(false);
 
@@ -74,7 +75,7 @@ export const PwaInstallBanner: React.FC = () => {
           setTimeout(() => setDismissed(true), 3500);
         }
       } catch (err) {
-        console.warn('Install prompt error:', err);
+        // Handled silently
       }
       return;
     }
@@ -86,13 +87,7 @@ export const PwaInstallBanner: React.FC = () => {
     }
 
     // Scenario C: Desktop Chrome / Edge or other browser where prompt was either already triggered or waiting
-    // Provide explicit clear instructions and trigger manual fallback
-    alert(
-      "🏛️ ગુજરાત ઈ-જન સેવા (QueueLess) 1-Click Install:\n\n" +
-      "૧. બ્રાઉઝરના એડ્રેસ બારમાં ઉપર જમણી બાજુ આવેલ 'Install App (⊕)' આઇકોન પર ક્લિક કરો.\n" +
-      "૨. અથવા બ્રાઉઝર મેનૂ (⋮) ➔ 'Install QueueLess Kacheri' પસંદ કરો.\n\n" +
-      "તમારી હોમ સ્ક્રીન પર ગુજરાત સરકારનો સત્તાવાર લોગો ધરાવતી એપ સીધી ઉમેરાઈ જશે."
-    );
+    setShowDesktopGuide(true);
   };
 
   return (
@@ -231,7 +226,76 @@ export const PwaInstallBanner: React.FC = () => {
 
             <button
               onClick={() => setShowIosGuide(false)}
-              className="w-full bg-[#003366] text-white font-bold py-2.5 rounded-xl text-xs"
+              className="w-full bg-[#003366] text-white font-bold py-2.5 rounded-xl text-xs hover:bg-[#002244] transition"
+            >
+              સમજાયું (Got it)
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Chrome / Edge Guide Modal */}
+      {showDesktopGuide && (
+        <div 
+          onClick={() => setShowDesktopGuide(false)}
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 text-left space-y-4 animate-in zoom-in-95 duration-150"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <GovLogo className="w-10 h-10 drop-shadow-sm" />
+                <div>
+                  <h4 className="font-black text-sm text-[#003366]">કમ્પ્યુટર / લેપટોપ ઇન્સ્ટોલેશન</h4>
+                  <p className="text-[10.5px] text-slate-500">Chrome / Edge 1-Click App</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowDesktopGuide(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-xs text-slate-500 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-2xl border border-blue-100">
+                <div className="w-7 h-7 rounded-xl bg-[#005A9C] text-white flex items-center justify-center shrink-0 text-xs font-bold">
+                  ૧
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800">એડ્રેસ બારમાં ઉપર જમણી બાજુ જુઓ</p>
+                  <p className="text-[11px] text-slate-600 mt-0.5">
+                    બ્રાઉઝરના URL બોક્સની અંદર જમણી બાજુ <span className="font-bold text-[#003366] bg-white px-1.5 py-0.5 rounded border border-blue-200 inline-block">⊕ (Install App)</span> આઇકોન દેખાશે.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-2xl border border-amber-200">
+                <div className="w-7 h-7 rounded-xl bg-[#FF9933] text-slate-900 flex items-center justify-center shrink-0 text-xs font-bold">
+                  ૨
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800">અથવા બ્રાઉઝર મેનૂમાંથી ઇન્સ્ટોલ કરો</p>
+                  <p className="text-[11px] text-slate-600 mt-0.5">
+                    ઉપર જમણી બાજુ રહેલા <span className="font-bold">ત્રણ ટપકાં (⋮)</span> પર ક્લિક કરી <span className="font-semibold text-amber-900">'Install QueueLess Kacheri'</span> પસંદ કરો.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+              <p className="text-[11px] text-emerald-800 font-medium">
+                આનાથી તમારા ડેસ્કટોપ પર ગુજરાત સરકારના પ્રતિક સાથે સ્વતંત્ર શોર્ટકટ એપ્લિકેશન ઉમેરાશે.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setShowDesktopGuide(false)}
+              className="w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition"
             >
               સમજાયું (Got it)
             </button>

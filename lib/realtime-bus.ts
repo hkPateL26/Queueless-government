@@ -121,9 +121,7 @@ export const broadcastQueueEvent = (event: QueueEvent) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(event)
-    }).catch(err => {
-      console.warn('Backend realtime transport warning:', err);
-    });
+    }).catch(() => {});
   } catch (e) {
     // Non-blocking
   }
@@ -136,7 +134,7 @@ export const broadcastQueueEvent = (event: QueueEvent) => {
       bc.close();
     }
   } catch (e) {
-    console.warn('BroadcastChannel error:', e);
+    // Non-blocking
   }
 
   // 3. Fallback Layer: LocalStorage StorageEvent
@@ -184,7 +182,7 @@ export const subscribeToQueueEvents = (callback: (event: QueueEvent) => void): (
         if (msg.data) handleIncomingEvent(msg.data);
       };
     } catch (e) {
-      console.warn('BroadcastChannel subscription error:', e);
+      // Non-blocking
     }
   }
 

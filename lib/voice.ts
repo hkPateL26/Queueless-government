@@ -13,7 +13,7 @@ export const speakGuidance = (text: string, lang: 'gu-IN' | 'hi-IN' | 'en-IN' = 
       utterance.pitch = 1.0;
       window.speechSynthesis.speak(utterance);
     } catch {
-      console.warn("Gujarati TTS unavailable on this browser/platform");
+      // Non-blocking TTS fallback
     }
   }
 };
