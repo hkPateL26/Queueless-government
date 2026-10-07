@@ -15,6 +15,7 @@ import {
   ValidationResult 
 } from '@/lib/ocr-validator';
 import { SchemeItem } from '@/lib/schemes-data';
+import { GovLogo } from '@/components/GovLogo';
 
 interface CameraScannerModalProps {
   scheme: SchemeItem;
@@ -145,9 +146,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
         {/* Top Header */}
         <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#005A9C] text-[#FF9933] flex items-center justify-center text-lg font-black border border-[#FF9933]">
-              <Camera className="w-5 h-5" />
-            </div>
+            <GovLogo className="w-10 h-10 shrink-0 drop-shadow-md" />
             <div>
               <h3 className="font-extrabold text-sm sm:text-base leading-tight">
                 દસ્તાવેજ OCR & પૂર્વ-ચકાસણી (Document Pre-Verification)

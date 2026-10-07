@@ -2,13 +2,18 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'QueueLess Kacheri – NagrikSeva AI',
+  title: 'QueueLess Kacheri – NagrikSeva AI (ગુજરાત સરકાર)',
   description: 'Zero physical queues for Gujarat Government Kacheris and Jan Seva Kendras',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#1e3a8a',
+  themeColor: '#003366',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -23,7 +28,24 @@ export default function RootLayout({
   return (
     <html lang="gu">
       <head>
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('ServiceWorker registered with scope:', reg.scope);
+                  }).catch(function(err) {
+                    console.warn('SW registration skipped:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body className="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col font-sans">
         {children}

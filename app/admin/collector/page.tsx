@@ -12,6 +12,7 @@ import {
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice } from '@/lib/jurisdiction-data';
+import { GovLogo } from '@/components/GovLogo';
 
 interface DistrictMetric {
   id: string;
@@ -214,9 +215,7 @@ export default function CollectorCommandDashboard() {
               <span className="hidden sm:inline">પોર્ટલ</span>
             </Link>
 
-            <div className="w-10 h-10 rounded-xl bg-amber-400/20 border-2 border-[#FF9933] flex items-center justify-center font-bold text-[#FF9933] text-xl shadow-inner">
-              👑
-            </div>
+            <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
 
             <div>
               <div className="flex items-center gap-2">

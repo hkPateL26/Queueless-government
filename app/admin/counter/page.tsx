@@ -15,6 +15,7 @@ import {
   playNotificationChime, broadcastQueueEvent, subscribeToQueueEvents, QueueEvent 
 } from '@/lib/realtime-bus';
 import { GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice } from '@/lib/jurisdiction-data';
+import { GovLogo } from '@/components/GovLogo';
 
 interface QueueCitizen {
   id: string;
@@ -474,9 +475,7 @@ export default function CounterOperatorDesk() {
               <span className="hidden sm:inline">નાગરિક પોર્ટલ</span>
             </Link>
             
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center font-bold text-[#FF9933] text-lg shadow-inner">
-              🏛️
-            </div>
+            <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
 
             <div>
               <div className="flex items-center gap-2">

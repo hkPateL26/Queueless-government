@@ -1,14 +1,25 @@
 {
-  "name": "QueueLess Kacheri - NagrikSeva AI",
+  "name": "QueueLess Kacheri – NagrikSeva AI (ગુજરાત સરકાર)",
   "short_name": "QueueLess",
-  "description": "Zero physical queues for Gujarat Government Kacheris and Jan Seva Kendras",
+  "description": "ગુજરાત સરકાર જન સેવા કેન્દ્રો અને મામલતદાર કચેરીઓ માટે કતાર મુક્ત સેવા પ્રણાલી",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0f2942",
-  "theme_color": "#1e3a8a",
+  "orientation": "portrait",
+  "background_color": "#002244",
+  "theme_color": "#003366",
+  "lang": "gu-IN",
+  "categories": ["government", "productivity", "utilities"],
   "icons": [
     {
       "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/emblem.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

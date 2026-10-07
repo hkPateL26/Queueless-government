@@ -17,6 +17,7 @@ import { SchemeDrawer } from '@/components/SchemeDrawer';
 import { CameraScannerModal } from '@/components/CameraScannerModal';
 import { SlotBookingModal, BookingDetails } from '@/components/SlotBookingModal';
 import { DigitalTokenPass } from '@/components/DigitalTokenPass';
+import { GovLogo } from '@/components/GovLogo';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 
 export default function Home() {
@@ -378,9 +379,7 @@ export default function Home() {
       <nav className="bg-white border-b border-slate-200 sticky top-9 z-40 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
           <button onClick={() => setView('landing')} className="flex items-center gap-2 sm:gap-3 cursor-pointer">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#003366] text-white flex items-center justify-center font-black text-base sm:text-xl shadow-md border-2 border-[#FF9933] shrink-0">
-              Q
-            </div>
+            <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
             <div className="text-left">
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-base sm:text-xl tracking-tight text-[#003366] leading-none">QueueLess</span>
@@ -480,7 +479,7 @@ export default function Home() {
             
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#003366] text-xs font-semibold">
-                <ShieldCheck className="w-4 h-4 text-[#005A9C]" />
+                <GovLogo className="w-4 h-4 shrink-0" />
                 <span>Gujarat Government–Inspired Design System • Public Service Framework</span>
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#138808]" />
               </div>
@@ -649,9 +648,7 @@ export default function Home() {
           <aside className="hidden md:flex md:w-64 bg-[#003366] text-white flex-col justify-between shrink-0">
             <div>
               <div className="p-5 border-b border-blue-900/60 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#FF9933] text-slate-900 flex items-center justify-center font-black text-sm">
-                  Q
-                </div>
+                <GovLogo className="w-9 h-9 shrink-0 drop-shadow-sm" />
                 <div>
                   <h3 className="font-extrabold text-white text-sm">QueueLess Kacheri</h3>
                   <p className="text-[10px] text-blue-200">GovTech | Citizen Service Portal</p>
@@ -1505,10 +1502,12 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 text-center">
-        <div className="max-w-7xl mx-auto px-4 space-y-2">
-          <p className="font-bold text-[#003366]">QueueLess / NagrikSeva AI © 2026 • Gujarat Government–Inspired Citizen Service Framework</p>
+        <div className="max-w-7xl mx-auto px-4 space-y-2 flex flex-col items-center">
+          <GovLogo className="w-12 h-12 mb-1 drop-shadow-sm" />
+          <p className="font-extrabold text-[#003366] text-sm">ગુજરાત સરકાર • મહેસૂલ & સામાન્ય વહીવટ વિભાગ</p>
+          <p className="text-xs text-slate-600 font-semibold">QueueLess Kacheri (NagrikSeva AI) © 2026 • Citizen Public Service Framework</p>
           <p className="text-[11px] text-slate-400">
-            GRTSA Service Standard Compliant • Designed for 33 Districts, 250+ Talukas, and 18,000+ Villages
+            GRTSA ૨૦૧૩ સમયબદ્ધ નાગરિક સેવા ધારો • ૩૩ જિલ્લા, ૨૫૦+ તાલુકા અને ૧૮,૦૦૦+ ગામો માટે
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
             <Link

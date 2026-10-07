@@ -26,8 +26,8 @@ import {
   GUJARAT_HOLIDAY_CALENDAR_METADATA
 } from '@/lib/slot-engine';
 import { triggerHaptic } from '@/lib/haptics';
-import { speakGuidance } from '@/lib/voice';
 import { SchemeItem } from '@/lib/schemes-data';
+import { GovLogo } from '@/components/GovLogo';
 
 export interface BookingDetails {
   district: DistrictItem;
@@ -293,9 +293,7 @@ export function SlotBookingModal({
         {/* HEADER */}
         <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
-              <Building2 className="w-5 h-5 text-[#FF9933]" />
-            </div>
+            <GovLogo className="w-10 h-10 shrink-0 drop-shadow-md" />
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold">

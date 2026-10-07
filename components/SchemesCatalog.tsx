@@ -13,6 +13,7 @@ import {
   getSchemeStructuredBenefit 
 } from '@/lib/schemes-data';
 import { triggerHaptic } from '@/lib/haptics';
+import { GovLogo } from '@/components/GovLogo';
 
 interface SchemesCatalogProps {
   onSelectScheme: (scheme: SchemeItem) => void;
@@ -61,17 +62,20 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({ onSelectScheme }
       
       {/* Header & Title */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-[#003366] text-xs font-bold border border-blue-200 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
-            <span>39 Gujarat Public Services Directory • Structured Reference</span>
+        <div className="flex items-start gap-3.5">
+          <GovLogo className="w-11 h-11 sm:w-12 sm:h-12 shrink-0 drop-shadow-md mt-1" />
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-[#003366] text-xs font-bold border border-blue-200 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
+              <span>39 Gujarat Public Services Directory • Structured Reference</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#003366] tracking-tight">
+              યોજના શોધ & દસ્તાવેજ પૂર્વ-ચકાસણી ({ALL_YOJANAS.length} Services)
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              કચેરીએ જતાં પહેલાં યોજનાની પાત્રતા, જરૂરી કાગળો, સરકારી ફી અને અંદાજિત સમય ચકાસો.
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#003366] tracking-tight">
-            યોજના શોધ & દસ્તાવેજ પૂર્વ-ચકાસણી ({ALL_YOJANAS.length} Services)
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            કચેરીએ જતાં પહેલાં યોજનાની પાત્રતા, જરૂરી કાગળો, સરકારી ફી અને અંદાજિત સમય ચકાસો.
-          </p>
         </div>
 
         {/* Live Search Bar */}

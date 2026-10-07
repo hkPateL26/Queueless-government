@@ -14,6 +14,7 @@ import {
   getSchemeOfficialSource, 
   getSchemeStructuredBenefit 
 } from '@/lib/schemes-data';
+import { GovLogo } from '@/components/GovLogo';
 
 interface SchemeDrawerProps {
   scheme: SchemeItem | null;
@@ -66,15 +67,18 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         className="bg-white w-full max-w-lg h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-250 overscroll-contain overflow-hidden"
       >
         {/* Drawer Header (Fixed) */}
-        <div className="bg-[#003366] text-white p-4 sm:p-5 shrink-0 flex items-start justify-between">
-          <div className="space-y-1">
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF9933] bg-[#002244] px-2.5 py-0.5 rounded-full border border-blue-800">
-              {scheme.categoryGu} • {scheme.department}
-            </span>
-            <h2 className="text-xl font-black text-white mt-1 leading-tight">
-              {scheme.titleGu}
-            </h2>
-            <p className="text-xs text-blue-200">{scheme.titleEn}</p>
+        <div className="bg-[#003366] text-white p-4 sm:p-5 shrink-0 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md mt-0.5" />
+            <div className="space-y-1 min-w-0">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF9933] bg-[#002244] px-2.5 py-0.5 rounded-full border border-blue-800 inline-block truncate max-w-full">
+                {scheme.categoryGu} • {scheme.department}
+              </span>
+              <h2 className="text-xl font-black text-white mt-1 leading-tight">
+                {scheme.titleGu}
+              </h2>
+              <p className="text-xs text-blue-200">{scheme.titleEn}</p>
+            </div>
           </div>
           <button
             onClick={() => {

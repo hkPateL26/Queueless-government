@@ -14,6 +14,7 @@ import { playNotificationChime, broadcastQueueEvent, subscribeToQueueEvents, tri
 import { BookingDetails } from './SlotBookingModal';
 import { SchemeItem } from '@/lib/schemes-data';
 import { BookingStatus } from '@/lib/slot-engine';
+import { GovLogo } from '@/components/GovLogo';
 
 interface DigitalTokenPassProps {
   booking: BookingDetails;
@@ -228,9 +229,7 @@ export function DigitalTokenPass({
 
           <div className="flex items-start sm:items-center justify-between gap-2">
             <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 text-[#FF9933] font-bold shrink-0">
-                <ShieldCheck className="w-5 h-5 sm:w-7 sm:h-7" />
-              </div>
+              <GovLogo className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 drop-shadow-md" />
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="text-[9px] sm:text-[11px] font-bold tracking-wider uppercase bg-white/20 px-1.5 py-0.5 rounded text-white whitespace-nowrap">
