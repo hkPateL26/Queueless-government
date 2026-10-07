@@ -1,15 +1,16 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   QrCode, Clock, MapPin, UserCheck, AlertTriangle, 
   Download, Share2, CheckCircle2, ShieldCheck, Printer,
   Volume2, ArrowRight, RefreshCw, Smartphone, Layers, X,
   Calendar, Navigation, FileCheck2, Star, CheckCircle, Shield,
-  ExternalLink, Bell, Sparkles, MessageSquare
+  ExternalLink, Bell, Sparkles, MessageSquare, Radio
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
+import { playOfficialGovChime, broadcastQueueEvent, subscribeToQueueEvents } from '@/lib/realtime-bus';
 import { BookingDetails } from './SlotBookingModal';
 import { SchemeItem } from '@/lib/schemes-data';
 
@@ -34,9 +35,53 @@ export function DigitalTokenPass({
   const [currentSlotTime, setCurrentSlotTime] = useState<string>(booking.slot.timeRange);
   const [aheadInQueue, setAheadInQueue] = useState<number>(2);
 
-  // Phase 3 Enhancements: Gate Verifier & SMS Modal States
+  // Phase 3 & Extended Enhancements
   const [verifierOpen, setVerifierOpen] = useState<boolean>(false);
   const [smsModalOpen, setSmsModalOpen] = useState<boolean>(false);
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
+  const [liveTime, setLiveTime] = useState<string>('');
+  const [isOfflineCached, setIsOfflineCached] = useState<boolean>(false);
+  const [isCalledByOfficer, setIsCalledByOfficer] = useState<boolean>(false);
+
+  // 1. Live Anti-Screenshot Timestamp Clock & Offline LocalStorage Caching
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setLiveTime(now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+
+    // Save to LocalStorage for zero-network rural offline access
+    try {
+      localStorage.setItem('qless_cached_token_pass', JSON.stringify({
+        booking,
+        schemeTitle: scheme?.titleGu || 'જન સેવા',
+        citizenName,
+        cachedAt: new Date().toISOString()
+      }));
+      setIsOfflineCached(true);
+    } catch {
+      // ignore
+    }
+
+    // 2. Real-time Queue Event Listener (Zero-server inter-tab sync)
+    const unsubscribe = subscribeToQueueEvents((event) => {
+      if (event.type === 'TOKEN_CALLED' && event.tokenNumber === booking.tokenNumber) {
+        setIsCalledByOfficer(true);
+        setAheadInQueue(0);
+        setEstimatedMinutes(0);
+        triggerHaptic('success');
+        playOfficialGovChime();
+        speakGuidance(`ધ્યાન આપો, કાઉન્ટર ${booking.counterNumber} પર ટોકન નંબર ${booking.tokenNumber} નો વારો આવી ગયો છે.`);
+      }
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, [booking, scheme, citizenName]);
 
   const handleRunningLate = () => {
     triggerHaptic('warning');
@@ -162,6 +207,14 @@ export function DigitalTokenPass({
         </div>
       </div>
 
+      {/* REAL-TIME OFFICER CALL ALERT */}
+      {isCalledByOfficer && (
+        <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white p-3 sm:p-4 text-center animate-pulse flex items-center justify-center gap-2 font-black text-xs sm:text-sm border-b-2 border-emerald-700 shadow-inner">
+          <Radio className="w-4 h-4 sm:w-5 sm:h-5 animate-ping shrink-0" />
+          <span>🔔 આપનો વારો આવી ગયો છે! તુરંત કાઉન્ટર {booking.counterNumber} પર પહોંચો. (NOW SERVING)</span>
+        </div>
+      )}
+
       {/* PASS CONTENT */}
       <div className="p-4 sm:p-6 space-y-5">
         
@@ -225,12 +278,23 @@ export function DigitalTokenPass({
               </div>
             </div>
 
-            <span className="text-[10px] font-mono text-gray-500 mt-2">
+            {/* Live Anti-Screenshot Ticker */}
+            <div className="flex items-center gap-1.5 mt-2.5 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] text-emerald-800 font-mono font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+              <span>{liveTime || 'LIVE'} • લાઈવ પાસ</span>
+            </div>
+
+            <span className="text-[10px] font-mono text-gray-500 mt-1">
               કચેરી સ્કેનર ID: QLESS-{booking.tokenNumber.replace('#', '')}-GP
             </span>
             <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2.5 py-0.5 rounded-full mt-1">
               ✓ ઑફલાઇન QR માન્ય (No Internet Required)
             </span>
+            {isOfflineCached && (
+              <span className="text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full mt-1 flex items-center gap-1">
+                <span>💾</span> લોકલ સ્ટોરેજ સુરક્ષિત
+              </span>
+            )}
           </div>
 
           {/* Counter, Time, and Queue Details */}
@@ -420,6 +484,27 @@ export function DigitalTokenPass({
               <Smartphone className="w-3.5 h-3.5 text-[#FF9933]" />
               <span>સરકારી SMS</span>
             </button>
+            <button
+              onClick={() => {
+                triggerHaptic('tap');
+                setWhatsAppModalOpen(true);
+              }}
+              className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+              <span>વોટ્સએપ બોટ</span>
+            </button>
+            <button
+              onClick={() => {
+                triggerHaptic('success');
+                playOfficialGovChime();
+                speakGuidance(`ધ્યાન આપો, કાઉન્ટર ${booking.counterNumber} પર ટોકન નંબર ${booking.tokenNumber} નો વારો આવી ગયો છે.`);
+              }}
+              className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+            >
+              <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
+              <span>ચાઇમ સાંભળો</span>
+            </button>
           </div>
 
           {onClose && (
@@ -568,6 +653,130 @@ export function DigitalTokenPass({
                 className="flex-1 bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition"
               >
                 સમજાઈ ગયું (Close)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. OFFICIAL GUJARAT GOVT WHATSAPP BOT SIMULATOR MODAL */}
+      {whatsAppModalOpen && (
+        <div 
+          onClick={() => setWhatsAppModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 modal-backdrop animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#ECE5DD] rounded-3xl max-w-sm w-full border border-slate-300 shadow-2xl overflow-hidden relative text-slate-800"
+          >
+            {/* WhatsApp Header */}
+            <div className="bg-[#075E54] text-white p-3.5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-emerald-100 text-[#075E54] flex items-center justify-center font-bold text-sm shadow">
+                  🏛️
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold leading-none">ગુજરાત જન સેવા કેન્દ્ર</span>
+                    <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 text-white flex items-center justify-center text-[9px] font-black">✓</span>
+                  </div>
+                  <p className="text-[10px] text-emerald-200">સત્તાવાર સરકારી WhatsApp બોટ • ઑનલાઇન</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setWhatsAppModalOpen(false)}
+                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* WhatsApp Chat Body */}
+            <div className="p-3.5 space-y-3 text-xs max-h-[75vh] overflow-y-auto">
+              {/* Outgoing Message */}
+              <div className="flex justify-end">
+                <div className="bg-[#DCF8C6] rounded-xl rounded-tr-none p-2.5 shadow-sm max-w-[80%] text-[11px]">
+                  <p>નમસ્તે, મારો ટોકન સ્ટેટસ જણાવો.</p>
+                  <span className="text-[9px] text-slate-400 block text-right mt-0.5">10:32 AM ✓✓</span>
+                </div>
+              </div>
+
+              {/* Incoming Bot Message */}
+              <div className="flex justify-start">
+                <div className="bg-white rounded-xl rounded-tl-none p-3 shadow-sm max-w-[92%] space-y-2 border border-slate-200">
+                  <div className="border-b border-slate-100 pb-1.5">
+                    <span className="text-[10px] font-black text-[#075E54] uppercase tracking-wider">
+                      🏛️ ગુજરાત ઈ-જન સેવા બુકિંગ કન્ફર્મેશન
+                    </span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    નમસ્તે <strong>{citizenName}</strong>, આપની એપોઇન્ટમેન્ટ કન્ફર્મ થયેલ છે.
+                  </p>
+                  
+                  <div className="bg-emerald-50 rounded-lg p-2 border border-emerald-200 space-y-1 text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">ટોકન ક્રમાંક:</span>
+                      <span className="font-bold text-[#075E54] font-mono">{booking.tokenNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">કચેરી:</span>
+                      <span className="font-semibold text-slate-800">{booking.taluka.officeNameGu}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">કાઉન્ટર:</span>
+                      <span className="font-bold text-[#075E54]">કાઉન્ટર {booking.counterNumber}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">સમય સ્લોટ:</span>
+                      <span className="font-bold text-slate-800">{currentSlotTime}</span>
+                    </div>
+                  </div>
+
+                  {/* Interactive WhatsApp Buttons */}
+                  <div className="pt-2 space-y-1.5">
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.taluka.officeNameGu + ' ' + booking.district.nameGu)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full bg-slate-50 hover:bg-slate-100 text-[#005A9C] font-bold py-1.5 px-3 rounded-lg border border-slate-200 flex items-center justify-center gap-1.5 text-[11px] transition"
+                    >
+                      <Navigation className="w-3.5 h-3.5" />
+                      <span>📍 કચેરી જીપીએસ નકશો ખોલો</span>
+                    </a>
+
+                    <button
+                      onClick={() => {
+                        handleRunningLate();
+                      }}
+                      className="w-full bg-slate-50 hover:bg-slate-100 text-amber-800 font-bold py-1.5 px-3 rounded-lg border border-slate-200 flex items-center justify-center gap-1.5 text-[11px] transition"
+                    >
+                      <Clock className="w-3.5 h-3.5 text-amber-600" />
+                      <span>⏱️ મોડું થશે (+૩૬ મિનિટ સ્લોટ ખસેડો)</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        alert("આધાર કાર્ડ, આવકનો દાખલો અને ૨ ફોટા અસલ સાથે લાવવા.");
+                      }}
+                      className="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-1.5 px-3 rounded-lg border border-slate-200 flex items-center justify-center gap-1.5 text-[11px] transition"
+                    >
+                      <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>📋 જરૂરી અસલ કાગળોનું લિસ્ટ</span>
+                    </button>
+                  </div>
+
+                  <span className="text-[9px] text-slate-400 block text-right">10:32 AM</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#F0F2F5] p-3 border-t border-slate-200 text-center">
+              <button
+                onClick={() => setWhatsAppModalOpen(false)}
+                className="w-full bg-[#075E54] hover:bg-[#054c44] text-white font-bold py-2 rounded-xl text-xs transition"
+              >
+                બંધ કરો (Close WhatsApp Simulator)
               </button>
             </div>
           </div>
