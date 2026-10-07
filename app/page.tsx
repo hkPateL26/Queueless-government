@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   ShieldCheck, MapPin, Lock, Clock, Search, ArrowRight, 
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
+import { subscribeToQueueEvents } from '@/lib/realtime-bus';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { SchemesCatalog } from '@/components/SchemesCatalog';
 import { SchemeDrawer } from '@/components/SchemeDrawer';
@@ -327,16 +329,16 @@ export default function Home() {
                       <p className="text-[10px] text-slate-400">Mohanbhai Patel • Rajkot Rural</p>
                     </div>
                   </button>
-                  <button
-                    onClick={() => loginAsDemo('officer')}
-                    className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-blue-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C]"
+                  <Link
+                    href="/admin/counter"
+                    className="w-full text-left px-3 py-2 text-xs font-semibold hover:bg-blue-50 flex items-center gap-2.5 text-[#1F2937] hover:text-[#005A9C] border-t border-slate-100"
                   >
                     <span className="w-6 h-6 rounded-lg bg-blue-100 text-[#005A9C] flex items-center justify-center text-xs">🏛️</span>
                     <div>
-                      <p className="font-bold leading-tight">કચેરી લૉગિન (Kacheri Login)</p>
-                      <p className="text-[10px] text-slate-400">Counter 1 • Gondal Mamlatdar</p>
+                      <p className="font-bold leading-tight text-[#003366]">અધિકારી ડેસ્ક (Officer Console ➔)</p>
+                      <p className="text-[10px] text-slate-400">GSWAN Live Operator Screen</p>
                     </div>
-                  </button>
+                  </Link>
                   <div className="border-t border-slate-100 my-1" />
                   <button
                     onClick={resetSession}
@@ -380,6 +382,13 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/admin/counter"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 text-xs font-black transition active:scale-95 shadow-xs"
+            >
+              <Building className="w-3.5 h-3.5 text-[#005A9C]" />
+              <span>અધિકારી ડેસ્ક</span>
+            </Link>
             {!currentUser ? (
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
@@ -1141,6 +1150,15 @@ export default function Home() {
           <p className="text-[11px] text-slate-400">
             GRTSA 2013 Compliant • Designed for 33 Districts, 250+ Talukas, and 18,000+ Villages
           </p>
+          <div className="pt-2">
+            <Link
+              href="/admin/counter"
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-[#003366] rounded-lg font-bold text-xs transition"
+            >
+              <Building className="w-3.5 h-3.5 text-[#005A9C]" />
+              <span>🏛️ કાઉન્ટર ઓપરેટર કન્સોલ (Officer Desk)</span>
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
