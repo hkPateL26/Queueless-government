@@ -35,7 +35,7 @@ Queueless-government/
 ├── components/
 │   ├── SchemesCatalog.tsx        <-- [TRACK 1: main] ૩૯ સત્તાવાર યોજનાઓ કેટાલોગ
 │   ├── SchemeDrawer.tsx          <-- [TRACK 1: main] યોજના જરૂરી દસ્તાવેજ ડ્રોઅર
-│   ├── CameraScannerModal.tsx    <-- [TRACK 1: main] AI OCR & Google Drive અપલોડ
+│   ├── CameraScannerModal.tsx    <-- [TRACK 1: main] Document OCR & Pre-Verification (Client-Side OCR + Rule Engine)
 │   ├── SlotBookingModal.tsx      <-- [TRACK 1: main] ૩૩ જિલ્લા સરકારી સ્લોટ બુકિંગ શીટ
 │   ├── DigitalTokenPass.tsx      <-- [TRACK 1: main] ત્રિરંગા QR ડિજિટલ પાસ + મોડું થાય છે
 │   └── admin/                    <-- [TRACK 2: dev-hari] EXCLUSIVE ADMIN COMPONENTS
@@ -48,7 +48,7 @@ Queueless-government/
     ├── jurisdiction-data.ts      <-- ૩૩ જિલ્લા, ૨૫૦+ તાલુકા, જન સેવા કેન્દ્રો & કાઉન્ટર ૧-૬
     ├── slot-engine.ts            <-- ૧૦:૩૦-૧૮:૧૦ કેપ્ડ સ્લોટ્સ, લંચ બ્રેક & ૨૦૨૬ રજાઓ
     ├── schemes-data.ts           <-- ૩૯ સત્તાવાર ગુજરાત સરકારી યોજનાઓની વિગતો
-    ├── ocr-validator.ts          <-- AI દસ્તાવેજ કાનૂની નિયમ ચકાસણી એન્જિન
+    ├── ocr-validator.ts          <-- Client-Side OCR + Rule Engine (ઓટોમેટેડ પ્રી-ચેક)
     ├── realtime-bus.ts           <-- User & Admin વચ્ચેનું લાઈવ સિંક્રોનાઇઝેશન એન્જિન
     ├── voice.ts                  <-- ગુજરાતી Text-to-Speech (TTS via Web Speech API gu-IN)
     └── haptics.ts                <-- Mobile Haptic Feedback સિસ્ટમ (Web Vibration API)
@@ -65,7 +65,15 @@ Queueless-government/
   - **6 Detailed Counter Cards:** Counter 1 to 6 displaying Counter #, Department name, Officer name, Status with Color + Icon + Text (`🟢 OPEN`, `🟡 BUSY`, `🟡 LUNCH BREAK` with resume time), NOW SERVING, NEXT token, Waiting count, and Estimated wait time.
   - **Gujarati-First Accessibility:** Multi-modal notification channels (Visual `🟢 NOW SERVING`, Web Audio `🔔 Notification Chime`, Voice `🗣️ Gujarati Text-to-Speech (TTS)` via `gu-IN`, Haptic `📳 Mobile Haptic Feedback` with tap 15ms / success 40ms / warning 80ms / error [50,100,50]).
   - **One-Click Demo Personas:** Evaluation test personas (Mohanbhai Patel `#A-42`, Officer Counter 1, Reset Session) for instant evaluation without entering OTPs or phone numbers.
-- [x] **Phase 2:** ૩૯ ગુજરાત યોજનાઓ, AI OCR નિયમ એન્જિન (૨૦૨૬: <૨૦૨૩ એક્સપાયરી ચેક), CamScanner & Google Drive/Folder અપલોડ, 2FA સિવિક લોગિન.
+- [x] **Phase 2: 39 Schemes Discovery & Document Pre-Verification:**
+  - **39 Schemes Discovery Catalog:** ૩૯ સેવાઓ/યોજનાઓ, કેટેગરી ફિલ્ટરિંગ, સર્ચ, "Can I Apply?" યોગ્યતા પૂર્વાવલોકન, સંકેતાત્મક સહાય (Indicative Benefits), સત્તાવાર સરકારી વિભાગ સ્ત્રોત (Official Sources), સેવા ફી અને SLA પારદર્શકતા.
+  - **Client-Side OCR + Rule Engine:** દસ્તાવેજ OCR & પ્રી-વેરિફિકેશન પાઇપલાઇન (`Document Image ➔ OCR ➔ Extracted Data ➔ Rule Engine ➔ Pre-Verification Result`).
+  - **Automated Pre-Check (ઓટોમેટેડ પ્રી-ચેક):** કાનૂની સુરક્ષા સાથે `Pre-check Passed`, `Action Required`, અથવા `Needs Review` સ્ટેટસ; સ્પષ્ટ ડિસ્ક્લેમર: *"This is an automated pre-check. Final verification is performed by the authorized government officer."*
+  - **રૂલ એન્જિન & કોન્ફિગરેબલ વેલિડિટી:** આવક પ્રમાણપત્ર અને દસ્તાવેજો માટે તારીખ, યોજનાના નિયમ અને વર્તમાન તારીખ આધારિત ડાયનેમિક મૂલ્યાંકન.
+  - **નોન-બ્લોકિંગ સિટિઝન UX:** સ્કેન અનિશ્ચિતતામાં `Needs Review`, મેન્યુઅલ તારીખ સુધારો અથવા "Continue with officer review" વિકલ્પ (કોઈ પરમેનન્ટ ટોકન બ્લોક નહીં).
+  - **Aadhaar Privacy Masking & Identity Check:** માસ્ક્ડ આધાર (`XXXX-XXXX-8842` છેલ્લા ૪ આંકડા) અને Citizen Identity Check (મોબાઇલ OTP + આધાર લાસ્ટ-૪).
+  - **CamScanner Viewfinder & Demo Cloud Import:** ગુણવત્તા માર્ગદર્શિકા (sharpness, lighting, framing) અને સ્પષ્ટ "Cloud Import — Demo" / "DigiLocker Import — Demo".
+  - **ડિફેન્સિબલ પિચ ધ્યેય (Pitch Goal):** *"Our goal is to reduce avoidable counter rejections by helping citizens identify missing, unreadable, or potentially outdated documents before they visit the office."*
 - [x] **Phase 3:** ૩૩ જિલ્લા & તાલુકા જન સેવા કેન્દ્ર ઓટો-કાઉન્ટર રાઉટીંગ, સરકારી કેપ્ડ સ્લોટ એન્જિન (૫ ટોકન/કલાક), લંચ રિસેસ & રજાઓ બ્લોકર, સત્તાવાર ડિજિટલ પાસ (QR), "+૩ સ્લોટ / ૩૬ મિનિટ મોડું થાય છે" શિફ્ટર, ઑફલાઇન LocalStorage કૅશ, વોટ્સએપ બોટ સિમ્યુલેટર.
 - [x] **Phase 4:** ૧૦૦% મોબાઈલ રિસ્પોન્સિવ (૩૨૦px iPhone SE/Android ફિટ, ઝીરો વર્ડ કટ), બુલેટપ્રૂફ બેકગ્રાઉન્ડ બોડી સ્ક્રોલ લોક, આઉટસાઇડ ટેપ ક્લોઝ, નેટિવ બોટમ નેવિગેશન બાર, 48px ટચ ટાર્ગેટ્સ.
 - [x] **Phase 5A:** કાઉન્ટર ઓપરેટર ડેસ્ક (`app/admin/counter/page.tsx`), GSWAN ઓફિસર HUD, વરિષ્ઠ નાગરિક (#P-XX) અગ્રતા સોર્ટિંગ, AI OCR દસ્તાવેજ નિરીક્ષક, GRTSA ૧૫m કાનૂની SLA ક્લોક, કાઉન્ટર ટ્રાન્સફર, લંચ રિસેસ ટોગલ.

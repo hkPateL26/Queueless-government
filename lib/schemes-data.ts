@@ -8,17 +8,50 @@ export interface SchemeItem {
   department: string;
   benefit: string;
   benefitGu: string;
+  benefitType?: string;
+  maxIndicativeBenefit?: string;
   slaDays: number;
   fee: number;
   validityYears?: number;
+  eligibilityEn?: string;
+  eligibilityGu?: string;
+  applicationMethod?: string;
+  applicationMethodGu?: string;
+  officialSource?: string;
+  lastUpdated?: string;
   requiredDocs: Array<{
     nameGu: string;
     nameEn: string;
     checkType: 'income_expiry_3yr' | 'aadhaar_regex' | 'land_record_712' | 'caste_cert' | 'marksheet' | 'generic';
     required: boolean;
+    hintGu?: string;
   }>;
   validationRuleDesc: string;
 }
+
+export const getSchemeOfficialSource = (scheme: SchemeItem): { source: string; lastUpdated: string; isReferenceOnly: boolean } => {
+  return {
+    source: scheme.officialSource || `${scheme.department} • Department Guidelines`,
+    lastUpdated: scheme.lastUpdated || '2026',
+    isReferenceOnly: true,
+  };
+};
+
+export const getSchemeEligibility = (scheme: SchemeItem): { en: string; gu: string } => {
+  return {
+    en: scheme.eligibilityEn || 'Gujarat resident citizens meeting departmental income and category guidelines.',
+    gu: scheme.eligibilityGu || 'ગુજરાતના કાયમી રહેવાસી અને સંબંધિત વિભાગના આવક/વર્ગ માપદંડ ધરાવતા નાગરિકો.',
+  };
+};
+
+export const getSchemeStructuredBenefit = (scheme: SchemeItem): { headlineEn: string; headlineGu: string; detailEn: string; detailGu: string } => {
+  return {
+    headlineEn: scheme.benefitType || 'Benefit: Indicative subsidy / service (amount depends on applicable category/rules)',
+    headlineGu: 'યોજના લાભ: સરકારી સહાય / સબસિડી (નિયમાનુસાર પાત્રતા આધારે)',
+    detailEn: scheme.benefit,
+    detailGu: scheme.benefitGu,
+  };
+};
 
 export const ALL_YOJANAS: SchemeItem[] = [
   // 🌾 1. AGRICULTURE & FARMING (12 SCHEMES)

@@ -212,9 +212,9 @@ export default function Home() {
     setActiveScheme(scheme);
     if (!currentUser) {
       triggerHaptic('warning');
-      speakGuidance("ટોકન મેળવવા માટે પહેલાં નાગરિક લૉગિન કરવું ફરજિયાત છે.");
+      speakGuidance("ટોકન મેળવવા માટે પહેલાં નાગરિક ઓળખ ચકાસણી કરવી જરૂરી છે.");
       setPendingTokenScheme(scheme);
-      setLoginPromptReason(`🔒 "${scheme.titleGu}" નો કચેરી ટોકન કલેક્ટ કરવા માટે નાગરિક લૉગિન (2FA Civic Login) ફરજિયાત છે.`);
+      setLoginPromptReason(`🔒 "${scheme.titleGu}" નો કચેરી ટોકન કલેક્ટ કરવા માટે નાગરિક ઓળખ ચકાસણી (Citizen Identity Check) જરૂરી છે.`);
       setDrawerOpen(false);
       setAuthModalOpen(true);
       return;
@@ -232,9 +232,9 @@ export default function Home() {
 
     if (!currentUser) {
       triggerHaptic('warning');
-      speakGuidance("દસ્તાવેજ પ્રમાણિત! ટોકન મેળવવા માટે પહેલાં નાગરિક લૉગિન કરો.");
+      speakGuidance("દસ્તાવેજ પ્રી-ચેક સફળ! ટોકન ફાળવણી માટે નાગરિક ઓળખ ચકાસણી કરો.");
       setPendingTokenScheme(activeScheme);
-      setLoginPromptReason(`🔒 દસ્તાવેજ પ્રમાણિત! "${activeScheme.titleGu}" નો ટોકન ફાળવવા માટે નાગરિક ઓળખ ચકાસણી (Login) ફરજિયાત છે.`);
+      setLoginPromptReason(`🔒 પ્રી-ચેક પૂર્ણ! "${activeScheme.titleGu}" નો ટોકન ફાળવવા માટે નાગરિક ઓળખ ચકાસણી (Citizen Identity Check) જરૂરી છે.`);
       setScannerOpen(false);
       setDrawerOpen(false);
       setAuthModalOpen(true);
@@ -435,8 +435,11 @@ export default function Home() {
                   className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-200 shrink-0"
                 />
                 <div className="text-left text-xs leading-none">
-                  <p className="font-extrabold text-[#003366] text-[11px] sm:text-xs truncate max-w-[90px] sm:max-w-none">{currentUser.name}</p>
-                  <p className="text-[9px] text-[#FF9933] font-bold hidden sm:block">{currentUser.role} • {currentUser.area}</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] bg-amber-100 text-amber-800 font-extrabold px-1.5 py-0.5 rounded border border-amber-200">🧪 DEMO MODE</span>
+                    <p className="font-extrabold text-[#003366] text-[11px] sm:text-xs truncate max-w-[120px] sm:max-w-none">{currentUser.name}</p>
+                  </div>
+                  <p className="text-[9px] text-[#FF9933] font-bold hidden sm:block mt-0.5">{currentUser.role} • {currentUser.area}</p>
                 </div>
                 <button onClick={resetSession} className="ml-0.5 text-slate-400 hover:text-red-500 text-xs p-1 cursor-pointer">
                   <RotateCcw className="w-3 h-3" />
@@ -516,7 +519,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-[#138808] shrink-0" />
-                  <span>Secure 2FA & GRTSA</span>
+                  <span>Citizen Identity & Masked Aadhaar</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
@@ -1263,7 +1266,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 2FA AUTH MODAL */}
+      {/* CITIZEN IDENTITY CHECK MODAL */}
       {authModalOpen && (
         <div 
           onClick={() => setAuthModalOpen(false)}
@@ -1284,8 +1287,8 @@ export default function Home() {
               <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#005A9C] flex items-center justify-center mx-auto text-xl mb-3">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-black text-[#003366]">2FA Civic Login</h3>
-              <p className="text-xs text-slate-500 mt-1">Mobile OTP + Citizen Aadhaar Verification</p>
+              <h3 className="text-xl font-black text-[#003366]">Citizen Identity Check</h3>
+              <p className="text-xs text-slate-500 mt-1">Mobile OTP + Aadhaar Last-4 (નાગરિક ઓળખ ચકાસણી)</p>
             </div>
 
             {loginPromptReason && (
@@ -1326,15 +1329,19 @@ export default function Home() {
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                   <span>Aadhaar Card Last 4 Digits (આધાર છેલ્લા ૪ આંકડા)</span>
-                  <span className="text-[10px] text-slate-400">UIDAI Safe</span>
+                  <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Aadhaar Masking</span>
                 </label>
                 <input
                   type="password"
                   value={aadhaar4}
                   onChange={(e) => setAadhaar4(e.target.value)}
                   maxLength={4}
+                  placeholder="••••"
                   className="w-full text-xs font-medium rounded-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C] tracking-widest text-center text-base"
                 />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  🔒 Aadhaar Number Masking: Only last 4 digits are used for token identity verification. Full Aadhaar numbers are never stored.
+                </p>
               </div>
 
               <div className="pt-1">
@@ -1342,7 +1349,7 @@ export default function Home() {
                   onClick={() => loginAsDemo('farmer')}
                   className="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-2 transition"
                 >
-                  <span>⚡ ઝડપી નાગરિક લૉગિન (Nagrik Login)</span>
+                  <span>⚡ Enter Demo as Mohanbhai (ઝડપી ડેમો)</span>
                 </button>
               </div>
 

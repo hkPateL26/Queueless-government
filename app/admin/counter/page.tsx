@@ -48,9 +48,9 @@ const INITIAL_QUEUE: QueueCitizen[] = [
     status: 'WAITING',
     aadhaarLast4: '7104',
     incomeDeclared: '₹ ૯૫,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ AI ચકાસણી સફળ: આવક ₹૯૫,૦૦૦ (મામલતદાર મર્યાદા હેઠળ માન્ય)',
+    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૯૫,૦૦૦ (નિયમ મુજબ મર્યાદા હેઠળ)',
     documents: [
-      { name: 'આધાર કાર્ડ (UIDAI Verified)', status: 'VERIFIED' },
+      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-7104)', status: 'VERIFIED' },
       { name: 'પતિના અવસાનનો દાખલો', status: 'VERIFIED' },
       { name: 'આવકનો દાખલો (સક્ષમ અધિકારી)', status: 'VERIFIED' }
     ]
@@ -68,9 +68,9 @@ const INITIAL_QUEUE: QueueCitizen[] = [
     status: 'WAITING',
     aadhaarLast4: '8842',
     incomeDeclared: '₹ ૧,૨૦,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ AI ચકાસણી સફળ: આવક ₹૧,૨૦,૦૦૦ (તલાટી રિપોર્ટ માન્ય)',
+    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૧,૨૦,૦૦૦ (તલાટી રિપોર્ટ સુસંગત)',
     documents: [
-      { name: 'આધાર કાર્ડ (UIDAI Verified)', status: 'VERIFIED' },
+      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-8842)', status: 'VERIFIED' },
       { name: 'ચાલુ વર્ષનો આવકનો દાખલો', status: 'VERIFIED' },
       { name: 'રેશન કાર્ડ નકલ', status: 'VERIFIED' }
     ]
@@ -88,9 +88,9 @@ const INITIAL_QUEUE: QueueCitizen[] = [
     status: 'WAITING',
     aadhaarLast4: '4192',
     incomeDeclared: '₹ ૨,૪૦,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ AI ચકાસણી સફળ: આવક ₹૨,૪૦,૦૦૦ (EWS મર્યાદા હેઠળ)',
+    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૨,૪૦,૦૦૦ (EWS મર્યાદા હેઠળ)',
     documents: [
-      { name: 'આધાર કાર્ડ (UIDAI)', status: 'VERIFIED' },
+      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-4192)', status: 'VERIFIED' },
       { name: 'આવક પંચનામું', status: 'VERIFIED' }
     ]
   },
@@ -107,9 +107,9 @@ const INITIAL_QUEUE: QueueCitizen[] = [
     status: 'WAITING',
     aadhaarLast4: '9921',
     incomeDeclared: '₹ ૧,૫૦,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ AI ચકાસણી સફળ: દસ્તાવેજો યોગ્ય',
+    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: દસ્તાવેજો યોગ્ય',
     documents: [
-      { name: 'આધાર કાર્ડ', status: 'VERIFIED' },
+      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-9921)', status: 'VERIFIED' },
       { name: 'લગ્ન નોંધણી પ્રમાણપત્ર', status: 'VERIFIED' }
     ]
   }
@@ -545,15 +545,15 @@ export default function CounterOperatorDesk() {
                     </div>
                   </div>
 
-                  {/* AI OCR Verification Box */}
+                  {/* OCR & Pre-Verification Box */}
                   <div className="bg-emerald-50/80 border border-emerald-300 rounded-2xl p-3.5 space-y-2">
                     <div className="flex items-center justify-between text-xs font-black text-emerald-900">
                       <span className="flex items-center gap-1.5">
                         <Sparkles className="w-4 h-4 text-emerald-600" />
-                        AI OCR સ્વચાલિત દસ્તાવેજ ચકાસણી સીલ
+                        દસ્તાવેજ OCR & પ્રી-વેરિફિકેશન (Pre-check Passed)
                       </span>
                       <span className="text-[10px] bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-full">
-                        ૧૦૦% મેળ બેસે છે
+                        ઓટોમેટેડ પ્રી-ચેક
                       </span>
                     </div>
                     <p className="text-xs text-emerald-800 font-semibold leading-relaxed">
@@ -816,14 +816,14 @@ export default function CounterOperatorDesk() {
                     <span className="font-bold text-slate-800">{doc.name}</span>
                   </div>
                   <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                    AI ચકાસાયેલ (Valid)
+                    પ્રી-ચેક પાસ (Pre-check Passed)
                   </span>
                 </div>
               ))}
             </div>
 
             <div className="bg-blue-50 p-3 rounded-xl border border-blue-200 text-[11px] text-[#003366]">
-              <strong>મામલતદાર ઓથોરાઈઝેશન:</strong> આ દસ્તાવેજો AI OCR સિક્યોર વેરિફિકેશન સિસ્ટમ દ્વારા ચકાસાયેલ છે. અસલ સહી-સિક્કા વગર ડિજિટલ મંજૂરી માન્ય ગણાશે.
+              <strong>અધિકારી નિરીક્ષણ સૂચના:</strong> આ દસ્તાવેજોનું સિસ્ટમ પ્રી-ચેક (OCR + Rule Engine) પૂર્ણ થયેલ છે. આખરી ખરાઈ અને મંજૂરી અધિકૃત સરકારી અધિકારી દ્વારા કરવામાં આવે છે.
             </div>
 
             <button
