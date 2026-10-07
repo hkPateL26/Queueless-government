@@ -110,6 +110,9 @@ export function SlotBookingModal({
     return scheme ? getProcessingTimelineInfo(scheme) : null;
   }, [scheme]);
 
+  const isEn = lang === 'en';
+  const isHi = lang === 'hi';
+
   // Handle District Change
   const handleDistrictChange = (distId: string) => {
     setSelectedDistrictId(distId);
@@ -304,14 +307,16 @@ export function SlotBookingModal({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold">
-                  {lang === 'gu' ? 'અધિકારક્ષેત્ર & સ્લોટ બુકિંગ' : 'Jurisdiction Routing & Appointment Scheduling'}
+                  {isEn ? 'Jurisdiction Routing & Appointment Scheduling' : isHi ? 'अधिकार क्षेत्र और अपॉइंटमेंट शेड्यूलिंग' : 'અધિકારક્ષેત્ર & સ્લોટ બુકિંગ'}
                 </h3>
                 <span className="bg-[#005A9C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-400">
-                  કેપેસિટી કંટ્રોલ્ડ
+                  {isEn ? 'Capacity Controlled' : isHi ? 'क्षमता नियंत्रित' : 'કેપેસિટી કંટ્રોલ્ડ'}
                 </span>
               </div>
               <p className="text-xs text-blue-200 mt-0.5">
-                {scheme ? scheme.titleGu : 'ગુજરાતના તમામ ૩૩ જિલ્લાઓ & તાલુકા કેન્દ્રો'}
+                {scheme 
+                  ? (isEn ? scheme.titleEn : scheme.titleGu) 
+                  : (isEn ? 'All 33 Districts & Taluka Centers of Gujarat' : 'ગુજરાતના તમામ ૩૩ જિલ્લાઓ & તાલુકા કેન્દ્રો')}
               </p>
             </div>
           </div>
@@ -345,15 +350,19 @@ export function SlotBookingModal({
                   <span className="text-xl">🏛️</span>
                   <div>
                     <h4 className="text-xs sm:text-sm font-black text-amber-950 uppercase tracking-wide">
-                      મુલાકાત પૂર્વે સત્તાવાર માહિતી (Pre-Booking Essential Guidance)
+                      {isEn 
+                        ? 'Pre-Booking Essential Guidance (Official Reference)' 
+                        : isHi 
+                        ? 'अपॉइंटमेंट पूर्व आवश्यक मार्गदर्शन (आधिकारिक)' 
+                        : 'મુલાકાત પૂર્વે સત્તાવાર માહિતી (Pre-Booking Essential Guidance)'}
                     </h4>
                     <p className="text-[11px] text-amber-800 font-semibold">
-                      {scheme.titleGu} • {scheme.department}
+                      {isEn ? scheme.titleEn : scheme.titleGu} • {scheme.department}
                     </p>
                   </div>
                 </div>
                 <span className="text-[10px] font-bold bg-amber-200/80 text-amber-950 px-2 py-0.5 rounded-md shrink-0">
-                  સેવા વિગતો
+                  {isEn ? 'Service Details' : isHi ? 'सेवा विवरण' : 'સેવા વિગતો'}
                 </span>
               </div>
 
@@ -365,17 +374,21 @@ export function SlotBookingModal({
                   <div>
                     <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
                       <FileCheck className="w-3.5 h-3.5 text-[#005A9C]" />
-                      <span>૧. જરૂરી કાગળો?</span>
+                      <span>{isEn ? '1. Required Docs?' : isHi ? '१. आवश्यक दस्तावेज?' : '૧. જરૂરી કાગળો?'}</span>
                     </span>
                     <p className="text-xs font-black text-[#003366] mt-1.5">
-                      {scheme.requiredDocs.length} દસ્તાવેજો જરૂરી
+                      {isEn 
+                        ? `${scheme.requiredDocs.length} Docs Required` 
+                        : isHi 
+                        ? `${scheme.requiredDocs.length} दस्तावेज आवश्यक` 
+                        : `${scheme.requiredDocs.length} દસ્તાવેજો જરૂરી`}
                     </p>
                     <p className="text-[10px] text-slate-500 mt-0.5 leading-tight line-clamp-2">
-                      {scheme.requiredDocs.map(d => d.nameGu).join(', ')}
+                      {scheme.requiredDocs.map(d => isEn ? d.nameEn : d.nameGu).join(', ')}
                     </p>
                   </div>
                   <p className="text-[9px] text-[#005A9C] font-bold mt-2 pt-1 border-t border-slate-100">
-                    અસલ + ઝેરોક્ષ સાથે રાખવી
+                    {isEn ? 'Carry Original + Photocopy' : isHi ? 'मूल + फोटोकॉपी साथ रखें' : 'અસલ + ઝેરોક્ષ સાથે રાખવી'}
                   </p>
                 </div>
 
@@ -384,17 +397,21 @@ export function SlotBookingModal({
                   <div>
                     <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
                       <IndianRupee className="w-3.5 h-3.5 text-[#138808]" />
-                      <span>૨. સરકારી ફી કેટલી?</span>
+                      <span>{isEn ? '2. Govt Fee?' : isHi ? '२. सरकारी शुल्क?' : '૨. સરકારી ફી કેટલી?'}</span>
                     </span>
                     <p className="text-sm font-black text-[#138808] mt-1.5">
-                      {scheme.fee === 0 ? '₹૦ (સંપૂર્ણ મફત)' : `₹${scheme.fee}`}
+                      {scheme.fee === 0 
+                        ? (isEn ? '₹0 (Free)' : isHi ? '₹० (मुफ्त)' : '₹૦ (સંપૂર્ણ મફત)') 
+                        : `₹${scheme.fee}`}
                     </p>
                     <p className="text-[10px] text-slate-500 mt-0.5">
-                      {scheme.fee === 0 ? 'કોઈ સરકારી ચાર્જ નથી' : 'નિયત સરકારી સેવા ફી'}
+                      {scheme.fee === 0 
+                        ? (isEn ? 'No government charge' : 'કોઈ સરકારી ચાર્જ નથી') 
+                        : (isEn ? 'Authorized service charge' : 'નિયત સરકારી સેવા ફી')}
                     </p>
                   </div>
                   <p className="text-[9px] text-slate-400 font-medium mt-2 pt-1 border-t border-slate-100">
-                    કાઉન્ટર પર સત્તાવાર રસીદ
+                    {isEn ? 'Official counter receipt' : 'કાઉન્ટર પર સત્તાવાર રસીદ'}
                   </p>
                 </div>
 
@@ -403,33 +420,35 @@ export function SlotBookingModal({
                   <div>
                     <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5 text-[#FF9933]" />
-                      <span>૩. કેટલો સમય લાગશે?</span>
+                      <span>{isEn ? '3. How Long Will It Take?' : isHi ? '३. कितना समय लगेगा?' : '૩. કેટલો સમય લાગશે?'}</span>
                     </span>
                     <p className="text-xs font-black text-[#003366] mt-1.5 leading-snug">
                       {timelineInfo.isVaries ? (
-                        <span className="text-amber-800">અલગ હોઈ શકે છે (કચેરીએ ચકાસો)</span>
+                        <span className="text-amber-800">
+                          {isEn ? 'Varies (Confirm at office)' : isHi ? 'कार्यालय अनुसार अलग (जांचें)' : 'અલગ હોઈ શકે છે (કચેરીએ ચકાસો)'}
+                        </span>
                       ) : (
-                        timelineInfo.formattedTimeGu
+                        isEn ? timelineInfo.formattedTimeEn : timelineInfo.formattedTimeGu
                       )}
                     </p>
                     <div className="mt-1">
                       {scheme.slaType === 'statutory_grtsa' ? (
                         <span className="text-[8.5px] font-bold bg-blue-100 text-blue-900 px-1 py-0.5 rounded border border-blue-200">
-                          ⚖️ GRTSA કાનૂની સમયમર્યાદા
+                          {isEn ? '⚖️ GRTSA Statutory' : isHi ? '⚖️ GRTSA विधिक सीमा' : '⚖️ GRTSA કાનૂની સમયમર્યાદા'}
                         </span>
                       ) : scheme.slaType === 'departmental_norm' ? (
                         <span className="text-[8.5px] font-bold bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded">
-                          🏛️ સિટીઝન ચાર્ટર ધોરણ
+                          {isEn ? '🏛️ Citizen Charter' : isHi ? '🏛️ सिटीजन चार्टर' : '🏛️ સિટીઝન ચાર્ટર ધોરણ'}
                         </span>
                       ) : (
                         <span className="text-[8.5px] text-slate-600 bg-slate-100 px-1 py-0.5 rounded">
-                          📋 યોજના ચક્ર આધારિત
+                          {isEn ? '📋 Batch Scheme Cycle' : isHi ? '📋 योजना चक्र' : '📋 યોજના ચક્ર આધારિત'}
                         </span>
                       )}
                     </div>
                   </div>
                   <p className="text-[9px] text-slate-400 mt-2 pt-1 border-t border-slate-100 truncate" title={scheme.officialSource}>
-                    સ્ત્રોત: {scheme.officialSource}
+                    {isEn ? 'Source: ' : 'સ્ત્રોત: '}{scheme.officialSource}
                   </p>
                 </div>
 
@@ -438,17 +457,17 @@ export function SlotBookingModal({
                   <div>
                     <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
                       <Building2 className="w-3.5 h-3.5 text-[#003366]" />
-                      <span>૪. કચેરી પ્રતીક્ષા સમય?</span>
+                      <span>{isEn ? '4. Counter Wait Time?' : isHi ? '४. काउंटर प्रतीक्षा समय?' : '૪. કચેરી પ્રતીક્ષા સમય?'}</span>
                     </span>
                     <p className="text-xs font-black text-slate-800 mt-1.5">
-                      ~૧૫-૨૦ મિનિટ (કાઉન્ટર પર)
+                      {isEn ? '~15-20 min (Counter Duration)' : isHi ? '~१५-२० मिनट (काउंटर पर)' : '~૧૫-૨૦ મિનિટ (કાઉન્ટર પર)'}
                     </p>
                     <p className="text-[10px] text-slate-500 mt-0.5">
-                      સ્લોટ સમયે હાજર રહેવાથી લાઈન વગર કામ
+                      {isEn ? 'Zero-queue visit during slot' : isHi ? 'स्लॉट समय पर कतार-मुक्त कार्य' : 'સ્લોટ સમયે હાજર રહેવાથી લાઈન વગર કામ'}
                     </p>
                   </div>
                   <p className="text-[9px] text-emerald-700 font-bold mt-2 pt-1 border-t border-slate-100">
-                    નીચે સ્લોટ પસંદ કરો 👇
+                    {isEn ? 'Select Slot Below 👇' : isHi ? 'नीचे स्लॉट चुनें 👇' : 'નીચે સ્લોટ પસંદ કરો 👇'}
                   </p>
                 </div>
 
@@ -461,14 +480,14 @@ export function SlotBookingModal({
             <div className="flex items-center gap-2 mb-3">
               <MapPin className="w-4 h-4 text-[#005A9C]" />
               <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                પગલું ૧: જિલ્લો અને તાલુકો પસંદ કરો (District & Taluka)
+                {isEn ? 'Step 1: Select District & Taluka' : isHi ? 'चरण १: जिला और तालुका चुनें' : 'પગલું ૧: જિલ્લો અને તાલુકો પસંદ કરો (District & Taluka)'}
               </h4>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                  જિલ્લો (District)
+                  {isEn ? 'District' : isHi ? 'जिला' : 'જિલ્લો (District)'}
                 </label>
                 <select
                   value={selectedDistrictId}
@@ -477,7 +496,7 @@ export function SlotBookingModal({
                 >
                   {GUJARAT_33_DISTRICTS.map((dist) => (
                     <option key={dist.id} value={dist.id}>
-                      {dist.nameGu} ({dist.nameEn})
+                      {isEn ? `${dist.nameEn} (${dist.nameGu})` : `${dist.nameGu} (${dist.nameEn})`}
                     </option>
                   ))}
                 </select>
@@ -485,7 +504,7 @@ export function SlotBookingModal({
 
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                  તાલુકો (Taluka)
+                  {isEn ? 'Taluka' : isHi ? 'तालुका' : 'તાલુકો (Taluka)'}
                 </label>
                 <select
                   value={selectedTalukaId}
@@ -494,7 +513,7 @@ export function SlotBookingModal({
                 >
                   {selectedDistrict.talukas.map((tal) => (
                     <option key={tal.id} value={tal.id}>
-                      {tal.nameGu} - {tal.officeNameGu}
+                      {isEn ? `${tal.nameEn} - ${tal.officeNameEn}` : `${tal.nameGu} - ${tal.officeNameGu}`}
                     </option>
                   ))}
                 </select>
@@ -508,11 +527,11 @@ export function SlotBookingModal({
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#005A9C]" />
                 <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                  પગલું ૨: સેવા કેન્દ્ર પસંદ કરો (Service Center Selection)
+                  {isEn ? 'Step 2: Select Service Center' : isHi ? 'चरण २: सेवा केंद्र चुनें' : 'પગલું ૨: સેવા કેન્દ્ર પસંદ કરો (Service Center Selection)'}
                 </h4>
               </div>
               <span className="text-[10px] text-slate-500 font-semibold">
-                {serviceCenters.length} કેન્દ્રો ઉપલબ્ધ
+                {isEn ? `${serviceCenters.length} centers available` : `${serviceCenters.length} કેન્દ્રો ઉપલબ્ધ`}
               </span>
             </div>
 
@@ -537,23 +556,23 @@ export function SlotBookingModal({
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-xs font-bold text-[#003366] flex items-center gap-1.5">
                           <span>📍</span>
-                          <span>{center.nameGu}</span>
+                          <span>{isEn ? center.nameEn : center.nameGu}</span>
                         </span>
                         {isSelected && (
                           <CheckCircle2 className="w-4 h-4 text-[#005A9C] shrink-0" />
                         )}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        {center.addressGu}
+                        {isEn ? center.addressEn : center.addressGu}
                       </p>
                     </div>
 
                     <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
                       <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        અંદાજિત અંતર: ~{center.distanceKm} કિ.મી.
+                        {isEn ? `Est Distance: ~${center.distanceKm} km` : `અંદાજિત અંતર: ~${center.distanceKm} કિ.મી.`}
                       </span>
                       <span className="text-slate-500 font-medium">
-                        {center.availabilityNoteGu || 'સેવા ઉપલબ્ધ'}
+                        {isEn ? (center.availabilityNoteEn || 'Service Available') : (center.availabilityNoteGu || 'સેવા ઉપલબ્ધ')}
                       </span>
                     </div>
                   </button>
@@ -565,10 +584,14 @@ export function SlotBookingModal({
             <div className="mt-3 p-2.5 bg-blue-50/70 border border-blue-200/80 rounded-lg text-xs text-[#003366] flex flex-col sm:flex-row sm:items-center justify-between gap-1">
               <span className="font-semibold flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-[#005A9C]" />
-                <span>કચેરી કામકાજનો સમય: <strong>{selectedCenter.config.serviceHours.displayGu}</strong></span>
+                <span>
+                  {isEn 
+                    ? <>Office Hours: <strong>{selectedCenter.config.serviceHours.displayEn}</strong></> 
+                    : <>કચેરી કામકાજનો સમય: <strong>{selectedCenter.config.serviceHours.displayGu}</strong></>}
+                </span>
               </span>
               <span className="text-[11px] text-slate-600">
-                (ભોજન રિસેસ: {selectedCenter.config.lunchBreak.displayGu})
+                ({isEn ? `Lunch Break: ${selectedCenter.config.lunchBreak.displayEn}` : `ભોજન રિસેસ: ${selectedCenter.config.lunchBreak.displayGu}`})
               </span>
             </div>
           </section>
@@ -578,7 +601,7 @@ export function SlotBookingModal({
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="w-4 h-4 text-[#005A9C]" />
               <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                પગલું ૩: મુલાકાતની તારીખ પસંદ કરો (Holiday Calendar Validated)
+                {isEn ? 'Step 3: Select Visit Date (Holiday Calendar Validated)' : isHi ? 'चरण ३: यात्रा की तिथि चुनें' : 'પગલું ૩: મુલાકાતની તારીખ પસંદ કરો (Holiday Calendar Validated)'}
               </h4>
             </div>
 
@@ -597,7 +620,11 @@ export function SlotBookingModal({
               />
 
               <div className="text-[11px] text-gray-500 leading-tight">
-                રવિવાર & ૨જા/૪થા શનિવારે જાહેર રજા | સત્તાવાર રજા યાદી આધારે માન્ય
+                {isEn 
+                  ? 'Sunday & 2nd/4th Saturday official holiday | Validated per Gujarat official gazette' 
+                  : isHi 
+                  ? 'रविवार एवं २रे/४थे शनिवार को सरकारी अवकाश | आधिकारिक गजट अनुसार' 
+                  : 'રવિવાર & ૨જા/૪થા શનિવારે જાહેર રજા | સત્તાવાર રજા યાદી આધારે માન્ય'}
               </div>
             </div>
 
@@ -607,16 +634,16 @@ export function SlotBookingModal({
                 <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                 <div className="text-xs">
                   <h5 className="font-bold text-red-900 flex items-center gap-2">
-                    <span>આ તારીખે કચેરી બંધ રહેશે (Office Closed)</span>
+                    <span>{isEn ? 'Office Closed on Selected Date' : isHi ? 'इस तिथि को कार्यालय बंद रहेगा' : 'આ તારીખે કચેરી બંધ રહેશે (Office Closed)'}</span>
                     <span className="bg-red-200 text-red-900 text-[10px] px-2 py-0.2 rounded-full font-bold">
-                      નો-બુકિંગ દિવસ
+                      {isEn ? 'No-Booking Day' : isHi ? 'नो-बुकिंग दिवस' : 'નો-બુકિંગ દિવસ'}
                     </span>
                   </h5>
                   <p className="mt-1 text-red-700 font-medium">
-                    {holidayCheck.reasonGu}
+                    {isEn ? (holidayCheck.reasonEn || holidayCheck.reasonGu) : isHi ? (holidayCheck.reasonEn || holidayCheck.reasonGu) : holidayCheck.reasonGu}
                   </p>
                   <p className="text-[10px] text-red-600 font-mono mt-0.5">
-                    સ્ત્રોત: {holidayCheck.source || GUJARAT_HOLIDAY_CALENDAR_METADATA.source}
+                    {isEn ? 'Source:' : isHi ? 'स्रोत:' : 'સ્ત્રોત:'} {holidayCheck.source || GUJARAT_HOLIDAY_CALENDAR_METADATA.source}
                   </p>
                 </div>
               </div>
@@ -629,11 +656,15 @@ export function SlotBookingModal({
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#005A9C]" />
                 <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                  પગલું ૪: ઉપલબ્ધ સમય સ્લોટ (ક્ષમતા મર્યાદા: {selectedCenter.config.defaultCapacityPerHour} સ્લોટ/કલાક)
+                  {isEn 
+                    ? `Step 4: Available Time Slots (Cap: ${selectedCenter.config.defaultCapacityPerHour} slots/hr)` 
+                    : isHi 
+                    ? `चरण ४: उपलब्ध समय स्लॉट (क्षमता: ${selectedCenter.config.defaultCapacityPerHour} स्लॉट/घंटा)` 
+                    : `પગલું ૪: ઉપલબ્ધ સમય સ્લોટ (ક્ષમતા મર્યાદા: ${selectedCenter.config.defaultCapacityPerHour} સ્લોટ/કલાક)`}
                 </h4>
               </div>
               <span className="text-[10px] font-semibold text-slate-500">
-                ભીડ નિયંત્રણ માટે કલાકદીઠ સીમિત સ્લોટ્સ
+                {isEn ? 'Capped hourly slots to prevent hall overcrowding' : isHi ? 'भीड़ नियंत्रण हेतु प्रति घंटा सीमित स्लॉट' : 'ભીડ નિયંત્રણ માટે કલાકદીઠ સીમિત સ્લોટ્સ'}
               </span>
             </div>
 
@@ -781,26 +812,30 @@ export function SlotBookingModal({
             />
             <div className="text-xs text-amber-950 font-bold cursor-pointer select-none flex-1">
               <label htmlFor="priority-check" className="flex flex-wrap items-center gap-1.5 text-[#003366] font-black cursor-pointer">
-                <span>♿ પ્રાથમિકતા અપોઇન્ટમેન્ટ સપોર્ટ (Priority Appointment)</span>
+                <span>{isEn ? '♿ Priority Appointment Support (Senior / Divyang)' : isHi ? '♿ प्राथमिकता अपॉइंटमेंट सहायता' : '♿ પ્રાથમિકતા અપોઇન્ટમેન્ટ સપોર્ટ (Priority Appointment)'}</span>
                 <span className="bg-[#FF9933] text-slate-900 text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">
-                  વહીવટી અગ્રતા નીતિ
+                  {isEn ? 'Priority Policy' : isHi ? 'प्राथमिकता नीति' : 'વહીવટી અગ્રતા નીતિ'}
                 </span>
               </label>
               <p className="text-[11px] text-amber-900/80 font-medium mt-0.5">
-                વરિષ્ઠ નાગરિકો (૬૦+) અથવા દિવ્યાંગજનો માટે વહીવટી માર્ગદર્શિકા હેઠળ પ્રાથમિકતા ફ્લેગ (#P-) ફાળવવામાં આવે છે.
+                {isEn 
+                  ? 'Senior citizens (60+) or Divyangjan are issued a priority token (#P-) under Gujarat public service guidelines.'
+                  : isHi 
+                  ? 'वरिष्ठ नागरिकों (६०+) या दिव्यांगजनों के लिए प्राथमिकता टोकन (#P-) प्रदान किया जाता है।' 
+                  : 'વરિષ્ઠ નાગરિકો (૬૦+) અથવા દિવ્યાંગજનો માટે વહીવટી માર્ગદર્શિકા હેઠળ પ્રાથમિકતા ફ્લેગ (#P-) ફાળવવામાં આવે છે.'}
               </p>
 
               {isPriority && (
                 <div className="mt-2.5 pt-2 border-t border-amber-200/80 flex items-center gap-2">
-                  <span className="text-[10px] text-slate-600">કેટેગરી:</span>
+                  <span className="text-[10px] text-slate-600">{isEn ? 'Category:' : isHi ? 'श्रेणी:' : 'કેટેગરી:'}</span>
                   <select
                     value={priorityCategory}
                     onChange={(e) => setPriorityCategory(e.target.value as PriorityCategory)}
                     className="bg-white border border-amber-300 rounded px-2 py-1 text-xs text-amber-900 font-bold focus:outline-none"
                   >
-                    <option value="senior_citizen">વરિષ્ઠ નાગરિક (૬૦+ વર્ષ)</option>
-                    <option value="divyangjan">દિવ્યાંગજન અગ્રતા</option>
-                    <option value="medical_priority">તાત્કાલિક તબીબી અગ્રતા</option>
+                    <option value="senior_citizen">{isEn ? 'Senior Citizen (60+ yrs)' : isHi ? 'वरिष्ठ नागरिक (६०+ वर्ष)' : 'વરિષ્ઠ નાગરિક (૬૦+ વર્ષ)'}</option>
+                    <option value="divyangjan">{isEn ? 'Divyangjan Priority' : isHi ? 'दिव्यांगजन प्राथमिकता' : 'દિવ્યાંગજન અગ્રતા'}</option>
+                    <option value="medical_priority">{isEn ? 'Urgent Medical Priority' : isHi ? 'चिकित्सा आपात प्राथमिकता' : 'તાત્કાલિક તબીબી અગ્રતા'}</option>
                   </select>
                 </div>
               )}
@@ -818,7 +853,7 @@ export function SlotBookingModal({
             }}
             className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-200 transition"
           >
-            રદ કરો (Cancel)
+            {isEn ? 'Cancel' : isHi ? 'रद्द करें' : 'રદ કરો (Cancel)'}
           </button>
 
           <button
@@ -830,7 +865,7 @@ export function SlotBookingModal({
                 : 'bg-[#003366] hover:bg-[#002244] text-white hover:shadow-lg'
             }`}
           >
-            <span>ટોકન સ્લોટ કન્ફર્મ કરો</span>
+            <span>{isEn ? 'Confirm Appointment Slot' : isHi ? 'स्लॉट पुष्टि करें' : 'ટોકન સ્લોટ કન્ફર્મ કરો'}</span>
             <ArrowRight className="w-4 h-4 text-[#FF9933]" />
           </button>
         </div>
