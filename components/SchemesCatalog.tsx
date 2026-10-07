@@ -19,15 +19,20 @@ import { GovLogo } from '@/components/GovLogo';
 interface SchemesCatalogProps {
   onSelectScheme: (scheme: SchemeItem) => void;
   lang?: 'en' | 'gu' | 'hi';
+  maxItems?: number;
+  onViewAll?: () => void;
 }
 
 export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({ 
   onSelectScheme, 
-  lang = 'gu' 
+  lang = 'gu',
+  maxItems,
+  onViewAll
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [visibleCount, setVisibleCount] = useState<number>(maxItems || 9);
 
   const isEn = lang === 'en';
   const isHi = lang === 'hi';
@@ -106,6 +111,16 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
       return catMatch && searchMatch;
     });
   }, [selectedCategory, searchQuery]);
+
+  const displayedSchemes = useMemo(() => {
+    if (searchQuery.trim()) {
+      return filteredSchemes;
+    }
+    if (maxItems) {
+      return filteredSchemes.slice(0, maxItems);
+    }
+    return filteredSchemes.slice(0, visibleCount);
+  }, [filteredSchemes, searchQuery, maxItems, visibleCount]);
 
   return (
     <div className="space-y-6">
@@ -216,7 +231,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
 
       {/* Schemes Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredSchemes.map((scheme) => {
+        {displayedSchemes.map((scheme) => {
           const eligibility = getSchemeEligibility(scheme);
           const sourceInfo = getSchemeOfficialSource(scheme);
           const benefit = getSchemeStructuredBenefit(scheme);
@@ -391,6 +406,70 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
           );
         })}
       </div>
+
+      {/* Pagination & "View All 39 Schemes" Controls */}
+      {maxItems && displayedSchemes.length < filteredSchemes.length && (
+        <div className="bg-gradient-to-r from-blue-50 via-white to-amber-50 rounded-2xl p-4 sm:p-6 border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-center sm:text-left">
+          <div className="flex items-center gap-3">
+            <GovLogo className="w-10 h-10 shrink-0" />
+            <div>
+              <h4 className="font-black text-[#003366] text-sm sm:text-base">
+                {isEn 
+                  ? `Showing top ${displayedSchemes.length} of ${filteredSchemes.length} public services` 
+                  : isHi 
+                  ? `शीर्ष ${displayedSchemes.length} सेवाएं प्रदर्शित (कुल ${filteredSchemes.length} में से)` 
+                  : `મુખ્ય ${displayedSchemes.length} સેવાઓ દર્શાવેલ છે (કુલ ${filteredSchemes.length} સેવાઓમાંથી)`}
+              </h4>
+              <p className="text-xs text-slate-500">
+                {isEn 
+                  ? 'Access full directory with document checklists, official forms & online tracking.' 
+                  : isHi 
+                  ? 'सभी सरकारी सेवाओं, आवश्यक दस्तावेजों और ट्रैकिंग के लिए पूर्ण निर्देशिका खोलें।' 
+                  : 'બધા સરકારી દાખલા, જરૂરી પુરાવા અને યોજનાઓની વિગતવાર યાદી જોવા માટે અહીં ક્લિક કરો.'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              triggerHaptic('success');
+              if (onViewAll) onViewAll();
+              else setVisibleCount(filteredSchemes.length);
+            }}
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#003366] hover:bg-[#002244] text-white font-extrabold text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+          >
+            <span>
+              {isEn ? 'Explore All 39 Public Services →' : isHi ? 'सभी ३९ सरकारी सेवाएं देखें →' : 'તમામ ૩૯ સરકારી સેવાઓ જુઓ →'}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {!maxItems && visibleCount < filteredSchemes.length && (
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setVisibleCount(prev => Math.min(prev + 9, filteredSchemes.length));
+            }}
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-[#003366] font-bold text-xs shadow-xs transition"
+          >
+            {isEn 
+              ? `Load More (+9) • Showing ${displayedSchemes.length} of ${filteredSchemes.length}` 
+              : isHi 
+              ? `और देखें (+९) • ${displayedSchemes.length} / ${filteredSchemes.length}` 
+              : `વધુ ૯ યોજનાઓ જુઓ (+૯ વધુ) • ${displayedSchemes.length}/${filteredSchemes.length}`}
+          </button>
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setVisibleCount(filteredSchemes.length);
+            }}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005A9C] font-extrabold text-xs border border-blue-200 transition"
+          >
+            {isEn ? 'View All (39)' : isHi ? 'सभी ३९ देखें' : 'બધી ૩૯ યોજનાઓ જુઓ'}
+          </button>
+        </div>
+      )}
 
       {filteredSchemes.length === 0 && (
         <div className="text-center py-12 bg-white rounded-3xl border border-slate-200 p-8 space-y-2">

@@ -18,6 +18,7 @@ import { CameraScannerModal } from '@/components/CameraScannerModal';
 import { SlotBookingModal, BookingDetails } from '@/components/SlotBookingModal';
 import { DigitalTokenPass } from '@/components/DigitalTokenPass';
 import { GovLogo } from '@/components/GovLogo';
+import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
 
@@ -306,12 +307,15 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] pb-20 md:pb-0">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] pb-20 md:pb-0 w-full">
+      {/* 🚀 LIVE GUJARAT GOVERNMENT TELEMETRY & SYSTEM HEALTH MARQUEE (CPU, RAM, UPTIME, SERVER HEALTH) */}
+      <GovTelemetryMarquee lang={lang} />
+
       {/* TOP GOV-SERVICE BAR (Government-Service Visual Palette: Navy Blue #003366, Saffron #FF9933, India Green #138808) */}
-      <header className="bg-[#003366] text-white text-xs border-b border-blue-900 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-9 flex items-center justify-between">
+      <header className="bg-[#003366] text-white text-xs border-b border-blue-900 sticky top-0 z-40">
+        <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 h-9 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <span className="flex items-center gap-1 font-semibold text-white text-[10px] sm:text-xs truncate">
+            <span className="flex items-center gap-1.5 font-semibold text-white text-[10px] sm:text-xs truncate">
               <span className="w-2 h-2 rounded-full bg-[#138808] animate-pulse shrink-0" />
               <span className="hidden sm:inline">{t('topBarStatusLive', lang)}</span>
               <span className="sm:hidden">{lang === 'gu' ? 'નેટવર્ક • લાઈવ' : lang === 'hi' ? 'नेटवर्क • लाइव' : 'Network • Live'}</span>
@@ -482,8 +486,8 @@ export default function Home() {
       </header>
 
       {/* MAIN NAV */}
-      <nav className="bg-white border-b border-slate-200 sticky top-9 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+      <nav className="bg-white border-b border-slate-200 sticky top-9 z-30 shadow-xs">
+        <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 h-14 sm:h-16 flex items-center justify-between">
           <button onClick={() => setView('landing')} className="flex items-center gap-2 sm:gap-3 cursor-pointer">
             <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
             <div className="text-left">
@@ -563,11 +567,11 @@ export default function Home() {
       {/* VIEW: SERVICES & 39 YOJANAS BENTO CATALOG (PHASE 2 ENGINE) */}
       {/* ========================================================= */}
       {view === 'services' && (
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full">
+        <main className="flex-1 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
           <div className="mb-4">
             <button
               onClick={() => setView('landing')}
-              className="text-xs font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1 mb-2"
+              className="text-xs font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1 mb-2 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> {t('backToHome', lang)}
             </button>
@@ -580,8 +584,8 @@ export default function Home() {
       {/* VIEW 1: CITIZEN LANDING PAGE                              */}
       {/* ========================================================= */}
       {view === 'landing' && (
-        <main className="flex-1">
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <main className="flex-1 w-full">
+          <section className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 pt-8 sm:pt-10 pb-12 sm:pb-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#003366] text-xs font-semibold">
@@ -696,14 +700,19 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Quick Preview of Schemes on Landing */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-            <SchemesCatalog onSelectScheme={handleSelectScheme} lang={lang} />
+          {/* Curated Top Services Preview on Landing (Limits initial scroll length) */}
+          <section className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
+            <SchemesCatalog 
+              onSelectScheme={handleSelectScheme} 
+              lang={lang} 
+              maxItems={6}
+              onViewAll={() => setView('services')}
+            />
           </section>
 
           {/* STATS COUNTER */}
           <section className="bg-white border-t border-slate-200 py-8 sm:py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-14">
                 <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                   <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
@@ -750,7 +759,7 @@ export default function Home() {
       {/* VIEW 2: CITIZEN RADAR & DASHBOARD                          */}
       {/* ========================================================== */}
       {view === 'dashboard' && (
-        <section className="flex-1 bg-[#F5F7FA] flex flex-col md:flex-row">
+        <section className="flex-1 bg-[#F5F7FA] flex flex-col md:flex-row w-full max-w-[1920px] mx-auto">
           <aside className="hidden md:flex md:w-64 bg-[#003366] text-white flex-col justify-between shrink-0">
             <div>
               <div className="p-5 border-b border-blue-900/60 flex items-center gap-3">
@@ -1598,7 +1607,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 text-center">
-        <div className="max-w-7xl mx-auto px-4 space-y-2 flex flex-col items-center">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 space-y-2 flex flex-col items-center">
           <GovLogo className="w-12 h-12 mb-1 drop-shadow-sm" />
           <p className="font-bold text-[#003366]">{t('footerDisclaimer', lang)}</p>
           <p className="text-[11px] text-slate-400">

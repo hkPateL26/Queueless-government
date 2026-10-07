@@ -13,6 +13,7 @@ import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice } from '@/lib/jurisdiction-data';
 import { GovLogo } from '@/components/GovLogo';
+import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 
 interface DistrictMetric {
   id: string;
@@ -188,7 +189,10 @@ export default function CollectorCommandDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] text-[#1F2937] flex flex-col">
+    <div className="min-h-screen bg-[#F0F2F5] text-[#1F2937] flex flex-col w-full">
+      {/* 🚀 LIVE GUJARAT GOVERNMENT TELEMETRY & SYSTEM HEALTH MARQUEE */}
+      <GovTelemetryMarquee />
+
       {/* 🟠 DEMO DATA & DEMO MODE BANNER */}
       <div className="bg-amber-500 text-slate-900 text-xs px-4 py-1.5 font-bold flex flex-wrap items-center justify-between border-b border-amber-600 shadow-xs">
         <div className="flex items-center gap-2">
@@ -204,7 +208,7 @@ export default function CollectorCommandDashboard() {
 
       {/* 🏛️ EXECUTIVE COLLECTORATE HEADER */}
       <header className="bg-gradient-to-r from-[#002244] via-[#003366] to-[#001933] text-white border-b-2 border-[#FF9933] shadow-lg sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link 
               href="/"
@@ -259,8 +263,8 @@ export default function CollectorCommandDashboard() {
 
       {/* 🚨 QUEUE DELAY WATCHDOG TICKER */}
       {delayAlerts.length > 0 && (
-        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-4 sm:px-6 py-2.5 shadow-md border-b border-red-800">
-          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-4 sm:px-6 lg:px-8 xl:px-12 py-2.5 shadow-md border-b border-red-800">
+          <div className="w-full max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 font-black">
               <AlertTriangle className="w-4 h-4 animate-bounce text-amber-300 shrink-0" />
               <span>કતાર વિલંબ ચેતવણી (Queue Delay Watchdog • {delayAlerts.length} અરજીઓ ૩૦+ મિનિટથી વિલંબિત):</span>
@@ -293,7 +297,7 @@ export default function CollectorCommandDashboard() {
       )}
 
       {/* 📊 STATE-WIDE METRIC SUMMARY CARDS (Separating Queue Waiting Time vs Desk Handling Time) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 w-full">
+      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 pt-5">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">કુલ ઇશ્યુ ટોકન (રાજ્યભર)</p>
@@ -338,7 +342,7 @@ export default function CollectorCommandDashboard() {
       </div>
 
       {/* 🗺️ MAIN EXECUTIVE CONSOLE: HEATMAP & TALUKA DRILL-DOWN */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+      <main className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
         
         {/* LEFT COLUMN: 33 DISTRICTS CONGESTION HEATMAP (7 cols) */}
         <div className="lg:col-span-7 space-y-4">

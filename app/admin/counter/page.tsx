@@ -16,6 +16,7 @@ import {
 } from '@/lib/realtime-bus';
 import { GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice } from '@/lib/jurisdiction-data';
 import { GovLogo } from '@/components/GovLogo';
+import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 
 interface QueueCitizen {
   id: string;
@@ -445,7 +446,10 @@ export default function CounterOperatorDesk() {
   const waitingCount = waitingList.length;
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] text-[#1F2937] flex flex-col">
+    <div className="min-h-screen bg-[#F0F2F5] text-[#1F2937] flex flex-col w-full">
+      {/* 🚀 LIVE GUJARAT GOVERNMENT TELEMETRY & SYSTEM HEALTH MARQUEE */}
+      <GovTelemetryMarquee />
+
       {/* 🟠 DEMO MODE BANNER */}
       <div className="bg-amber-500 text-slate-900 text-xs px-4 py-1.5 font-bold flex flex-wrap items-center justify-between border-b border-amber-600 shadow-xs">
         <div className="flex items-center gap-2">
@@ -464,7 +468,7 @@ export default function CounterOperatorDesk() {
 
       {/* 🏛️ COUNTER OPERATOR CONSOLE HEADER */}
       <header className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white border-b-2 border-[#FF9933] shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link 
               href="/"
@@ -513,8 +517,8 @@ export default function CounterOperatorDesk() {
       </header>
 
       {/* 🧭 JURISDICTION & CONFIGURABLE COUNTER SELECTOR STRIP */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 shadow-xs">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 xl:px-12 py-2.5 shadow-xs">
+        <div className="w-full max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="flex items-center gap-1.5 font-bold text-[#003366]">
               <Building className="w-4 h-4 text-[#005A9C]" />
@@ -589,7 +593,7 @@ export default function CounterOperatorDesk() {
       </div>
 
       {/* 📊 KPI SUMMARY STRIP */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 w-full">
+      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 pt-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#005A9C] flex items-center justify-center font-bold">
@@ -635,7 +639,7 @@ export default function CounterOperatorDesk() {
 
       {/* 📜 AUDIT TRAIL LOG PANEL (TOGGLEABLE) */}
       {auditPanelOpen && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 w-full animate-in fade-in">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 pt-3 animate-in fade-in">
           <div className="bg-white rounded-2xl border border-slate-300 shadow-md p-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
               <div className="flex items-center gap-2">
@@ -677,7 +681,7 @@ export default function CounterOperatorDesk() {
       )}
 
       {/* 🖥️ MAIN CONSOLE GRID */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-5 w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
+      <main className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-5 grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
         
         {/* LEFT COLUMN: ACTIVE SERVING HUD (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
