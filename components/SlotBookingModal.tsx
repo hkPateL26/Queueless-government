@@ -53,12 +53,14 @@ export interface BookingDetails {
   validUntil?: string;
 }
 
+import { Language } from '@/lib/translations';
+
 interface SlotBookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   scheme: SchemeItem | null;
   onConfirm: (details: BookingDetails) => void;
-  lang?: 'en' | 'gu' | 'hi';
+  lang?: Language;
 }
 
 export function SlotBookingModal({

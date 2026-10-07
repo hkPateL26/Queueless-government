@@ -93,65 +93,71 @@ export const PwaInstallBanner: React.FC = () => {
   return (
     <>
       <aside 
-        aria-label="PWA Installation Banner"
-        className="fixed bottom-[56px] md:bottom-0 inset-x-0 bg-white/98 backdrop-blur-md border-t-2 border-[#FF9933] shadow-2xl p-3 sm:p-4 z-40 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 transition-all animate-in slide-in-from-bottom-2 duration-300"
+        aria-label="PWA Installation Widget"
+        className="fixed bottom-16 md:bottom-6 right-3 sm:right-6 z-40 bg-white/95 backdrop-blur-md border border-slate-200 border-t-2 border-t-[#FF9933] shadow-2xl rounded-2xl p-3.5 max-w-xs sm:max-w-sm w-full animate-in slide-in-from-bottom-4 duration-300"
       >
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          {/* Authentic Government Emblem Logo */}
-          <div className="relative shrink-0">
-            <GovLogo className="w-11 h-11 sm:w-12 sm:h-12" />
-            <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-[9px] text-white font-bold">
-              ✓
-            </span>
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-black uppercase text-[#FF9933] bg-[#003366] px-2 py-0.5 rounded tracking-wider">
-                ગુજરાત સરકાર • સત્તાવાર એપ
-              </span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 hidden sm:inline-flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#FF9933]" />
-                1-Click PWA
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative shrink-0">
+              <GovLogo className="w-8 h-8 drop-shadow-xs" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border border-white flex items-center justify-center text-[7px] text-white font-bold">
+                ✓
               </span>
             </div>
-            
-            <h4 className="text-xs sm:text-sm font-black text-[#003366] mt-0.5 truncate">
-              {installSuccess ? '🎉 એપ સફળતાપૂર્વક ઇન્સ્ટોલ થઈ રહી છે!' : 'એપને ૧-ક્લિકમાં મોબાઇલમાં ઇન્સ્ટોલ કરો'}
-            </h4>
-            
-            <p className="text-[10.5px] sm:text-[11px] text-slate-500 truncate">
-              ઇન્ટરનેટ વગર પણ કચેરી ટોકન, QR પાસ અને ૩૯ યોજનાઓ જોવા માટે હોમ સ્ક્રીન પર ઉમેરો.
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9px] font-black uppercase text-[#FF9933] bg-[#003366] px-1.5 py-0.2 rounded tracking-wider">
+                  સત્તાવાર PWA એપ
+                </span>
+              </div>
+              <h4 className="text-xs font-black text-[#003366] leading-tight truncate mt-0.5">
+                {installSuccess ? '🎉 ઇન્સ્ટોલ થઈ રહી છે...' : 'QueueLess Kacheri એપ'}
+              </h4>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+          {/* Explicit Close Button */}
           <button
             onClick={() => {
               triggerHaptic('tap');
               setDismissed(true);
             }}
-            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition min-h-[42px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-[#005A9C]"
-            aria-label="Dismiss install banner / પછીથી"
+            className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center text-xs transition cursor-pointer shrink-0"
+            title="બંધ કરો (Close)"
+            aria-label="Close install prompt"
           >
-            પછીથી (Later)
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <p className="text-[10.5px] text-slate-500 mb-2.5 leading-snug">
+          ૧-ક્લિકમાં ફોન કે કમ્પ્યુટરમાં ઇન્સ્ટોલ કરી ઓફલાઇન ટોકન અને ૩૯ સેવાઓ જુઓ.
+        </p>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setDismissed(true);
+            }}
+            className="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold text-slate-500 hover:bg-slate-100 transition text-center cursor-pointer"
+          >
+            પછીથી
           </button>
 
           <button
             onClick={handleInstallClick}
-            className="flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-xl text-xs font-black bg-[#FF9933] hover:bg-amber-600 text-slate-900 shadow-md transition active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap min-h-[42px] focus-visible:ring-2 focus-visible:ring-[#003366] cursor-pointer"
-            aria-label="Install App / ઇન્સ્ટોલ કરો"
+            className="flex-1 py-1.5 px-3 rounded-xl text-[11px] font-black bg-[#FF9933] hover:bg-amber-600 text-slate-900 shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             {installSuccess ? (
               <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-900" />
-                <span>ઇન્સ્ટોલ થયેલ છે!</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-900" />
+                <span>ઇન્સ્ટોલ થઈ ગયું</span>
               </>
             ) : (
               <>
-                <Download className="w-4 h-4 text-slate-900 animate-bounce" />
-                <span>ઇન્સ્ટોલ કરો (Install App)</span>
+                <Download className="w-3.5 h-3.5 text-slate-900 animate-bounce" />
+                <span>ઇન્સ્ટોલ કરો</span>
               </>
             )}
           </button>

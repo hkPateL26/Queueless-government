@@ -16,12 +16,14 @@ import { SchemeItem } from '@/lib/schemes-data';
 import { BookingStatus } from '@/lib/slot-engine';
 import { GovLogo } from '@/components/GovLogo';
 
+import { Language } from '@/lib/translations';
+
 interface DigitalTokenPassProps {
   booking: BookingDetails;
   scheme: SchemeItem | null;
   citizenName: string;
   onClose?: () => void;
-  lang?: 'en' | 'gu' | 'hi';
+  lang?: Language;
 }
 
 export function DigitalTokenPass({

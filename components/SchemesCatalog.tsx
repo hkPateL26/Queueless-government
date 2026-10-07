@@ -15,10 +15,11 @@ import {
 } from '@/lib/schemes-data';
 import { triggerHaptic } from '@/lib/haptics';
 import { GovLogo } from '@/components/GovLogo';
+import { Language } from '@/lib/translations';
 
 interface SchemesCatalogProps {
   onSelectScheme: (scheme: SchemeItem) => void;
-  lang?: 'en' | 'gu' | 'hi';
+  lang?: Language;
   maxItems?: number;
   onViewAll?: () => void;
 }

@@ -1,4 +1,4 @@
-export type Language = 'en' | 'gu' | 'hi';
+export type Language = 'en' | 'gu' | 'hi' | 'mr' | 'sd' | 'khi' | 'mwr' | 'bn' | 'ur' | 'or';
 
 export interface LanguageOption {
   code: Language;
@@ -14,25 +14,81 @@ export const GUJARAT_LANGUAGES: LanguageOption[] = [
     code: 'gu',
     nativeLabel: 'ગુજરાતી',
     englishLabel: 'Gujarati',
-    multiLabel: 'ગુજરાતી • Gujarati • गुजराती',
-    regionalDescription: 'ગુજરાત રાજ્યની સત્તાવાર ભાષા (State Official Language)',
+    multiLabel: 'ગુજરાતી (Gujarati)',
+    regionalDescription: 'ગુજરાત રાજ્યની સત્તાવાર રાજભાષા (State Official Language)',
     badge: 'રાજ્ય ભાષા'
-  },
-  {
-    code: 'en',
-    nativeLabel: 'English',
-    englishLabel: 'English',
-    multiLabel: 'English • અંગ્રેજી • अंग्रेज़ी',
-    regionalDescription: 'સરકારી અને વહીવટી જાહેર સેવાઓ (Official Administrative Access)',
-    badge: 'Official'
   },
   {
     code: 'hi',
     nativeLabel: 'हिन्दी',
     englishLabel: 'Hindi',
-    multiLabel: 'हिन्दी • Hindi • હિન્દી',
-    regionalDescription: 'ગુજરાતમાં વ્યાપક બોલાતી ભાષા (Widely Spoken in Gujarat)',
-    badge: 'राष्ट्रभाषा'
+    multiLabel: 'हिन्दी (Hindi)',
+    regionalDescription: 'ગુજરાતમાં વ્યાપક સંપર્ક ભાષા (National / Widely Spoken)',
+    badge: 'રાષ્ટ્રભાષા'
+  },
+  {
+    code: 'en',
+    nativeLabel: 'English',
+    englishLabel: 'English',
+    multiLabel: 'English (અંગ્રેજી)',
+    regionalDescription: 'સત્તાવાર વહીવટી અને જાહેર સેવાઓ (Administrative Access)',
+    badge: 'Official'
+  },
+  {
+    code: 'mr',
+    nativeLabel: 'मराठी',
+    englishLabel: 'Marathi',
+    multiLabel: 'मराठी (Marathi)',
+    regionalDescription: 'સુરત, વડોદરા અને દક્ષિણ ગુજરાત સમુદાય (Surat & Vadodara)',
+    badge: 'દક્ષિણ-મધ્ય ગુજરાત'
+  },
+  {
+    code: 'sd',
+    nativeLabel: 'سنڌي / સિંધી',
+    englishLabel: 'Sindhi',
+    multiLabel: 'સિંધી • سنڌي (Sindhi)',
+    regionalDescription: 'કચ્છ, ગાંધીધામ, અમદાવાદ અને ગોધરા પરિવારો માટે (Kutch & Ahmedabad)',
+    badge: 'સિંધી સમાજ'
+  },
+  {
+    code: 'khi',
+    nativeLabel: 'કચ્છી',
+    englishLabel: 'Kutchi',
+    multiLabel: 'કચ્છી (Kutchi)',
+    regionalDescription: 'કચ્છ પ્રદેશની સ્થાનિક પ્રાદેશિક ભાષા (Kutch Region)',
+    badge: 'કચ્છ જિલ્લો'
+  },
+  {
+    code: 'mwr',
+    nativeLabel: 'मारवाड़ी',
+    englishLabel: 'Marwari',
+    multiLabel: 'मारवाड़ी (Marwari / Rajasthani)',
+    regionalDescription: 'અમદાવાદ, સુરત અને રાજકોટ વેપારી વર્ગ (Business Community)',
+    badge: 'વેપારી સમુદાય'
+  },
+  {
+    code: 'bn',
+    nativeLabel: 'বাংলা',
+    englishLabel: 'Bengali',
+    multiLabel: 'বাংলা (Bengali)',
+    regionalDescription: 'સુરત-અમદાવાદ ડાયમંડ અને ટેક્સટાઇલ કારીગરો માટે (Textile & Gems)',
+    badge: 'સુરત-અમદાવાદ'
+  },
+  {
+    code: 'ur',
+    nativeLabel: 'اردو',
+    englishLabel: 'Urdu',
+    multiLabel: 'اردو (Urdu)',
+    regionalDescription: 'અમદાવાદ, ભરૂચ અને સુરત વિસ્તારો માટે (Urban Communities)',
+    badge: 'શહેરી ગુજરાત'
+  },
+  {
+    code: 'or',
+    nativeLabel: 'ଓଡ଼ିଆ',
+    englishLabel: 'Odia',
+    multiLabel: 'ଓଡ଼ିଆ (Odia)',
+    regionalDescription: 'સુરત GIDC, હજીરા ઔદ્યોગિક કામદારો માટે (Industrial Workforce)',
+    badge: 'સુરત GIDC'
   }
 ];
 
@@ -158,24 +214,64 @@ export const TRANSLATIONS = {
 
   // Hero Section
   heroBadge: {
-    en: 'Gujarat Government–Inspired Design System • Public Service Framework',
-    gu: 'ગુજરાત સરકાર પ્રેરિત ડિઝાઇન સિસ્ટમ • જાહેર સેવા માળખું',
-    hi: 'गुजरात सरकार प्रेरित डिज़ाइन प्रणाली • लोक सेवा ढांचा'
+    en: 'Government of Gujarat • General Administration Department (GAD)',
+    gu: 'ગુજરાત સરકાર • સામાન્ય વહીવટ વિભાગ (GAD)',
+    hi: 'गुजरात सरकार • सामान्य प्रशासन विभाग (GAD)'
   },
   heroTitleLine1: {
-    en: 'Skip The Queue,',
-    gu: 'લાઈનમાં ઊભા રહેશો નહીં,',
-    hi: 'कतार में खड़े न रहें,'
+    en: 'Digital Jan Seva Portal —',
+    gu: 'ડિજિટલ જન સેવા પોર્ટલ —',
+    hi: 'डिजिटल जन सेवा पोर्टल —'
   },
   heroTitleLine2: {
-    en: 'Not Your Work',
-    gu: 'કામ અટકશે નહીં',
-    hi: 'काम नहीं रुकेगा'
+    en: 'Transparent, Timely & Citizen-Centric Governance',
+    gu: 'પારદર્શક, સરળ અને સમયબદ્ધ નાગરિક સેવાઓ',
+    hi: 'पारदर्शी, सुलभ और समयबद्ध नागरिक सेवाएं'
   },
   heroSubtitle: {
-    en: 'Book virtual slot tokens for Mamlatdar offices, Jan Seva Kendras, Aadhaar, RTO, and Taluka Panchayat. Get real-time wait estimates and manage your visit from anywhere in Gujarat.',
-    gu: 'મામલતદાર કચેરી, જન સેવા કેન્દ્ર, આધાર, RTO અને તાલુકા પંચાયત માટે વર્ચ્યુઅલ સ્લોટ ટોકન બુક કરો. વાસ્તવિક પ્રતીક્ષા સમય જાણો અને ગુજરાતમાં ગમે ત્યાંથી તમારી મુલાકાતનું સંચાલન કરો.',
-    hi: 'मामलतदार कार्यालय, जन सेवा केंद्र, आधार, आरटीओ और तालुका पंचायत के लिए वर्चुअल स्लॉट टोकन बुक करें। वास्तविक प्रतीक्षा समय जानें और गुजरात में कहीं से भी अपनी यात्रा का प्रबंधन करें।'
+    en: 'Official slot scheduling and virtual queue token system under the Gujarat Right to Public Services Act (GRTSA 2013). Access 39+ G2C administrative services across all 33 districts and 250+ Talukas.',
+    gu: 'ગુજરાત લોક સેવા હક્ક અધિનિયમ (GRTSA ૨૦૧૩) અને નાગરિક અધિકાર પત્ર હેઠળ સત્તાવાર સ્લોટ બુકિંગ તથા વર્ચ્યુઅલ કતાર વ્યવસ્થાપન. રાજ્યના તમામ ૩૩ જિલ્લાઓ અને ૨૫૦+ તાલુકાઓમાં મામલતદાર, જન સેવા કેન્દ્ર અને પંચાયત સેવાઓ સુલભ.',
+    hi: 'गुजरात लोक सेवा अधिकार अधिनियम (GRTSA २०१३) और नागरिक अधिकार पत्र के अंतर्गत आधिकारिक स्लॉट बुकिंग व वर्चुअल कतार प्रणाली। राज्य के सभी ३३ जिलों और २५०+ तालुकों में जन सेवा केंद्र, मामलतदार व पंचायत सेवाएं उपलब्ध।'
+  },
+  guestDeskTitle: {
+    en: 'Citizen Public Action Desk',
+    gu: 'નાગરિક જાહેર સેવા ડેસ્ક',
+    hi: 'नागरिक लोक सेवा डेस्क'
+  },
+  guestDeskSubtitle: {
+    en: 'Live Queue Tracking & Instant Slot Booking',
+    gu: 'લાઈવ ટોકન ટ્રેકિંગ અને ત્વરિત સ્લોટ બુકિંગ',
+    hi: 'लाइव टोकन ट्रैकिंग और त्वरित स्लॉट बुकिंग'
+  },
+  tabTrackToken: {
+    en: 'Track Token',
+    gu: 'ટોકન ટ્રેક કરો',
+    hi: 'टोकन ट्रैक करें'
+  },
+  tabBookSlot: {
+    en: 'Book Slot',
+    gu: 'સ્લોટ બુક કરો',
+    hi: 'स्लॉट बुक करें'
+  },
+  enterTokenPlaceholder: {
+    en: 'Enter token no. (e.g. A-42, B-1247)',
+    gu: 'ટોકન નંબર દાખલ કરો (દા.ત. A-42, B-1247)',
+    hi: 'टोकन संख्या दर्ज करें (उदा. A-42, B-1247)'
+  },
+  btnTrackNow: {
+    en: 'Check Live Status',
+    gu: 'લાઈવ સ્થિતિ ચકાસો',
+    hi: 'लाइव स्थिति जांचें'
+  },
+  helpModalTitle: {
+    en: 'Citizen Help & Grievance Support',
+    gu: 'નાગરિક સહાય અને ફરિયાદ નિવારણ ડેસ્ક',
+    hi: 'नागरिक सहायता और शिकायत निवारण डेस्क'
+  },
+  helpModalSubtitle: {
+    en: 'Government of Gujarat Official Support Channels',
+    gu: 'ગુજરાત સરકાર સત્તાવાર સહાય ચેનલો અને સંપર્ક સૂત્રો',
+    hi: 'गुजरात सरकार आधिकारिक सहायता चैनल और संपर्क सूत्र'
   },
   heroSearchPlaceholder: {
     en: 'Search: Tractor, MYSY, Income Certificate, Ayushman...',
@@ -717,5 +813,5 @@ export type TranslationKey = keyof typeof TRANSLATIONS;
 export function t(key: TranslationKey, lang: Language): string {
   const item = TRANSLATIONS[key];
   if (!item) return key;
-  return item[lang] || item['en'] || key;
+  return (item as any)[lang] || (item as any)['gu'] || (item as any)['en'] || key;
 }

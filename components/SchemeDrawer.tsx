@@ -16,6 +16,7 @@ import {
   getProcessingTimelineInfo
 } from '@/lib/schemes-data';
 import { GovLogo } from '@/components/GovLogo';
+import { Language } from '@/lib/translations';
 
 interface SchemeDrawerProps {
   scheme: SchemeItem | null;
@@ -24,7 +25,7 @@ interface SchemeDrawerProps {
   onOpenScanner: () => void;
   isLoggedIn?: boolean;
   onCollectToken?: (scheme: SchemeItem) => void;
-  lang?: 'en' | 'gu' | 'hi';
+  lang?: Language;
 }
 
 export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({

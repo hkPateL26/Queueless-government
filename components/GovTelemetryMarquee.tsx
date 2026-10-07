@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Cpu, Server, Wifi, RefreshCw, CheckCircle2, ShieldCheck, Database, Cloud } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
+import { Language } from '@/lib/translations';
 
 interface GovTelemetryMarqueeProps {
-  lang?: 'en' | 'gu' | 'hi';
+  lang?: Language;
 }
 
 export const GovTelemetryMarquee: React.FC<GovTelemetryMarqueeProps> = ({ lang = 'gu' }) => {
