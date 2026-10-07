@@ -4,7 +4,8 @@ import React, { useState, useMemo } from 'react';
 import { 
   Building2, MapPin, Calendar, Clock, AlertTriangle, 
   CheckCircle2, X, ChevronRight, ShieldCheck, ArrowRight,
-  Info, Sparkles, UserCheck, Utensils, Navigation
+  Info, Sparkles, UserCheck, Utensils, Navigation,
+  FileCheck, IndianRupee
 } from 'lucide-react';
 import { 
   GUJARAT_33_DISTRICTS, 
@@ -27,7 +28,7 @@ import {
 } from '@/lib/slot-engine';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
-import { SchemeItem } from '@/lib/schemes-data';
+import { SchemeItem, getProcessingTimelineInfo } from '@/lib/schemes-data';
 
 export interface BookingDetails {
   district: DistrictItem;
@@ -104,6 +105,10 @@ export function SlotBookingModal({
   const selectedCenter = useMemo(() => {
     return serviceCenters.find(c => c.id === selectedCenterId) || serviceCenters[0];
   }, [serviceCenters, selectedCenterId]);
+
+  const timelineInfo = useMemo(() => {
+    return scheme ? getProcessingTimelineInfo(scheme) : null;
+  }, [scheme]);
 
   // Handle District Change
   const handleDistrictChange = (distId: string) => {
@@ -332,6 +337,125 @@ export function SlotBookingModal({
         {/* BODY */}
         <div className="p-3.5 sm:p-6 overflow-y-auto modal-scroll-area space-y-5 sm:space-y-6 flex-1 text-[#1F2937]">
           
+          {/* CITIZEN PRE-BOOKING ADVISORY: 4 ESSENTIAL QUESTIONS */}
+          {scheme && timelineInfo && (
+            <div className="bg-gradient-to-br from-amber-50/90 to-orange-50/80 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
+              <div className="flex items-center justify-between border-b border-amber-200/80 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🏛️</span>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black text-amber-950 uppercase tracking-wide">
+                      મુલાકાત પૂર્વે સત્તાવાર માહિતી (Pre-Booking Essential Guidance)
+                    </h4>
+                    <p className="text-[11px] text-amber-800 font-semibold">
+                      {scheme.titleGu} • {scheme.department}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold bg-amber-200/80 text-amber-950 px-2 py-0.5 rounded-md shrink-0">
+                  સેવા વિગતો
+                </span>
+              </div>
+
+              {/* 4 Sequential Questions Flow: What docs? → Cost? → How long? → When visit? */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                
+                {/* 1. What documents do I need? */}
+                <div className="bg-white rounded-xl p-3 border border-amber-200/90 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                      <FileCheck className="w-3.5 h-3.5 text-[#005A9C]" />
+                      <span>૧. જરૂરી કાગળો?</span>
+                    </span>
+                    <p className="text-xs font-black text-[#003366] mt-1.5">
+                      {scheme.requiredDocs.length} દસ્તાવેજો જરૂરી
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-tight line-clamp-2">
+                      {scheme.requiredDocs.map(d => d.nameGu).join(', ')}
+                    </p>
+                  </div>
+                  <p className="text-[9px] text-[#005A9C] font-bold mt-2 pt-1 border-t border-slate-100">
+                    અસલ + ઝેરોક્ષ સાથે રાખવી
+                  </p>
+                </div>
+
+                {/* 2. How much does it cost? */}
+                <div className="bg-white rounded-xl p-3 border border-amber-200/90 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                      <IndianRupee className="w-3.5 h-3.5 text-[#138808]" />
+                      <span>૨. સરકારી ફી કેટલી?</span>
+                    </span>
+                    <p className="text-sm font-black text-[#138808] mt-1.5">
+                      {scheme.fee === 0 ? '₹૦ (સંપૂર્ણ મફત)' : `₹${scheme.fee}`}
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {scheme.fee === 0 ? 'કોઈ સરકારી ચાર્જ નથી' : 'નિયત સરકારી સેવા ફી'}
+                    </p>
+                  </div>
+                  <p className="text-[9px] text-slate-400 font-medium mt-2 pt-1 border-t border-slate-100">
+                    કાઉન્ટર પર સત્તાવાર રસીદ
+                  </p>
+                </div>
+
+                {/* 3. How long will it take? */}
+                <div className="bg-white rounded-xl p-3 border border-amber-200/90 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-[#FF9933]" />
+                      <span>૩. કેટલો સમય લાગશે?</span>
+                    </span>
+                    <p className="text-xs font-black text-[#003366] mt-1.5 leading-snug">
+                      {timelineInfo.isVaries ? (
+                        <span className="text-amber-800">અલગ હોઈ શકે છે (કચેરીએ ચકાસો)</span>
+                      ) : (
+                        timelineInfo.formattedTimeGu
+                      )}
+                    </p>
+                    <div className="mt-1">
+                      {scheme.slaType === 'statutory_grtsa' ? (
+                        <span className="text-[8.5px] font-bold bg-blue-100 text-blue-900 px-1 py-0.5 rounded border border-blue-200">
+                          ⚖️ GRTSA કાનૂની સમયમર્યાદા
+                        </span>
+                      ) : scheme.slaType === 'departmental_norm' ? (
+                        <span className="text-[8.5px] font-bold bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded">
+                          🏛️ સિટીઝન ચાર્ટર ધોરણ
+                        </span>
+                      ) : (
+                        <span className="text-[8.5px] text-slate-600 bg-slate-100 px-1 py-0.5 rounded">
+                          📋 યોજના ચક્ર આધારિત
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-slate-400 mt-2 pt-1 border-t border-slate-100 truncate" title={scheme.officialSource}>
+                    સ્ત્રોત: {scheme.officialSource}
+                  </p>
+                </div>
+
+                {/* 4. When should I visit & office wait? */}
+                <div className="bg-white rounded-xl p-3 border border-amber-200/90 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                      <Building2 className="w-3.5 h-3.5 text-[#003366]" />
+                      <span>૪. કચેરી પ્રતીક્ષા સમય?</span>
+                    </span>
+                    <p className="text-xs font-black text-slate-800 mt-1.5">
+                      ~૧૫-૨૦ મિનિટ (કાઉન્ટર પર)
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      સ્લોટ સમયે હાજર રહેવાથી લાઈન વગર કામ
+                    </p>
+                  </div>
+                  <p className="text-[9px] text-emerald-700 font-bold mt-2 pt-1 border-t border-slate-100">
+                    નીચે સ્લોટ પસંદ કરો 👇
+                  </p>
+                </div>
+
+              </div>
+            </div>
+          )}
+
           {/* STEP 1: JURISDICTION (DISTRICT & TALUKA) */}
           <section className="bg-gray-50 border border-gray-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">

@@ -10,7 +10,8 @@ import {
   SchemeItem, 
   getSchemeEligibility, 
   getSchemeOfficialSource, 
-  getSchemeStructuredBenefit 
+  getSchemeStructuredBenefit,
+  getProcessingTimelineInfo
 } from '@/lib/schemes-data';
 import { triggerHaptic } from '@/lib/haptics';
 
@@ -145,6 +146,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({ onSelectScheme }
           const eligibility = getSchemeEligibility(scheme);
           const sourceInfo = getSchemeOfficialSource(scheme);
           const benefit = getSchemeStructuredBenefit(scheme);
+          const timelineInfo = getProcessingTimelineInfo(scheme);
 
           return (
             <div
@@ -208,15 +210,54 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({ onSelectScheme }
                   </div>
                 </div>
 
-                {/* Expected SLA & Official Source reference */}
-                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium pt-1">
-                  <span className="flex items-center gap-1 font-bold text-[#003366]">
-                    <Clock className="w-3 h-3 text-[#FF9933]" />
-                    <span>અપેક્ષિત નિકાલ: {scheme.slaDays} દિવસ</span>
-                  </span>
-                  <span className="truncate max-w-[140px] text-slate-400" title={sourceInfo.source}>
-                    સ્ત્રોત: {sourceInfo.source}
-                  </span>
+                {/* Service Processing Time & Office Waiting Distinction */}
+                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 text-[10.5px]">
+                  {/* Expected Processing / Delivery Time */}
+                  <div className="flex items-start justify-between gap-1.5">
+                    <span className="font-bold text-slate-600 flex items-center gap-1 shrink-0">
+                      <Clock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
+                      <span>અપેક્ષિત ડિલિવરી:</span>
+                    </span>
+                    <span className="font-black text-[#003366] text-right">
+                      {timelineInfo.isVaries ? (
+                        <span className="text-amber-700">અલગ હોઈ શકે છે (કચેરીએ ચકાસો)</span>
+                      ) : (
+                        timelineInfo.formattedTimeGu
+                      )}
+                    </span>
+                  </div>
+
+                  {/* SLA Type Tag (Only statutory for GRTSA) */}
+                  <div className="flex items-center justify-between text-[9.5px]">
+                    <span className="text-slate-400">સમયમર્યાદા ધોરણ:</span>
+                    {scheme.slaType === 'statutory_grtsa' ? (
+                      <span className="font-extrabold text-blue-700 bg-blue-100/70 px-1.5 py-0.5 rounded border border-blue-200">
+                        ⚖️ GRTSA ૨૦૧૩ અધિસૂચિત
+                      </span>
+                    ) : scheme.slaType === 'departmental_norm' ? (
+                      <span className="font-bold text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">
+                        🏛️ સિટીઝન ચાર્ટર
+                      </span>
+                    ) : (
+                      <span className="font-medium text-slate-500 bg-slate-200/60 px-1.5 py-0.5 rounded">
+                        📋 યોજના ચક્ર / ક્વોટા
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Appointment Waiting Time distinction */}
+                  <div className="flex items-center justify-between text-[9.5px] text-slate-500 pt-0.5 border-t border-slate-200/60">
+                    <span>🏢 કચેરી કાઉન્ટર પ્રતીક્ષા:</span>
+                    <span className="font-bold text-slate-700">~૧૫-૨૦ મિનિટ</span>
+                  </div>
+
+                  {/* Official Source & Updated */}
+                  <div className="pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-400">
+                    <span className="truncate max-w-[150px]" title={scheme.officialSource}>
+                      સ્ત્રોત: {scheme.officialSource}
+                    </span>
+                    <span>અપડેટ: {scheme.lastUpdated}</span>
+                  </div>
                 </div>
               </div>
 

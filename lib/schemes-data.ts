@@ -1,3 +1,11 @@
+export type SlaType = 
+  | 'statutory_grtsa'       // Formally notified under Gujarat Right of Citizens to Public Services Act, 2013
+  | 'departmental_norm'     // Published Departmental Citizen Charter norm
+  | 'scheme_cycle'          // Periodic DBT release / committee batch cycle / academic year
+  | 'varies';               // Processing time varies across offices / field inquiries
+
+export type ProcessingTimeUnit = 'working_days' | 'calendar_days' | 'same_day' | 'varies';
+
 export interface SchemeItem {
   id: string;
   category: 'agriculture' | 'healthcare' | 'education' | 'welfare';
@@ -10,15 +18,27 @@ export interface SchemeItem {
   benefitGu: string;
   benefitType?: string;
   maxIndicativeBenefit?: string;
-  slaDays: number;
   fee: number;
   validityYears?: number;
   eligibilityEn?: string;
   eligibilityGu?: string;
   applicationMethod?: string;
   applicationMethodGu?: string;
-  officialSource?: string;
-  lastUpdated?: string;
+
+  // ⏱️ SERVICE-WISE PROCESSING / DELIVERY TIME FIELDS
+  processingTime: string;             // e.g. "7 - 14", "1 - 2", "Same Day", "Varies"
+  processingTimeUnit: ProcessingTimeUnit;
+  slaType: SlaType;
+  officialSource: string;
+  lastUpdated: string;
+  statutorySlaNoteGu?: string;
+  statutorySlaNoteEn?: string;
+  appointmentWaitEstimateGu?: string; // Counter appointment duration (~15-20 mins)
+  appointmentWaitEstimateEn?: string;
+
+  // Backward compatibility alias
+  slaDays?: number;
+
   requiredDocs: Array<{
     nameGu: string;
     nameEn: string;
@@ -53,6 +73,57 @@ export const getSchemeStructuredBenefit = (scheme: SchemeItem): { headlineEn: st
   };
 };
 
+export const getProcessingTimelineInfo = (scheme: SchemeItem) => {
+  const isVaries = scheme.processingTimeUnit === 'varies' || scheme.processingTime.toLowerCase().includes('varies');
+  
+  let formattedTimeEn = '';
+  let formattedTimeGu = '';
+
+  if (isVaries) {
+    formattedTimeEn = 'Processing time varies — confirm with the concerned office';
+    formattedTimeGu = 'પ્રક્રિયા સમય અલગ હોઈ શકે છે — સંબંધિત કચેરી ખાતે ચકાસો';
+  } else if (scheme.processingTimeUnit === 'same_day') {
+    formattedTimeEn = 'Same Day / Immediate (Subject to counter/server availability)';
+    formattedTimeGu = 'તે જ દિવસે / તાત્કાલિક (કાઉન્ટર અને સર્વર ઉપલબ્ધતા મુજબ)';
+  } else if (scheme.processingTimeUnit === 'working_days') {
+    formattedTimeEn = `${scheme.processingTime} Working Days`;
+    formattedTimeGu = `${scheme.processingTime} કાર્યકારી દિવસ`;
+  } else {
+    formattedTimeEn = `${scheme.processingTime} Days`;
+    formattedTimeGu = `${scheme.processingTime} દિવસ`;
+  }
+
+  let slaBadgeEn = '';
+  let slaBadgeGu = '';
+  if (scheme.slaType === 'statutory_grtsa') {
+    slaBadgeEn = 'Statutory Public Service (GRTSA 2013 Notified)';
+    slaBadgeGu = 'અધિસૂચિત જાહેર સેવા (GRTSA ૨૦૧૩ કાનૂની સમયમર્યાદા)';
+  } else if (scheme.slaType === 'departmental_norm') {
+    slaBadgeEn = 'Departmental Citizen Charter Standard';
+    slaBadgeGu = 'વિભાગીય સિટીઝન ચાર્ટર ધોરણ';
+  } else if (scheme.slaType === 'scheme_cycle') {
+    slaBadgeEn = 'Batch / DBT Scheme Cycle';
+    slaBadgeGu = 'બેચ / ડીબીટી મંજૂરી ચક્ર';
+  }
+
+  return {
+    isVaries,
+    formattedTimeEn,
+    formattedTimeGu,
+    slaBadgeEn,
+    slaBadgeGu,
+    statutoryNoteEn: scheme.statutorySlaNoteEn,
+    statutoryNoteGu: scheme.statutorySlaNoteGu,
+    appointmentWaitEstimateEn: scheme.appointmentWaitEstimateEn || 'Counter visit waiting time: ~15-20 min',
+    appointmentWaitEstimateGu: scheme.appointmentWaitEstimateGu || 'કાઉન્ટર મુલાકાત પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    officialSource: scheme.officialSource,
+    lastUpdated: scheme.lastUpdated || '2025-2026',
+    feeTextEn: scheme.fee === 0 ? 'Free (₹0)' : `₹${scheme.fee} (Nominal service fee)`,
+    feeTextGu: scheme.fee === 0 ? 'મફત (₹૦)' : `₹${scheme.fee} (નિયત સેવા ફી)`
+  };
+};
+
+
 export const ALL_YOJANAS: SchemeItem[] = [
   // 🌾 1. AGRICULTURE & FARMING (12 SCHEMES)
   {
@@ -67,6 +138,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ખેતી યંત્રો, ઓજારો, પાઈપલાઈન અને સિંચાઈ સાધનો માટે સંકલિત સબસિડી પોર્ટલ',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'i-Khedut Portal (ikhedut.gujarat.gov.in) • કૃષિ અને ખેડૂત કલ્યાણ વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'પોર્ટલ વિન્ડો અને જિલ્લા ક્વોટા અનુસાર બેચ મંજૂરી',
+    statutorySlaNoteEn: 'Batch sanction subject to open portal window and district quota',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ અને ૮-અ જમીનની નકલ', nameEn: '7/12 & 8-A Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -86,6 +166,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'નવા ટ્રેક્ટરની ખરીદી પર ₹૪૫,૦૦૦ થી ₹૬૦,૦૦૦ સુધીની સરકારી સબસિડી',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'i-Khedut Portal (ikhedut.gujarat.gov.in) • Directorate of Agriculture, Gujarat',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'પૂર્વ-મંજૂરી લિસ્ટ અને ખરીદી ચકાસણી બાદ ડીબીટી ચુકવણી',
+    statutorySlaNoteEn: 'Pre-sanction draw followed by dealer invoice verification and DBT',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ અને ૮-અ જમીનની નકલ', nameEn: '7/12 & 8-A Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -106,6 +195,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'રોટાવેટર, થ્રેશર અને પ્લાઉની ખરીદી પર ૫૦% સુધીની સબસિડી',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'i-Khedut Portal (ikhedut.gujarat.gov.in) • કૃષિ વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'સાધનો ભૌતિક ચકાસણી અને જિલ્લા લક્ષ્યાંક આધીન',
+    statutorySlaNoteEn: 'Physical implement verification and district target allocation',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ અને ૮-અ નકલ', nameEn: '7/12 & 8-A Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -125,6 +223,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ટપક/ફુવારા પદ્ધતિ માટે ૭૦% થી ૮૫% સુધીનું આર્થિક અનુદાન (GGRC)',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'Gujarat Green Revolution Company (ggrc.co.in) & કૃષિ વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'GGRC સર્વે અને ત્રિપક્ષીય કરાર બાદ સબસિડી ચુકવણી',
+    statutorySlaNoteEn: 'Field survey by GGRC, tripartite agreement and installation sign-off',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨, ૮-અ અને ૧૬ નંબર ફોર્મ', nameEn: '7/12 & 8-A Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'વીજ બિલ / બોરવેલ દાખલો', nameEn: 'Electricity Bill / Water Source Proof', checkType: 'generic', required: true },
@@ -144,6 +251,13 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'પાક સંરક્ષણ તાડપત્રી ખરીદી પર ૫૦% થી ૭૫% સહાય (મહત્તમ ૨ નંગ)',
     slaDays: 3,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'i-Khedut Portal (ikhedut.gujarat.gov.in) • કૃષિ અને ખેડૂત કલ્યાણ વિભાગ',
+    lastUpdated: '2025-2026',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ નકલ', nameEn: '7/12 Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -163,6 +277,13 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'મગફળી, કપાસ અને ઘઉંના પ્રમાણિત બિયારણની ખરીદી પર સબસિડી',
     slaDays: 3,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'Gujarat State Seed Corporation (gssc.gujarat.gov.in) & i-Khedut',
+    lastUpdated: '2025-2026',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ અને ૮-અ નકલ', nameEn: '7/12 Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -182,6 +303,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ખેતરમાં પાક સંગ્રહ ગોડાઉન બનાવવા માટે ₹૫૦,૦૦૦ સુધીની સહાય',
     slaDays: 10,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'i-Khedut Portal (ikhedut.gujarat.gov.in) • કૃષિ વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'બાંધકામ પૂર્ણતા અને સ્ટેજ ચકાસણી બાદ ૨ હપ્તામાં સબસિડી',
+    statutorySlaNoteEn: 'Staged construction verification and phased DBT disbursement',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨, ૮-અ જમીન નકલ', nameEn: '7/12 & 8-A Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -201,6 +331,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'વાર્ષિક ₹૬,૦૦૦ ની સીધી ખાતામાં સહાય (₹૨,૦૦૦ ના ૩ હપ્તા)',
     slaDays: 3,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'Ministry of Agriculture & Farmers Welfare, GoI (pmkisan.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'ત્રિમાસિક હપ્તા ચક્ર (રૂ. ૨,૦૦૦ પ્રતિ હપ્તો)',
+    statutorySlaNoteEn: 'Four-monthly national installment cycle (₹2,000 per trimester)',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ જમીનની નકલ (RoR)', nameEn: 'Land RoR / 7/12', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ (મોબાઈલ લિંક્ડ)', nameEn: 'Aadhaar Card (Mobile Linked)', checkType: 'aadhaar_regex', required: true },
@@ -220,6 +359,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'અતિવૃષ્ટિ કે કમોસમી વરસાદમાં હેક્ટર દીઠ ₹૨૫,૦૦૦ સુધી નુકસાન વળતર',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'મહેસૂલ અને કૃષિ વિભાગ, ગુજરાત સરકાર',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'કુદરતી આપત્તિ જાહેર થવા અને સર્વે રિપોર્ટ આધારે',
+    statutorySlaNoteEn: 'Triggered during notified natural calamities following district survey',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ અને ૮-અ નકલ', nameEn: '7/12 & 8-A Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'તલાટીનો વાવેતર દાખલો', nameEn: 'Talati Sowing Certificate', checkType: 'generic', required: true },
@@ -239,6 +387,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'એક દેશી ગાય દીઠ દર મહિને ₹૯૦૦ (વાર્ષિક ₹૧૦,૮૦૦) નિભાવ સહાય',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'ગુજરાત પ્રાકૃતિક કૃષિ વિકાસ બોર્ડ & i-Khedut',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'ટેગ ચકાસણી બાદ ત્રિમાસિક રૂ. ૨,૭૦૦ ડીબીટી ચુકવણી',
+    statutorySlaNoteEn: 'Quarterly ₹2,700 DBT maintenance upon cattle tag verification',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ જમીન નકલ', nameEn: '7/12 Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'ગાયનો કાનનો ટેગ નંબર (INAF)', nameEn: 'Cow Ear Tag ID (INAF)', checkType: 'generic', required: true },
@@ -259,6 +416,13 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ખેતી માહિતી માટે સ્માર્ટફોન ખરીદી પર ૪૦% અથવા ₹૬,૦૦૦ સુધી સહાય',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'i-Khedut Portal (ikhedut.gujarat.gov.in) • કૃષિ વિભાગ',
+    lastUpdated: '2025-2026',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: '૭/૧૨ અને ૮-અ નકલ', nameEn: '7/12 & 8-A Land Record', checkType: 'land_record_712', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -280,6 +444,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ગુજરાતના પરિવાર દીઠ વાર્ષિક ₹૧૦ લાખ સુધીની કેશલેસ સરકારી/ખાનગી હોસ્પિટલ સારવાર',
     slaDays: 1,
     fee: 0,
+    processingTime: '1 - 2',
+    processingTimeUnit: 'working_days',
+    slaType: 'departmental_norm',
+    officialSource: 'National Health Authority (beneficiary.nha.gov.in) & આરોગ્ય વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'બાયોમેટ્રિક ઇ-કેવાયસી ચકાસણી બાદ ૨૪ થી ૪૮ કલાકમાં કાર્ડ જારી',
+    statutorySlaNoteEn: 'Digital card issued within 24-48 hours upon biometric e-KYC',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'રેશન કાર્ડ (NFSA અથવા મા કાર્ડ)', nameEn: 'Ration Card (NFSA List)', checkType: 'generic', required: true },
@@ -299,6 +472,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'કેન્સર, કિડની, હૃદયરોગ અને ન્યુરો જેવી ગંભીર બીમારીઓ માટે નિઃશુલ્ક સારવાર',
     slaDays: 2,
     fee: 0,
+    processingTime: '1 - 3',
+    processingTimeUnit: 'working_days',
+    slaType: 'departmental_norm',
+    officialSource: 'આરોગ્ય કમિશનરેટ, ગુજરાત સરકાર (gujhealth.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'કિયોસ્ક પર આવક અને રેશનકાર્ડ ખરાઈ બાદ કાર્ડ વિતરણ',
+    statutorySlaNoteEn: 'Card issuance at designated kiosk upon income/ration verification',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'આવકનો દાખલો (વાર્ષિક ₹૪ લાખથી ઓછી)', nameEn: 'Income Certificate (< ₹4L)', checkType: 'income_expiry_3yr', required: true },
@@ -318,6 +500,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'વિધવા માતાઓને દર મહિને ₹૧,૨૫૦ આજીવન સીધી બેંક સહાય',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'મહિલા અને બાળ વિકાસ વિભાગ (wcd.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'મામલતદાર કચેરી ખરાઈ બાદ માસિક પેન્શન ડીબીટી ચક્ર',
+    statutorySlaNoteEn: 'Mamlatdar verification followed by monthly treasury DBT cycle',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'પતિનો મરણનો દાખલો', nameEn: "Husband's Death Certificate", checkType: 'generic', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -339,6 +530,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'વાર્ષિક માત્ર ₹૨૦ ના પ્રીમિયમે ₹૨ લાખનું અકસ્માત મૃત્યુ/દિવ્યાંગતા કવચ',
     slaDays: 1,
     fee: 20,
+    processingTime: '1 - 2',
+    processingTimeUnit: 'working_days',
+    slaType: 'departmental_norm',
+    officialSource: 'નાણાં મંત્રાલય, ભારત સરકાર (jansuraksha.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'બેંક શાખા ખાતે ૨૪ કલાકમાં ઓટો-ડેબિટ સર્ટિફિકેટ સક્રિય',
+    statutorySlaNoteEn: 'Bank branch auto-debit policy activation within 24-48 hours',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'બેંક બચત ખાતું પાસબુક', nameEn: 'Bank Savings Account Passbook', checkType: 'generic', required: true }
@@ -357,6 +557,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ગર્ભવતી અને ધાત્રી માતાઓને ૧,૦૦૦ દિવસ સુધી દર મહિને મફત પૌષ્ટિક આહાર કીટ',
     slaDays: 2,
     fee: 0,
+    processingTime: 'Same Day',
+    processingTimeUnit: 'same_day',
+    slaType: 'departmental_norm',
+    officialSource: 'ઇન્ટિગ્રેટેડ ચાઇલ્ડ ડેવલપમેન્ટ સર્વિસીસ (ICDS), ગુજરાત',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'આંગણવાડી ખાતે TeCHO નોંધણી વખતે તાત્કાલિક કીટ વિતરણ',
+    statutorySlaNoteEn: 'Immediate monthly kit allotment upon TeCHO-Health pregnancy entry',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'મમતા કાર્ડ (MCP Card)', nameEn: 'Mamta Card (MCP Card)', checkType: 'generic', required: true },
       { nameGu: 'માતા અને પિતાનું આધાર કાર્ડ', nameEn: "Mother & Husband's Aadhaar", checkType: 'aadhaar_regex', required: true },
@@ -376,6 +585,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ખાનગી માન્ય હોસ્પિટલોમાં પણ ૧૦૦% મફત સુવાવડ અને સિઝેરિયન ઓપરેશન',
     slaDays: 1,
     fee: 0,
+    processingTime: 'Same Day',
+    processingTimeUnit: 'same_day',
+    slaType: 'departmental_norm',
+    officialSource: 'આરોગ્ય અને પરિવાર કલ્યાણ વિભાગ, ગુજરાત સરકાર',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'માન્ય ખાનગી પ્રસૂતિ હોસ્પિટલમાં દાખલ થતાં જ મફત સારવાર',
+    statutorySlaNoteEn: 'Immediate cashless admission at empanelled obstetric nursing homes',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'BPL રેશનકાર્ડ અથવા આવકનો દાખલો', nameEn: 'BPL Ration Card / Income Certificate', checkType: 'income_expiry_3yr', required: true },
@@ -395,6 +613,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'આદિવાસી તાલુકાઓમાં સગર્ભા બહેનોને એક ટંકનું સંપૂર્ણ ગરમ પૌષ્ટિક ભોજન',
     slaDays: 2,
     fee: 0,
+    processingTime: 'Same Day',
+    processingTimeUnit: 'same_day',
+    slaType: 'departmental_norm',
+    officialSource: 'આદિજાતિ વિકાસ વિભાગ, ગુજરાત (tribal.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'આદિજાતિ તાલુકા આંગણવાડીમાં તાત્કાલિક ભોજન નોંધણી',
+    statutorySlaNoteEn: 'Immediate daily fortified hot meal registration at tribal Anganwadis',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'મમતા કાર્ડ', nameEn: 'Mamta Card', checkType: 'generic', required: true }
@@ -413,6 +640,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'સરકારી હોસ્પિટલમાં સુવાવડ કરાવવા પર ગ્રામીણ માતાઓને ₹૧,૪૦૦ રોકડ સહાય',
     slaDays: 2,
     fee: 0,
+    processingTime: '7',
+    processingTimeUnit: 'working_days',
+    slaType: 'departmental_norm',
+    officialSource: 'નેશનલ હેલ્થ મિશન (NHM), ગુજરાત',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'સરકારી હોસ્પિટલ પ્રસૂતિ બાદ ૭ દિવસમાં ખાતામાં સહાય',
+    statutorySlaNoteEn: 'Institutional delivery assistance credited within 7 working days',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'સરકારી સંસ્થાકીય પ્રસૂતિ ડિસ્ચાર્જ કાર્ડ', nameEn: 'Institutional Delivery Slip', checkType: 'generic', required: true },
@@ -432,6 +668,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: '૬૦ વર્ષથી વધુ ઉંમરના નિરાધાર વડીલોને દર મહિને ₹૧,૦૦૦ થી ₹૧,૨૫૦ પેન્શન',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'સામાજિક ન્યાય અને અધિકારિતા વિભાગ (sje.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'તાલુકા મામલતદાર મંજૂરી બાદ માસિક સરકારી પેન્શન ચક્ર',
+    statutorySlaNoteEn: 'Monthly social security treasury release post Mamlatdar approval',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ (ઉંમરનો પુરાવો ૬૦+)', nameEn: 'Aadhaar Card (Age Proof 60+)', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય)', nameEn: 'Income Certificate (3-Year)', checkType: 'income_expiry_3yr', required: true },
@@ -453,6 +698,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ધોરણ ૯ થી ૧૨ માં અભ્યાસ કરતી દીકરીઓને કુલ ₹૫૦,૦૦૦ ની શિષ્યવૃત્તિ સહાય',
     slaDays: 3,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'શિક્ષણ વિભાગ, ગુજરાત સરકાર',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'શાળા નામાંકન ખરાઈ બાદ શૈક્ષણિક સત્ર ડીબીટી હપ્તા',
+    statutorySlaNoteEn: 'School enrollment verification followed by academic session DBT',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'વિદ્યાર્થિનીનું આધાર કાર્ડ', nameEn: 'Student Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'શાળા બોનાફાઇડ / U-DISE ID', nameEn: 'School Bonafide / U-DISE ID', checkType: 'generic', required: true },
@@ -472,6 +726,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'મેડિકલમાં ₹૨ લાખ અને એન્જિનિયરિંગમાં ₹૫૦,૦૦૦ સુધી કોલેજ ટ્યુશન ફી સહાય',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'Knowledge Consortium of Gujarat (mysy.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'હેલ્પ સેન્ટર કાગળ ચકાસણી અને રાજ્ય સ્કોલરશીપ કમિટી મંજૂરી',
+    statutorySlaNoteEn: 'Help center document verification and state sanction committee cycle',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'ધો. ૧૦ અથવા ૧૨ ની માર્કશીટ (૮૦+ પર્સન્ટાઈલ)', nameEn: '10th/12th Marksheet (80+ Percentile)', checkType: 'marksheet', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય, < ₹૬ લાખ)', nameEn: 'Income Certificate (3-Year, < ₹6L)', checkType: 'income_expiry_3yr', required: true },
@@ -492,6 +755,13 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ધોરણ ૧૧ અને ૧૨ વિજ્ઞાન પ્રવાહ (સાયન્સ) ના વિદ્યાર્થીઓને ₹૨૫,૦૦૦ સહાય',
     slaDays: 3,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'શિક્ષણ વિભાગ, ગુજરાત સરકાર',
+    lastUpdated: '2025-2026',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'ધોરણ ૧૦ ની માર્કશીટ', nameEn: 'Std 10 Marksheet', checkType: 'marksheet', required: true },
@@ -511,6 +781,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ધોરણ ૧ થી ૧૦ ના SC/ST/OBC વિદ્યાર્થીઓને વાર્ષિક શિષ્યવૃત્તિ અને ગણવેશ સહાય',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'Digital Gujarat Portal (digitalgujarat.gov.in) • સામાજિક ન્યાય વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'વાર્ષિક સ્કોલરશીપ વિન્ડો અને જિલ્લા સમાજ કલ્યાણ મંજૂરી',
+    statutorySlaNoteEn: 'Annual window and District Social Welfare Office verification',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'જાતિનો દાખલો', nameEn: 'Caste Certificate', checkType: 'caste_cert', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય)', nameEn: 'Income Certificate (3-Year)', checkType: 'income_expiry_3yr', required: true },
@@ -530,6 +809,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'કોલેજ અને ડિપ્લોમાના અનામત વર્ગના વિદ્યાર્થીઓને સંપૂર્ણ ફી અને નિર્વાહ ભથ્થું',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'Digital Gujarat Portal (digitalgujarat.gov.in) • આદિજાતિ & સામાજિક ન્યાય',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'કોલેજ બોનાફાઇડ ખરાઈ બાદ PFMS પોર્ટલ દ્વારા ડીબીટી ક્રેડિટ',
+    statutorySlaNoteEn: 'College verification followed by PFMS direct benefit transfer',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'જાતિનો દાખલો', nameEn: 'Caste Certificate', checkType: 'caste_cert', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય)', nameEn: 'Income Certificate (3-Year)', checkType: 'income_expiry_3yr', required: true },
@@ -550,6 +838,13 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'હોનહાર તેજસ્વી વિદ્યાર્થીઓ માટે ઉચ્ચ અભ્યાસ અર્થે વિશેષ મેરિટ શિષ્યવૃત્તિ',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'ઉચ્ચ શિક્ષણ કમિશનરેટ (scholarships.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'બોર્ડ મેરિટ માર્કશીટ', nameEn: 'Board Merit Marksheet', checkType: 'marksheet', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય, < ₹૪.૫ લાખ)', nameEn: 'Income Certificate (3-Year, < ₹4.5L)', checkType: 'income_expiry_3yr', required: true },
@@ -569,6 +864,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ધોરણ ૯ માં પ્રવેશ મેળવતી દીકરીઓને શાળાએ જવા માટે તદ્દન મફત સાયકલ સહાય',
     slaDays: 3,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'વિકસતી જાતિ કલ્યાણ નિયામક કચેરી, ગુજરાત',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'તાલુકા શાળા બોર્ડ દ્વારા સાયકલ વિતરણ અભિયાન હેઠળ',
+    statutorySlaNoteEn: 'Taluka school board physical bicycle distribution drive',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'ધોરણ ૮ પાસ માર્કશીટ', nameEn: 'Std 8 Pass Marksheet', checkType: 'marksheet', required: true },
       { nameGu: 'ધોરણ ૯ માં શાળા પ્રવેશ દાખલો', nameEn: 'Std 9 School Admission Slip', checkType: 'generic', required: true },
@@ -588,6 +892,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'વિદેશમાં ઉચ્ચ અભ્યાસ માટે માત્ર ૪% ના રાહત દરે ₹૧૫ લાખ સુધીની શૈક્ષણિક લોન',
     slaDays: 10,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'ગુજરાત બિનઅનામત શૈક્ષણિક & આર્થિક વિકાસ નિગમ (gueedc.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'નિગમ બોર્ડ સ્ક્રુટિની કમિટી દ્વારા લોન મંજૂરી આદેશ',
+    statutorySlaNoteEn: 'Loan sanction letter issued following GUEEDC scrutiny committee meet',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'વિદેશી યુનિવર્સિટી I-20 / Offer Letter', nameEn: 'Foreign University Offer Letter / I-20', checkType: 'generic', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય)', nameEn: 'Income Certificate (3-Year)', checkType: 'income_expiry_3yr', required: true },
@@ -610,6 +923,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'ગ્રામીણ વિસ્તારમાં પાકું મકાન બનાવવા માટે ₹૧,૨૦,૦૦૦ + મનરેગા મજૂરી સહાય',
     slaDays: 15,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'Ministry of Rural Development (pmayg.nic.in) & ગ્રામ વિકાસ કમિશનરેટ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'ગ્રામ પંચાયત આવાસ યાદી, જીઓ-ટેગિંગ અને ૩ તબક્કામાં હપ્તા',
+    statutorySlaNoteEn: 'PMAY-G priority list, geo-tagging of kutcha house and 3-stage DBT',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'કાચું મકાન / પ્લોટ જમીન દસ્તાવેજ', nameEn: 'Plot / Kutcha House Document', checkType: 'generic', required: true },
       { nameGu: 'SECC 2011 / BPL કાર્ડ અથવા જોબ કાર્ડ', nameEn: 'BPL Card / MGNREGA Job Card', checkType: 'generic', required: true },
@@ -630,6 +952,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'શહેરમાં મકાન ખરીદવા કે બનાવવા માટે ₹૨.૫૦ લાખ સુધીની વ્યાજ સબસિડી',
     slaDays: 15,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'શહેરી વિકાસ અને શહેરી ગૃહ નિર્માણ વિભાગ (pmay-urban.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'મ્યુનિસિપલ કોર્પોરેશન ડ્રો/લોટરી અને વ્યાજ સબસિડી મંજૂરી',
+    statutorySlaNoteEn: 'Municipal allotment lottery and CLSS interest subsidy approval',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આવકનો દાખલો (EWS < ₹૩ લાખ, LIG < ₹૬ લાખ)', nameEn: 'Income Certificate (3-Year)', checkType: 'income_expiry_3yr', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -649,6 +980,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'અનુસૂચિત જાતિ (SC) ના પરિવારોને પ્લોટ પર મકાન બાંધકામ માટે ₹૧,૨૦,૦૦૦ સહાય',
     slaDays: 10,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'e-Samaj Kalyan Portal (esamajkalyan.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'તાલુકા સ્થળ તપાસ અને ૩ બાંધકામ તબક્કામાં સહાય હપ્તા',
+    statutorySlaNoteEn: 'Taluka site inspection and 3-stage construction disbursement',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'SC જાતિનો દાખલો', nameEn: 'SC Caste Certificate', checkType: 'caste_cert', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય, ગ્રામીણ ₹૧.૨L / શહેરી ₹૧.૫L)', nameEn: 'Income Certificate (3-Year)', checkType: 'income_expiry_3yr', required: true },
@@ -669,6 +1009,13 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'સામાજિક-શૈક્ષણિક પછાત વર્ગ (OBC) પરિવારોને મકાન બાંધકામ માટે ₹૧,૨૦,૦૦૦ સહાય',
     slaDays: 10,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'e-Samaj Kalyan Portal (esamajkalyan.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'SEBC/OBC જાતિનો દાખલો', nameEn: 'SEBC/OBC Caste Certificate', checkType: 'caste_cert', required: true },
       { nameGu: 'આવકનો દાખલો (૩-વર્ષ માન્ય)', nameEn: 'Income Certificate (3-Year)', checkType: 'income_expiry_3yr', required: true },
@@ -689,6 +1036,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'કડીયાકામ, સિલાઈ, સુથારી, કડિયાકામ સહિત ૨૮ વ્યવસાયો માટે વિનામૂલ્યે ઓજારોની કીટ',
     slaDays: 7,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'કુટીર અને ગ્રામોદ્યોગ કમિશનરેટ • e-Samaj Kalyan',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'કોમ્પ્યુટરાઇઝ્ડ ડ્રો અને જિલ્લા ટૂલકિટ વિતરણ કેમ્પ',
+    statutorySlaNoteEn: 'Computerized lottery draw and district tool-kit distribution camp',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'આધાર કાર્ડ અને રેશન કાર્ડ', nameEn: 'Aadhaar & Ration Card', checkType: 'aadhaar_regex', required: true },
       { nameGu: 'જાતિનો દાખલો', nameEn: 'Caste Certificate', checkType: 'caste_cert', required: true },
@@ -709,6 +1065,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'દીકરીના જન્મ પર કુલ ₹૧,૧૦,૦૦૦ સહાય (ધો. ૧ માં ₹૪,૦૦૦, ધો. ૯ માં ₹૬,૦૦૦ અને ૧૮ વર્ષે ₹૧ લાખ)',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'મહિલા અને બાળ વિકાસ વિભાગ (wcd.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'જિલ્લા બાળ સુરક્ષા એકમ (DCPU) દ્વારા પોલિસી પ્રમાણપત્ર',
+    statutorySlaNoteEn: 'Bond certificate issued by District Child Protection Unit',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'દીકરીનો જન્મનો દાખલો (૦૨/૦૮/૨૦૧૯ પછી)', nameEn: 'Daughter Birth Certificate (After 02/08/2019)', checkType: 'generic', required: true },
       { nameGu: 'માતા-પિતાનું આધાર કાર્ડ અને લગ્ન નોંધણી દાખલો', nameEn: "Parents' Aadhaar & Marriage Certificate", checkType: 'aadhaar_regex', required: true },
@@ -728,6 +1093,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'દીકરીના લગ્ન પ્રસંગે કન્યાના બેંક ખાતામાં સીધા ₹૧૨,૦૦૦ જમા સહાય',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'સામાજિક ન્યાય અને અધિકારિતા વિભાગ • e-Samaj Kalyan',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'લગ્ન નોંધણી ચકાસણી બાદ જિલ્લા સમાજ કલ્યાણ દ્વારા રૂ. ૧૨,૦૦૦ ડીબીટી',
+    statutorySlaNoteEn: 'Marriage registration scrutiny followed by ₹12,000 DBT release',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'લગ્ન નોંધણી પ્રમાણપત્ર (૨ વર્ષની અંદર)', nameEn: 'Marriage Certificate (Within 2 years)', checkType: 'generic', required: true },
       { nameGu: 'કન્યા અને વરરાજાનું આધાર કાર્ડ', nameEn: "Bride & Groom's Aadhaar Cards", checkType: 'aadhaar_regex', required: true },
@@ -748,6 +1122,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: '૮૦% કે તેથી વધુ દિવ્યાંગતા ધરાવતા વ્યક્તિઓને દર મહિને ₹૧,૦૦૦ પેન્શન',
     slaDays: 5,
     fee: 0,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'સમાજ સુરક્ષા નિયામક કચેરી (socialdefence.gujarat.gov.in)',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'UDID ૮૦%+ મેડિકલ બોર્ડ ખરાઈ બાદ માસિક પેન્શન આદેશ',
+    statutorySlaNoteEn: 'UDID 80%+ medical board verification and monthly pension order',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'UDID / દિવ્યાંગતા પ્રમાણપત્ર (૮૦%+)', nameEn: 'Disability Certificate with UDID (80%+)', checkType: 'generic', required: true },
       { nameGu: 'આધાર કાર્ડ', nameEn: 'Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -768,6 +1151,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'તમામ સરકારી યોજનાઓ માટે સત્તાવાર ૩ નાણાકીય વર્ષ માન્ય આવક પ્રમાણપત્ર',
     slaDays: 3,
     fee: 20,
+    processingTime: '7 - 14',
+    processingTimeUnit: 'working_days',
+    slaType: 'statutory_grtsa',
+    officialSource: 'Digital Gujarat Portal (digitalgujarat.gov.in) • મહેસૂલ વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'ગુજરાત લોકસેવા હક અધિનિયમ ૨૦૧૩ અન્વયે અધિસૂચિત સેવા (તલાટી/નાયબ મામલતદાર)',
+    statutorySlaNoteEn: 'Statutory Notified Public Service under Gujarat Right of Citizens to Public Services Act, 2013',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     validityYears: 3,
     requiredDocs: [
       { nameGu: 'રેશન કાર્ડ અને આધાર કાર્ડ', nameEn: 'Ration Card & Aadhaar Card', checkType: 'aadhaar_regex', required: true },
@@ -789,6 +1181,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'અનામત, શિષ્યવૃત્તિ અને સરકારી નોકરીઓ માટે આજીવન માન્ય જાતિ પ્રમાણપત્ર',
     slaDays: 3,
     fee: 20,
+    processingTime: '7 - 14',
+    processingTimeUnit: 'working_days',
+    slaType: 'statutory_grtsa',
+    officialSource: 'Digital Gujarat Portal (digitalgujarat.gov.in) • સામાજિક ન્યાય & મહેસૂલ વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'ગુજરાત લોકસેવા હક અધિનિયમ ૨૦૧૩ અન્વયે અધિસૂચિત સેવા (મામલતદાર/સમાજ કલ્યાણ)',
+    statutorySlaNoteEn: 'Statutory Notified Public Service under Gujarat Right of Citizens to Public Services Act, 2013',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     requiredDocs: [
       { nameGu: 'શાળા છોડ્યાનું પ્રમાણપત્ર (L.C.)', nameEn: 'School Leaving Certificate (L.C.)', checkType: 'generic', required: true },
       { nameGu: 'પિતા / કાકાનું શાળા છોડ્યાનું પ્રમાણપત્ર', nameEn: "Father's / Uncle's Leaving Certificate", checkType: 'generic', required: true },
@@ -808,6 +1209,15 @@ export const ALL_YOJANAS: SchemeItem[] = [
     benefitGu: 'વિધવા માતા-બહેનોને દર મહિને ₹૧,૨૫૦ આર્થિક સહાય પેન્શન સીધું બેંક ખાતામાં',
     slaDays: 15,
     fee: 20,
+    processingTime: 'Varies',
+    processingTimeUnit: 'varies',
+    slaType: 'scheme_cycle',
+    officialSource: 'સામાજિક ન્યાય અને અધિકારીતા વિભાગ & મહેસૂલ વિભાગ',
+    lastUpdated: '2025-2026',
+    statutorySlaNoteGu: 'મામલતદાર કચેરી સ્થળ તપાસ બાદ સમાજ સુરક્ષા ડીબીટી મંજૂરી',
+    statutorySlaNoteEn: 'Mamlatdar field enquiry followed by Social Security DBT sanction',
+    appointmentWaitEstimateGu: 'કાઉન્ટર મુલાકાત/પ્રતીક્ષા સમય: ~૧૫-૨૦ મિનિટ',
+    appointmentWaitEstimateEn: 'Counter appointment visit duration: ~15-20 min',
     validityYears: 3,
     requiredDocs: [
       { nameGu: 'પતિના મરણનો દાખલો (Death Certificate)', nameEn: 'Husband Death Certificate', checkType: 'generic', required: true },

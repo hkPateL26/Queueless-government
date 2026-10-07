@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { 
   X, CheckSquare, Square, Share2, Camera, ShieldCheck, 
   Clock, IndianRupee, Volume2, ArrowRight, FileCheck2, Lock, 
-  CheckCircle2, HelpCircle, ExternalLink, AlertCircle, Info
+  CheckCircle2, HelpCircle, ExternalLink, AlertCircle, Info, Building2
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -12,7 +12,8 @@ import {
   SchemeItem, 
   getSchemeEligibility, 
   getSchemeOfficialSource, 
-  getSchemeStructuredBenefit 
+  getSchemeStructuredBenefit,
+  getProcessingTimelineInfo
 } from '@/lib/schemes-data';
 
 interface SchemeDrawerProps {
@@ -42,6 +43,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const eligibility = getSchemeEligibility(scheme);
   const sourceInfo = getSchemeOfficialSource(scheme);
   const benefit = getSchemeStructuredBenefit(scheme);
+  const timelineInfo = getProcessingTimelineInfo(scheme);
 
   const toggleDoc = (docName: string) => {
     triggerHaptic('tap');
@@ -51,7 +53,8 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const handleShareWhatsApp = () => {
     triggerHaptic('success');
     const docList = scheme.requiredDocs.map((d, i) => `${i + 1}. ${d.nameGu}`).join('\n');
-    const message = `🏛️ *${scheme.titleGu}*\nકચેરીએ જતાં પહેલાં જરૂરી કાગળો (Before You Visit):\n\n${docList}\n\n⏱️ અપેક્ષિત સમય: ${scheme.slaDays} દિવસ\n💰 સરકારી ફી: ${scheme.fee === 0 ? '₹૦ (મફત)' : `₹${scheme.fee}`}\n📌 સ્ત્રોત: ${sourceInfo.source}\n\nℹ️ આ ઓટોમેટેડ પૂર્વ-માર્ગદર્શન છે. આખરી ચકાસણી અધિકૃત અધિકારી દ્વારા કરવામાં આવે છે.`;
+    const deliveryText = timelineInfo.isVaries ? 'પ્રક્રિયા સમય અલગ હોઈ શકે છે (કચેરી ખાતે ચકાસો)' : timelineInfo.formattedTimeGu;
+    const message = `🏛️ *${scheme.titleGu}*\nકચેરીએ જતાં પહેલાં માર્ગદર્શિકા (Before You Visit):\n\n📄 જરૂરી કાગળો:\n${docList}\n\n⏱️ અપેક્ષિત ડિલિવરી સમય: ${deliveryText}\n🏢 કાઉન્ટર મુલાકાત પ્રતીક્ષા: ~૧૫-૨૦ મિનિટ\n💰 સરકારી ફી: ${scheme.fee === 0 ? '₹૦ (મફત)' : `₹${scheme.fee}`}\n🏛️ વિભાગ: ${scheme.department}\n🔗 સત્તાવાર સ્ત્રોત: ${scheme.officialSource} (અપડેટ: ${scheme.lastUpdated})\n\nℹ️ આ ઓટોમેટેડ પૂર્વ-માર્ગદર્શન છે. આખરી ચકાસણી અધિકૃત સરકારી અધિકારી દ્વારા કરવામાં આવે છે.`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -90,39 +93,120 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         {/* Scrollable Center Body with Touch Action Pan-Y */}
         <div className="flex-1 overflow-y-auto modal-scroll-area p-4 sm:p-5 space-y-4 sm:space-y-5">
             
-          {/* 📋 WHAT YOU NEED BEFORE VISITING (Requirement 17) */}
+          {/* 📋 WHAT YOU NEED BEFORE VISITING (Requirement 17 & Processing Time) */}
           <div className="bg-amber-50/70 border-2 border-amber-300 rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-amber-200 pb-2">
               <div className="flex items-center gap-2">
                 <span className="text-base">📌</span>
                 <h3 className="text-xs font-black text-amber-950 uppercase tracking-wide">
-                  કચેરીએ જતાં પહેલાં યાદી (Before You Visit Checklist)
+                  કચેરીએ જતાં પહેલાં માર્ગદર્શિકા (Before You Visit Guidance)
                 </h3>
               </div>
               <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">
-                તૈયારી ચેકલિસ્ટ
+                સત્તાવાર વિગતો
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-white p-2.5 rounded-xl border border-amber-200">
-                <p className="text-[10px] text-slate-500 font-bold uppercase">અપેક્ષિત નિકાલ સમય</p>
-                <p className="font-extrabold text-[#003366] text-sm mt-0.5">{scheme.slaDays} કાર્યકારી દિવસ</p>
-                <p className="text-[9px] text-slate-400">Department SLA</p>
+            {/* 4 Pillars Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+              {/* 1. Expected Processing / Delivery Time */}
+              <div className="bg-white p-3 rounded-xl border border-amber-200 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-[#FF9933]" />
+                      <span>અપેક્ષિત પ્રક્રિયા / ડિલિવરી સમય</span>
+                    </p>
+                  </div>
+                  <p className="font-extrabold text-[#003366] text-sm mt-1 leading-snug">
+                    {timelineInfo.isVaries ? (
+                      <span className="text-amber-800 text-xs font-bold leading-tight block">
+                        પ્રક્રિયા સમય અલગ હોઈ શકે છે — સંબંધિત કચેરી ખાતે ચકાસો
+                      </span>
+                    ) : (
+                      timelineInfo.formattedTimeGu
+                    )}
+                  </p>
+                  <p className="text-[9px] text-slate-400 mt-0.5">
+                    {timelineInfo.isVaries ? '(Varies across offices / batch cycles)' : `(${timelineInfo.formattedTimeEn})`}
+                  </p>
+                </div>
+
+                {/* Statutory vs Norm vs Batch Cycle Note */}
+                <div className="mt-2 pt-1.5 border-t border-slate-100">
+                  {scheme.slaType === 'statutory_grtsa' ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded p-1.5 text-[9px] text-blue-900 font-medium">
+                      <span className="font-extrabold text-[#005A9C] block">⚖️ GRTSA ૨૦૧૩ અધિસૂચિત કાનૂની સમયમર્યાદા</span>
+                      <p className="text-[8.5px] text-blue-800 mt-0.5">
+                        {scheme.statutorySlaNoteGu || 'ગુજરાત જાહેર સેવા હક્ક અધિનિયમ ૨૦૧૩ હેઠળ કાયદેસર સમયમર્યાદા.'}
+                      </p>
+                    </div>
+                  ) : scheme.slaType === 'departmental_norm' ? (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded p-1 text-[9px] text-emerald-800 font-medium">
+                      🏛️ સિટીઝન ચાર્ટર ધોરણ (વિભાગીય સમયગાળો)
+                    </div>
+                  ) : (
+                    <div className="bg-slate-100 rounded p-1 text-[9px] text-slate-600">
+                      📋 યોજના આધારિત ચક્ર / ક્વોટા મંજૂરી (GRTSA લાગુ નથી)
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="bg-white p-2.5 rounded-xl border border-amber-200">
-                <p className="text-[10px] text-slate-500 font-bold uppercase">સરકારી નિયત ફી</p>
-                <p className="font-extrabold text-[#138808] text-sm mt-0.5">
-                  {scheme.fee === 0 ? '₹૦ (મફત અરજી)' : `₹${scheme.fee}`}
+
+              {/* 2. Office Appointment / Queue Waiting Time */}
+              <div className="bg-white p-3 rounded-xl border border-amber-200 flex flex-col justify-between">
+                <div>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                    <Building2 className="w-3 h-3 text-[#005A9C]" />
+                    <span>કચેરી મુલાકાત પ્રતીક્ષા સમય</span>
+                  </p>
+                  <p className="font-extrabold text-slate-800 text-sm mt-1">
+                    ~૧૫-૨૦ મિનિટ (કાઉન્ટર સમય)
+                  </p>
+                  <p className="text-[9px] text-slate-400 mt-0.5">
+                    Office Queue / Counter Waiting Time
+                  </p>
+                </div>
+                <div className="mt-2 pt-1.5 border-t border-slate-100 text-[9px] text-slate-500">
+                  ℹ️ ટોકન સ્લોટ પર પહોંચવાથી લાઈન વગર નિર્ધારિત સમયમાં વેરિફિકેશન પૂર્ણ થાય છે.
+                </div>
+              </div>
+
+              {/* 3. Government Fee */}
+              <div className="bg-white p-3 rounded-xl border border-amber-200">
+                <p className="text-[10px] text-slate-500 font-bold uppercase flex items-center gap-1">
+                  <IndianRupee className="w-3 h-3 text-[#138808]" />
+                  <span>સરકારી નિયત ફી</span>
                 </p>
-                <p className="text-[9px] text-slate-400">અધિકૃત ચાર્જ</p>
+                <p className="font-extrabold text-[#138808] text-base mt-1">
+                  {scheme.fee === 0 ? '₹૦ (સંપૂર્ણ મફત)' : `₹${scheme.fee}`}
+                </p>
+                <p className="text-[9px] text-slate-400">
+                  {scheme.fee === 0 ? 'કોઈ સરકારી ચાર્જ નથી' : 'અધિકૃત સરકારી સેવા ફી'}
+                </p>
+              </div>
+
+              {/* 4. Issuing Department & Official Source */}
+              <div className="bg-white p-3 rounded-xl border border-amber-200 flex flex-col justify-between">
+                <div>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">વિભાગ અને સત્તાવાર સ્ત્રોત</p>
+                  <p className="font-bold text-[#003366] text-xs mt-1 leading-snug">
+                    {scheme.department}
+                  </p>
+                  <p className="text-[10px] text-slate-600 mt-1 truncate" title={scheme.officialSource}>
+                    🔗 {scheme.officialSource}
+                  </p>
+                </div>
+                <p className="text-[9px] text-slate-400 mt-1">
+                  છેલ્લે અપડેટ: {scheme.lastUpdated}
+                </p>
               </div>
             </div>
 
             <div className="text-[11px] text-amber-900 bg-amber-100/60 p-2.5 rounded-xl flex items-start gap-2">
               <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                કચેરીના કાઉન્ટર પર ધક્કો ન થાય તે માટે નીચે આપેલા તમામ કાગળો અસલ તથા ઝેરોક્ષ સાથે લઈ જવા વિનંતી.
+                <strong>ધ્યાન રાખો:</strong> ઉપર દર્શાવેલ <em>અપેક્ષિત પ્રક્રિયા સમય</em> અરજી જમા થયા પછી પ્રમાણપત્ર/લાભ જારી થવાનો અપેક્ષિત સમય છે, જ્યારે <em>કચેરી મુલાકાત સમય (~૧૫-૨૦ મિ.)</em> ફક્ત કાઉન્ટર પર દસ્તાવેજ જમા/ચકાસણીનો સમય છે.
               </p>
             </div>
           </div>
