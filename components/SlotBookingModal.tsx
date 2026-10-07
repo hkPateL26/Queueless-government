@@ -32,6 +32,8 @@ export interface BookingDetails {
   counterNameEn: string;
   officerName: string;
   tokenNumber: string;
+  isPriority?: boolean;
+  leaveHomeBy?: string;
 }
 
 interface SlotBookingModalProps {
@@ -65,6 +67,7 @@ export function SlotBookingModal({
 
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [selectedSlotId, setSelectedSlotId] = useState<string>('slot-2');
+  const [isPriority, setIsPriority] = useState<boolean>(false);
 
   const selectedDistrict = useMemo(() => {
     return GUJARAT_33_DISTRICTS.find(d => d.id === selectedDistrictId) || GUJARAT_33_DISTRICTS[0];
@@ -147,10 +150,27 @@ export function SlotBookingModal({
     triggerHaptic('success');
     speakGuidance("સ્લોટ બુકિંગ સફળ! તમારો કચેરી ટોકન જારી થયો છે.");
 
-    // Generate token number (e.g. A-42 or K-18)
-    const tokenLetter = ['A', 'B', 'C', 'D'][routing.counterNumber % 4] || 'A';
-    const tokenNum = Math.floor(10 + Math.random() * 89);
-    const tokenNumber = `#${tokenLetter}-${tokenNum}`;
+    // Calculate recommended departure time (45 minutes prior)
+    const slotHour = parseInt(selectedSlot.startTime.split(':')[0] || '10', 10);
+    const slotMinute = parseInt(selectedSlot.startTime.split(':')[1] || '30', 10);
+    let depHour = slotHour;
+    let depMinute = slotMinute - 45;
+    if (depMinute < 0) {
+      depMinute += 60;
+      depHour -= 1;
+    }
+    const leaveHomeBy = `${String(depHour).padStart(2, '0')}:${String(depMinute).padStart(2, '0')} AM`;
+
+    // Generate token number: #P-07 for Senior/Divyang Priority, otherwise #A-42
+    let tokenNumber = '';
+    if (isPriority) {
+      const pNum = Math.floor(1 + Math.random() * 15);
+      tokenNumber = `#P-${String(pNum).padStart(2, '0')}`;
+    } else {
+      const tokenLetter = ['A', 'B', 'C', 'D'][routing.counterNumber % 4] || 'A';
+      const tokenNum = Math.floor(10 + Math.random() * 89);
+      tokenNumber = `#${tokenLetter}-${tokenNum}`;
+    }
 
     onConfirm({
       district: selectedDistrict,
@@ -161,7 +181,9 @@ export function SlotBookingModal({
       counterNameGu: counterDetails.nameGu,
       counterNameEn: counterDetails.nameEn,
       officerName: counterDetails.officerName,
-      tokenNumber
+      tokenNumber,
+      isPriority,
+      leaveHomeBy
     });
   };
 
@@ -435,6 +457,34 @@ export function SlotBookingModal({
                 </div>
               </div>
             </div>
+          </section>
+
+          {/* STEP 5: SENIOR CITIZEN & DIVYANGJAN PRIORITY FAST-TRACK */}
+          <section className="bg-amber-50/80 border border-amber-300 rounded-xl p-3.5 flex items-start gap-3 transition">
+            <input 
+              type="checkbox" 
+              id="priority-check" 
+              checked={isPriority} 
+              onChange={(e) => {
+                triggerHaptic('tap');
+                setIsPriority(e.target.checked);
+                if (e.target.checked) {
+                  speakGuidance("વરિષ્ઠ નાગરિક અને દિવ્યાંગજન પ્રાયોરિટી ફાસ્ટ-ટ્રેક સક્રિય થયો છે. તમને વિશેષ ગોલ્ડન ટોકન ફાળવાશે.");
+                }
+              }}
+              className="mt-0.5 w-4 h-4 rounded text-amber-600 accent-[#FF9933] cursor-pointer"
+            />
+            <label htmlFor="priority-check" className="text-xs text-amber-950 font-bold cursor-pointer select-none">
+              <span className="flex flex-wrap items-center gap-1.5 text-[#003366] font-black">
+                <span>🧓/♿ હું વરિષ્ઠ નાગરિક (૬૦+) અથવા દિવ્યાંગજન છું</span>
+                <span className="bg-[#FF9933] text-slate-900 text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">
+                  GRTSA Priority Fast-Track
+                </span>
+              </span>
+              <p className="text-[11px] text-amber-900/80 font-medium mt-0.5">
+                ટીક કરવાથી તમને વિશેષ <strong>ગોલ્ડન પ્રાયોરિટી ટોકન (#P)</strong> મળશે, જેથી કચેરીમાં પહોંચતા જ કતાર વગર પ્રથમ પ્રાથમિકતા મળશે.
+              </p>
+            </label>
           </section>
 
         </div>
