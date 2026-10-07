@@ -74,34 +74,34 @@ export function DigitalTokenPass({
           <div className="flex-1 bg-[#138808]" />
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 text-[#FF9933] font-bold">
-              <ShieldCheck className="w-7 h-7" />
+        <div className="flex items-start sm:items-center justify-between gap-2">
+          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 text-[#FF9933] font-bold shrink-0">
+              <ShieldCheck className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold tracking-widest uppercase bg-white/20 px-2 py-0.5 rounded text-white">
-                  GUJARAT GOV • GRTSA 2013
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[9px] sm:text-[11px] font-bold tracking-wider uppercase bg-white/20 px-1.5 py-0.5 rounded text-white whitespace-nowrap">
+                  GUJARAT GOV
                 </span>
-                <span className="flex items-center gap-1 text-[11px] font-bold text-green-300">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  સક્રિય (Active)
+                <span className="flex items-center gap-1 text-[9px] sm:text-[11px] font-bold text-green-300">
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400 animate-pulse" />
+                  સક્રિય
                 </span>
               </div>
-              <h2 className="text-base sm:text-lg font-bold text-white mt-0.5">
-                ઈ-જન સેવા સત્તાવાર ટોકન પાસ
+              <h2 className="text-sm sm:text-lg font-bold text-white mt-0.5 truncate">
+                ઈ-જન સેવા ટોકન પાસ
               </h2>
-              <p className="text-xs text-blue-100">
+              <p className="text-[10px] sm:text-xs text-blue-100 truncate">
                 {booking.taluka.officeNameGu}
               </p>
             </div>
           </div>
 
           {/* TOKEN CHIP */}
-          <div className="text-right">
-            <span className="text-[10px] uppercase font-bold text-blue-200 block">ટોકન ક્રમાંક</span>
-            <span className="text-2xl sm:text-3xl font-extrabold font-mono text-[#FF9933] drop-shadow-sm">
+          <div className="text-right shrink-0">
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold text-blue-200 block">ટોકન ક્રમાંક</span>
+            <span className="text-xl sm:text-3xl font-extrabold font-mono text-[#FF9933] drop-shadow-sm">
               {booking.tokenNumber}
             </span>
           </div>

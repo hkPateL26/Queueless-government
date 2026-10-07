@@ -145,14 +145,14 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               triggerHaptic('tap');
               setActiveTab('camera');
             }}
-            className={`flex-1 py-3 text-xs font-black flex items-center justify-center gap-2 transition cursor-pointer ${
+            className={`flex-1 py-2.5 sm:py-3 px-2 text-[11px] sm:text-xs font-black flex items-center justify-center gap-1.5 sm:gap-2 transition cursor-pointer ${
               activeTab === 'camera'
                 ? 'text-[#003366] border-b-2 border-[#005A9C] bg-white'
                 : 'text-slate-500 hover:text-[#003366]'
             }`}
           >
-            <Camera className="w-4 h-4 text-[#005A9C]" />
-            <span>લાઈવ કેમેરા સ્કેન (Live Camera)</span>
+            <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#005A9C] shrink-0" />
+            <span className="truncate">લાઈવ કેમેરા (Camera)</span>
           </button>
           <button
             onClick={() => {
@@ -160,14 +160,14 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               setActiveTab('drive');
               speakGuidance("ગૂગલ ડ્રાઇવ અથવા કમ્પ્યુટરમાંથી ફાઇલ અથવા ફોલ્ડર અપલોડ કરો.");
             }}
-            className={`flex-1 py-3 text-xs font-extrabold flex items-center justify-center gap-2 transition cursor-pointer ${
+            className={`flex-1 py-2.5 sm:py-3 px-2 text-[11px] sm:text-xs font-extrabold flex items-center justify-center gap-1.5 sm:gap-2 transition cursor-pointer ${
               activeTab === 'drive'
                 ? 'text-[#003366] border-b-2 border-[#FF9933] bg-white'
                 : 'text-slate-500 hover:text-[#003366]'
             }`}
           >
-            <Cloud className="w-4 h-4 text-[#FF9933]" />
-            <span>Google Drive & ફાઇલ/ફોલ્ડર અપલોડ</span>
+            <Cloud className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF9933] shrink-0" />
+            <span className="truncate">Drive & અપલોડ</span>
           </button>
         </div>
 
@@ -440,14 +440,14 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between gap-3">
+        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5">
           <button
             onClick={() => handleRunOcr(SAMPLE_OCR_TEST_CASES.valid2025)}
             disabled={scanning}
-            className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center gap-2"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center justify-center gap-2"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${scanning ? 'animate-spin' : ''}`} />
-            <span>{scanning ? 'સ્કેનિંગ ચાલુ છે...' : 'ફોટો કેપ્ચર & સ્કેન'}</span>
+            <span>{scanning ? 'સ્કેનિંગ...' : 'ફોટો કેપ્ચર & સ્કેન'}</span>
           </button>
 
           <button
@@ -458,7 +458,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               }
             }}
             disabled={!validationResult?.isValid}
-            className={`px-5 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 transition shadow-md ${
+            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition shadow-md ${
               validationResult?.isValid
                 ? 'bg-[#005A9C] hover:bg-[#003366] text-white active:scale-95'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
@@ -472,7 +472,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             ) : (
               <>
                 <Lock className="w-3.5 h-3.5 text-[#FF9933]" />
-                <span>ટોકન મેળવવા લૉગિન કરો (Login to Collect)</span>
+                <span>ટોકન માટે લૉગિન કરો</span>
               </>
             )}
           </button>

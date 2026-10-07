@@ -313,21 +313,21 @@ export function SlotBookingModal({
           </section>
 
           {/* STEP 3: CAPPED TIME SLOTS (10:30 AM - 06:10 PM with LUNCH BLACKOUT) */}
-          <section className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
+          <section className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#005A9C]" />
+                <Clock className="w-4 h-4 text-[#005A9C] shrink-0" />
                 <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                  પગલું ૩: સમય સ્લોટ પસંદ કરો (Max 5 Tokens / Hour Capacity)
+                  પગલું ૩: સમય સ્લોટ પસંદ કરો (Max 5 Tokens / Hour)
                 </h4>
               </div>
-              <span className="text-[11px] font-semibold text-[#138808] flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-[#138808]" /> 🟢 જગ્યા ખાલી | 🟡 મધ્યમ | 🔴 હાઉસફુલ
+              <span className="text-[10px] sm:text-[11px] font-semibold text-[#138808] flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-[#138808]" /> 🟢 ખાલી | 🟡 મધ્યમ | 🔴 પૂર્ણ
               </span>
             </div>
 
             {holidayCheck.isClosed ? (
-              <div className="p-6 text-center text-gray-400 bg-white border border-gray-200 rounded-xl">
+              <div className="p-5 text-center text-gray-400 bg-white border border-gray-200 rounded-xl">
                 <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
                 <p className="text-xs font-semibold">પસંદ કરેલ તારીખે સરકારી રજા હોવાથી સ્લોટ્સ ઉપલબ્ધ નથી.</p>
                 <p className="text-[11px] text-gray-400 mt-1">કૃપા કરીને અન્ય ચાલુ દિવસ પસંદ કરો.</p>
@@ -343,15 +343,15 @@ export function SlotBookingModal({
                     return (
                       <div
                         key={slot.id}
-                        className="col-span-1 sm:col-span-2 p-2.5 rounded-xl bg-gray-200/70 border border-gray-300/80 text-gray-600 flex items-center justify-between opacity-80"
+                        className="col-span-1 sm:col-span-2 p-2.5 rounded-xl bg-gray-200/70 border border-gray-300/80 text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 opacity-80"
                       >
                         <div className="flex items-center gap-2">
-                          <Utensils className="w-4 h-4 text-gray-500" />
+                          <Utensils className="w-4 h-4 text-gray-500 shrink-0" />
                           <span className="text-xs font-bold">
                             {slot.timeRange}
                           </span>
                         </div>
-                        <span className="text-[11px] font-semibold bg-gray-300 text-gray-700 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] sm:text-[11px] font-semibold bg-gray-300 text-gray-700 px-2 py-0.5 rounded-full w-fit">
                           {slot.statusGu}
                         </span>
                       </div>
@@ -367,7 +367,7 @@ export function SlotBookingModal({
                         triggerHaptic('tap');
                         setSelectedSlotId(slot.id);
                       }}
-                      className={`p-3 rounded-xl border text-left transition flex items-center justify-between ${
+                      className={`p-2.5 sm:p-3 rounded-xl border text-left transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 ${
                         isSelected 
                           ? 'bg-[#003366] text-white border-[#003366] shadow-md ring-2 ring-blue-500/50' 
                           : isFull 
@@ -379,16 +379,16 @@ export function SlotBookingModal({
                         <div className="text-xs font-bold flex items-center gap-1.5">
                           <span>{slot.timeRange}</span>
                           {isSelected && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#FF9933]" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                           )}
                         </div>
-                        <div className={`text-[11px] mt-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                        <div className={`text-[10px] sm:text-[11px] mt-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
                           ક્ષમતા: {slot.bookedCount}/5 ટોકન બુક થયેલ
                         </div>
                       </div>
 
-                      <div className="text-right shrink-0">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      <div className="sm:text-right shrink-0">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${
                           slot.statusColor === 'green' 
                             ? isSelected ? 'bg-green-700 text-white' : 'bg-green-100 text-green-800'
                             : slot.statusColor === 'yellow'

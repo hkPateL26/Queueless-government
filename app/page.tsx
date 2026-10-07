@@ -5,7 +5,7 @@ import {
   ShieldCheck, MapPin, Lock, Clock, Search, ArrowRight, 
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
   Users, Building, Award, Bell, CheckCircle2, ChevronDown, Download,
-  Layers, ArrowLeft, Calendar
+  Layers, ArrowLeft, Calendar, Home as HomeIcon, Radio
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -202,22 +202,23 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937]">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] pb-16 md:pb-0">
       {/* TOP GOV BAR */}
       <header className="bg-[#003366] text-white text-xs border-b border-blue-900 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-9 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 font-semibold text-white">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#138808] animate-pulse" />
-              <span>GSDC Gandhinagar • Live Synced</span>
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-9 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <span className="flex items-center gap-1 font-semibold text-white text-[10px] sm:text-xs truncate">
+              <span className="w-2 h-2 rounded-full bg-[#138808] animate-pulse shrink-0" />
+              <span className="hidden sm:inline">GSDC Gandhinagar • Live Synced</span>
+              <span className="sm:hidden">GSDC • Live</span>
             </span>
-            <span className="text-blue-300/40 hidden sm:inline">|</span>
-            <span className="text-blue-200 hidden sm:inline font-mono text-[11px]">GRTSA 2013 Certified • 42ms</span>
+            <span className="text-blue-300/40 hidden md:inline">|</span>
+            <span className="text-blue-200 hidden md:inline font-mono text-[11px]">GRTSA 2013 Certified • 42ms</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Language Switcher */}
-            <div className="flex items-center bg-[#002244] rounded-lg p-0.5 border border-blue-800 text-[11px]">
+            <div className="flex items-center bg-[#002244] rounded-lg p-0.5 border border-blue-800 text-[10px] sm:text-[11px]">
               {(['en', 'gu', 'hi'] as const).map((l) => (
                 <button
                   key={l}
@@ -225,7 +226,7 @@ export default function Home() {
                     triggerHaptic('tap');
                     setLang(l);
                   }}
-                  className={`px-2 py-0.5 rounded font-bold transition ${
+                  className={`px-1.5 sm:px-2 py-0.5 rounded font-bold transition ${
                     lang === l ? 'bg-[#005A9C] text-white' : 'text-blue-200 hover:text-white'
                   }`}
                 >
@@ -241,10 +242,10 @@ export default function Home() {
                   triggerHaptic('tap');
                   setDemoMenuOpen(!demoMenuOpen);
                 }}
-                className="bg-[#FF9933] hover:bg-amber-600 text-slate-900 font-extrabold px-3 py-1 rounded-md text-[11px] shadow-sm flex items-center gap-1.5 transition active:scale-95"
+                className="bg-[#FF9933] hover:bg-amber-600 text-slate-900 font-extrabold px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-[11px] shadow-sm flex items-center gap-1 transition active:scale-95 cursor-pointer"
               >
-                <span>⚡ 1-Click Demo Fill</span>
-                <ChevronDown className="w-3 h-3" />
+                <span>⚡ Demo</span>
+                <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               </button>
 
               {demoMenuOpen && (
@@ -289,17 +290,17 @@ export default function Home() {
 
       {/* MAIN NAV */}
       <nav className="bg-white border-b border-slate-200 sticky top-9 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button onClick={() => setView('landing')} className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#003366] text-white flex items-center justify-center font-black text-xl shadow-md border-2 border-[#FF9933]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
+          <button onClick={() => setView('landing')} className="flex items-center gap-2 sm:gap-3 cursor-pointer">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#003366] text-white flex items-center justify-center font-black text-base sm:text-xl shadow-md border-2 border-[#FF9933] shrink-0">
               Q
             </div>
             <div className="text-left">
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg sm:text-xl tracking-tight text-[#003366] leading-none">QueueLess</span>
-                <span className="text-[10px] bg-amber-50 text-[#FF9933] border border-amber-200 px-1.5 py-0.5 rounded font-extrabold">કચેરી</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-base sm:text-xl tracking-tight text-[#003366] leading-none">QueueLess</span>
+                <span className="text-[9px] sm:text-[10px] bg-amber-50 text-[#FF9933] border border-amber-200 px-1 py-0.5 rounded font-extrabold">કચેરી</span>
               </div>
-              <p className="text-[10px] text-slate-500 font-medium">Government Office Queue Management System</p>
+              <p className="text-[10px] text-slate-500 font-medium hidden sm:block">Government Office Queue Management System</p>
             </div>
           </button>
 
@@ -314,15 +315,15 @@ export default function Home() {
             <button onClick={() => triggerHaptic('tap')} className="text-slate-400 hover:text-slate-600">Help & Support</button>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {!currentUser ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   onClick={() => {
                     triggerHaptic('tap');
                     setAuthModalOpen(true);
                   }}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-[#003366] hover:bg-slate-100 border border-slate-200"
+                  className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-[#003366] hover:bg-slate-100 border border-slate-200 cursor-pointer"
                 >
                   Login
                 </button>
@@ -331,30 +332,31 @@ export default function Home() {
                     triggerHaptic('tap');
                     setAuthModalOpen(true);
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#005A9C] hover:bg-[#003366] text-white shadow-sm active:scale-95 transition"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold bg-[#005A9C] hover:bg-[#003366] text-white shadow-sm active:scale-95 transition cursor-pointer"
                 >
                   Get Started
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl">
                 <img
                   src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mohan"
                   alt="Avatar"
-                  className="w-6 h-6 rounded-full bg-amber-200"
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-200 shrink-0"
                 />
                 <div className="text-left text-xs leading-none">
-                  <p className="font-extrabold text-[#003366]">{currentUser.name}</p>
-                  <p className="text-[9.5px] text-[#FF9933] font-bold">{currentUser.role} • {currentUser.area}</p>
+                  <p className="font-extrabold text-[#003366] text-[11px] sm:text-xs truncate max-w-[90px] sm:max-w-none">{currentUser.name}</p>
+                  <p className="text-[9px] text-[#FF9933] font-bold hidden sm:block">{currentUser.role} • {currentUser.area}</p>
                 </div>
-                <button onClick={resetSession} className="ml-1 text-slate-400 hover:text-red-500 text-xs">
-                  <RotateCcw className="w-3.5 h-3.5" />
+                <button onClick={resetSession} className="ml-0.5 text-slate-400 hover:text-red-500 text-xs p-1 cursor-pointer">
+                  <RotateCcw className="w-3 h-3" />
                 </button>
               </div>
             )}
           </div>
         </div>
       </nav>
+
 
       {/* ========================================================= */}
       {/* VIEW: SERVICES & 39 YOJANAS BENTO CATALOG (PHASE 2 ENGINE) */}
@@ -387,55 +389,55 @@ export default function Home() {
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#138808]" />
               </div>
 
-              <h1 className="text-4xl sm:text-5xl font-black text-[#003366] tracking-tight leading-[1.15]">
+              <h1 className="text-3xl sm:text-5xl font-black text-[#003366] tracking-tight leading-tight sm:leading-[1.15] break-words">
                 Skip The Queue, <br className="hidden sm:inline" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#005A9C] via-[#FF9933] to-[#003366]">
                   Not Your Work
                 </span>
               </h1>
 
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl">
+              <p className="text-slate-600 text-xs sm:text-base leading-relaxed max-w-xl">
                 Book virtual slot tokens for Mamlatdar offices, Jan Seva Kendras, Aadhaar, RTO, and Taluka Panchayat. Get real-time wait estimates and manage your visit from anywhere in Gujarat.
               </p>
 
-              <div className="bg-white p-2.5 rounded-2xl shadow-xl border border-slate-200 flex flex-col sm:flex-row gap-2 max-w-xl">
-                <div className="flex items-center gap-3 px-3 flex-1">
-                  <Search className="w-4 h-4 text-slate-400" />
+              <div className="bg-white p-2 sm:p-2.5 rounded-2xl shadow-xl border border-slate-200 flex flex-col sm:flex-row gap-2 max-w-xl">
+                <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 flex-1 min-w-0">
+                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
                   <input
                     type="text"
                     onFocus={() => setView('services')}
-                    placeholder="Search office or scheme: ટ્રેક્ટર, MYSY, આવકનો દાખલો..."
+                    placeholder="Search: ટ્રેક્ટર, MYSY, આવક દાખલો..."
                     className="w-full text-xs sm:text-sm bg-transparent outline-none text-[#1F2937] placeholder-slate-400 font-medium"
                   />
                 </div>
                 <button
                   onClick={() => setView('services')}
-                  className="bg-[#005A9C] hover:bg-[#003366] text-white font-bold px-5 py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition whitespace-nowrap"
+                  className="bg-[#005A9C] hover:bg-[#003366] text-white font-bold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition whitespace-nowrap cursor-pointer"
                 >
                   <span>Explore 39 Yojanas</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-500 font-medium">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 text-xs text-slate-500 font-medium">
                 <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#FF9933]" />
+                  <MapPin className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                   <span>33 Districts & 250+ Talukas</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-[#138808]" />
-                  <span>Secure 2FA & GRTSA Compliant</span>
+                  <Lock className="w-3.5 h-3.5 text-[#138808] shrink-0" />
+                  <span>Secure 2FA & GRTSA</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#005A9C]" />
+                  <Clock className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
                   <span>Live Updates 24/7</span>
                 </div>
               </div>
             </div>
 
             {/* Right: Floating Hero Card */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-[340px]">
+            <div className="lg:col-span-5 flex justify-center w-full">
+              <div className="relative w-full max-w-[290px] sm:max-w-[340px]">
                 <div className="absolute -inset-3 bg-gradient-to-tr from-[#005A9C]/20 via-[#FF9933]/20 to-[#138808]/20 rounded-3xl blur-xl" />
                 <div className="relative bg-white rounded-3xl p-6 shadow-2xl border border-slate-200">
                   <div className="flex items-center justify-between mb-4">
@@ -499,43 +501,43 @@ export default function Home() {
           </section>
 
           {/* STATS COUNTER */}
-          <section className="bg-white border-t border-slate-200 py-12">
+          <section className="bg-white border-t border-slate-200 py-8 sm:py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-5">
-                  <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-[#005A9C]" />
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-14">
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
                     <span>Live Tokens</span>
                   </p>
-                  <h3 className="text-3xl font-black text-[#003366] mt-1">12,483</h3>
-                  <p className="text-[11px] text-[#138808] font-bold mt-0.5">↑ 8.2% today</p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">12,483</h3>
+                  <p className="text-[10px] sm:text-[11px] text-[#138808] font-bold mt-0.5">↑ 8.2% today</p>
                 </div>
 
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-5">
-                  <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#FF9933]" />
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                     <span>Avg Wait Time</span>
                   </p>
-                  <h3 className="text-3xl font-black text-[#003366] mt-1">14 min</h3>
-                  <p className="text-[11px] text-[#138808] font-bold mt-0.5">↓ 22% vs walk-in</p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">14 min</h3>
+                  <p className="text-[10px] sm:text-[11px] text-[#138808] font-bold mt-0.5">↓ 22% vs walk-in</p>
                 </div>
 
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-5">
-                  <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
-                    <Building className="w-3.5 h-3.5 text-[#138808]" />
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-[#138808] shrink-0" />
                     <span>Active Kacheris</span>
                   </p>
-                  <h3 className="text-3xl font-black text-[#003366] mt-1">250+</h3>
-                  <p className="text-[11px] text-slate-500 font-semibold mt-0.5">All 33 Districts</p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">250+</h3>
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold mt-0.5">All 33 Districts</p>
                 </div>
 
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-5">
-                  <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
-                    <Award className="w-3.5 h-3.5 text-[#FF9933]" />
-                    <span>GRTSA SLA Met</span>
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
+                    <span>GRTSA SLA</span>
                   </p>
-                  <h3 className="text-3xl font-black text-[#003366] mt-1">99.8%</h3>
-                  <p className="text-[11px] text-[#138808] font-bold mt-0.5">Time-bound Delivery</p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">99.8%</h3>
+                  <p className="text-[10px] sm:text-[11px] text-[#138808] font-bold mt-0.5">Time-bound</p>
                 </div>
               </div>
             </div>
@@ -548,7 +550,7 @@ export default function Home() {
       {/* ========================================================== */}
       {view === 'dashboard' && (
         <section className="flex-1 bg-[#F5F7FA] flex flex-col md:flex-row">
-          <aside className="w-full md:w-64 bg-[#003366] text-white flex flex-col justify-between shrink-0">
+          <aside className="hidden md:flex md:w-64 bg-[#003366] text-white flex-col justify-between shrink-0">
             <div>
               <div className="p-5 border-b border-blue-900/60 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#FF9933] text-slate-900 flex items-center justify-center font-black text-sm">
@@ -802,41 +804,41 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="border-2 border-[#138808]/70 bg-emerald-50/40 rounded-2xl p-3.5">
-                      <p className="text-[11px] font-bold text-slate-500 uppercase">Counter 1</p>
-                      <p className="text-lg font-black text-[#003366] mt-0.5">TOKEN #A-40</p>
-                      <p className="text-[10px] text-[#138808] font-bold mt-1">● Being Processed</p>
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                    <div className="border-2 border-[#138808]/70 bg-emerald-50/40 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 1</p>
+                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#A-40</p>
+                      <p className="text-[9px] sm:text-[10px] text-[#138808] font-bold mt-1">● Being Processed</p>
                     </div>
 
-                    <div className="border-2 border-[#138808]/70 bg-emerald-50/40 rounded-2xl p-3.5">
-                      <p className="text-[11px] font-bold text-slate-500 uppercase">Counter 2</p>
-                      <p className="text-lg font-black text-[#003366] mt-0.5">TOKEN #A-41</p>
-                      <p className="text-[10px] text-[#138808] font-bold mt-1">● Being Processed</p>
+                    <div className="border-2 border-[#138808]/70 bg-emerald-50/40 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 2</p>
+                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#A-41</p>
+                      <p className="text-[9px] sm:text-[10px] text-[#138808] font-bold mt-1">● Being Processed</p>
                     </div>
 
-                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-2xl p-3.5">
-                      <p className="text-[11px] font-bold text-slate-500 uppercase">Counter 3</p>
-                      <p className="text-lg font-black text-[#003366] mt-0.5">TOKEN #A-39</p>
-                      <p className="text-[10px] text-slate-500 font-semibold mt-1">● Signing Documents</p>
+                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 3</p>
+                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#A-39</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">● Signing Docs</p>
                     </div>
 
-                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-2xl p-3.5">
-                      <p className="text-[11px] font-bold text-slate-500 uppercase">Counter 4</p>
-                      <p className="text-lg font-black text-[#003366] mt-0.5">TOKEN #B-12</p>
-                      <p className="text-[10px] text-slate-500 font-semibold mt-1">● Land Records (7/12)</p>
+                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 4</p>
+                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#B-12</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">● Land 7/12</p>
                     </div>
 
-                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-2xl p-3.5">
-                      <p className="text-[11px] font-bold text-slate-500 uppercase">Counter 5</p>
-                      <p className="text-lg font-black text-[#003366] mt-0.5">TOKEN #B-14</p>
-                      <p className="text-[10px] text-slate-500 font-semibold mt-1">● Aadhaar Biometric</p>
+                    <div className="border-2 border-slate-200 bg-[#F5F7FA] rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 5</p>
+                      <p className="text-base sm:text-lg font-black text-[#003366] mt-0.5">#B-14</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-1">● Aadhaar Bio</p>
                     </div>
 
-                    <div className="border-2 border-amber-300 bg-amber-50 rounded-2xl p-3.5">
-                      <p className="text-[11px] font-bold text-slate-500 uppercase">Counter 6</p>
-                      <p className="text-lg font-black text-amber-900 mt-0.5">CALLING NEXT</p>
-                      <p className="text-[10px] text-[#FF9933] font-bold mt-1">🔔 Ready for #A-42</p>
+                    <div className="border-2 border-amber-300 bg-amber-50 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5">
+                      <p className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase">Counter 6</p>
+                      <p className="text-base sm:text-lg font-black text-amber-900 mt-0.5">CALLING NEXT</p>
+                      <p className="text-[9px] sm:text-[10px] text-[#FF9933] font-bold mt-1">🔔 Ready for #A-42</p>
                     </div>
                   </div>
 
@@ -856,8 +858,8 @@ export default function Home() {
 
       {/* 2FA AUTH MODAL */}
       {authModalOpen && (
-        <div className="fixed inset-0 bg-[#003366]/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 relative">
+        <div className="fixed inset-0 bg-[#003366]/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-2xl border border-slate-200 relative">
             <button
               onClick={() => setAuthModalOpen(false)}
               className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-sm"
@@ -990,6 +992,71 @@ export default function Home() {
 
       {/* PWA 1-CLICK INSTALL BANNER */}
       <PwaInstallBanner />
+
+      {/* NATIVE MOBILE BOTTOM NAVIGATION BAR */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shadow-lg">
+        <button
+          onClick={() => {
+            triggerHaptic('tap');
+            setView('landing');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 ${
+            view === 'landing' ? 'text-[#005A9C]' : 'text-slate-500'
+          }`}
+        >
+          <HomeIcon className="w-4 h-4" />
+          <span>હોમ</span>
+        </button>
+
+        <button
+          onClick={() => {
+            triggerHaptic('tap');
+            setView('services');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 ${
+            view === 'services' ? 'text-[#005A9C]' : 'text-slate-500'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>૩૯ યોજના</span>
+        </button>
+
+        <button
+          onClick={() => {
+            triggerHaptic('tap');
+            if (activeBooking) {
+              setTokenPassModalOpen(true);
+            } else if (currentUser) {
+              setView('dashboard');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              setAuthModalOpen(true);
+            }
+          }}
+          className="flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 text-[#FF9933]"
+        >
+          <div className="w-8 h-8 -mt-3.5 rounded-full bg-[#003366] text-[#FF9933] flex items-center justify-center border-2 border-white shadow-md">
+            <Ticket className="w-4 h-4" />
+          </div>
+          <span>ટોકન પાસ</span>
+        </button>
+
+        <button
+          onClick={() => {
+            triggerHaptic('tap');
+            setView('dashboard');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition active:scale-95 ${
+            view === 'dashboard' ? 'text-[#005A9C]' : 'text-slate-500'
+          }`}
+        >
+          <Radio className="w-4 h-4" />
+          <span>કચેરી રડાર</span>
+        </button>
+      </nav>
 
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 text-center">

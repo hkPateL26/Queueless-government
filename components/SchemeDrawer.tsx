@@ -77,30 +77,30 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           <div className="p-5 space-y-6">
             
             {/* Quick Stats Grid: SLA, Fee, Validity */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-3 text-center">
-                <Clock className="w-4 h-4 text-[#005A9C] mx-auto mb-1" />
-                <p className="text-[10px] font-bold text-slate-500 uppercase">નિકાલ સમય</p>
-                <p className="text-sm font-black text-[#003366] mt-0.5">{scheme.slaDays} દિવસ</p>
-                <p className="text-[9px] text-[#138808] font-bold">GRTSA ગેરંટી</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-2 sm:p-3 text-center">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#005A9C] mx-auto mb-1" />
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase">નિકાલ સમય</p>
+                <p className="text-xs sm:text-sm font-black text-[#003366] mt-0.5">{scheme.slaDays} દિવસ</p>
+                <p className="text-[8px] sm:text-[9px] text-[#138808] font-bold">GRTSA ગેરંટી</p>
               </div>
 
-              <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-3 text-center">
-                <IndianRupee className="w-4 h-4 text-[#138808] mx-auto mb-1" />
-                <p className="text-[10px] font-bold text-slate-500 uppercase">સરકારી ફી</p>
-                <p className="text-sm font-black text-[#003366] mt-0.5">
+              <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-2 sm:p-3 text-center">
+                <IndianRupee className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#138808] mx-auto mb-1" />
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase">સરકારી ફી</p>
+                <p className="text-xs sm:text-sm font-black text-[#003366] mt-0.5">
                   {scheme.fee === 0 ? '₹૦ (મફત)' : `₹${scheme.fee}`}
                 </p>
-                <p className="text-[9px] text-slate-500">અધિકૃત ચાર્જ</p>
+                <p className="text-[8px] sm:text-[9px] text-slate-500">અધિકૃત ચાર્જ</p>
               </div>
 
-              <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-3 text-center">
-                <ShieldCheck className="w-4 h-4 text-[#FF9933] mx-auto mb-1" />
-                <p className="text-[10px] font-bold text-slate-500 uppercase">દાખલા મુદત</p>
-                <p className="text-sm font-black text-[#003366] mt-0.5">
+              <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-2 sm:p-3 text-center">
+                <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF9933] mx-auto mb-1" />
+                <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase">દાખલા મુદત</p>
+                <p className="text-xs sm:text-sm font-black text-[#003366] mt-0.5">
                   {scheme.validityYears ? `${scheme.validityYears} વર્ષ` : 'નિયમ મુજબ'}
                 </p>
-                <p className="text-[9px] text-slate-500">કાનૂની માન્યતા</p>
+                <p className="text-[8px] sm:text-[9px] text-slate-500">કાનૂની માન્યતા</p>
               </div>
             </div>
 
@@ -196,17 +196,17 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         </div>
 
         {/* Bottom Drawer Actions */}
-        <div className="p-4 bg-white border-t border-slate-200 space-y-2.5 sticky bottom-0 z-20">
+        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 space-y-2 sticky bottom-0 z-20">
           <button
             onClick={() => {
               triggerHaptic('success');
               onOpenScanner();
             }}
-            className="w-full bg-[#005A9C] hover:bg-[#003366] text-white font-extrabold py-3.5 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2"
+            className="w-full bg-[#005A9C] hover:bg-[#003366] text-white font-extrabold py-3 sm:py-3.5 px-3 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-center"
           >
-            <Camera className="w-4 h-4 text-[#FF9933]" />
-            <span>દસ્તાવેજ AI કેમેરાથી ચકાસો (Verify with Camera)</span>
-            <ArrowRight className="w-4 h-4" />
+            <Camera className="w-4 h-4 text-[#FF9933] shrink-0" />
+            <span className="truncate">દસ્તાવેજ AI કેમેરાથી ચકાસો</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
 
           {onCollectToken && (
@@ -215,17 +215,17 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                 triggerHaptic('tap');
                 onCollectToken(scheme);
               }}
-              className="w-full bg-amber-50 hover:bg-amber-100 text-[#003366] border border-amber-300 font-extrabold py-2.5 rounded-2xl text-xs shadow-xs transition active:scale-95 flex items-center justify-center gap-2"
+              className="w-full bg-amber-50 hover:bg-amber-100 text-[#003366] border border-amber-300 font-extrabold py-2.5 px-3 rounded-2xl text-[11px] sm:text-xs shadow-xs transition active:scale-95 flex items-center justify-center gap-2 text-center"
             >
               {isLoggedIn ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4 text-[#138808]" />
+                  <CheckCircle2 className="w-4 h-4 text-[#138808] shrink-0" />
                   <span>કચેરી ટોકન કલેક્ટ કરો (Collect Live Token)</span>
                 </>
               ) : (
                 <>
-                  <Lock className="w-3.5 h-3.5 text-[#FF9933]" />
-                  <span>ટોકન મેળવવા લૉગિન કરો (Login Required to Collect Token)</span>
+                  <Lock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
+                  <span>ટોકન મેળવવા લૉગિન કરો (Login Required)</span>
                 </>
               )}
             </button>
