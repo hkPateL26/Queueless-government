@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, MapPin, Lock, Clock, Search, ArrowRight, 
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
@@ -45,6 +45,70 @@ export default function Home() {
     area: string;
     token: string;
   } | null>(null);
+
+  // STRICT BACKGROUND BODY SCROLL LOCK WHEN ANY MODAL / DRAWER IS OPEN
+  useEffect(() => {
+    const isAnyModalOpen = drawerOpen || scannerOpen || slotModalOpen || tokenPassModalOpen || authModalOpen;
+    
+    if (isAnyModalOpen) {
+      const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+      document.body.dataset.scrollY = scrollY.toString();
+      document.documentElement.classList.add('modal-open');
+      document.body.classList.add('modal-open');
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      const scrollY = document.body.dataset.scrollY;
+      document.documentElement.classList.remove('modal-open');
+      document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY, 10));
+        delete document.body.dataset.scrollY;
+      }
+    }
+
+    return () => {
+      const scrollY = document.body.dataset.scrollY;
+      document.documentElement.classList.remove('modal-open');
+      document.body.classList.remove('modal-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY, 10));
+        delete document.body.dataset.scrollY;
+      }
+    };
+  }, [drawerOpen, scannerOpen, slotModalOpen, tokenPassModalOpen, authModalOpen]);
+
+  // ESC KEY TO DISMISS ACTIVE MODAL
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (tokenPassModalOpen) setTokenPassModalOpen(false);
+        else if (slotModalOpen) setSlotModalOpen(false);
+        else if (scannerOpen) setScannerOpen(false);
+        else if (drawerOpen) setDrawerOpen(false);
+        else if (authModalOpen) setAuthModalOpen(false);
+        else if (demoMenuOpen) setDemoMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [tokenPassModalOpen, slotModalOpen, scannerOpen, drawerOpen, authModalOpen, demoMenuOpen]);
 
   // 1-Click Demo Fill Handlers
   const loginAsDemo = (role: 'farmer' | 'officer') => {
@@ -202,7 +266,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] pb-16 md:pb-0">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] pb-20 md:pb-0">
       {/* TOP GOV BAR */}
       <header className="bg-[#003366] text-white text-xs border-b border-blue-900 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-9 flex items-center justify-between">
@@ -627,11 +691,11 @@ export default function Home() {
               </div>
             </header>
 
-            <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-y-auto">
+            <div className="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 flex-1 overflow-y-auto">
               
               {/* Left Column: My Live Token Card */}
-              <div className="lg:col-span-5 space-y-6">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+              <div className="lg:col-span-5 space-y-4 sm:space-y-6">
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-extrabold text-[#003366] tracking-tight">My Live Token</span>
                     <span className="bg-emerald-50 text-[#138808] border border-emerald-200 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
@@ -690,10 +754,10 @@ export default function Home() {
                   <div className="mt-5 grid grid-cols-2 gap-2">
                     <button
                       onClick={handleRunningLate}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 active:scale-95 transition"
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold py-2 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition"
                     >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>I'm Running Late (+3)</span>
+                      <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">મોડું થાય છે (+૩)</span>
                     </button>
                     <button
                       onClick={() => {
@@ -701,10 +765,10 @@ export default function Home() {
                         const tokenStr = activeBooking ? activeBooking.tokenNumber : '#A-42';
                         speakGuidance(`નમસ્તે ${currentUser?.name || 'મોહનભાઈ'}, તમારો ટોકન નંબર ${tokenStr} સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`);
                       }}
-                      className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 active:scale-95 transition"
+                      className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition"
                     >
-                      <Volume2 className="w-3.5 h-3.5" />
-                      <span>સાંભળો (Audio)</span>
+                      <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">સાંભળો (Audio)</span>
                     </button>
                   </div>
 
@@ -733,10 +797,10 @@ export default function Home() {
               </div>
 
               {/* Right Column: Live Queue Radar + Waiting Room Display */}
-              <div className="lg:col-span-7 space-y-6">
+              <div className="lg:col-span-7 space-y-4 sm:space-y-6">
                 
                 {/* Radar Card */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-extrabold text-[#003366]">Live Queue Radar</h3>
@@ -792,7 +856,7 @@ export default function Home() {
                 </div>
 
                 {/* Live TV Waiting Room Display */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div>
                       <h4 className="text-sm font-extrabold text-[#003366]">Live TV Waiting Room Display</h4>
@@ -858,11 +922,17 @@ export default function Home() {
 
       {/* 2FA AUTH MODAL */}
       {authModalOpen && (
-        <div className="fixed inset-0 bg-[#003366]/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-2xl border border-slate-200 relative">
+        <div 
+          onClick={() => setAuthModalOpen(false)}
+          className="fixed inset-0 bg-[#003366]/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop animate-in fade-in duration-150"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl p-4 sm:p-6 max-w-md w-full shadow-2xl border border-slate-200 relative max-h-[92vh] overflow-y-auto modal-scroll-area animate-in zoom-in-95"
+          >
             <button
               onClick={() => setAuthModalOpen(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-sm"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-sm w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center transition"
             >
               ✕
             </button>
@@ -977,8 +1047,14 @@ export default function Home() {
 
       {/* PHASE 3: DIGITAL TOKEN PASS MODAL */}
       {tokenPassModalOpen && activeBooking && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in">
-          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto">
+        <div 
+          onClick={() => setTokenPassModalOpen(false)}
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-5 modal-backdrop animate-in fade-in duration-150"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-xl max-h-[92vh] overflow-y-auto modal-scroll-area rounded-2xl sm:rounded-3xl shadow-2xl animate-in zoom-in-95"
+          >
             <DigitalTokenPass
               booking={activeBooking}
               scheme={activeScheme}
@@ -994,7 +1070,7 @@ export default function Home() {
       <PwaInstallBanner />
 
       {/* NATIVE MOBILE BOTTOM NAVIGATION BAR */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] px-3 flex items-center justify-around shadow-lg">
         <button
           onClick={() => {
             triggerHaptic('tap');

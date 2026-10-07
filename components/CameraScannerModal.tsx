@@ -111,11 +111,17 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-[#003366]/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-5">
-      <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 bg-[#003366]/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-5 modal-backdrop animate-in fade-in duration-150"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95"
+      >
         
         {/* Top Header */}
-        <div className="bg-[#003366] text-white p-4 sm:p-5 flex items-center justify-between">
+        <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#005A9C] text-[#FF9933] flex items-center justify-center text-lg font-black border border-[#FF9933]">
               <Camera className="w-5 h-5" />
@@ -139,7 +145,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
         </div>
 
         {/* Mode Selector & Test Presets */}
-        <div className="flex border-b border-slate-200 bg-slate-50">
+        <div className="flex border-b border-slate-200 bg-slate-50 shrink-0">
           <button
             onClick={() => {
               triggerHaptic('tap');
@@ -172,7 +178,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
         </div>
 
         {/* Viewfinder Canvas Area */}
-        <div className="p-4 flex-1 overflow-y-auto space-y-4">
+        <div className="p-3 sm:p-4 flex-1 overflow-y-auto modal-scroll-area space-y-4">
           
           {activeTab === 'camera' ? (
             <div className="space-y-4">
@@ -440,7 +446,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5">
+        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5 shrink-0">
           <button
             onClick={() => handleRunOcr(SAMPLE_OCR_TEST_CASES.valid2025)}
             disabled={scanning}

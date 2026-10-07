@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { 
   QrCode, Clock, MapPin, UserCheck, AlertTriangle, 
   Download, Share2, CheckCircle2, ShieldCheck, Printer,
-  Volume2, ArrowRight, RefreshCw, Smartphone, Layers
+  Volume2, ArrowRight, RefreshCw, Smartphone, Layers, X
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -98,12 +98,26 @@ export function DigitalTokenPass({
             </div>
           </div>
 
-          {/* TOKEN CHIP */}
-          <div className="text-right shrink-0">
-            <span className="text-[9px] sm:text-[10px] uppercase font-bold text-blue-200 block">ટોકન ક્રમાંક</span>
-            <span className="text-xl sm:text-3xl font-extrabold font-mono text-[#FF9933] drop-shadow-sm">
-              {booking.tokenNumber}
-            </span>
+          {/* TOKEN CHIP & CLOSE BUTTON */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="text-right">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-blue-200 block">ટોકન ક્રમાંક</span>
+              <span className="text-xl sm:text-3xl font-extrabold font-mono text-[#FF9933] drop-shadow-sm">
+                {booking.tokenNumber}
+              </span>
+            </div>
+            {onClose && (
+              <button
+                onClick={() => {
+                  triggerHaptic('tap');
+                  onClose();
+                }}
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition shrink-0"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -166,11 +166,17 @@ export function SlotBookingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-200 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 modal-backdrop animate-in fade-in duration-150"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[88vh] animate-in slide-in-from-bottom sm:zoom-in-95"
+      >
         
         {/* HEADER */}
-        <div className="bg-[#003366] text-white p-4 sm:p-5 flex items-center justify-between border-b border-blue-900 sticky top-0 z-10">
+        <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
               <Building2 className="w-5 h-5 text-[#FF9933]" />
@@ -201,7 +207,7 @@ export function SlotBookingModal({
         </div>
 
         {/* BODY */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 text-[#1F2937]">
+        <div className="p-3.5 sm:p-6 overflow-y-auto modal-scroll-area space-y-5 sm:space-y-6 flex-1 text-[#1F2937]">
           
           {/* STEP 1: JURISDICTION (DISTRICT & TALUKA) */}
           <section className="bg-gray-50 border border-gray-200 rounded-xl p-4">
@@ -434,7 +440,7 @@ export function SlotBookingModal({
         </div>
 
         {/* FOOTER ACTIONS */}
-        <div className="bg-gray-50 p-4 border-t border-gray-200 flex items-center justify-between">
+        <div className="bg-gray-50 p-3 sm:p-4 border-t border-gray-200 flex items-center justify-between shrink-0">
           <button
             onClick={() => {
               triggerHaptic('tap');

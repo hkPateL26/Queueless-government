@@ -48,14 +48,18 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-[#003366]/60 backdrop-blur-xs z-50 flex justify-end">
-      <div className="bg-white w-full max-w-lg h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-slide-left overflow-y-auto">
-        
-        <div>
-          {/* Drawer Header */}
-          <div className="bg-[#003366] text-white p-5 sticky top-0 z-20 flex items-start justify-between">
-            <div className="space-y-1">
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF9933] bg-[#002244] px-2.5 py-0.5 rounded-full border border-blue-800">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 bg-[#003366]/70 backdrop-blur-xs z-50 flex justify-end modal-backdrop animate-in fade-in duration-200"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full max-w-lg h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-250 overscroll-contain overflow-hidden"
+      >
+        {/* Drawer Header (Fixed) */}
+        <div className="bg-[#003366] text-white p-4 sm:p-5 shrink-0 flex items-start justify-between">
+          <div className="space-y-1">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF9933] bg-[#002244] px-2.5 py-0.5 rounded-full border border-blue-800">
                 {scheme.categoryGu} • {scheme.department}
               </span>
               <h2 className="text-xl font-black text-white mt-1 leading-tight">
@@ -72,9 +76,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             >
               <X className="w-5 h-5" />
             </button>
-          </div>
+        </div>
 
-          <div className="p-5 space-y-6">
+        {/* Scrollable Center Body with Touch Action Pan-Y */}
+        <div className="flex-1 overflow-y-auto modal-scroll-area p-4 sm:p-5 space-y-5 sm:space-y-6">
             
             {/* Quick Stats Grid: SLA, Fee, Validity */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -193,10 +198,9 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             </button>
 
           </div>
-        </div>
 
-        {/* Bottom Drawer Actions */}
-        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 space-y-2 sticky bottom-0 z-20">
+        {/* Bottom Drawer Actions (Fixed) */}
+        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 space-y-2 shrink-0">
           <button
             onClick={() => {
               triggerHaptic('success');

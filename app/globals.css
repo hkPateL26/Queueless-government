@@ -34,4 +34,25 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Strict Modal Open & Scroll Containment */
+  .modal-backdrop {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-scroll-area {
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+}
+
+/* Modal Open Lock for Body and HTML */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
 }
