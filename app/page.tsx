@@ -22,6 +22,7 @@ import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { CitizenHelpModal } from '@/components/CitizenHelpModal';
 import { TokenTrackerModal } from '@/components/TokenTrackerModal';
 import { GovJanSevaGateway } from '@/components/GovJanSevaGateway';
+import { AuthenticQrCode } from '@/components/AuthenticQrCode';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
 
@@ -167,7 +168,7 @@ export default function Home() {
 
     const userObj = role === 'farmer' 
       ? {
-          name: 'Mohanbhai Patel',
+          name: 'Hari Patel',
           role: 'Citizen',
           area: 'Rajkot Rural',
           token: '#A-42',
@@ -203,7 +204,7 @@ export default function Home() {
     setAuthModalOpen(false);
     
     const userObj = {
-      name: 'Mohanbhai Patel',
+      name: 'Hari Patel',
       role: 'Citizen',
       area: pendingSlotBooking ? `${pendingSlotBooking.taluka.nameGu}, ${pendingSlotBooking.district.nameGu}` : 'Rajkot Rural',
       token: pendingSlotBooking ? pendingSlotBooking.tokenNumber : '#A-42',
@@ -355,7 +356,7 @@ export default function Home() {
       area: `${details.taluka.nameGu}, ${details.district.nameGu}`,
       token: details.tokenNumber
     } : {
-      name: 'Mohanbhai Patel',
+      name: 'Hari Patel',
       role: 'Citizen',
       area: `${details.taluka.nameGu}, ${details.district.nameGu}`,
       token: details.tokenNumber
@@ -714,18 +715,25 @@ export default function Home() {
             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl">
                 <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mohan"
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Hari"
                   alt="Avatar"
                   className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-200 shrink-0"
                 />
                 <div className="text-left text-xs leading-none">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] bg-amber-100 text-amber-800 font-extrabold px-1.5 py-0.5 rounded border border-amber-200">{t('demoModeBadge', lang)}</span>
+                    <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                      {lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen'}
+                    </span>
                     <p className="font-extrabold text-[#003366] text-[11px] sm:text-xs truncate max-w-[120px] sm:max-w-none">{currentUser.name}</p>
                   </div>
-                  <p className="text-[9px] text-[#FF9933] font-bold hidden sm:block mt-0.5">{currentUser.role} • {currentUser.area}</p>
+                  <p className="text-[9px] text-[#005A9C] font-bold hidden sm:block mt-0.5">{currentUser.role} • {currentUser.area}</p>
                 </div>
-                <button onClick={resetSession} className="ml-0.5 text-slate-400 hover:text-red-500 text-xs p-1 cursor-pointer">
+                <button 
+                  onClick={resetSession} 
+                  title={lang === 'gu' ? 'લૉગઆઉટ / સેશન રીસેટ' : 'Logout / Reset Session'}
+                  className="ml-0.5 text-slate-400 hover:text-red-500 text-xs p-1 cursor-pointer"
+                >
                   <RotateCcw className="w-3 h-3" />
                 </button>
               </div>
@@ -883,152 +891,181 @@ export default function Home() {
       {/* ========================================================== */}
       {/* VIEW 2: CITIZEN RADAR & DASHBOARD                          */}
       {/* ========================================================== */}
+      {/* ========================================================== */}
+      {/* VIEW 2: CITIZEN RADAR & DASHBOARD (FULL-WIDTH RESPONSIVE) */}
+      {/* ========================================================== */}
       {view === 'dashboard' && (
-        <section className="flex-1 bg-[#F5F7FA] flex flex-col md:flex-row w-full max-w-[1920px] mx-auto">
-          <aside className="hidden md:flex md:w-64 bg-[#003366] text-white flex-col justify-between shrink-0">
-            <div>
-              <div className="p-5 border-b border-blue-900/60 flex items-center gap-3">
-                <GovLogo className="w-9 h-9 shrink-0 drop-shadow-sm" />
-                <div>
-                  <h3 className="font-extrabold text-white text-sm">{t('appTitle', lang)} {t('appTag', lang)}</h3>
-                  <p className="text-[10px] text-blue-200">{t('govTechPortal', lang)}</p>
-                </div>
-              </div>
-
-              <nav className="p-3 space-y-1 text-xs font-bold">
-                <button className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl bg-[#005A9C] text-white">
-                  <span>{t('dashboardTitle', lang)}</span>
+        <main className="flex-1 bg-[#F5F7FA] w-full">
+          {/* TOP CITIZEN SUB-NAV & COMMAND BAR */}
+          <div className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-xs">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+              {/* Back to Home & View Switchers */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setView('landing');
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#003366] text-xs font-bold transition cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>{t('backToHome', lang)}</span>
                 </button>
+                <div className="h-4 w-px bg-slate-200 hidden sm:block" />
                 <button
                   onClick={() => {
                     triggerHaptic('tap');
                     setView('services');
                   }}
-                  className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-blue-200 hover:text-white hover:bg-blue-900/50"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005A9C] text-xs font-bold transition cursor-pointer"
                 >
-                  <Layers className="w-4 h-4 text-[#FF9933]" />
+                  <Layers className="w-3.5 h-3.5 text-[#FF9933]" />
                   <span>{t('navServices', lang)}</span>
                 </button>
-                <button onClick={() => triggerHaptic('tap')} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-blue-200 hover:text-white hover:bg-blue-900/50">
-                  <span>{t('historyTab', lang)}</span>
-                </button>
-                <button onClick={() => triggerHaptic('tap')} className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-blue-200 hover:text-white hover:bg-blue-900/50">
-                  <span>{t('profileTab', lang)}</span>
-                </button>
-              </nav>
-            </div>
-
-            <div className="p-4 border-t border-blue-900/60 flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full bg-amber-400/20 text-[#FF9933] flex items-center justify-center text-xs">
-                🇮🇳
-              </span>
-              <div className="text-[10px] leading-tight">
-                <p className="font-bold text-white">{lang === 'gu' ? 'નાગરિક પોર્ટલ' : lang === 'hi' ? 'नागरिक पोर्टल' : lang === 'mr' ? 'नागरिक पोर्टल' : 'Citizen Portal'}</p>
-                <p className="text-blue-200">{lang === 'gu' ? 'ગુજરાત સરકાર પ્રેરિત ડિઝાઇન' : lang === 'hi' ? 'गुजरात सरकार प्रेरित डिज़ाइन' : lang === 'mr' ? 'गुजरात शासन प्रेरित डिझाइन' : 'Gov-Inspired Design System'}</p>
               </div>
-            </div>
-          </aside>
 
-          {/* Right Main Dashboard */}
-          <div className="flex-1 flex flex-col min-w-0">
-            <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between">
+              {/* Citizen Identity & Kacheri Live Status */}
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-400 uppercase hidden sm:inline">{t('liveDistrictLabel', lang)}</span>
-                <div className="flex items-center gap-2 bg-[#F5F7FA] border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-[#003366]">
-                  <span>🇮🇳</span>
-                  <span>{t('districtRajkot', lang)}</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                <div className="hidden sm:flex items-center gap-2 bg-[#F5F7FA] border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-[#003366]">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{activeBooking ? (lang === 'en' ? `${activeBooking.taluka.officeNameEn || activeBooking.taluka.officeNameGu}` : `${activeBooking.taluka.officeNameGu}`) : t('defaultOfficeName', lang)}</span>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2.5">
+                
+                {/* Citizen Profile Pill */}
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
                   <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mohan"
-                    alt="Avatar"
-                    className="w-8 h-8 rounded-full bg-amber-100 border border-amber-300"
+                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Hari"
+                    alt="Citizen Avatar"
+                    className="w-7 h-7 rounded-full bg-amber-100 border border-amber-300 shrink-0"
                   />
-                  <div className="text-left text-xs leading-none hidden sm:block">
-                    <p className="font-extrabold text-[#003366]">{currentUser?.name || 'Mohanbhai Patel'}</p>
-                    <p className="text-[10px] text-slate-500 font-medium">{currentUser?.role || 'Citizen'} • {currentUser?.area || 'Rajkot Rural'}</p>
+                  <div className="text-left text-xs leading-tight">
+                    <p className="font-extrabold text-[#003366]">{currentUser?.name || 'હરિ પટેલ (Hari Patel)'}</p>
+                    <p className="text-[10px] text-slate-500 font-medium">{currentUser?.role || 'નાગરિક'} • {currentUser?.area || 'રાજકોટ ગ્રામ્ય'}</p>
                   </div>
                 </div>
-                <button className="relative w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
-                  <Bell className="w-4 h-4 text-slate-600" />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#FF9933] text-slate-900 font-black text-[9px] flex items-center justify-center">3</span>
+              </div>
+            </div>
+          </div>
+
+          {/* MAIN DASHBOARD CONTENT GRID */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+            
+            {/* Top Quick Banner: Live Appointment Summary */}
+            <div className="mb-6 bg-gradient-to-r from-[#003366] to-[#004d80] rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 shrink-0">
+                  <Ticket className="w-6 h-6 text-[#FF9933]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-[#FF9933] border border-amber-400/30 px-2 py-0.5 rounded">
+                      {lang === 'gu' ? 'સત્તાવાર ડિજિટલ એપોઇન્ટમેન્ટ' : lang === 'hi' ? 'आधिकारिक डिजिटल अपॉइंटमेंट' : lang === 'mr' ? 'अधिकृत डिजिटल अपॉइंटमेंट' : 'Official Digital Appointment'}
+                    </span>
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded font-mono font-bold">
+                      {t('tokenActiveBadge', lang)}
+                    </span>
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-white mt-1">
+                    {currentUser?.name || 'હરિ પટેલ (Hari Patel)'} • {activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}
+                  </h2>
+                  <p className="text-xs text-blue-100 mt-0.5">
+                    {activeBooking 
+                      ? `${t('counterLabel', lang)} ${activeBooking.counterNumber} • ${lang === 'en' ? (activeBooking.counterNameEn || activeBooking.counterNameGu) : activeBooking.counterNameGu}` 
+                      : (lang === 'gu' ? 'કાઉન્ટર ૨ • આવક, જાતિ અને નિવાસ પ્રમાણપત્ર વિતરણ' : 'Counter 2 • Income, Caste & Domicile Certificates')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status and Action in Banner */}
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="bg-white/10 border border-white/15 px-3 py-2 rounded-xl text-xs font-bold backdrop-blur-xs">
+                  <span className="text-blue-200 block text-[10px]">{t('arriveByLabel', lang)}</span>
+                  <span className="text-amber-300 font-black font-mono text-sm">
+                    {activeBooking 
+                      ? (lateShiftMinutes > 0 ? `${activeBooking.slot.startTime} (+${lateShiftMinutes}m)` : activeBooking.slot.startTime) 
+                      : (lateShiftMinutes > 0 ? `11:56 AM (+${lateShiftMinutes}m)` : '11:20 AM')}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setTokenPassModalOpen(true);
+                  }}
+                  className="bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-extrabold px-3.5 py-2 rounded-xl text-xs shadow-sm transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Ticket className="w-4 h-4 text-slate-900" />
+                  <span>{t('btnViewDigitalPass', lang)}</span>
                 </button>
               </div>
-            </header>
+            </div>
 
-            <div className="p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 flex-1 overflow-y-auto">
+            {/* 2-Column Responsive Dashboard Body */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
               
-              {/* Left Column: My Live Token Card */}
-              <div className="lg:col-span-5 space-y-4 sm:space-y-6">
-                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-extrabold text-[#003366] tracking-tight">{t('myLiveTokenCardTitle', lang)}</span>
+              {/* Left Column (5 cols): Authentic QR Code + Virtual Token + Multi-Modal Channels */}
+              <div className="lg:col-span-5 space-y-5 sm:space-y-6">
+                
+                {/* Card 1: Official Virtual Token & Authentic QR Code */}
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-[#138808]" />
+                      <span className="text-xs font-extrabold text-[#003366] tracking-tight">{t('myLiveTokenCardTitle', lang)}</span>
+                    </div>
                     <span className="bg-emerald-50 text-[#138808] border border-emerald-200 text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#138808] animate-ping" />
                       {t('tokenActiveBadge', lang)}
                     </span>
                   </div>
 
-                  <div className="mt-2">
+                  <div className="text-center pt-1">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('virtualTokenTitle', lang)}</p>
-                    <h2 className="text-4xl sm:text-5xl font-black text-[#FF9933] tracking-tight mt-0.5">
+                    <h2 className="text-4xl sm:text-5xl font-black text-[#FF9933] tracking-tight mt-1 font-mono">
                       {activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}
                     </h2>
-                    <div className="mt-2">
-                      <p className="text-xs font-black text-[#003366]">
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-xs font-black text-[#003366]">
+                      <span>🏛️</span>
+                      <span>
                         {activeBooking 
                           ? `${t('counterLabel', lang)} ${activeBooking.counterNumber} • ${lang === 'en' ? (activeBooking.counterNameEn || activeBooking.counterNameGu) : activeBooking.counterNameGu}` 
-                          : t('defaultServiceTitle', lang)}
-                      </p>
-                      <p className="text-[11px] text-slate-500 font-medium">
-                        {activeBooking ? `${t('officerLabel', lang)} ${activeBooking.officerName}` : t('defaultServiceSub', lang)}
-                      </p>
+                          : (lang === 'gu' ? 'કાઉન્ટર ૨ • શ્રીમતી પ્રિયંકા વ્યાસ' : 'Counter 2 • Smt. Priyanka Vyas')}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="my-5 bg-[#F5F7FA] border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center">
-                    <div className="w-44 h-44 bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex flex-col justify-between">
-                      <div className="flex justify-between">
-                        <div className="w-8 h-8 border-4 border-[#003366] rounded-sm p-0.5"><div className="w-full h-full bg-[#003366]" /></div>
-                        <div className="w-8 h-8 border-4 border-[#003366] rounded-sm p-0.5"><div className="w-full h-full bg-[#003366]" /></div>
-                      </div>
-                      <div className="qr-pattern flex-1 my-1.5" />
-                      <div className="flex justify-between items-end">
-                        <div className="w-8 h-8 border-4 border-[#003366] rounded-sm p-0.5"><div className="w-full h-full bg-[#003366]" /></div>
-                        <span className="text-[9px] font-mono font-black text-[#003366]">
-                          {activeBooking ? `Qless-${activeBooking.tokenNumber.replace('#','')}-GP` : 'Qless-A42-GP'}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-[11px] font-mono font-bold text-slate-500 mt-2">
-                      {activeBooking ? (lang === 'en' ? (activeBooking.taluka.officeNameEn || activeBooking.taluka.officeNameGu) : activeBooking.taluka.officeNameGu) : 'Qless-A42-GP (Encrypted Token ID)'}
-                    </p>
+                  {/* 📷 AUTHENTIC HIGH-RES SCANNABLE QR CODE */}
+                  <div className="py-2 flex justify-center">
+                    <AuthenticQrCode
+                      payload={`https://queueless.gujarat.gov.in/verify?token=${encodeURIComponent(activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42'))}&citizen=${encodeURIComponent(currentUser?.name || 'Hari Patel')}&office=RajkotGondal&sig=QL-GUJ-8F3A29`}
+                      tokenId={activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}
+                      size={180}
+                      label={lang === 'gu' ? 'સત્તાવાર સુરક્ષિત QR ટોકન' : lang === 'hi' ? 'आधिकारिक सुरक्षित QR टोकन' : lang === 'mr' ? 'अधिकृत सुरक्षित QR टोकन' : 'Official Secure QR Token'}
+                      subLabel={lang === 'gu' ? 'કચેરી ગેટ અથવા કાઉન્ટર ૨ પર સ્કેન કરો' : lang === 'hi' ? 'कार्यालय गेट या काउंटर २ पर स्कैन करें' : lang === 'mr' ? 'कार्यालय गेट किंवा काउंटर २ वर स्कॅन करा' : 'Scan at Kacheri Gate or Desk 2'}
+                    />
                   </div>
 
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-extrabold text-[#003366]">
-                      {t('arriveByLabel', lang)} <span className="text-red-600 font-black">
+                  {/* Arrive By & Buffer Info */}
+                  <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-3.5 text-center space-y-1">
+                    <p className="text-xs font-extrabold text-[#003366]">
+                      {t('arriveByLabel', lang)} <span className="text-red-600 font-black font-mono text-sm">
                         {activeBooking 
                           ? (lateShiftMinutes > 0 ? `${activeBooking.slot.startTime} (+${lateShiftMinutes}m)` : activeBooking.slot.startTime) 
                           : (lateShiftMinutes > 0 ? `11:56 AM (+${lateShiftMinutes}m)` : '11:20 AM')}
                       </span>
                     </p>
-                    <p className="text-xs font-bold text-[#FF9933]">
+                    <p className="text-[11px] font-bold text-[#FF9933]">
                       ⏱️ {activeBooking ? activeBooking.slot.timeRange : '11:30 AM - 12:30 PM'} {lateShiftMinutes > 0 ? t('rescheduledLabel', lang) : t('trafficBufferLabel', lang)}
                     </p>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-2 gap-2">
+                  {/* Citizen Actions: Running Late + Voice Guidance */}
+                  <div className="grid grid-cols-2 gap-2.5">
                     <button
                       onClick={handleRunningLate}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold py-2.5 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition min-h-[44px]"
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 active:scale-95 transition min-h-[44px] cursor-pointer"
                       title={t('btnRunningLate', lang)}
                     >
-                      <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+                      <RotateCcw className="w-3.5 h-3.5 shrink-0 text-amber-700" />
                       <span className="truncate">{t('btnRunningLate', lang)}</span>
                     </button>
                     <button
@@ -1037,46 +1074,32 @@ export default function Home() {
                         const tokenStr = activeBooking ? activeBooking.tokenNumber : '#A-42';
                         speakGuidance(
                           lang === 'en'
-                            ? `Hello ${currentUser?.name || 'Mohanbhai'}, your token number ${tokenStr} is active. Please proceed to the counter on time.`
+                            ? `Hello Hari Patel, your token number ${tokenStr} is active for Counter 2. Please proceed to the counter on time.`
                             : lang === 'hi'
-                              ? `नमस्ते ${currentUser?.name || 'मोहनभाई'}, आपका टोकन नंबर ${tokenStr} सक्रिय है। कृपया समय पर काउंटर पर पहुंचें।`
+                              ? `नमस्ते हरि पटेल, आपका टोकन नंबर ${tokenStr} काउंटर २ के लिए सक्रिय है। कृपया समय पर पहुंचें।`
                               : lang === 'mr'
-                                ? `नमस्कार ${currentUser?.name || 'मोहनभाई'}, तुमचा टोकन क्रमांक ${tokenStr} सक्रिय आहे. कृपया वेळेवर काउंटरवर जावे.`
-                                : `નમસ્તે ${currentUser?.name || 'મોહનભાઈ'}, તમારો ટોકન નંબર ${tokenStr} સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`
+                                ? `नमस्कार हरी पटेल, तुमचा टोकन क्रमांक ${tokenStr} काउंटर २ साठी सक्रिय आहे. कृपया वेळेवर उपस्थित राहा.`
+                                : `નમસ્તે હરિભાઈ પટેલ, તમારો ટોકન નંબર ${tokenStr} કાઉન્ટર ૨ માટે સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`
                         );
                       }}
-                      className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2.5 px-2 rounded-xl text-[11px] sm:text-xs flex items-center justify-center gap-1 active:scale-95 transition min-h-[44px]"
+                      className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 active:scale-95 transition min-h-[44px] cursor-pointer"
                       title={t('btnListenAudio', lang)}
                     >
-                      <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                      <Volume2 className="w-3.5 h-3.5 shrink-0 text-[#005A9C]" />
                       <span className="truncate">{t('btnListenAudio', lang)}</span>
                     </button>
                   </div>
 
-                  {activeBooking && (
-                    <div className="mt-3">
-                      <button
-                        onClick={() => {
-                          triggerHaptic('tap');
-                          setTokenPassModalOpen(true);
-                        }}
-                        className="w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition"
-                      >
-                        <Ticket className="w-4 h-4 text-[#FF9933]" />
-                        <span>{t('btnViewDigitalPass', lang)}</span>
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
+                  {/* Queue Position Pill */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
                     <span className="text-slate-500">{t('queuePosition', lang)}</span>
-                    <span className="text-xl font-black text-[#003366] bg-[#F5F7FA] px-3 py-1 rounded-xl font-mono">
-                      {lateShiftMinutes > 0 ? '17' : '14'}
+                    <span className="text-xl font-black text-[#003366] bg-[#F5F7FA] border border-slate-200 px-3 py-1 rounded-xl font-mono">
+                      {lateShiftMinutes > 0 ? '૧૭' : '૧૪'} {lang === 'gu' ? 'નાગરિકો' : 'Citizens'}
                     </span>
                   </div>
                 </div>
 
-                {/* ♿ MULTI-MODAL ACCESSIBILITY CHANNELS (PHASE 1 INCLUSIVE DESIGN) */}
+                {/* Card 2: ♿ MULTI-MODAL ACCESSIBILITY CHANNELS */}
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -1092,30 +1115,30 @@ export default function Home() {
                   <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
                     {t('multiModalDesc', lang)}
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div className="bg-emerald-50/70 border border-emerald-200 p-2 rounded-xl flex items-center gap-1.5">
-                      <span className="text-sm">🟢</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-emerald-50/70 border border-emerald-200 p-2.5 rounded-xl flex items-center gap-2">
+                      <span className="text-base">🟢</span>
                       <div>
                         <p className="text-[9px] font-bold text-emerald-800 uppercase">{t('channelVisual', lang)}</p>
                         <p className="text-[10px] font-black text-slate-800 leading-tight">{t('channelVisualDesc', lang)}</p>
                       </div>
                     </div>
-                    <div className="bg-blue-50 border border-blue-200 p-2 rounded-xl flex items-center gap-1.5">
-                      <span className="text-sm">🔔</span>
+                    <div className="bg-blue-50 border border-blue-200 p-2.5 rounded-xl flex items-center gap-2">
+                      <span className="text-base">🔔</span>
                       <div>
                         <p className="text-[9px] font-bold text-[#005A9C] uppercase">{t('channelChime', lang)}</p>
                         <p className="text-[10px] font-black text-slate-800 leading-tight">{t('channelChimeDesc', lang)}</p>
                       </div>
                     </div>
-                    <div className="bg-purple-50 border border-purple-200 p-2 rounded-xl flex items-center gap-1.5">
-                      <span className="text-sm">🗣️</span>
+                    <div className="bg-purple-50 border border-purple-200 p-2.5 rounded-xl flex items-center gap-2">
+                      <span className="text-base">🗣️</span>
                       <div>
                         <p className="text-[9px] font-bold text-purple-800 uppercase">{t('channelVoice', lang)}</p>
                         <p className="text-[10px] font-black text-slate-800 leading-tight">{t('channelVoiceDesc', lang)}</p>
                       </div>
                     </div>
-                    <div className="bg-amber-50 border border-amber-200 p-2 rounded-xl flex items-center gap-1.5">
-                      <span className="text-sm">📳</span>
+                    <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl flex items-center gap-2">
+                      <span className="text-base">📳</span>
                       <div>
                         <p className="text-[9px] font-bold text-amber-800 uppercase">{t('channelHaptic', lang)}</p>
                         <p className="text-[10px] font-black text-slate-800 leading-tight">{t('channelHapticDesc', lang)}</p>
@@ -1123,14 +1146,15 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+
               </div>
 
-              {/* Right Column: Live Queue Radar + Waiting Room Display */}
-              <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+              {/* Right Column (7 cols): Live Queue Radar + Waiting Hall with 6 Clear Counters */}
+              <div className="lg:col-span-7 space-y-5 sm:space-y-6">
                 
-                {/* 📡 PHASE 1: LIVE QUEUE VISUALIZATION / KACHERI RADAR */}
-                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                {/* 📡 LIVE QUEUE VISUALIZATION / KACHERI RADAR */}
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-base sm:text-lg font-black text-[#003366]">
@@ -1141,23 +1165,25 @@ export default function Home() {
                         </span>
                       </div>
                       <p className="text-xs font-bold text-slate-500 mt-1 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-[#FF9933]" />
                         <span>
                           {t('currentOfficeTitle', lang)} {activeBooking ? (lang === 'en' ? `${activeBooking.taluka.officeNameEn || activeBooking.taluka.officeNameGu}, ${activeBooking.district.nameEn || activeBooking.district.nameGu}` : `${activeBooking.taluka.officeNameGu}, ${activeBooking.district.nameGu}`) : t('defaultOfficeName', lang)}
                         </span>
                       </p>
                     </div>
                     <span className="text-[10px] font-bold bg-[#F5F7FA] text-[#003366] border border-slate-200 px-2.5 py-1 rounded-lg">
-                      Queue Display • Phase 1
+                      Queue Display • Live Sync
                     </span>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 items-center">
+                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                     <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-4">
                       <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{t('liveWaitEst', lang)}</p>
-                      <h4 className="text-3xl sm:text-4xl font-black text-[#138808] mt-1">{lang === 'gu' ? '૧૮ મિનિટ' : lang === 'hi' ? '१८ मिनट' : lang === 'mr' ? '१८ मिनिटे' : '18 mins'}</h4>
+                      <h4 className="text-3xl sm:text-4xl font-black text-[#138808] mt-1 font-mono">
+                        {lang === 'gu' ? '૧૮ મિનિટ' : lang === 'hi' ? '१८ मिनट' : lang === 'mr' ? '१८ मिनिटे' : '18 mins'}
+                      </h4>
                       <p className="text-xs text-slate-600 font-semibold mt-1">{t('estServiceTime', lang)}</p>
-                      <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-[#005A9C] bg-blue-50 p-2 rounded-lg border border-blue-100">
+                      <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-[#005A9C] bg-blue-50 p-2.5 rounded-xl border border-blue-100">
                         <span>{t('routeBufferDesc', lang)}</span>
                       </div>
                     </div>
@@ -1197,7 +1223,7 @@ export default function Home() {
                 </div>
 
                 {/* 📺 WAITING HALL DISPLAY & 6 DETAILED COUNTER CARDS */}
-                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
                       <h4 className="text-base font-black text-[#003366] flex items-center gap-2">
@@ -1217,6 +1243,7 @@ export default function Home() {
 
                   {/* 6 Rich Counter Cards Grid */}
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    
                     {/* COUNTER 1 */}
                     <div className="rounded-2xl border-2 border-emerald-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
                       <div>
@@ -1260,14 +1287,19 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* COUNTER 2 */}
-                    <div className="rounded-2xl border-2 border-amber-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
+                    {/* COUNTER 2 (🌟 CITIZEN'S ASSIGNED DESK) */}
+                    <div className="rounded-2xl border-2 border-[#FF9933] bg-gradient-to-b from-amber-50/50 to-white p-3.5 flex flex-col justify-between shadow-md relative ring-2 ring-[#FF9933]/30">
                       <div>
-                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
-                          <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
-                            {t('counterLabel', lang)} 2
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 text-amber-900 border border-amber-300">
+                        <div className="flex items-center justify-between gap-1 pb-2 border-b border-amber-200">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-black tracking-wide text-[#003366] uppercase">
+                              {t('counterLabel', lang)} 2
+                            </span>
+                            <span className="text-[9px] bg-[#FF9933] text-slate-950 font-black px-1.5 py-0.5 rounded font-mono">
+                              ⭐ {lang === 'gu' ? 'તમારું કાઉન્ટર' : lang === 'hi' ? 'आपका काउंटर' : lang === 'mr' ? 'आपले काउंटर' : 'YOUR DESK'}
+                            </span>
+                          </div>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
                             <span>🟡</span>
                             <span>{t('busyBadge', lang)}</span>
                           </span>
@@ -1285,13 +1317,13 @@ export default function Home() {
                           <p className="text-[9px] font-black uppercase text-emerald-800 tracking-wider">{t('nowServingText', lang)}</p>
                           <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">A-41</p>
                         </div>
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-center">
-                          <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">{t('nextText', lang)}</p>
+                        <div className="bg-amber-100/80 border-2 border-[#FF9933] rounded-xl p-2 text-center animate-pulse">
+                          <p className="text-[9px] font-black uppercase text-amber-900 tracking-wider">{t('nextText', lang)}</p>
                           <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">A-42</p>
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
+                      <div className="pt-2 border-t border-amber-100 flex items-center justify-between text-[11px] font-bold">
                         <span className="text-slate-600 flex items-center gap-1">
                           <Users className="w-3 h-3 text-slate-400" />
                           <span>5 {t('peopleWaitingSuffix', lang)}</span>
@@ -1435,7 +1467,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* COUNTER 6 */}
+                    {/* COUNTER 6 (FIXED: C-08 / C-09, NO DUPLICATE OF A-42!) */}
                     <div className="rounded-2xl border-2 border-emerald-300 bg-white p-3.5 flex flex-col justify-between shadow-xs">
                       <div>
                         <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
@@ -1458,32 +1490,41 @@ export default function Home() {
                       <div className="my-3 grid grid-cols-2 gap-2">
                         <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2 text-center">
                           <p className="text-[9px] font-black uppercase text-emerald-800 tracking-wider">{t('nowServingText', lang)}</p>
-                          <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">A-42</p>
+                          <p className="text-2xl font-black text-[#003366] font-mono mt-0.5">C-08</p>
                         </div>
                         <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 text-center">
                           <p className="text-[9px] font-black uppercase text-slate-500 tracking-wider">{t('nextText', lang)}</p>
-                          <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">A-43</p>
+                          <p className="text-2xl font-black text-[#FF9933] font-mono mt-0.5">C-09</p>
                         </div>
                       </div>
 
                       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
                         <span className="text-slate-600 flex items-center gap-1">
                           <Users className="w-3 h-3 text-slate-400" />
-                          <span>2 {t('peopleWaitingSuffix', lang)}</span>
+                          <span>4 {t('peopleWaitingSuffix', lang)}</span>
                         </span>
                         <span className="text-[#005A9C] flex items-center gap-1 font-extrabold">
                           <Clock className="w-3 h-3 text-[#FF9933]" />
-                          <span>{t('estWaitPrefix', lang)} 6 min</span>
+                          <span>{t('estWaitPrefix', lang)} 12 min</span>
                         </span>
                       </div>
                     </div>
+
                   </div>
 
+                  {/* Sync and Guarantee Note */}
                   <div className="mt-5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-[11px] text-slate-400 font-medium">
-                      {t('liveSyncNote', lang)}
+                    <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#138808]" />
+                      <span>{t('liveSyncNote', lang)}</span>
                     </p>
-                    <button onClick={() => setView('landing')} className="text-xs font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1">
+                    <button 
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setView('landing');
+                      }} 
+                      className="text-xs font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1 cursor-pointer"
+                    >
                       <ArrowLeft className="w-3.5 h-3.5" />
                       <span>← {t('backToHome', lang)}</span>
                     </button>
@@ -1493,8 +1534,9 @@ export default function Home() {
               </div>
 
             </div>
+
           </div>
-        </section>
+        </main>
       )}
 
       {/* CITIZEN IDENTITY CHECK MODAL */}
@@ -1640,7 +1682,7 @@ export default function Home() {
             <DigitalTokenPass
               booking={activeBooking}
               scheme={activeScheme}
-              citizenName={currentUser?.name || 'Mohanbhai Patel'}
+              citizenName={currentUser?.name || 'હરિ પટેલ (Hari Patel)'}
               onClose={() => setTokenPassModalOpen(false)}
               lang={lang}
             />

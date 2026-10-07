@@ -33,7 +33,7 @@ Comprehensive digitized service directory across 4 departments:
 - Enforces user authentication before issuing or collecting any official token.
 - Seamless 2FA Civic Login (Mobile OTP + Aadhaar 4-digits).
 - **1-Click Hackathon Judge Demo Login:**
-  - 👤 **નાગરિક લૉગિન (Nagrik Login):** Mohanbhai Patel, Rajkot Rural (Token `#A-42`)
+  - 👤 **નાગરિક લૉગિન (Nagrik Login):** Hari Patel (હરિ પટેલ), Rajkot Rural (Token `#A-42`)
   - 🏛️ **કચેરી લૉગિન (Kacheri Login):** Counter 1, Gondal Mamlatdar (Token `#A-40`)
 
 ### 5. 📱 PWA & Offline Zero-Dependency File

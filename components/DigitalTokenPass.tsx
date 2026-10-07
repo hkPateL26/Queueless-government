@@ -17,6 +17,7 @@ import { BookingStatus } from '@/lib/slot-engine';
 import { GovLogo } from '@/components/GovLogo';
 import { Language } from '@/lib/translations';
 import { getLocalizedSchemeTitle } from '@/lib/scheme-translations';
+import { AuthenticQrCode } from '@/components/AuthenticQrCode';
 
 interface DigitalTokenPassProps {
   booking: BookingDetails;
@@ -382,47 +383,14 @@ export function DigitalTokenPass({
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
             
             {/* Signed QR Code Container */}
-            <div className="md:col-span-5 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50/50 to-indigo-50/50 rounded-2xl border border-blue-200 text-center">
-              <div className="bg-white p-3 rounded-xl shadow-md border border-gray-200 relative group">
-                {/* Fallback SVG QR Code */}
-                <svg className="w-36 h-36" viewBox="0 0 100 100" fill="none">
-                  <rect width="100" height="100" fill="white" />
-                  {/* Outer corners */}
-                  <rect x="5" y="5" width="26" height="26" fill="#003366" rx="3" />
-                  <rect x="9" y="9" width="18" height="18" fill="white" />
-                  <rect x="13" y="13" width="10" height="10" fill="#003366" />
-
-                  <rect x="69" y="5" width="26" height="26" fill="#003366" rx="3" />
-                  <rect x="73" y="9" width="18" height="18" fill="white" />
-                  <rect x="77" y="13" width="10" height="10" fill="#003366" />
-
-                  <rect x="5" y="69" width="26" height="26" fill="#003366" rx="3" />
-                  <rect x="9" y="73" width="18" height="18" fill="white" />
-                  <rect x="13" y="77" width="10" height="10" fill="#003366" />
-
-                  {/* Data blocks */}
-                  <rect x="36" y="8" width="8" height="8" fill="#005A9C" />
-                  <rect x="48" y="12" width="12" height="6" fill="#FF9933" />
-                  <rect x="36" y="24" width="6" height="12" fill="#138808" />
-                  <rect x="46" y="22" width="16" height="8" fill="#003366" />
-                  <rect x="8" y="38" width="14" height="6" fill="#003366" />
-                  <rect x="26" y="40" width="8" height="14" fill="#005A9C" />
-                  <rect x="40" y="38" width="20" height="20" fill="#003366" rx="2" />
-                  <circle cx="50" cy="48" r="4" fill="#FF9933" />
-                  <rect x="66" y="38" width="10" height="10" fill="#138808" />
-                  <rect x="80" y="44" width="12" height="6" fill="#003366" />
-                  <rect x="38" y="64" width="14" height="6" fill="#005A9C" />
-                  <rect x="58" y="64" width="8" height="14" fill="#FF9933" />
-                  <rect x="44" y="76" width="16" height="14" fill="#003366" />
-                  <rect x="68" y="72" width="12" height="10" fill="#138808" />
-                  <rect x="82" y="68" width="10" height="22" fill="#005A9C" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/5 rounded-xl pointer-events-none">
-                  <span className="text-[10px] font-bold bg-[#003366] text-white px-2 py-0.5 rounded shadow">
-                    Signed QR Token
-                  </span>
-                </div>
-              </div>
+            <div className="md:col-span-5 flex flex-col items-center justify-center p-3 bg-gradient-to-b from-blue-50/50 to-indigo-50/50 rounded-2xl border border-blue-200 text-center">
+              <AuthenticQrCode
+                payload={`https://queueless.gujarat.gov.in/verify?token=${encodeURIComponent(booking.tokenNumber)}&citizen=${encodeURIComponent(citizenName)}&counter=${encodeURIComponent(booking.counterNumber)}&sig=${encodeURIComponent(signatureChecksum)}`}
+                tokenId={booking.tokenNumber}
+                size={160}
+                label="સત્તાવાર સહી કરેલ QR ટોકન"
+                subLabel="કચેરી ગેટ / કાઉન્ટર પર સ્કેન કરો"
+              />
 
               {/* Requirement 11: Live Token Validity Indicator */}
               <div className="flex items-center gap-1.5 mt-2.5 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] text-emerald-800 font-mono font-bold">

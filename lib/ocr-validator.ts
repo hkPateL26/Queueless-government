@@ -73,7 +73,7 @@ export const validateIncomeCertificateText = (
 
   // 2. Extract Applicant Name
   const nameMatch = text.match(/(?:શ્રી|Shri|Mr\.)\s+([^\n,]+)/i);
-  const applicantName = nameMatch ? nameMatch[1].trim() : 'મોહનભાઈ પટેલ (Mohanbhai Patel)';
+  const applicantName = nameMatch ? nameMatch[1].trim() : 'હરિ પટેલ (Hari Patel)';
 
   // 3. Extract Issue Date / Year
   let detectedYear: number | null = null;

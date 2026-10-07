@@ -137,10 +137,10 @@ export const TRANSLATIONS = {
     mr: 'ओटीपी किंवा फोन नंबर न टाकता त्वरित चाचणीसाठी.'
   },
   citizenPersonaTitle: {
-    en: 'Citizen Persona (Mohanbhai Patel)',
-    gu: 'નાગરિક ડેમો પ્રોફાઇલ (મોહનભાઈ પટેલ)',
-    hi: 'नागरिक डेमो प्रोफाइल (मोहनभाई पटेल)',
-    mr: 'नागरिक डेमो प्रोफाइल (मोहनभाई पटेल)'
+    en: 'Citizen Profile (Hari Patel)',
+    gu: 'નાગરિક પ્રોફાઇલ (હરિ પટેલ)',
+    hi: 'नागरिक प्रोफाइल (हरि पटेल)',
+    mr: 'नागरिक प्रोफाइल (हरी पटेल)'
   },
   officerPersonaTitle: {
     en: 'Officer Console Persona ➔',
@@ -875,10 +875,10 @@ export const TRANSLATIONS = {
     mr: '🔒 आधार मास्किंग: टोकन ओळखीसाठी फक्त शेवटचे ४ अंक वापरले जातात. पूर्ण आधार क्रमांक कधीही संग्रहित केला जात नाही.'
   },
   demoLoginBtn: {
-    en: '⚡ Enter Demo as Mohanbhai',
-    gu: '⚡ મોહનભાઈ તરીકે ઝડપી પ્રવેશ',
-    hi: '⚡ मोहनभाई के रूप में त्वरित प्रवेश',
-    mr: '⚡ मोहनभाई म्हणून त्वरित प्रवेश'
+    en: '⚡ Enter as Hari Patel',
+    gu: '⚡ હરિ પટેલ તરીકે ઝડપી પ્રવેશ',
+    hi: '⚡ हरि पटेल के रूप में त्वरित प्रवेश',
+    mr: '⚡ हरी पटेल म्हणून त्वरित प्रवेश'
   },
   getOtpBtn: {
     en: 'Get Secure OTP & Verify',

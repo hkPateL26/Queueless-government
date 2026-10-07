@@ -33,7 +33,7 @@ interface MockTokenInfo {
 const PRESET_TOKENS: Record<string, MockTokenInfo> = {
   'A-42': {
     token: 'A-42',
-    name: 'મોહનભાઈ પટેલ (Mohanbhai Patel)',
+    name: 'હરિ પટેલ (Hari Patel)',
     center: 'ગોંડલ જન સેવા કેન્દ્ર — રાજકોટ',
     counter: 'કાઉન્ટર ૧ (આવક/જાતિ સેવા)',
     ahead: 2,

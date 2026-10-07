@@ -64,7 +64,7 @@ Queueless-government/
   - **Live Queue Visualization / Kacheri Radar:** Phase 1 queue display focus (waiting time, crowd gauge, capacity).
   - **6 Detailed Counter Cards:** Counter 1 to 6 displaying Counter #, Department name, Officer name, Status with Color + Icon + Text (`🟢 OPEN`, `🟡 BUSY`, `🟡 LUNCH BREAK` with resume time), NOW SERVING, NEXT token, Waiting count, and Estimated wait time.
   - **Gujarati-First Accessibility:** Multi-modal notification channels (Visual `🟢 NOW SERVING`, Web Audio `🔔 Notification Chime`, Voice `🗣️ Gujarati Text-to-Speech (TTS)` via `gu-IN`, Haptic `📳 Mobile Haptic Feedback` with tap 15ms / success 40ms / warning 80ms / error [50,100,50]).
-  - **One-Click Demo Personas:** Evaluation test personas (Mohanbhai Patel `#A-42`, Officer Counter 1, Reset Session) for instant evaluation without entering OTPs or phone numbers.
+  - **One-Click Demo Personas:** Evaluation test personas (Hari Patel `#A-42`, Officer Counter 1, Reset Session) for instant evaluation without entering OTPs or phone numbers.
 - [x] **Phase 2: 39 Schemes Discovery & Document Pre-Verification:**
   - **39 Schemes Discovery Catalog:** ૩૯ સેવાઓ/યોજનાઓ, કેટેગરી ફિલ્ટરિંગ, સર્ચ, "Can I Apply?" યોગ્યતા પૂર્વાવલોકન, સંકેતાત્મક સહાય (Indicative Benefits), સત્તાવાર સરકારી વિભાગ સ્ત્રોત (Official Sources), સેવા ફી અને SLA પારદર્શકતા.
   - **Client-Side OCR + Rule Engine:** દસ્તાવેજ OCR & પ્રી-વેરિફિકેશન પાઇપલાઇન (`Document Image ➔ OCR ➔ Extracted Data ➔ Rule Engine ➔ Pre-Verification Result`).
@@ -125,7 +125,7 @@ Queueless-government/
     - **પીક અવર્સ સમયરેખા (Peak Queue Timeline):** નોંધાયેલ કતાર ડેટા આધારિત પીક અવર્સ (10:30 AM – 6:00 PM) ભીડ વિશ્લેષણ ચાર્ટ.
     - **દૈનિક MIS રિપોર્ટ — ડેમો (Daily MIS Bulletin — Demo):** પ્રિન્ટ / PDF ડાઉનલોડ સાથે વહીવટી ડેમો સારાંશ.
   - **Phase 5C: સીમલેસ ક્રોસ-નેવિગેશન & રીઅલ-ટાઇમ ક્રોસ-ટોક:**
-    - ડેમો પર્સોના સ્વિચિંગ (Citizen Mohanbhai Patel `#A-42` ↔ Officer K. M. Trivedi ↔ Collector Prabhatkumar Sharma).
+    - ડેમો પર્સોના સ્વિચિંગ (Citizen Hari Patel `#A-42` ↔ Officer K. M. Trivedi ↔ Collector Prabhatkumar Sharma).
     - ઓફિસર ડેસ્ક પર `CALL NEXT` ક્લિક કરવાથી બેકએન્ડ રીઅલ-ટાઇમ લેયર મારફતે નાગરિક મોબાઇલ અને કલેક્ટર ડેશબોર્ડ પર તાત્કાલિક સિંક.
 - [x] **Phase 6: રીઅલ-ટાઇમ સિંક્રોનાઇઝેશન આર્કિટેક્ચર (Real-Time Synchronization Layer):**
   - **Cross-Device Layer:** બેકએન્ડ રીઅલ-ટાઇમ ટ્રાન્સપોર્ટ (`/api/queue-events`) દ્વારા અલગ-અલગ ડિવાઇસીસ (ફોન ↔ લેપટોપ) વચ્ચે ઇવેન્ટ સિંક્રોનાઇઝેશન.
