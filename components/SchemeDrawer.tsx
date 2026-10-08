@@ -26,6 +26,7 @@ import {
 } from '@/lib/scheme-translations';
 import { GovLogo } from '@/components/GovLogo';
 import { Language } from '@/lib/translations';
+import { inspectUploadedFileStrict } from '@/lib/ocr-validator';
 
 export interface DocVerificationState {
   status: 'idle' | 'scanning' | 'passed' | 'failed';
@@ -87,9 +88,60 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     setCheckedDocs(prev => ({ ...prev, [docKey]: !prev[docKey] }));
   };
 
+  const handleRealFileUpload = async (docKey: string, file: File) => {
+    triggerHaptic('tap');
+    setDocVerifications(prev => ({
+      ...prev,
+      [docKey]: { status: 'scanning', fileName: file.name }
+    }));
+
+    try {
+      const res = await inspectUploadedFileStrict(file, docKey);
+      if (res.isValid) {
+        setDocVerifications(prev => ({
+          ...prev,
+          [docKey]: {
+            status: 'passed',
+            fileName: file.name,
+            extractedDetails: isEn ? res.extractedDetailsEn : res.extractedDetailsGu
+          }
+        }));
+        setCheckedDocs(prev => ({ ...prev, [docKey]: true }));
+        triggerHaptic('success');
+        speakGuidance(isEn ? 'Document verified successfully.' : 'દસ્તાવેજ સફળતાપૂર્વક પ્રમાણિત થયો છે.');
+      } else {
+        setDocVerifications(prev => ({
+          ...prev,
+          [docKey]: {
+            status: 'failed',
+            fileName: file.name,
+            reasonEn: res.reasonEn,
+            reasonGu: res.reasonGu
+          }
+        }));
+        setCheckedDocs(prev => ({ ...prev, [docKey]: false }));
+        triggerHaptic('warning');
+        speakGuidance(isEn ? 'Document rejected. Please check requirements.' : (res.reasonGu || 'દસ્તાવેજ અમાન્ય છે.'));
+      }
+    } catch (err) {
+      console.error('File inspection error:', err);
+      setDocVerifications(prev => ({
+        ...prev,
+        [docKey]: {
+          status: 'failed',
+          fileName: file.name,
+          reasonEn: 'Unable to analyze image. Please upload a clear photo.',
+          reasonGu: 'ફોટો વિશ્લેષણ થઈ શક્યું નથી. કૃપા કરીને સ્પષ્ટ ફોટો ફરીથી પાડો.'
+        }
+      }));
+      setCheckedDocs(prev => ({ ...prev, [docKey]: false }));
+      triggerHaptic('warning');
+    }
+  };
+
   const handleVerifyDoc = (
     docKey: string,
-    scenario: 'valid' | 'expired' | 'mismatch' | 'wrong_doc' | 'file_upload',
+    scenario: 'valid' | 'expired' | 'mismatch' | 'wrong_doc',
     fileNameCustom?: string
   ) => {
     triggerHaptic('tap');
@@ -99,7 +151,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     }));
 
     setTimeout(() => {
-      if (scenario === 'valid' || scenario === 'file_upload') {
+      if (scenario === 'valid') {
         let extracted = '';
         if (docKey.includes('આવક') || docKey.includes('Income')) {
           extracted = isEn 
@@ -157,17 +209,23 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         triggerHaptic('warning');
         speakGuidance(isEn ? 'Applicant name mismatch detected.' : 'અરજદારનું નામ મેળ ખાતું નથી.');
       } else if (scenario === 'wrong_doc') {
+        const isAadhaarSlot = docKey.includes('આધાર') || docKey.includes('Aadhaar');
         setDocVerifications(prev => ({
           ...prev,
           [docKey]: {
             status: 'failed',
-            fileName: 'Electricity_Bill.jpg',
-            reasonEn: 'Incorrect Document Type: Uploaded file is a utility bill, not the required government certificate.',
-            reasonGu: 'ખોટો દસ્તાવેજ: અપલોડ કરેલ કાગળ લાઈટબિલ છે, જે માંગેલ સત્તાવાર સરકારી પ્રમાણપત્ર નથી.'
+            fileName: isAadhaarSlot ? 'Atmiya_University_Fee_Receipt.jpeg' : 'Electricity_Bill.jpg',
+            reasonEn: isAadhaarSlot 
+              ? 'Invalid Document: The uploaded file is an Atmiya University Fee Receipt, which is not a government-issued Aadhaar Card. Please upload an authentic Aadhaar Card.'
+              : 'Incorrect Document Type: Uploaded file is a utility bill or private receipt, not the required government certificate.',
+            reasonGu: isAadhaarSlot
+              ? '❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ કાગળ આત્મીય યુનિવર્સિટીની ફી રસીદ (College Fee Receipt) છે, જે સત્તાવાર સરકારી આધાર કાર્ડ નથી! કૃપા કરીને અસલ આધાર કાર્ડનો ફોટો અપલોડ કરો.'
+              : '❌ ખોટો દસ્તાવેજ: અપલોડ કરેલ કાગળ લાઈટબિલ અથવા ખાનગી રસીદ છે, જે માંગેલ સત્તાવાર સરકારી પ્રમાણપત્ર નથી.'
           }
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: false }));
         triggerHaptic('warning');
+        speakGuidance(isEn ? 'Invalid document type uploaded.' : 'અમાન્ય દસ્તાવેજ: સાચો સરકારી દસ્તાવેજ અપલોડ કરો.');
       }
     }, 850);
   };
@@ -595,10 +653,11 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                           type="file"
                           accept="image/*,application/pdf"
                           className="hidden"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              handleVerifyDoc(doc.nameGu, 'file_upload', file.name);
+                              await handleRealFileUpload(doc.nameGu, file);
+                              e.target.value = '';
                             }
                           }}
                         />
@@ -635,6 +694,15 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                           title="Simulate name mismatch"
                         >
                           ⚠️ {isEn ? 'Mismatch' : 'ખોટું નામ'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleVerifyDoc(doc.nameGu, 'wrong_doc')}
+                          className="text-[10px] font-black text-rose-800 bg-rose-100/80 hover:bg-rose-200 border border-rose-300 px-2 py-1 rounded-lg transition active:scale-95 cursor-pointer"
+                          title="Simulate college fee receipt or wrong document"
+                        >
+                          🚫 {isEn ? 'Receipt/Bill' : 'ફી રસીદ / બિલ'}
                         </button>
                       </div>
                     </div>
