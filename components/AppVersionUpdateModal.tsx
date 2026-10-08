@@ -55,6 +55,17 @@ export const AppVersionUpdateModal: React.FC<AppVersionUpdateModalProps> = ({
     }
   }, [forceOpen]);
 
+  // Body scroll lock on modal open
+  useEffect(() => {
+    if (isOpen || forceOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isOpen, forceOpen]);
+
   if (!isOpen && !forceOpen) return null;
 
   const currentRelease: AppReleaseVersion = APP_CHANGELOG_HISTORY[selectedVersionIndex] || APP_CHANGELOG_HISTORY[0];
@@ -119,12 +130,17 @@ export const AppVersionUpdateModal: React.FC<AppVersionUpdateModalProps> = ({
   return (
     <div 
       onClick={handleDismiss}
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-2 sm:p-4 modal-backdrop animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden modal-backdrop animate-in fade-in duration-200"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border border-slate-200 flex flex-col max-h-[92dvh] animate-in slide-in-from-bottom-6 duration-200 text-left"
+        className="bg-white w-full max-w-lg rounded-t-[28px] sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-200 flex flex-col h-[92dvh] max-h-[92dvh] sm:h-auto sm:max-h-[88vh] animate-in slide-in-from-bottom duration-200 text-left"
       >
+        {/* MOBILE BOTTOM SHEET DRAG PILL */}
+        <div className="sm:hidden pt-2.5 pb-1 flex justify-center bg-[#003366] shrink-0">
+          <div className="w-12 h-1.5 bg-white/40 rounded-full" />
+        </div>
+
         {/* HEADER */}
         <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#005A9C] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -311,7 +327,7 @@ export const AppVersionUpdateModal: React.FC<AppVersionUpdateModalProps> = ({
         </div>
 
         {/* FOOTER */}
-        <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 flex items-center justify-between text-xs font-bold text-slate-500 shrink-0">
+        <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] flex items-center justify-between text-xs font-bold text-slate-500 shrink-0 sticky bottom-0 z-20">
           <button
             onClick={handleCheckUpdates}
             className="text-[10px] sm:text-xs text-[#005A9C] hover:underline flex items-center gap-1 cursor-pointer"
@@ -322,7 +338,7 @@ export const AppVersionUpdateModal: React.FC<AppVersionUpdateModalProps> = ({
 
           <button
             onClick={handleDismiss}
-            className="bg-[#003366] hover:bg-[#002244] text-white px-4 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer"
+            className="bg-[#003366] hover:bg-[#002244] active:scale-95 text-white px-4 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer"
           >
             {lang === 'gu' ? '✓ સમજાઈ ગયું (બંધ કરો)' : 'Got it (Close)'}
           </button>

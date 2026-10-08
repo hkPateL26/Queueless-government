@@ -68,8 +68,8 @@ export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
         id: 'gondal',
         nameGu: 'ગોંડલ',
         nameEn: 'Gondal',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી ગોંડલ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Gondal',
+        officeNameGu: 'ગોંડલ - જન સેવા કેન્દ્ર • મામલતદાર કચેરી ગોંડલ',
+        officeNameEn: 'Gondal - Jan Seva Kendra • Mamlatdar Office Gondal',
         counters: [
           { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Social Welfare & Pension', officerName: 'કે. એમ. ત્રિવેદી', services: ['widow', 'pension', 'divyang', 'scholarship'] },
           { number: 2, nameGu: 'જન સેવા પ્રમાણપત્રો (આવક/જાતિ)', nameEn: 'Certificates (Income/Caste)', officerName: 'પી. આર. જાડેજા', services: ['income', 'caste', 'ews', 'cremilayer'] },
@@ -80,11 +80,55 @@ export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
         ]
       },
       {
+        id: 'rajkot-west',
+        nameGu: 'રાજકોટ શહેર પશ્ચિમ (નાના મવા)',
+        nameEn: 'Rajkot City West (Nana Mava)',
+        officeNameGu: 'રાજકોટ પશ્ચિમ - મામલતદાર કચેરી જન સેવા કેન્દ્ર (નાના મવા રોડ)',
+        officeNameEn: 'Rajkot West - Mamlatdar Office Jan Seva Kendra (Nana Mava)',
+        counters: [
+          { number: 1, nameGu: 'પ્રમાણપત્ર શાખા (આવક/જાતિ)', nameEn: 'Certificates Desk', officerName: 'એસ. બી. જાડેજા', services: ['income', 'caste', 'ews'] },
+          { number: 2, nameGu: 'આધાર સુપર સેન્ટર', nameEn: 'Aadhaar Center', officerName: 'પી. કે. જોશી', services: ['aadhaar', 'biometric'] },
+          { number: 3, nameGu: 'રેશનકાર્ડ ડેસ્ક', nameEn: 'Ration Desk', officerName: 'એન. આર. વાઘેલા', services: ['ration', 'nfsa'] },
+          { number: 4, nameGu: 'ઈ-ધરા જમીન મહેસૂલ', nameEn: 'E-Dhara Desk', officerName: 'એચ. સી. પંડ્યા', services: ['land', '712'] },
+          { number: 5, nameGu: 'સમાજ સુરક્ષા & પેન્શન', nameEn: 'Social Security', officerName: 'આર. એમ. દવે', services: ['widow', 'pension'] },
+          { number: 6, nameGu: 'સામાન્ય નાગરિક સેવા', nameEn: 'General Services', officerName: 'કે. ટી. મહેતા', services: ['general', 'awas'] }
+        ]
+      },
+      {
+        id: 'rajkot-east',
+        nameGu: 'રાજકોટ શહેર પૂર્વ (આજી વસાહત)',
+        nameEn: 'Rajkot City East (Aji GIDC)',
+        officeNameGu: 'રાજકોટ પૂર્વ - મામલતદાર કચેરી જન સેવા કેન્દ્ર (ભાવનગર રોડ)',
+        officeNameEn: 'Rajkot East - Mamlatdar Office Jan Seva Kendra (Bhavnagar Rd)',
+        counters: [
+          { number: 1, nameGu: 'સમાજ કલ્યાણ શાખા', nameEn: 'Social Welfare', officerName: 'એમ. પી. ગોહિલ', services: ['widow', 'pension'] },
+          { number: 2, nameGu: 'આવક & જાતિ પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'બી. એલ. ચાવડા', services: ['income', 'caste'] },
+          { number: 3, nameGu: 'પુરવઠા & રેશનકાર્ડ', nameEn: 'Civil Supplies', officerName: 'ડી. કે. ઝાલા', services: ['ration', 'nfsa'] },
+          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ નકલ', nameEn: 'E-Dhara Land', officerName: 'વી. આર. શાહ', services: ['land', '712'] },
+          { number: 5, nameGu: 'આધાર નોંધણી બારી', nameEn: 'Aadhaar Desk', officerName: 'જે. પી. પરમાર', services: ['aadhaar'] }
+        ]
+      },
+      {
+        id: 'rajkot-central',
+        nameGu: 'રાજકોટ સેન્ટ્રલ (કલેક્ટર કચેરી)',
+        nameEn: 'Rajkot Central (Collectorate)',
+        officeNameGu: 'રાજકોટ સેન્ટ્રલ - જિલ્લા કલેક્ટર કચેરી મુખ્ય જન સેવા કેન્દ્ર',
+        officeNameEn: 'Rajkot Central - District Collectorate Main Jan Seva Kendra',
+        counters: [
+          { number: 1, nameGu: 'જિલ્લા મહેસૂલી પ્રમાણપત્રો', nameEn: 'Revenue Desk', officerName: 'એ. એમ. શાહ', services: ['income', 'caste', 'ews'] },
+          { number: 2, nameGu: 'આધાર સુપર સેન્ટર (UIDAI)', nameEn: 'Aadhaar Super Center', officerName: 'વી. ટી. સોલંકી', services: ['aadhaar', 'biometric'] },
+          { number: 3, nameGu: 'જિલ્લા પુરવઠા શાખા', nameEn: 'Food Supplies', officerName: 'જી. પી. પટેલ', services: ['ration', 'nfsa'] },
+          { number: 4, nameGu: 'ઈ-ધરા અપીલ & જમીન રેકોર્ડ્સ', nameEn: 'Land Records RoR', officerName: 'કે. કે. ચાવડા', services: ['land', '712'] },
+          { number: 5, nameGu: 'સમાજ સુરક્ષા & દિવ્યાંગ સહાય', nameEn: 'Divyang & Pension', officerName: 'એન. એસ. જાડેજા', services: ['widow', 'pension', 'divyang'] },
+          { number: 6, nameGu: 'કલેક્ટર અપીલ & પૂછપરછ', nameEn: 'Collectorate Desk', officerName: 'આર. વી. ત્રિવેદી', services: ['general', 'scholarship'] }
+        ]
+      },
+      {
         id: 'rajkot-rural',
         nameGu: 'રાજકોટ ગ્રામ્ય',
         nameEn: 'Rajkot Rural',
-        officeNameGu: 'જન સેવા કેન્દ્ર • તાલુકા મામલતદાર કચેરી રાજકોટ ગ્રામ્ય',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Rajkot Rural',
+        officeNameGu: 'રાજકોટ ગ્રામ્ય - તાલુકા મામલતદાર કચેરી જન સેવા કેન્દ્ર',
+        officeNameEn: 'Rajkot Rural - Taluka Mamlatdar Office Jan Seva Kendra',
         counters: [
           { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Welfare & Pension', officerName: 'આર. એન. ગોહિલ', services: ['widow', 'pension', 'welfare'] },
           { number: 2, nameGu: 'આવક & જાતિ પ્રમાણપત્રો', nameEn: 'Certificates (Income/Caste)', officerName: 'ડી. એચ. વાઘેલા', services: ['income', 'caste'] },
@@ -95,11 +139,25 @@ export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
         ]
       },
       {
+        id: 'kotda-sangani',
+        nameGu: 'કોટડા સાંગાણી',
+        nameEn: 'Kotda Sangani',
+        officeNameGu: 'કોટડા સાંગાણી - તાલુકા મામલતદાર કચેરી જન સેવા કેન્દ્ર',
+        officeNameEn: 'Kotda Sangani - Taluka Mamlatdar Office Jan Seva Kendra',
+        counters: [
+          { number: 1, nameGu: 'સામાજિક સુરક્ષા & પેન્શન', nameEn: 'Social Security', officerName: 'એમ. કે. રાઠોડ', services: ['widow', 'pension'] },
+          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ (આવક/જાતિ)', nameEn: 'Certificates', officerName: 'ડી. બી. ઝાલા', services: ['income', 'caste'] },
+          { number: 3, nameGu: 'રેશનકાર્ડ & અન્ન વિતરણ', nameEn: 'Ration Desk', officerName: 'આર. વી. જોશી', services: ['ration'] },
+          { number: 4, nameGu: 'આધાર બાયોમેટ્રિક & અપડેટ', nameEn: 'Aadhaar Desk', officerName: 'પી. કે. પરમાર', services: ['aadhaar'] },
+          { number: 5, nameGu: 'ઈ-ધરા જમીન રેકોર્ડ્સ ૭/૧૨', nameEn: 'E-Dhara Land', officerName: 'વી. એસ. ચૌહાણ', services: ['land', '712', 'ikhedut'] }
+        ]
+      },
+      {
         id: 'jetpur',
         nameGu: 'જેતપુર',
         nameEn: 'Jetpur',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી જેતપુર',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Jetpur',
+        officeNameGu: 'જેતપુર - જન સેવા કેન્દ્ર • મામલતદાર કચેરી જેતપુર',
+        officeNameEn: 'Jetpur - Jan Seva Kendra • Mamlatdar Office Jetpur',
         counters: [
           { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Social Welfare', officerName: 'ટી. એસ. શેખ', services: ['welfare', 'pension'] },
           { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'કે. જી. રામાણી', services: ['income', 'caste'] },
@@ -113,8 +171,8 @@ export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
         id: 'dhoraji',
         nameGu: 'ધોરાજી',
         nameEn: 'Dhoraji',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી ધોરાજી',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Dhoraji',
+        officeNameGu: 'ધોરાજી - જન સેવા કેન્દ્ર • મામલતદાર કચેરી ધોરાજી',
+        officeNameEn: 'Dhoraji - Jan Seva Kendra • Mamlatdar Office Dhoraji',
         counters: [
           { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Social Welfare', officerName: 'એચ. આર. પરમાર', services: ['welfare'] },
           { number: 2, nameGu: 'આવક/જાતિ દાખલા', nameEn: 'Certificates', officerName: 'જે. બી. મકવાણા', services: ['income', 'caste'] },
@@ -125,11 +183,39 @@ export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
         ]
       },
       {
+        id: 'upleta',
+        nameGu: 'ઉપલેટા',
+        nameEn: 'Upleta',
+        officeNameGu: 'ઉપલેટા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી ઉપલેટા',
+        officeNameEn: 'Upleta - Jan Seva Kendra • Mamlatdar Office Upleta',
+        counters: [
+          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'બી. એમ. વાળા', services: ['welfare'] },
+          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'કે. પી. સોલંકી', services: ['income', 'caste'] },
+          { number: 3, nameGu: 'પુરવઠા & રેશન', nameEn: 'Supplies', officerName: 'આર. ડી. જાડેજા', services: ['ration'] },
+          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ રેકોર્ડ', nameEn: 'E-Dhara', officerName: 'એમ. કે. મહેતા', services: ['land', '712'] },
+          { number: 5, nameGu: 'આધાર બાયોમેટ્રિક', nameEn: 'Aadhaar', officerName: 'એસ. એલ. પરમાર', services: ['aadhaar'] }
+        ]
+      },
+      {
+        id: 'lodhika',
+        nameGu: 'લોધિકા (જીઆઈડીસી)',
+        nameEn: 'Lodhika (GIDC)',
+        officeNameGu: 'લોધિકા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી લોધિકા',
+        officeNameEn: 'Lodhika - Jan Seva Kendra • Mamlatdar Office Lodhika',
+        counters: [
+          { number: 1, nameGu: 'સામાજિક સુરક્ષા શાખા', nameEn: 'Social Welfare', officerName: 'એમ. જે. ગોહિલ', services: ['welfare', 'pension'] },
+          { number: 2, nameGu: 'જન સેવા દાખલાઓ', nameEn: 'Certificates', officerName: 'કે. પી. પરમાર', services: ['income', 'caste'] },
+          { number: 3, nameGu: 'રેશનકાર્ડ & પુરવઠા', nameEn: 'Ration Desk', officerName: 'ડી. વી. મહેતા', services: ['ration'] },
+          { number: 4, nameGu: 'આધાર સુધારણા કાઉન્ટર', nameEn: 'Aadhaar Desk', officerName: 'આર. એન. ચૌધરી', services: ['aadhaar'] },
+          { number: 5, nameGu: 'ઈ-ધરા જમીન મહેસૂલ', nameEn: 'E-Dhara', officerName: 'બી. એલ. ત્રિવેદી', services: ['land', '712'] }
+        ]
+      },
+      {
         id: 'jasdan',
         nameGu: 'જસદણ',
         nameEn: 'Jasdan',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી જસદણ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Jasdan',
+        officeNameGu: 'જસદણ - જન સેવા કેન્દ્ર • મામલતદાર કચેરી જસદણ',
+        officeNameEn: 'Jasdan - Jan Seva Kendra • Mamlatdar Office Jasdan',
         counters: [
           { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Social Welfare', officerName: 'ડી. પી. ખાચર', services: ['welfare'] },
           { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'આર. એમ. ડાભી', services: ['income', 'caste'] },
@@ -137,6 +223,48 @@ export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
           { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'કે. એલ. મિયાત્રા', services: ['land', 'ikhedut'] },
           { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'એસ. જે. કંટારિયા', services: ['aadhaar'] },
           { number: 6, nameGu: 'આવાસ યોજના', nameEn: 'Housing', officerName: 'એમ. કે. ઝાલા', services: ['awas'] }
+        ]
+      },
+      {
+        id: 'vinchhiya',
+        nameGu: 'વીંછીયા',
+        nameEn: 'Vinchhiya',
+        officeNameGu: 'વીંછીયા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી વીંછીયા',
+        officeNameEn: 'Vinchhiya - Jan Seva Kendra • Mamlatdar Office Vinchhiya',
+        counters: [
+          { number: 1, nameGu: 'સામાજિક સુરક્ષા', nameEn: 'Welfare', officerName: 'કે. આર. કોળી', services: ['welfare', 'pension'] },
+          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'પી. ડી. વાળા', services: ['income', 'caste'] },
+          { number: 3, nameGu: 'રેશનકાર્ડ સેવા', nameEn: 'Ration', officerName: 'એમ. એસ. ચાવડા', services: ['ration'] },
+          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ જમીન', nameEn: 'E-Dhara', officerName: 'એચ. જી. જોશી', services: ['land', '712'] },
+          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'બી. એમ. રાઠોડ', services: ['aadhaar'] }
+        ]
+      },
+      {
+        id: 'paddhari',
+        nameGu: 'પડધરી',
+        nameEn: 'Paddhari',
+        officeNameGu: 'પડધરી - જન સેવા કેન્દ્ર • મામલતદાર કચેરી પડધરી',
+        officeNameEn: 'Paddhari - Jan Seva Kendra • Mamlatdar Office Paddhari',
+        counters: [
+          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એસ. ટી. જાડેજા', services: ['welfare'] },
+          { number: 2, nameGu: 'દાખલા વિતરણ', nameEn: 'Certificates', officerName: 'વી. કે. પટેલ', services: ['income', 'caste'] },
+          { number: 3, nameGu: 'પુરવઠા શાખા', nameEn: 'Ration', officerName: 'આર. એમ. મકવાણા', services: ['ration'] },
+          { number: 4, nameGu: 'ઈ-ધરા ખેતીવાડી', nameEn: 'E-Dhara', officerName: 'કે. પી. વ્યાસ', services: ['land', '712'] },
+          { number: 5, nameGu: 'આધાર કાઉન્ટર', nameEn: 'Aadhaar', officerName: 'જે. ડી. ચૌહાણ', services: ['aadhaar'] }
+        ]
+      },
+      {
+        id: 'jamkandorna',
+        nameGu: 'જામકંડોરણા',
+        nameEn: 'Jamkandorna',
+        officeNameGu: 'જામકંડોરણા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી જામકંડોરણા',
+        officeNameEn: 'Jamkandorna - Jan Seva Kendra • Mamlatdar Office Jamkandorna',
+        counters: [
+          { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Welfare', officerName: 'એ. કે. રાદડિયા', services: ['welfare'] },
+          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'એમ. પી. જાડેજા', services: ['income', 'caste'] },
+          { number: 3, nameGu: 'રેશનકાર્ડ & અન્ન પુરવઠા', nameEn: 'Ration', officerName: 'ડી. એસ. પટેલ', services: ['ration'] },
+          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ નકલ', nameEn: 'E-Dhara', officerName: 'વી. એલ. સોજીત્રા', services: ['land', '712'] },
+          { number: 5, nameGu: 'આધાર સુવિધા ડેસ્ક', nameEn: 'Aadhaar', officerName: 'પી. કે. મોરડિયા', services: ['aadhaar'] }
         ]
       }
     ]
@@ -752,5 +880,138 @@ export function getRecommendedCounter(
   }
 
   return getAutoRoutedCounter(schemeId, category);
+}
+
+// ============================================================================
+// VILLAGE CLUSTER & NEARBY VILLAGE FREE SLOT DATABASE (RURAL RESCUE ENGINE)
+// ============================================================================
+export interface VillageClusterCenter {
+  villageId: string;
+  villageNameGu: string;
+  villageNameEn: string;
+  talukaId: string;
+  talukaNameGu: string;
+  centerNameGu: string;
+  centerNameEn: string;
+  distanceKm: number;
+  availableSlotsToday: number;
+  totalSlotsToday: number;
+  crowdLevel: 'low' | 'moderate' | 'full';
+  estimatedWaitMins: number;
+  isCitizenHomeVillage: boolean;
+  recommendedReasonGu?: string;
+  recommendedReasonEn?: string;
+}
+
+export const VILLAGE_CLUSTERS_DATABASE: Record<string, VillageClusterCenter[]> = {
+  // Gomta cluster in Gondal taluka
+  gomta: [
+    {
+      villageId: 'gomta',
+      villageNameGu: 'ગોમટા (તમારું ગામ)',
+      villageNameEn: 'Gomta (Your Village)',
+      talukaId: 'gondal',
+      talukaNameGu: 'ગોંડલ',
+      centerNameGu: 'ગોમટા ગ્રામ પંચાયત • ઈ-ગ્રામ વિશ્વગ્રામ કેન્દ્ર',
+      centerNameEn: 'Gomta Gram Panchayat • E-Gram Center',
+      distanceKm: 0.2,
+      availableSlotsToday: 1,
+      totalSlotsToday: 24,
+      crowdLevel: 'full',
+      estimatedWaitMins: 38,
+      isCitizenHomeVillage: true,
+      recommendedReasonGu: '⚠️ આજે ગોમટા કેન્દ્રમાં સ્લોટ લગભગ ફૂલ છે (૮૮% ભીડ).',
+      recommendedReasonEn: 'High rush at Gomta center today.'
+    },
+    {
+      villageId: 'moviya',
+      villageNameGu: 'મોવીયા',
+      villageNameEn: 'Moviya',
+      talukaId: 'gondal',
+      talukaNameGu: 'ગોંડલ',
+      centerNameGu: 'મોવીયા ગ્રામ પંચાયત • ઈ-ગ્રામ જન સુવિધા કેન્દ્ર',
+      centerNameEn: 'Moviya Gram Panchayat • E-Gram Kendra',
+      distanceKm: 4.2,
+      availableSlotsToday: 8,
+      totalSlotsToday: 24,
+      crowdLevel: 'low',
+      estimatedWaitMins: 6,
+      isCitizenHomeVillage: false,
+      recommendedReasonGu: '🟢 સ્માર્ટ ભલામણ: ગોમટાથી માત્ર ૪.૨ કિમી! આજે ૮ સ્લોટ ખાલી છે અને રાહ જોવાનો સમય માત્ર ૬ મિનિટ છે.',
+      recommendedReasonEn: 'Fastest: Just 4.2 km from Gomta with 8 free slots and 6 min wait.'
+    },
+    {
+      villageId: 'shrinathgadh',
+      villageNameGu: 'શ્રીનાથગઢ',
+      villageNameEn: 'Shrinathgadh',
+      talukaId: 'gondal',
+      talukaNameGu: 'ગોંડલ',
+      centerNameGu: 'શ્રીનાથગઢ ગ્રામ પંચાયત કેન્દ્ર',
+      centerNameEn: 'Shrinathgadh Gram Panchayat Center',
+      distanceKm: 5.5,
+      availableSlotsToday: 11,
+      totalSlotsToday: 20,
+      crowdLevel: 'low',
+      estimatedWaitMins: 4,
+      isCitizenHomeVillage: false,
+      recommendedReasonGu: '🟢 ત્વરિત સેવા: કતાર વગર તાત્કાલિક પ્રમાણપત્ર વિતરણ ઉપલબ્ધ.',
+      recommendedReasonEn: 'Quick service with instant certificate processing.'
+    },
+    {
+      villageId: 'biliyala',
+      villageNameGu: 'બીલીયાળા',
+      villageNameEn: 'Biliyala',
+      talukaId: 'gondal',
+      talukaNameGu: 'ગોંડલ',
+      centerNameGu: 'બીલીયાળા ગ્રામ પંચાયત • ઈ-ધરા & જન સેવા',
+      centerNameEn: 'Biliyala Gram Panchayat E-Gram Desk',
+      distanceKm: 6.1,
+      availableSlotsToday: 6,
+      totalSlotsToday: 20,
+      crowdLevel: 'moderate',
+      estimatedWaitMins: 10,
+      isCitizenHomeVillage: false,
+      recommendedReasonGu: 'હાઈવે ટચ કેન્દ્ર, આધાર અને મહેસૂલી દાખલા માટે અનુકૂળ.',
+      recommendedReasonEn: 'Highway touch center for convenient access.'
+    },
+    {
+      villageId: 'bhojrajpara',
+      villageNameGu: 'ભોજરાજપરા / ગોંડલ સબ-સેન્ટર',
+      villageNameEn: 'Bhojrajpara / Gondal Sub-Center',
+      talukaId: 'gondal',
+      talukaNameGu: 'ગોંડલ',
+      centerNameGu: 'ભોજરાજપરા જન સુવિધા કેન્દ્ર',
+      centerNameEn: 'Bhojrajpara Jan Suvidha Kendra',
+      distanceKm: 7.8,
+      availableSlotsToday: 9,
+      totalSlotsToday: 25,
+      crowdLevel: 'low',
+      estimatedWaitMins: 8,
+      isCitizenHomeVillage: false,
+      recommendedReasonGu: 'ગોંડલ ટાઉન નજીકનું આધુનિક કેન્દ્ર.',
+      recommendedReasonEn: 'Modern e-center near Gondal town.'
+    },
+    {
+      villageId: 'kotda-sangani-sub',
+      villageNameGu: 'કોટડા સાંગાણી સબ-સેન્ટર',
+      villageNameEn: 'Kotda Sangani Sub-Center',
+      talukaId: 'kotda-sangani',
+      talukaNameGu: 'કોટડા સાંગાણી',
+      centerNameGu: 'તાલુકા જન સેવા કેન્દ્ર કોટડા સાંગાણી',
+      centerNameEn: 'Jan Seva Kendra Kotda Sangani',
+      distanceKm: 9.2,
+      availableSlotsToday: 14,
+      totalSlotsToday: 30,
+      crowdLevel: 'low',
+      estimatedWaitMins: 5,
+      isCitizenHomeVillage: false,
+      recommendedReasonGu: 'માત્ર ૨૮% ભીડ, રાજ્યવ્યાપી આધાર અને સાર્વત્રિક સેવાઓ માટે શ્રેષ્ઠ.',
+      recommendedReasonEn: 'Only 28% crowd with 14 available slots.'
+    }
+  ]
+};
+
+export function getNearbyVillageCluster(villageName: string = 'ગોમટા'): VillageClusterCenter[] {
+  return VILLAGE_CLUSTERS_DATABASE['gomta'] || [];
 }
 

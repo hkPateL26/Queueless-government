@@ -64,6 +64,19 @@ export function DigitalTokenPass({
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [channelsModalOpen, setChannelsModalOpen] = useState<boolean>(false);
 
+  const isAnySubModalOpen = lateModalOpen || rescheduleModalOpen || cancelModalOpen || verifierOpen || smsModalOpen || whatsAppModalOpen || channelsModalOpen;
+
+  // Body scroll lock when any dialog is open
+  useEffect(() => {
+    if (isAnySubModalOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isAnySubModalOpen]);
+
   // Live Token Validity Clock (Requirement 11)
   const [liveTime, setLiveTime] = useState<string>('');
   const [isOfflineCached, setIsOfflineCached] = useState<boolean>(false);

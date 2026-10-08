@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, CheckSquare, Square, Share2, Camera, ShieldCheck, 
   Clock, IndianRupee, Volume2, ArrowRight, FileCheck2, Lock, 
@@ -46,6 +46,17 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   lang = 'gu'
 }) => {
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
+
+  // Body scroll lock on drawer open
+  useEffect(() => {
+    if (isOpen && scheme) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isOpen, scheme]);
 
   if (!isOpen || !scheme) return null;
 
@@ -451,8 +462,8 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 
         </div>
 
-        {/* Bottom Drawer Actions (Fixed) */}
-        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 space-y-2 shrink-0">
+        {/* Bottom Drawer Actions (Fixed & Sticky) */}
+        <div className="p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 space-y-2 shrink-0 sticky bottom-0 z-20">
           <button
             onClick={() => {
               triggerHaptic('success');

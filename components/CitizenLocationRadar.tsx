@@ -53,6 +53,17 @@ export function CitizenLocationRadar({
     isLive: false
   });
 
+  // Body scroll lock on modal open
+  useEffect(() => {
+    if (isOpen && !isStandaloneCard) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isOpen, isStandaloneCard]);
+
   // Dynamic GPS and Nearest Kacheri Calculation
   const refreshLocation = async () => {
     triggerHaptic('tap');
@@ -391,12 +402,17 @@ export function CitizenLocationRadar({
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 modal-backdrop animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden modal-backdrop animate-in fade-in duration-150"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full max-w-4xl max-h-[92vh] overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col border border-slate-200"
+        className="bg-white w-full max-w-4xl h-[92dvh] max-h-[92dvh] sm:h-auto sm:max-h-[88vh] overflow-hidden rounded-t-[28px] sm:rounded-3xl shadow-2xl flex flex-col border border-slate-200 animate-in slide-in-from-bottom duration-200"
       >
+        {/* MOBILE BOTTOM SHEET DRAG PILL */}
+        <div className="sm:hidden pt-2.5 pb-1 flex justify-center bg-[#003366] shrink-0">
+          <div className="w-12 h-1.5 bg-white/40 rounded-full" />
+        </div>
+
         {/* HEADER */}
         <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#005A9C] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3">
@@ -428,17 +444,17 @@ export function CitizenLocationRadar({
         </div>
 
         {/* BODY */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 overscroll-contain">
           {content}
         </div>
 
         {/* FOOTER */}
-        <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 flex items-center justify-between text-xs font-bold text-slate-500 shrink-0">
+        <div className="bg-slate-50 border-t border-slate-200 p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] flex items-center justify-between text-xs font-bold text-slate-500 shrink-0 sticky bottom-0 z-20">
           <span className="text-[10px] sm:text-xs text-slate-500 truncate mr-2">Gujarat Geographic Queue Optimization • GRTSA 2013</span>
           {onClose && (
             <button
               onClick={onClose}
-              className="bg-[#003366] hover:bg-[#002244] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition cursor-pointer shrink-0"
+              className="bg-[#003366] hover:bg-[#002244] active:scale-95 text-white px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition cursor-pointer shrink-0"
             >
               {lang === 'gu' ? 'બંધ કરો' : 'Close'}
             </button>

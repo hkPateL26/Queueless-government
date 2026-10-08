@@ -13,7 +13,9 @@ import {
   TalukaOffice, 
   ServiceCenter,
   getTalukaServiceCenters,
-  getRecommendedCounter 
+  getRecommendedCounter,
+  getNearbyVillageCluster,
+  VillageClusterCenter
 } from '@/lib/jurisdiction-data';
 import { 
   generateOfficeSlots, 
@@ -82,6 +84,17 @@ export function SlotBookingModal({
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>(initialDistrictId || DEFAULT_CITIZEN_PROFILE.districtId);
   const [selectedTalukaId, setSelectedTalukaId] = useState<string>(initialTalukaId || DEFAULT_CITIZEN_PROFILE.talukaId);
 
+  // Body scroll lock to eliminate background bounce and double scrollbars on mobile & desktop
+  React.useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   // Sync state when props change
   React.useEffect(() => {
     if (initialDistrictId) setSelectedDistrictId(initialDistrictId);
@@ -90,6 +103,13 @@ export function SlotBookingModal({
 
   // Service Center state (Requirement 3: Service Center Selection)
   const [selectedCenterId, setSelectedCenterId] = useState<string>('gondal-jsk');
+
+  // Nearby Village Cluster state (Rural Rescue: Book in neighbor village if home center is crowded/full)
+  const [selectedClusterVillageId, setSelectedClusterVillageId] = useState<string | null>(null);
+
+  const nearbyClusters = useMemo(() => {
+    return getNearbyVillageCluster(initialVillage || 'ગોમટા');
+  }, [initialVillage]);
 
   // Date state (defaults to today in 2026 format or current working date)
   const todayStr = useMemo(() => {
@@ -120,9 +140,52 @@ export function SlotBookingModal({
     return getTalukaServiceCenters(selectedTaluka);
   }, [selectedTaluka]);
 
+  // Dynamically resolve service center (defaults to selected Taluka center OR neighboring village cluster center)
   const selectedCenter = useMemo(() => {
+    if (selectedClusterVillageId) {
+      const cluster = nearbyClusters.find(c => c.villageId === selectedClusterVillageId);
+      if (cluster) {
+        return {
+          id: `cluster-${cluster.villageId}`,
+          nameGu: cluster.centerNameGu,
+          nameEn: cluster.centerNameEn,
+          centerType: 'jan_seva_kendra' as const,
+          distanceKm: cluster.distanceKm,
+          addressGu: `${cluster.villageNameGu}, તાલુકો: ${cluster.talukaNameGu}, જિલ્લો: રાજકોટ`,
+          addressEn: `${cluster.villageNameEn}, Taluka: ${cluster.talukaNameGu}, District: Rajkot`,
+          availabilityNoteGu: `${cluster.availableSlotsToday} સ્લોટ ખાલી • પ્રતીક્ષા સમય: ~${cluster.estimatedWaitMins} મિ.`,
+          availabilityNoteEn: `${cluster.availableSlotsToday} slots free • Wait: ~${cluster.estimatedWaitMins} mins`,
+          config: {
+            serviceHours: {
+              startTime: '10:30',
+              endTime: '18:10',
+              displayEn: '10:30 AM – 06:10 PM',
+              displayGu: '૧૦:૩૦ સવારે – ૦૬:૧૦ સાંજે'
+            },
+            lunchBreak: {
+              startTime: '13:30',
+              endTime: '14:00',
+              displayEn: '01:30 PM – 02:00 PM',
+              displayGu: '૦૧:૩૦ બપોરે – ૦૨:૦૦ બપોરે'
+            },
+            workingDays: [1, 2, 3, 4, 5, 6],
+            defaultCapacityPerHour: 6,
+            sourceReference: 'Gujarat Panchayats E-Gram Vishwagram Schedule'
+          },
+          counters: [
+            { 
+              number: 1, 
+              nameGu: 'ઈ-ગ્રામ જન સુવિધા ડેસ્ક (સર્વ સેવા)', 
+              nameEn: 'E-Gram All Services Desk', 
+              officerName: 'પંચાયત મંત્રી / VCE સુપરવાઈઝર', 
+              services: ['income', 'caste', 'ration', 'land', '712', 'aadhaar', 'general', 'welfare'] 
+            }
+          ]
+        };
+      }
+    }
     return serviceCenters.find(c => c.id === selectedCenterId) || serviceCenters[0];
-  }, [serviceCenters, selectedCenterId]);
+  }, [serviceCenters, selectedCenterId, selectedClusterVillageId, nearbyClusters]);
 
   const timelineInfo = useMemo(() => {
     return scheme ? getProcessingTimelineInfo(scheme) : null;
@@ -136,6 +199,7 @@ export function SlotBookingModal({
   // Handle District Change
   const handleDistrictChange = (distId: string) => {
     setSelectedDistrictId(distId);
+    setSelectedClusterVillageId(null);
     setIsRecalculatingSlots(true);
     setTimeout(() => setIsRecalculatingSlots(false), 200);
     const dist = GUJARAT_33_DISTRICTS.find(d => d.id === distId);
@@ -153,6 +217,7 @@ export function SlotBookingModal({
   // Handle Taluka Change
   const handleTalukaChange = (talId: string) => {
     setSelectedTalukaId(talId);
+    setSelectedClusterVillageId(null);
     setIsRecalculatingSlots(true);
     setTimeout(() => setIsRecalculatingSlots(false), 200);
     const tal = selectedDistrict.talukas.find(t => t.id === talId);
@@ -315,12 +380,16 @@ export function SlotBookingModal({
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 modal-backdrop animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden modal-backdrop animate-in fade-in duration-150"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[88vh] animate-in slide-in-from-bottom sm:zoom-in-95"
+        className="bg-white w-full max-w-3xl rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[92dvh] max-h-[92dvh] sm:h-auto sm:max-h-[88vh] animate-in slide-in-from-bottom duration-200"
       >
+        {/* MOBILE BOTTOM SHEET DRAG PILL (WHATSAPP UX) */}
+        <div className="sm:hidden pt-2.5 pb-1 flex justify-center bg-[#003366] shrink-0">
+          <div className="w-12 h-1.5 bg-white/40 rounded-full" />
+        </div>
         
         {/* HEADER */}
         <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
@@ -601,6 +670,131 @@ export function SlotBookingModal({
                   : 'આવક, જાતિ અને ૭/૧૨ ના દાખલા તમારા કાયમી રહેઠાણ મુજબ ગોંડલ મામલતદાર કચેરીમાંથી જ માન્ય રહેશે. આધાર બાયોમેટ્રિક/મોબાઇલ અપડેટ અને RTO સેવાઓ રાજ્યના કોઈપણ કેન્દ્ર પર લઈ શકાય છે.'}
               </p>
             </div>
+
+            {/* NEARBY VILLAGE FREE SLOT FINDER (RURAL RESCUE) */}
+            <div className="mt-3.5 bg-gradient-to-br from-emerald-50/95 via-teal-50/70 to-blue-50/60 border-2 border-emerald-300 rounded-2xl p-3 sm:p-4 space-y-3 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200/80 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                    🌐
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h4 className="text-xs sm:text-sm font-black text-emerald-950">
+                        {isEn 
+                          ? 'Nearby Village Free Slot Finder (Cluster E-Gram)' 
+                          : 'આજુબાજુના ગામોમાં ઉપલબ્ધ ખાલી સ્લોટ (ક્લસ્ટર ઈ-ગ્રામ કેન્દ્ર)'}
+                      </h4>
+                      <span className="text-[9px] bg-emerald-200 text-emerald-900 font-extrabold px-1.5 py-0.2 rounded uppercase">
+                        {isEn ? 'Panchayat Rule Permitted' : 'પંચાયત નિયમ માન્ય'}
+                      </span>
+                    </div>
+                    <p className="text-[10.5px] text-emerald-800 font-medium mt-0.5">
+                      {isEn
+                        ? 'If your village is crowded, panchayat rules allow booking at any neighboring cluster Gram Panchayat e-Gram center.'
+                        : 'જો તમારા ગામમાં સ્લોટ પૂર્ણ હોય કે ભીડ હોય, તો પંચાયત નિયમ મુજબ આજુબાજુના ગામના ઈ-ગ્રામ કેન્દ્રમાં પણ સ્લોટ બુક કરી શકો છો.'}
+                    </p>
+                  </div>
+                </div>
+                {selectedClusterVillageId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedClusterVillageId(null);
+                      triggerHaptic('tap');
+                    }}
+                    className="text-[11px] font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1 rounded-lg transition self-start sm:self-auto shrink-0 shadow-2xs cursor-pointer"
+                  >
+                    {isEn ? '↺ Reset to Taluka' : '↺ મૂળ કચેરી પર પાછા ફરો'}
+                  </button>
+                )}
+              </div>
+
+              {/* Village cluster grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {nearbyClusters.map((cluster) => {
+                  const isSelected = selectedClusterVillageId === cluster.villageId;
+                  const isHome = cluster.isCitizenHomeVillage;
+
+                  return (
+                    <div
+                      key={cluster.villageId}
+                      className={`rounded-xl p-3 border transition flex flex-col justify-between text-left relative ${
+                        isSelected
+                          ? 'bg-white border-emerald-600 ring-2 ring-emerald-500 shadow-md'
+                          : isHome
+                          ? 'bg-amber-50/70 border-amber-300'
+                          : 'bg-white border-slate-200 hover:border-emerald-300'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <span>{isHome ? '🏠' : '📍'}</span>
+                            <span>{isEn ? cluster.villageNameEn : cluster.villageNameGu}</span>
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                            {cluster.distanceKm} km
+                          </span>
+                        </div>
+
+                        <p className="text-[10.5px] text-slate-600 font-medium leading-snug line-clamp-1">
+                          {isEn ? cluster.centerNameEn : cluster.centerNameGu}
+                        </p>
+
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-full ${
+                            cluster.crowdLevel === 'low'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              : cluster.crowdLevel === 'moderate'
+                              ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                              : 'bg-red-100 text-red-800 border border-red-300'
+                          }`}>
+                            {isEn 
+                              ? `${cluster.availableSlotsToday} Slots Free` 
+                              : `${cluster.availableSlotsToday} સ્લોટ ખાલી`}
+                          </span>
+
+                          <span className="text-[9.5px] text-slate-500 font-semibold">
+                            ⏳ ~{cluster.estimatedWaitMins} {isEn ? 'min wait' : 'મિ. પ્રતીક્ષા'}
+                          </span>
+                        </div>
+
+                        <p className="text-[9.5px] text-emerald-800 font-semibold mt-1.5 leading-snug line-clamp-2">
+                          {isEn ? cluster.recommendedReasonEn : cluster.recommendedReasonGu}
+                        </p>
+                      </div>
+
+                      <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+                        {isSelected ? (
+                          <span className="text-[11px] font-black text-emerald-700 flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>{isEn ? 'Center Selected' : 'પસંદ કરેલ કેન્દ્ર'}</span>
+                          </span>
+                        ) : isHome ? (
+                          <span className="text-[10px] text-amber-800 font-bold">
+                            {isEn ? 'Home Center (High Rush)' : 'મૂળ કેન્દ્ર (વધુ ભીડ)'}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              triggerHaptic('tap');
+                              setSelectedClusterVillageId(cluster.villageId);
+                              speakGuidance(`${cluster.villageNameGu} કેન્દ્ર પસંદ થયું. ${cluster.availableSlotsToday} સ્લોટ ઉપલબ્ધ છે.`);
+                            }}
+                            className="w-full text-center text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-2 rounded-lg transition shadow-2xs cursor-pointer flex items-center justify-center gap-1"
+                          >
+                            <span>{isEn ? 'Select This Center' : 'આ કેન્દ્ર પસંદ કરો'}</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </section>
 
           {/* STEP 2: SERVICE CENTER SELECTION (Requirement 3) */}
@@ -617,15 +811,43 @@ export function SlotBookingModal({
               </span>
             </div>
 
+            {/* Active Neighboring Village Center Alert Banner */}
+            {selectedClusterVillageId && (
+              <div className="mb-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-400 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🌐</span>
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-200/80 px-1.5 py-0.2 rounded">
+                      {isEn ? 'Cluster E-Gram Center Active' : 'ક્લસ્ટર ઈ-ગ્રામ કેન્દ્ર સક્રિય'}
+                    </span>
+                    <p className="text-xs font-black text-emerald-950 mt-0.5">
+                      {isEn ? selectedCenter.nameEn : selectedCenter.nameGu} ({selectedCenter.distanceKm} km)
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setSelectedClusterVillageId(null);
+                  }}
+                  className="text-[11px] font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1 rounded-lg transition self-start sm:self-auto shrink-0 shadow-2xs cursor-pointer"
+                >
+                  {isEn ? 'Switch to Taluka Office' : 'તાલુકા સેવા સદન પસંદ કરો'}
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {serviceCenters.map((center) => {
-                const isSelected = selectedCenterId === center.id;
+                const isSelected = !selectedClusterVillageId && selectedCenterId === center.id;
                 return (
                   <button
                     key={center.id}
                     type="button"
                     onClick={() => {
                       triggerHaptic('tap');
+                      setSelectedClusterVillageId(null);
                       setSelectedCenterId(center.id);
                     }}
                     className={`p-3 rounded-xl border text-left transition flex flex-col justify-between ${
@@ -970,14 +1192,14 @@ export function SlotBookingModal({
 
         </div>
 
-        {/* FOOTER ACTIONS */}
-        <div className="bg-gray-50 p-3 sm:p-4 border-t border-gray-200 flex items-center justify-between shrink-0">
+        {/* FOOTER ACTIONS - STICKY WHATSAPP BOTTOM BAR */}
+        <div className="bg-white/95 backdrop-blur-md p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0 sticky bottom-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-lg">
           <button
             onClick={() => {
               triggerHaptic('tap');
               onClose();
             }}
-            className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-200 transition"
+            className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
           >
             {isEn ? 'Cancel' : isHi ? 'रद्द करें' : isMr ? 'रद्द करा' : 'રદ કરો (Cancel)'}
           </button>
@@ -985,14 +1207,14 @@ export function SlotBookingModal({
           <button
             disabled={holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'}
             onClick={handleFinalConfirm}
-            className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-md transition ${
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-black text-xs sm:text-sm flex items-center gap-2 shadow-md transition cursor-pointer ${
               holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-[#003366] hover:bg-[#002244] text-white hover:shadow-lg'
+                ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                : 'bg-[#003366] hover:bg-[#002244] active:scale-[0.98] text-white hover:shadow-lg'
             }`}
           >
             <span>{isEn ? 'Confirm Appointment Slot' : isHi ? 'स्लॉट पुष्टि करें' : isMr ? 'अपॉइंटमेंट स्लॉट निश्चित करा' : 'ટોકન સ્લોટ કન્ફર્મ કરો'}</span>
-            <ArrowRight className="w-4 h-4 text-[#FF9933]" />
+            <ArrowRight className="w-4 h-4 text-[#FF9933] shrink-0" />
           </button>
         </div>
 

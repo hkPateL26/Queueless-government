@@ -53,6 +53,17 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
   const isMr = lang === 'mr';
   const isGu = lang === 'gu';
 
+  // Body scroll lock on modal open
+  useEffect(() => {
+    if (isOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     let stream: MediaStream | null = null;
     if (isOpen && activeTab === 'camera') {
@@ -160,12 +171,16 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 bg-[#003366]/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-5 modal-backdrop animate-in fade-in duration-150"
+      className="fixed inset-0 bg-[#003366]/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-5 overflow-hidden modal-backdrop animate-in fade-in duration-150"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl sm:rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95"
+        className="bg-white rounded-t-[28px] sm:rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[92dvh] max-h-[92dvh] sm:h-auto sm:max-h-[88vh] animate-in slide-in-from-bottom duration-200"
       >
+        {/* MOBILE BOTTOM SHEET DRAG PILL */}
+        <div className="sm:hidden pt-2.5 pb-1 flex justify-center bg-[#003366] shrink-0">
+          <div className="w-12 h-1.5 bg-white/40 rounded-full" />
+        </div>
         
         {/* Top Header */}
         <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
@@ -706,7 +721,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5 shrink-0">
+        <div className="p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5 shrink-0 sticky bottom-0 z-20">
           <button
             onClick={() => handleRunOcr(SAMPLE_OCR_TEST_CASES.valid2025)}
             disabled={scanning}

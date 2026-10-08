@@ -82,6 +82,17 @@ export function TokenTrackerModal({
   const isMr = lang === 'mr';
   const isEn = lang === 'en';
 
+  // Body scroll lock on modal open
+  React.useEffect(() => {
+    if (isOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isOpen]);
+
   const cleanQuery = searchToken.trim().toUpperCase().replace('#', '');
   
   // Lookup from presets or generate dynamic result
@@ -132,12 +143,17 @@ export function TokenTrackerModal({
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 modal-backdrop animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden modal-backdrop animate-in fade-in duration-200"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg bg-white rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden h-[92dvh] max-h-[92dvh] sm:h-auto sm:max-h-[88vh] flex flex-col animate-in slide-in-from-bottom duration-200"
       >
+        {/* MOBILE BOTTOM SHEET DRAG PILL */}
+        <div className="sm:hidden pt-2.5 pb-1 flex justify-center bg-[#003366] shrink-0">
+          <div className="w-12 h-1.5 bg-white/40 rounded-full" />
+        </div>
+
         {/* HEADER */}
         <div className="bg-[#003366] text-white px-5 sm:px-6 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -287,7 +303,7 @@ export function TokenTrackerModal({
         </div>
 
         {/* FOOTER ACTIONS */}
-        <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex flex-col sm:flex-row items-center gap-2 justify-between text-xs shrink-0">
+        <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] flex flex-col sm:flex-row items-center gap-2 justify-between text-xs shrink-0 sticky bottom-0 z-20">
           <button
             onClick={() => {
               triggerHaptic('tap');

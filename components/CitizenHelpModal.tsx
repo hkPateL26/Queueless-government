@@ -23,6 +23,17 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
     onClose();
   };
 
+  // Body scroll lock on modal open
+  React.useEffect(() => {
+    if (isOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isOpen]);
+
   const isGu = lang === 'gu';
   const isHi = lang === 'hi';
   const isMr = lang === 'mr';
@@ -98,12 +109,17 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
   return (
     <div 
       onClick={handleClose}
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 modal-backdrop animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden modal-backdrop animate-in fade-in duration-200"
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-200"
+        className="w-full max-w-2xl bg-white rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden h-[92dvh] max-h-[92dvh] sm:h-auto sm:max-h-[88vh] flex flex-col animate-in slide-in-from-bottom duration-200"
       >
+        {/* MOBILE BOTTOM SHEET DRAG PILL */}
+        <div className="sm:hidden pt-2.5 pb-1 flex justify-center bg-[#003366] shrink-0">
+          <div className="w-12 h-1.5 bg-white/40 rounded-full" />
+        </div>
+
         {/* MODAL HEADER */}
         <div className="bg-[#003366] text-white px-5 sm:px-6 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -223,13 +239,13 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between text-xs shrink-0">
+        <div className="bg-slate-50 border-t border-slate-200 px-5 py-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] flex items-center justify-between text-xs shrink-0 sticky bottom-0 z-20">
           <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
             {isGu ? 'સામાન્ય વહીવટ વિભાગ • સચિવાલય, ગાંધીનગર' : isHi ? 'सामान्य प्रशासन विभाग • सचिवालय, गांधीनगर' : isMr ? 'सामान्य प्रशासन विभाग • सचिवालय, गांधीनगर' : 'General Administration Dept • Sachivalaya, Gandhinagar'}
           </span>
           <button
             onClick={handleClose}
-            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white font-bold transition cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] active:scale-95 text-white font-bold transition cursor-pointer"
           >
             {isGu ? 'સમજાઈ ગયું (બંધ કરો)' : isHi ? 'समझ गया (बंद करें)' : isMr ? 'समजले (बंद करा)' : 'Understood (Close)'}
           </button>
