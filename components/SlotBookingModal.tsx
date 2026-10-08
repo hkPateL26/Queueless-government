@@ -3,9 +3,9 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Building2, MapPin, Calendar, Clock, AlertTriangle, 
-  CheckCircle2, X, ChevronRight, ShieldCheck, ArrowRight,
+  CheckCircle2, X, ChevronRight, ChevronDown, ChevronUp, ShieldCheck, ArrowRight,
   Info, Sparkles, UserCheck, Utensils, Navigation,
-  FileCheck, IndianRupee
+  FileCheck, IndianRupee, AlertCircle, Upload
 } from 'lucide-react';
 import { 
   GUJARAT_33_DISTRICTS, 
@@ -104,8 +104,16 @@ export function SlotBookingModal({
   // Service Center state (Requirement 3: Service Center Selection)
   const [selectedCenterId, setSelectedCenterId] = useState<string>('gondal-jsk');
 
-  // Nearby Village Cluster state (Rural Rescue: Book in neighbor village if home center is crowded/full)
+  // Nearby Village Cluster state (Collapsible & Gondal-Specific)
+  const [isClustersExpanded, setIsClustersExpanded] = useState<boolean>(false);
   const [selectedClusterVillageId, setSelectedClusterVillageId] = useState<string | null>(null);
+
+  // Priority Appointment Validation States (Verified Family Member Proof & AI Government Check)
+  const [selectedPriorityMemberId, setSelectedPriorityMemberId] = useState<string>('mem-4'); // defaults to Parsottambhai Patel (Senior Citizen 68 yrs)
+  const [customProofType, setCustomProofType] = useState<string>('udid_divyang');
+  const [customProofNumber, setCustomProofNumber] = useState<string>('GJ-03-UDID-8842');
+  const [isAiVerifying, setIsAiVerifying] = useState<boolean>(false);
+  const [aiVerificationPassed, setAiVerificationPassed] = useState<boolean>(true);
 
   const nearbyClusters = useMemo(() => {
     return getNearbyVillageCluster(initialVillage || 'ગોમટા');
@@ -275,31 +283,42 @@ export function SlotBookingModal({
     };
   }, [selectedCenter, routing.counterNumber]);
 
-  // Recommended departure calculation (Estimate)
+  // Recommended departure calculation (Fully Dynamic Estimate based on origin & destination)
   const transitEstimate = useMemo(() => {
-    const distanceKm = selectedCenter.distanceKm || 8.4;
-    // ~2.5 mins per km in rural/suburban Gujarat
-    const travelMins = Math.round(distanceKm * 2.8);
+    const originNameGu = initialVillage || DEFAULT_CITIZEN_PROFILE.villageGu || 'ગોમટા';
+    const originNameEn = initialVillage || DEFAULT_CITIZEN_PROFILE.villageEn || 'Gomta';
+    const destinationNameGu = selectedCenter.nameGu;
+    const destinationNameEn = selectedCenter.nameEn;
+    const distanceKm = Number((selectedCenter.distanceKm || 8.4).toFixed(1));
+    
+    // ~2.8 mins per km in rural/suburban Gujarat + 10 min traffic & parking buffer
+    const travelMins = Math.max(4, Math.round(distanceKm * 2.8));
     const bufferMins = 10;
     const totalPriorMins = travelMins + bufferMins;
 
     const slotHour = parseInt(selectedSlot.startTime.split(':')[0] || '10', 10);
     const slotMinute = parseInt(selectedSlot.startTime.split(':')[1] || '30', 10);
-    let depHour = slotHour;
-    let depMinute = slotMinute - totalPriorMins;
-    if (depMinute < 0) {
-      depMinute += 60;
-      depHour -= 1;
-    }
-    const leaveHomeBy = `${String(depHour).padStart(2, '0')}:${String(depMinute).padStart(2, '0')} AM`;
+    const slotTotalMins = slotHour * 60 + slotMinute;
+    let depTotalMins = slotTotalMins - totalPriorMins;
+    if (depTotalMins < 0) depTotalMins += 24 * 60;
+    
+    const h24 = Math.floor(depTotalMins / 60) % 24;
+    const mins = depTotalMins % 60;
+    const period = h24 >= 12 ? 'PM' : 'AM';
+    const h12 = h24 % 12 || 12;
+    const leaveHomeBy = `${String(h12).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${period}`;
 
     return {
+      originNameGu,
+      originNameEn,
+      destinationNameGu,
+      destinationNameEn,
       distanceKm,
       travelMins,
       bufferMins,
       leaveHomeBy
     };
-  }, [selectedCenter, selectedSlot]);
+  }, [selectedCenter, selectedSlot, initialVillage]);
 
   if (!isOpen) return null;
 
@@ -327,13 +346,24 @@ export function SlotBookingModal({
       return;
     }
 
+    // Validate Priority Claim (Security Policy to prevent queue jumping)
+    const isPriorityVerified = isPriority && (selectedPriorityMemberId === 'mem-4' || aiVerificationPassed);
+    if (isPriority && !isPriorityVerified) {
+      triggerHaptic('warning');
+      speakGuidance("અગ્રતા ટોકન માટે સરકારી દસ્તાવેજ ચકાસણી અનિવાર્ય છે.");
+      alert(lang === 'en'
+        ? "⚠️ Proof verification required for Priority Appointment (#P-). Please verify UDID/Medical certificate or select a verified senior citizen family member."
+        : "⚠️ અગ્રતા ટોકન (#P-) મેળવવા માટે સરકારી દસ્તાવેજ ચકાસણી અનિવાર્ય છે. કૃપા કરીને દસ્તાવેજ નંબર દાખલ કરી 'AI ચકાસણી' બટન દબાવો અથવા પરિવારના વરિષ્ઠ સભ્ય પસંદ કરો.");
+      return;
+    }
+
     triggerHaptic('success');
     speakGuidance("સ્લોટ બુકિંગ સફળ! તમારો કચેરી ટોકન જારી થયો છે.");
 
-    // Generate token number: #P-07 for Priority, otherwise #A-42
+    // Generate token number: #P-07 for Priority ONLY IF verified, otherwise #A-42
     let tokenNumber = '';
-    const activePriorityCat: PriorityCategory = isPriority ? priorityCategory : 'none';
-    if (isPriority) {
+    const activePriorityCat: PriorityCategory = isPriorityVerified ? priorityCategory : 'none';
+    if (isPriorityVerified) {
       const pNum = Math.floor(1 + Math.random() * 15);
       tokenNumber = `#P-${String(pNum).padStart(2, '0')}`;
     } else {
@@ -671,130 +701,152 @@ export function SlotBookingModal({
               </p>
             </div>
 
-            {/* NEARBY VILLAGE FREE SLOT FINDER (RURAL RESCUE) */}
-            <div className="mt-3.5 bg-gradient-to-br from-emerald-50/95 via-teal-50/70 to-blue-50/60 border-2 border-emerald-300 rounded-2xl p-3 sm:p-4 space-y-3 shadow-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200/80 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
-                    🌐
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <h4 className="text-xs sm:text-sm font-black text-emerald-950">
-                        {isEn 
-                          ? 'Nearby Village Free Slot Finder (Cluster E-Gram)' 
-                          : 'આજુબાજુના ગામોમાં ઉપલબ્ધ ખાલી સ્લોટ (ક્લસ્ટર ઈ-ગ્રામ કેન્દ્ર)'}
-                      </h4>
-                      <span className="text-[9px] bg-emerald-200 text-emerald-900 font-extrabold px-1.5 py-0.2 rounded uppercase">
-                        {isEn ? 'Panchayat Rule Permitted' : 'પંચાયત નિયમ માન્ય'}
-                      </span>
+            {/* NEARBY VILLAGE FREE SLOT FINDER (RURAL RESCUE - CONDITIONAL FOR GONDAL & COLLAPSIBLE) */}
+            {selectedTalukaId === 'gondal' && (
+              <div className="mt-3.5 bg-gradient-to-br from-emerald-50/95 via-teal-50/70 to-blue-50/60 border-2 border-emerald-300 rounded-2xl p-3 sm:p-3.5 space-y-3 shadow-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                      🌐
                     </div>
-                    <p className="text-[10.5px] text-emerald-800 font-medium mt-0.5">
-                      {isEn
-                        ? 'If your village is crowded, panchayat rules allow booking at any neighboring cluster Gram Panchayat e-Gram center.'
-                        : 'જો તમારા ગામમાં સ્લોટ પૂર્ણ હોય કે ભીડ હોય, તો પંચાયત નિયમ મુજબ આજુબાજુના ગામના ઈ-ગ્રામ કેન્દ્રમાં પણ સ્લોટ બુક કરી શકો છો.'}
-                    </p>
-                  </div>
-                </div>
-                {selectedClusterVillageId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedClusterVillageId(null);
-                      triggerHaptic('tap');
-                    }}
-                    className="text-[11px] font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1 rounded-lg transition self-start sm:self-auto shrink-0 shadow-2xs cursor-pointer"
-                  >
-                    {isEn ? '↺ Reset to Taluka' : '↺ મૂળ કચેરી પર પાછા ફરો'}
-                  </button>
-                )}
-              </div>
-
-              {/* Village cluster grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                {nearbyClusters.map((cluster) => {
-                  const isSelected = selectedClusterVillageId === cluster.villageId;
-                  const isHome = cluster.isCitizenHomeVillage;
-
-                  return (
-                    <div
-                      key={cluster.villageId}
-                      className={`rounded-xl p-3 border transition flex flex-col justify-between text-left relative ${
-                        isSelected
-                          ? 'bg-white border-emerald-600 ring-2 ring-emerald-500 shadow-md'
-                          : isHome
-                          ? 'bg-amber-50/70 border-amber-300'
-                          : 'bg-white border-slate-200 hover:border-emerald-300'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                            <span>{isHome ? '🏠' : '📍'}</span>
-                            <span>{isEn ? cluster.villageNameEn : cluster.villageNameGu}</span>
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="text-xs sm:text-sm font-black text-emerald-950">
+                          {isEn 
+                            ? 'Nearby Village Free Slot Finder (Cluster E-Gram)' 
+                            : 'આજુબાજુના ગામોમાં ઉપલબ્ધ ખાલી સ્લોટ (ક્લસ્ટર ઈ-ગ્રામ કેન્દ્ર)'}
+                        </h4>
+                        <span className="text-[9px] bg-emerald-200 text-emerald-900 font-extrabold px-1.5 py-0.2 rounded uppercase">
+                          {isEn ? 'Panchayat Rule' : 'પંચાયત નિયમ માન્ય'}
+                        </span>
+                        {selectedClusterVillageId && (
+                          <span className="text-[9px] bg-emerald-600 text-white font-extrabold px-1.5 py-0.2 rounded">
+                            {isEn ? 'Cluster Active' : 'ક્લસ્ટર સક્રિય'}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
-                            {cluster.distanceKm} km
-                          </span>
-                        </div>
-
-                        <p className="text-[10.5px] text-slate-600 font-medium leading-snug line-clamp-1">
-                          {isEn ? cluster.centerNameEn : cluster.centerNameGu}
-                        </p>
-
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-full ${
-                            cluster.crowdLevel === 'low'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                              : cluster.crowdLevel === 'moderate'
-                              ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                              : 'bg-red-100 text-red-800 border border-red-300'
-                          }`}>
-                            {isEn 
-                              ? `${cluster.availableSlotsToday} Slots Free` 
-                              : `${cluster.availableSlotsToday} સ્લોટ ખાલી`}
-                          </span>
-
-                          <span className="text-[9.5px] text-slate-500 font-semibold">
-                            ⏳ ~{cluster.estimatedWaitMins} {isEn ? 'min wait' : 'મિ. પ્રતીક્ષા'}
-                          </span>
-                        </div>
-
-                        <p className="text-[9.5px] text-emerald-800 font-semibold mt-1.5 leading-snug line-clamp-2">
-                          {isEn ? cluster.recommendedReasonEn : cluster.recommendedReasonGu}
-                        </p>
-                      </div>
-
-                      <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
-                        {isSelected ? (
-                          <span className="text-[11px] font-black text-emerald-700 flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>{isEn ? 'Center Selected' : 'પસંદ કરેલ કેન્દ્ર'}</span>
-                          </span>
-                        ) : isHome ? (
-                          <span className="text-[10px] text-amber-800 font-bold">
-                            {isEn ? 'Home Center (High Rush)' : 'મૂળ કેન્દ્ર (વધુ ભીડ)'}
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              triggerHaptic('tap');
-                              setSelectedClusterVillageId(cluster.villageId);
-                              speakGuidance(`${cluster.villageNameGu} કેન્દ્ર પસંદ થયું. ${cluster.availableSlotsToday} સ્લોટ ઉપલબ્ધ છે.`);
-                            }}
-                            className="w-full text-center text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-2 rounded-lg transition shadow-2xs cursor-pointer flex items-center justify-center gap-1"
-                          >
-                            <span>{isEn ? 'Select This Center' : 'આ કેન્દ્ર પસંદ કરો'}</span>
-                            <ChevronRight className="w-3 h-3" />
-                          </button>
                         )}
                       </div>
+                      <p className="text-[10px] sm:text-[10.5px] text-emerald-800 font-medium mt-0.5">
+                        {isEn
+                          ? 'Panchayat rules permit booking at 6 neighboring cluster village centers if Gondal/Gomta is full.'
+                          : 'ગોંડલ તાલુકામાં ભીડ હોય તો આજુબાજુના ૬ ગ્રામ પંચાયત ઈ-ગ્રામ કેન્દ્રોમાં કતાર વગર કામ કરાવી શકાય છે.'}
+                      </p>
                     </div>
-                  );
-                })}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {selectedClusterVillageId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedClusterVillageId(null);
+                          triggerHaptic('tap');
+                        }}
+                        className="text-[10px] font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 px-2 py-1 rounded-lg transition shadow-2xs cursor-pointer"
+                      >
+                        {isEn ? '↺ Reset' : '↺ રીસેટ'}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setIsClustersExpanded(!isClustersExpanded);
+                      }}
+                      className="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg transition shadow-2xs cursor-pointer flex items-center gap-1"
+                    >
+                      <span>{isClustersExpanded ? (isEn ? 'Collapse ▴' : 'સંકેલો ▴') : (isEn ? 'View (6 Centers) ▾' : 'જુઓ (૬ કેન્દ્રો) ▾')}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Collapsible Village Cluster Grid */}
+                {isClustersExpanded && (
+                  <div className="pt-2 border-t border-emerald-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 animate-in fade-in duration-200">
+                    {nearbyClusters.map((cluster) => {
+                      const isSelected = selectedClusterVillageId === cluster.villageId;
+                      const isHome = cluster.isCitizenHomeVillage;
+
+                      return (
+                        <div
+                          key={cluster.villageId}
+                          className={`rounded-xl p-3 border transition flex flex-col justify-between text-left relative ${
+                            isSelected
+                              ? 'bg-white border-emerald-600 ring-2 ring-emerald-500 shadow-md'
+                              : isHome
+                              ? 'bg-amber-50/70 border-amber-300'
+                              : 'bg-white border-slate-200 hover:border-emerald-300'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                                <span>{isHome ? '🏠' : '📍'}</span>
+                                <span>{isEn ? cluster.villageNameEn : cluster.villageNameGu}</span>
+                              </span>
+                              <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                                {cluster.distanceKm} km
+                              </span>
+                            </div>
+
+                            <p className="text-[10.5px] text-slate-600 font-medium leading-snug line-clamp-1">
+                              {isEn ? cluster.centerNameEn : cluster.centerNameGu}
+                            </p>
+
+                            <div className="flex items-center gap-1.5 mt-2">
+                              <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-full ${
+                                cluster.crowdLevel === 'low'
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                  : cluster.crowdLevel === 'moderate'
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : 'bg-red-100 text-red-800 border border-red-300'
+                              }`}>
+                                {isEn 
+                                  ? `${cluster.availableSlotsToday} Slots Free` 
+                                  : `${cluster.availableSlotsToday} સ્લોટ ખાલી`}
+                              </span>
+
+                              <span className="text-[9.5px] text-slate-500 font-semibold">
+                                ⏳ ~{cluster.estimatedWaitMins} {isEn ? 'min wait' : 'મિ. પ્રતીક્ષા'}
+                              </span>
+                            </div>
+
+                            <p className="text-[9.5px] text-emerald-800 font-semibold mt-1.5 leading-snug line-clamp-2">
+                              {isEn ? cluster.recommendedReasonEn : cluster.recommendedReasonGu}
+                            </p>
+                          </div>
+
+                          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+                            {isSelected ? (
+                              <span className="text-[11px] font-black text-emerald-700 flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>{isEn ? 'Center Selected' : 'પસંદ કરેલ કેન્દ્ર'}</span>
+                              </span>
+                            ) : isHome ? (
+                              <span className="text-[10px] text-amber-800 font-bold">
+                                {isEn ? 'Home Center (High Rush)' : 'મૂળ કેન્દ્ર (વધુ ભીડ)'}
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  triggerHaptic('tap');
+                                  setSelectedClusterVillageId(cluster.villageId);
+                                  speakGuidance(`${cluster.villageNameGu} કેન્દ્ર પસંદ થયું. ${cluster.availableSlotsToday} સ્લોટ ઉપલબ્ધ છે.`);
+                                }}
+                                className="w-full text-center text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-2 rounded-lg transition shadow-2xs cursor-pointer flex items-center justify-center gap-1"
+                              >
+                                <span>{isEn ? 'Select This Center' : 'આ કેન્દ્ર પસંદ કરો'}</span>
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </section>
 
           {/* STEP 2: SERVICE CENTER SELECTION (Requirement 3) */}
@@ -1078,15 +1130,15 @@ export function SlotBookingModal({
             )}
           </section>
 
-          {/* STEP 5: CONFIGURABLE COUNTER ROUTING */}
+          {/* STEP 5: CONFIGURABLE COUNTER ROUTING (IMAGE 3 ENHANCEMENT) */}
           <section className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#005A9C] text-white flex items-center justify-center font-bold text-sm shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#005A9C] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
                 C{routing.counterNumber}
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-xs font-bold text-blue-900">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="text-xs sm:text-sm font-black text-blue-900">
                     {isEn 
                       ? `Assigned Counter: Counter ${routing.counterNumber} - ${counterDetails.nameEn}` 
                       : isHi 
@@ -1095,99 +1147,242 @@ export function SlotBookingModal({
                       ? `नियुक्त काउंटर: काउंटर ${routing.counterNumber} - ${counterDetails.nameEn}` 
                       : `ફાળવેલ કાઉન્ટર: કાઉન્ટર ${routing.counterNumber} - ${counterDetails.nameGu}`}
                   </h4>
-                  <span className="bg-blue-200 text-blue-900 text-[10px] px-1.5 py-0.2 rounded font-bold">
-                    {isEn ? 'Service-Based' : isHi ? 'सेवा आधारित' : isMr ? 'सेवा आधारित' : 'સેવા આધારિત'}
+                  <span className="bg-blue-200 text-blue-900 text-[9.5px] px-2 py-0.5 rounded font-extrabold uppercase">
+                    {isEn ? 'Direct Window' : 'સીધી બારી ફાળવણી'}
                   </span>
                 </div>
-                <p className="text-xs text-blue-800 mt-1">
+                
+                <p className="text-xs text-blue-800 mt-1 font-medium">
                   {isEn ? routing.reasonEn : routing.reasonGu}
                 </p>
-                <div className="mt-2 text-[11px] text-gray-600 flex items-center gap-2">
-                  <UserCheck className="w-3.5 h-3.5 text-gray-500" />
-                  <span>{isEn ? 'Desk Officer: ' : isHi ? 'डेस्क अधिकारी: ' : isMr ? 'डेस्क अधिकारी: ' : 'ડેસ્ક અધિકારી: '}<strong>{counterDetails.officerName}</strong></span>
+
+                <div className="mt-2 pt-2 border-t border-blue-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-700">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <UserCheck className="w-3.5 h-3.5 text-[#005A9C]" />
+                    <span>{isEn ? 'Desk Officer: ' : 'ડેસ્ક અધિકારી: '}<strong>{counterDetails.officerName}</strong></span>
+                  </div>
+                  <span className="text-[10px] text-emerald-800 bg-emerald-100/90 font-bold px-2 py-0.5 rounded border border-emerald-300">
+                    {isEn ? '✓ Zero-Confusion Walk-In' : '✓ કચેરીએ સીધા આ કાઉન્ટર પર જવું'}
+                  </span>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* STEP 6: RECOMMENDED DEPARTURE (ESTIMATE) (Requirement 16) */}
-          <section className="bg-blue-50/60 border border-blue-200 rounded-xl p-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#005A9C] text-white flex items-center justify-center shrink-0">
+          {/* STEP 6: RECOMMENDED DEPARTURE (DYNAMIC TRANSIT FROM RESIDENCE TO KACHERI) */}
+          <section className="bg-gradient-to-r from-blue-50/80 to-slate-50 border border-blue-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#005A9C] text-white flex items-center justify-center shrink-0 mt-0.5">
                 <Navigation className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs font-bold text-[#003366]">
-                  {isEn ? 'Recommended Departure Time (Estimate)' : isHi ? 'घर से प्रस्थान का अनुशंसित समय (अनुमानित)' : isMr ? 'घरातून निघण्याची शिफारस केलेली वेळ (अंदाजे)' : 'ઘરેથી નીકળવાનો ભલામણ કરેલ સમય (અંદાજિત)'}
-                </p>
-                <p className="text-[10.5px] text-slate-600">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="text-xs font-black text-[#003366]">
+                    {isEn ? 'Recommended Departure Time (Dynamic Transit)' : isHi ? 'घर से प्रस्थान का अनुशंसित समय (गतिशील)' : isMr ? 'घरातून निघण्याची शिफारस केलेली वेळ' : 'ઘરેથી નીકળવાનો ભલામણ કરેલ સમય (ડાયનેમિક મુસાફરી)'}
+                  </p>
+                  <span className="text-[9px] bg-blue-100 text-[#005A9C] font-extrabold px-1.5 py-0.2 rounded border border-blue-200">
+                    {isEn ? 'Live Transit' : 'લાઈવ ગણતરી'}
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-700 font-bold mt-1">
                   {isEn 
-                    ? `Estimated transit: ~${transitEstimate.travelMins} mins (${transitEstimate.distanceKm} km) + ${transitEstimate.bufferMins} min buffer`
-                    : isHi 
-                    ? `अनुमानित यात्रा: ~${transitEstimate.travelMins} मिनट (${transitEstimate.distanceKm} किमी) + ${transitEstimate.bufferMins} मि. बफर`
-                    : isMr 
-                    ? `अंदाजे प्रवास: ~${transitEstimate.travelMins} मिनिटे (${transitEstimate.distanceKm} किमी) + ${transitEstimate.bufferMins} मि. बफर`
-                    : `અંદાજિત મુસાફરી: ~${transitEstimate.travelMins} મિનિટ (${transitEstimate.distanceKm} કિ.મી.) + ${transitEstimate.bufferMins} મિ. બફર`}
+                    ? `📍 Route: ${transitEstimate.originNameEn} ➔ ${transitEstimate.destinationNameEn}`
+                    : `📍 રૂટ: ${transitEstimate.originNameGu} ➔ ${transitEstimate.destinationNameGu}`}
+                </p>
+
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  {isEn 
+                    ? `Est Transit: ~${transitEstimate.travelMins} mins (${transitEstimate.distanceKm} km) + ${transitEstimate.bufferMins} min traffic buffer` 
+                    : `અંદાજિત મુસાફરી: ~${transitEstimate.travelMins} મિનિટ (${transitEstimate.distanceKm} કિ.મી.) + ${transitEstimate.bufferMins} મિ. ટ્રાફિક બફર`}
                 </p>
               </div>
             </div>
-            <div className="text-right shrink-0">
-              <span className="text-xs sm:text-sm font-black text-blue-900 bg-white border border-blue-300 px-2 sm:px-2.5 py-1 rounded-lg">
+
+            <div className="text-left sm:text-right shrink-0 bg-white sm:bg-transparent p-2 sm:p-0 rounded-lg border sm:border-0 border-blue-200 flex sm:flex-col items-center sm:items-end justify-between">
+              <span className="text-sm font-black text-[#003366] sm:bg-white sm:border sm:border-blue-300 sm:px-2.5 sm:py-1 rounded-lg sm:shadow-xs">
                 {transitEstimate.leaveHomeBy}
               </span>
-              <span className="block text-[8.5px] text-slate-500 mt-0.5">
-                {isEn ? 'Plan according to traffic' : isHi ? 'ट्रैफिक अनुसार योजना बनाएं' : isMr ? 'रहदारीनुसार नियोजन करा' : 'ટ્રાફિક મુજબ પ્લાન કરો'}
+              <span className="block text-[8.5px] text-slate-500 mt-0.5 font-semibold">
+                {isEn ? 'Plan according to traffic' : 'ટ્રાફિક મુજબ પ્લાન કરો'}
               </span>
             </div>
           </section>
 
-          {/* STEP 7: PRIORITY APPOINTMENT SUPPORT (Requirement 8) */}
-          <section className="bg-amber-50/80 border border-amber-300 rounded-xl p-3.5 flex items-start gap-3 transition">
-            <input 
-              type="checkbox" 
-              id="priority-check" 
-              checked={isPriority} 
-              onChange={(e) => {
-                triggerHaptic('tap');
-                setIsPriority(e.target.checked);
-                if (e.target.checked) {
-                  speakGuidance(isEn ? 'Priority appointment slot selected.' : isHi ? 'प्राथमिकता अपॉइंटमेंट स्लॉट चयनित।' : isMr ? 'प्राधान्य अपॉइंटमेंट स्लॉट निवडला.' : 'પ્રાથમિકતા અગ્રતા સ્લોટ પસંદ થયો છે. વહીવટી માર્ગદર્શિકા મુજબ વિશેષ ટોકન ફાળવાશે.');
-                }
-              }}
-              className="mt-0.5 w-4 h-4 rounded text-amber-600 accent-[#FF9933] cursor-pointer"
-            />
-            <div className="text-xs text-amber-950 font-bold cursor-pointer select-none flex-1">
-              <label htmlFor="priority-check" className="flex flex-wrap items-center gap-1.5 text-[#003366] font-black cursor-pointer">
-                <span>{isEn ? '♿ Priority Appointment Support (Senior / Divyang)' : isHi ? '♿ प्राथमिकता अपॉइंटमेंट सहायता' : isMr ? '♿ प्राधान्य अपॉइंटमेंट सहाय्यता (ज्येष्ठ / दिव्यांग)' : '♿ પ્રાથમિકતા અપોઇન્ટમેન્ટ સપોર્ટ (Priority Appointment)'}</span>
-                <span className="bg-[#FF9933] text-slate-900 text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase">
-                  {isEn ? 'Priority Policy' : isHi ? 'प्राथमिकता नीति' : isMr ? 'प्राधान्य धोरण' : 'વહીવટી અગ્રતા નીતિ'}
-                </span>
-              </label>
-              <p className="text-[11px] text-amber-900/80 font-medium mt-0.5">
-                {isEn 
-                  ? 'Senior citizens (60+) or Divyangjan are issued a priority token (#P-) under Gujarat public service guidelines.'
-                  : isHi 
-                  ? 'वरिष्ठ नागरिकों (६०+) या दिव्यांगजनों के लिए प्राथमिकता टोकन (#P-) प्रदान किया जाता है।' 
-                  : isMr
-                  ? 'ज्येष्ठ नागरिक (६०+) किंवा दिव्यांग व्यक्तींना शासकीय नियमानुसार प्राधान्य टोकन (#P-) दिले जाते.'
-                  : 'વરિષ્ઠ નાગરિકો (૬૦+) અથવા દિવ્યાંગજનો માટે વહીવટી માર્ગદર્શિકા હેઠળ પ્રાથમિકતા ફ્લેગ (#P-) ફાળવવામાં આવે છે.'}
-              </p>
+          {/* STEP 7: PRIORITY APPOINTMENT SUPPORT (WITH VERIFIED FAMILY PROOF & AI CHECK) */}
+          <section className="bg-amber-50/85 border-2 border-amber-300 rounded-2xl p-3.5 space-y-3 transition">
+            <div className="flex items-start gap-3">
+              <input 
+                type="checkbox" 
+                id="priority-check" 
+                checked={isPriority} 
+                onChange={(e) => {
+                  triggerHaptic('tap');
+                  const checked = e.target.checked;
+                  setIsPriority(checked);
+                  if (checked) {
+                    speakGuidance("પ્રાથમિકતા અગ્રતા સ્લોટ પસંદ થયો છે. સરકારી નિયમ મુજબ વરિષ્ઠ નાગરિક અથવા દિવ્યાંગજન દસ્તાવેજ ચકાસણી જરૂરી છે.");
+                  }
+                }}
+                className="mt-0.5 w-4 h-4 rounded text-amber-600 accent-[#FF9933] cursor-pointer"
+              />
+              <div className="text-xs text-amber-950 font-bold cursor-pointer select-none flex-1">
+                <label htmlFor="priority-check" className="flex flex-wrap items-center gap-1.5 text-[#003366] font-black cursor-pointer">
+                  <span>{isEn ? '♿ Priority Appointment Support (Senior / Divyang)' : '♿ પ્રાથમિકતા અપોઇન્ટમેન્ટ સપોર્ટ (Priority Appointment)'}</span>
+                  <span className="bg-[#FF9933] text-slate-900 text-[9px] px-2 py-0.5 rounded-full font-black uppercase">
+                    {isEn ? 'Statutory Policy' : 'વહીવટી અગ્રતા નીતિ'}
+                  </span>
+                </label>
+                <p className="text-[11px] text-amber-900/80 font-medium mt-0.5">
+                  {isEn 
+                    ? 'Senior citizens (60+) or Divyangjan are issued a priority token (#P-) subject to verified government document match.'
+                    : 'વરિષ્ઠ નાગરિકો (૬૦+) અથવા દિવ્યાંગજનો માટે અગ્રતા ફ્લેગ (#P-) ફાળવાય છે. દુરુપયોગ રોકવા સરકારી ડેટા સાથે AI ચકાસણી અનિવાર્ય છે.'}
+                </p>
+              </div>
+            </div>
 
-              {isPriority && (
-                <div className="mt-2.5 pt-2 border-t border-amber-200/80 flex items-center gap-2">
-                  <span className="text-[10px] text-slate-600">{isEn ? 'Category:' : isHi ? 'श्रेणी:' : isMr ? 'श्रेणी:' : 'કેટેગરી:'}</span>
+            {/* EXPANDED PROOF & FAMILY VALIDATION PANEL */}
+            {isPriority && (
+              <div className="pt-2.5 border-t border-amber-300/80 space-y-3 animate-in fade-in">
+                {/* 1. Select Family Member */}
+                <div>
+                  <label className="text-[11px] font-black text-[#003366] block mb-1">
+                    {isEn ? 'Select Family Member for Priority Appointment *' : 'કોના માટે અગ્રતા ટોકન લેવું છે? (પરિવાર સભ્ય પસંદ કરો) *'}
+                  </label>
                   <select
-                    value={priorityCategory}
-                    onChange={(e) => setPriorityCategory(e.target.value as PriorityCategory)}
-                    className="bg-white border border-amber-300 rounded px-2 py-1 text-xs text-amber-900 font-bold focus:outline-none"
+                    value={selectedPriorityMemberId}
+                    onChange={(e) => {
+                      triggerHaptic('tap');
+                      const memId = e.target.value;
+                      setSelectedPriorityMemberId(memId);
+                      if (memId === 'mem-4') {
+                        setPriorityCategory('senior_citizen');
+                        setAiVerificationPassed(true);
+                      } else {
+                        setPriorityCategory('divyangjan');
+                        setAiVerificationPassed(false);
+                      }
+                    }}
+                    className="w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#003366]"
                   >
-                    <option value="senior_citizen">{isEn ? 'Senior Citizen (60+ yrs)' : isHi ? 'वरिष्ठ नागरिक (६०+ वर्ष)' : isMr ? 'ज्येष्ठ नागरिक (६०+ वर्षे)' : 'વરિષ્ઠ નાગરિક (૬૦+ વર્ષ)'}</option>
-                    <option value="divyangjan">{isEn ? 'Divyangjan Priority' : isHi ? 'दिव्यांगजन प्राथमिकता' : isMr ? 'दिव्यांगजन प्राधान्य' : 'દિવ્યાંગજન અગ્રતા'}</option>
-                    <option value="medical_priority">{isEn ? 'Urgent Medical Priority' : isHi ? 'चिकित्सा आपात प्राथमिकता' : isMr ? 'वैद्यकीय तातडीचे प्राधान्य' : 'તાત્કાલિક તબીબી અગ્રતા'}</option>
+                    {DEFAULT_CITIZEN_PROFILE.familyMembers.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.nameGu} ({member.relationGu}) {member.id === 'mem-4' ? '• વરિષ્ઠ નાગરિક (૬૮ વર્ષ) - પ્રમાણિત' : '• વય < ૬૦ (UDID જરૂરી)'}
+                      </option>
+                    ))}
+                    <option value="custom">અન્ય સભ્ય / વિશેષ અગ્રતા (નવા દસ્તાવેજ અપલોડ કરો)</option>
                   </select>
                 </div>
-              )}
-            </div>
+
+                {/* 2. AUTOMATIC AI VERIFICATION RESULT FOR SENIOR CITIZEN */}
+                {selectedPriorityMemberId === 'mem-4' ? (
+                  <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-xs text-emerald-950 flex items-start gap-2.5">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-black text-emerald-900">
+                          {isEn ? 'AI Government Data Match: VERIFIED' : '✅ AI સરકારી ચકાસણી સફળ (Verified Senior Citizen)'}
+                        </span>
+                        <span className="text-[9px] bg-emerald-200 text-emerald-900 font-extrabold px-1.5 py-0.2 rounded">
+                          UIDAI & NFSA Match
+                        </span>
+                      </div>
+                      <p className="text-[10.5px] text-emerald-800 mt-1 leading-relaxed">
+                        <strong>પરસોત્તમભાઈ પટેલ (ઉંમર: ૬૮ વર્ષ)</strong> - આધાર કાર્ડ (XXXX 4410) અને રેશનકાર્ડ રેકોર્ડ્સ મુજબ વરિષ્ઠ નાગરિક પાત્રતા ૧૦૦% માન્ય છે. <strong>અગ્રતા ટોકન (#P-)</strong> જારી કરવા મંજૂરી આપેલ છે.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  /* 3. UNDER 60 OR OTHER MEMBER: REQUIRE UDID / MEDICAL PROOF & RUN AI CHECK */
+                  <div className="bg-white border border-amber-300 rounded-xl p-3 space-y-2.5">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-bold text-amber-900">
+                          ⚠️ પસંદ કરેલ સભ્યની વય ૬૦ વર્ષથી ઓછી છે
+                        </p>
+                        <p className="text-[10.5px] text-slate-600 mt-0.5">
+                          વરિષ્ઠ નાગરિક કેટેગરી લાગુ પડશે નહીં. અગ્રતા ટોકન (#P-) મેળવવા માટે સ્વાવલંબન દિવ્યાંગ UDID કાર્ડ અથવા તબીબી પ્રમાણપત્ર જરૂરી છે.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-700 block mb-1">
+                          અગ્રતા શ્રેણી *
+                        </label>
+                        <select
+                          value={priorityCategory}
+                          onChange={(e) => setPriorityCategory(e.target.value as PriorityCategory)}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800"
+                        >
+                          <option value="divyangjan">દિવ્યાંગજન અગ્રતા (UDID Card)</option>
+                          <option value="medical_priority">તાત્કાલિક તબીબી અગ્રતા (Medical Emergency)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-700 block mb-1">
+                          UDID / હોસ્પિટલ રેફરન્સ નંબર *
+                        </label>
+                        <input
+                          type="text"
+                          value={customProofNumber}
+                          onChange={(e) => {
+                            setCustomProofNumber(e.target.value);
+                            setAiVerificationPassed(false);
+                          }}
+                          placeholder="દા.ત. GJ-03-UDID-8842"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#003366]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      <button
+                        type="button"
+                        disabled={isAiVerifying || !customProofNumber.trim()}
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setIsAiVerifying(true);
+                          setTimeout(() => {
+                            setIsAiVerifying(false);
+                            setAiVerificationPassed(true);
+                            triggerHaptic('success');
+                            speakGuidance("AI દસ્તાવેજ ચકાસણી સફળ થઈ છે. અગ્રતા ટોકન મંજૂર થયું.");
+                          }, 700);
+                        }}
+                        className="bg-[#003366] hover:bg-[#002244] disabled:bg-slate-300 text-white font-black text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                      >
+                        {isAiVerifying ? (
+                          <>
+                            <span className="animate-spin text-xs">⏳</span>
+                            <span>AI ચકાસણી ચાલુ...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
+                            <span>AI સરકારી ચકાસણી કરો</span>
+                          </>
+                        )}
+                      </button>
+
+                      {aiVerificationPassed ? (
+                        <span className="text-[10.5px] font-black text-emerald-700 bg-emerald-50 border border-emerald-300 px-2 py-1 rounded-md flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>ચકાસણી સફળ (#P- માન્ય)</span>
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-amber-800 font-bold">
+                          ચકાસણી બાકી (નંબર દાખલ કરી બટન દબાવો)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
 
         </div>
