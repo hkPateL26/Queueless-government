@@ -6,7 +6,8 @@ import {
   ShieldCheck, MapPin, Lock, Clock, Search, ArrowRight, 
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
   Users, Building, Award, Bell, CheckCircle2, ChevronDown, Download,
-  Layers, ArrowLeft, Calendar, Home as HomeIcon, Radio, Globe, Headphones
+  Layers, ArrowLeft, Calendar, Home as HomeIcon, Radio, Globe, Headphones,
+  Compass
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -26,6 +27,8 @@ import { AuthenticQrCode } from '@/components/AuthenticQrCode';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
 import { CounterGridSkeleton } from '@/components/ui/Skeleton';
+import { CitizenProfileModal } from '@/components/CitizenProfileModal';
+import { CitizenLocationRadar } from '@/components/CitizenLocationRadar';
 
 export default function Home() {
   const [view, setView] = useState<'landing' | 'dashboard' | 'services'>('landing');
@@ -36,6 +39,11 @@ export default function Home() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [tokenTrackerModalOpen, setTokenTrackerModalOpen] = useState(false);
+  const [citizenProfileModalOpen, setCitizenProfileModalOpen] = useState(false);
+  const [locationRadarModalOpen, setLocationRadarModalOpen] = useState(false);
+  const [radarViewTab, setRadarViewTab] = useState<'nearby' | 'hall'>('nearby');
+  const [targetBookingTalukaId, setTargetBookingTalukaId] = useState<string | undefined>(undefined);
+  const [targetBookingDistrictId, setTargetBookingDistrictId] = useState<string | undefined>(undefined);
   const [pendingSlotBooking, setPendingSlotBooking] = useState<BookingDetails | null>(null);
   const [phone, setPhone] = useState('9876543210');
   const [aadhaar4, setAadhaar4] = useState('8842');
@@ -117,7 +125,7 @@ export default function Home() {
 
   // STRICT BACKGROUND BODY SCROLL LOCK WHEN ANY MODAL / DRAWER IS OPEN
   useEffect(() => {
-    const isAnyModalOpen = drawerOpen || scannerOpen || slotModalOpen || tokenPassModalOpen || authModalOpen || helpModalOpen || tokenTrackerModalOpen;
+    const isAnyModalOpen = drawerOpen || scannerOpen || slotModalOpen || tokenPassModalOpen || authModalOpen || helpModalOpen || tokenTrackerModalOpen || citizenProfileModalOpen || locationRadarModalOpen;
     
     if (isAnyModalOpen) {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop;
@@ -161,13 +169,15 @@ export default function Home() {
         delete document.body.dataset.scrollY;
       }
     };
-  }, [drawerOpen, scannerOpen, slotModalOpen, tokenPassModalOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen]);
+  }, [drawerOpen, scannerOpen, slotModalOpen, tokenPassModalOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, citizenProfileModalOpen, locationRadarModalOpen]);
 
   // ESC KEY TO DISMISS ACTIVE MODAL
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (tokenPassModalOpen) setTokenPassModalOpen(false);
+        if (citizenProfileModalOpen) setCitizenProfileModalOpen(false);
+        else if (locationRadarModalOpen) setLocationRadarModalOpen(false);
+        else if (tokenPassModalOpen) setTokenPassModalOpen(false);
         else if (slotModalOpen) setSlotModalOpen(false);
         else if (scannerOpen) setScannerOpen(false);
         else if (drawerOpen) setDrawerOpen(false);
@@ -180,7 +190,7 @@ export default function Home() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tokenPassModalOpen, slotModalOpen, scannerOpen, drawerOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, loginMenuOpen, langMenuOpen]);
+  }, [tokenPassModalOpen, slotModalOpen, scannerOpen, drawerOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, citizenProfileModalOpen, locationRadarModalOpen, loginMenuOpen, langMenuOpen]);
 
   // 1-Click Demo Fill Handlers
   const loginAsDemo = (role: 'farmer' | 'officer') => {
@@ -281,6 +291,13 @@ export default function Home() {
     setLoginPromptReason(null);
     setLoginMenuOpen(false);
     setView('landing');
+  };
+
+  const handleBookKacheriSlot = (_kacheriId: string, talukaId: string) => {
+    triggerHaptic('tap');
+    setTargetBookingDistrictId('rajkot');
+    setTargetBookingTalukaId(talukaId);
+    setSlotModalOpen(true);
   };
 
   const handleRunningLate = () => {
@@ -736,20 +753,29 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 border border-slate-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl">
-
+              <div 
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setCitizenProfileModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 hover:bg-blue-50/80 border border-slate-200 hover:border-blue-300 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl cursor-pointer transition select-none group"
+                title={lang === 'gu' ? 'આધાર પ્રોફાઇલ અને પરિવાર વિગતો ખોલો' : 'Open Aadhaar Profile & Family Vault'}
+              >
                 <div className="text-left text-xs leading-none">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                       {lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen'}
                     </span>
-                    <p className="font-extrabold text-[#003366] text-xs sm:text-sm whitespace-nowrap">{getCitizenDisplayName(lang)}</p>
+                    <p className="font-extrabold text-[#003366] text-xs sm:text-sm whitespace-nowrap group-hover:text-[#005A9C]">{getCitizenDisplayName(lang)}</p>
                   </div>
                   <p className="text-[9px] text-[#005A9C] font-bold hidden sm:block mt-0.5 whitespace-nowrap">{getCitizenRoleArea(lang)}</p>
                 </div>
                 <button 
-                  onClick={resetSession} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetSession();
+                  }} 
                   title={lang === 'gu' ? 'લૉગઆઉટ / સેશન રીસેટ' : 'Logout / Reset Session'}
                   className="ml-0.5 text-slate-400 hover:text-red-500 text-xs p-1 cursor-pointer"
                 >
@@ -952,12 +978,22 @@ export default function Home() {
                 
                 {/* Citizen Profile Pill or Guest Login Button */}
                 {currentUser ? (
-                  <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setCitizenProfileModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 px-3 py-1.5 rounded-xl transition text-left cursor-pointer group"
+                    title={lang === 'gu' ? 'આધાર પ્રોફાઇલ અને પરિવાર વિગતો ખોલો' : 'Open Aadhaar Profile & Family Vault'}
+                  >
                     <div className="text-left text-xs leading-tight">
-                      <p className="font-extrabold text-[#003366] whitespace-nowrap">{currentUser.name || getCitizenDisplayName(lang)}</p>
+                      <p className="font-extrabold text-[#003366] group-hover:text-[#005A9C] whitespace-nowrap flex items-center gap-1.5">
+                        <span>{currentUser.name || getCitizenDisplayName(lang)}</span>
+                        <span className="text-[9px] bg-blue-100 text-[#005A9C] font-mono px-1 py-0.2 rounded font-bold">UID</span>
+                      </p>
                       <p className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{currentUser.role || 'નાગરિક'} • {currentUser.area || 'ગુજરાત'}</p>
                     </div>
-                  </div>
+                  </button>
                 ) : (
                   <button
                     onClick={() => {
@@ -1051,6 +1087,16 @@ export default function Home() {
                   <button
                     onClick={() => {
                       triggerHaptic('tap');
+                      setLocationRadarModalOpen(true);
+                    }}
+                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Compass className="w-3.5 h-3.5 text-amber-300" />
+                    <span>{lang === 'gu' ? '📍 નજીકની કચેરીઓ (GPS રડાર)' : '📍 Nearby Kacheris (Radar)'}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
                       setSlotModalOpen(true);
                     }}
                     className="bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-extrabold px-3.5 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
@@ -1096,6 +1142,16 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setLocationRadarModalOpen(true);
+                    }}
+                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Compass className="w-3.5 h-3.5 text-amber-300" />
+                    <span>{lang === 'gu' ? '📍 લાઈવ કચેરી રડાર' : '📍 Live Radar'}</span>
+                  </button>
                   <button
                     onClick={() => {
                       triggerHaptic('tap');
@@ -1406,10 +1462,70 @@ export default function Home() {
 
               </div>
 
-              {/* Right Column (7 cols): Live Queue Radar + Waiting Hall with 6 Clear Counters */}
+              {/* Right Column (7 cols): Live Queue Radar & Nearby Kacheris Switcher */}
               <div className="lg:col-span-7 space-y-5 sm:space-y-6">
                 
-                {/* 📡 LIVE QUEUE VISUALIZATION / KACHERI RADAR */}
+                {/* Modern Tab Bar: Smart Kacheri Radar vs Waiting Hall Counters */}
+                <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl w-full sm:w-auto">
+                    <button
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setRadarViewTab('nearby');
+                      }}
+                      className={`flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        radarViewTab === 'nearby'
+                          ? 'bg-[#003366] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Compass className={`w-3.5 h-3.5 ${radarViewTab === 'nearby' ? 'text-[#FF9933]' : ''}`} />
+                      <span>{lang === 'gu' ? '📍 સ્માર્ટ કચેરી રડાર & ભીડ સરખામણી' : '📍 Nearby Kacheris Radar'}</span>
+                      <span className="text-[9px] bg-emerald-500 text-white font-mono px-1.5 py-0.2 rounded font-bold">
+                        {lang === 'gu' ? 'ઓછી ભીડ' : 'Smart'}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setRadarViewTab('hall');
+                      }}
+                      className={`flex-1 sm:flex-none px-3 py-2 rounded-lg text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        radarViewTab === 'hall'
+                          ? 'bg-[#003366] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Building className={`w-3.5 h-3.5 ${radarViewTab === 'hall' ? 'text-[#FF9933]' : ''}`} />
+                      <span>{lang === 'gu' ? '🏛️ કચેરી કાઉન્ટર્સ (૬ કાઉન્ટર)' : '🏛️ Kacheri Counters'}</span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setCitizenProfileModalOpen(true);
+                    }}
+                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-[#003366] rounded-xl text-xs font-bold border border-blue-200 transition cursor-pointer"
+                    title={lang === 'gu' ? 'આધાર પ્રોફાઇલ & પરિવાર વૉલ્ટ' : 'Aadhaar Profile & Family Vault'}
+                  >
+                    <Users className="w-3.5 h-3.5 text-[#005A9C]" />
+                    <span>{lang === 'gu' ? 'આધાર & પરિવાર વૉલ્ટ' : 'Family Vault'}</span>
+                  </button>
+                </div>
+
+                {radarViewTab === 'nearby' ? (
+                  <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
+                    <CitizenLocationRadar
+                      isStandaloneCard={true}
+                      lang={lang}
+                      onSelectKacheriForBooking={handleBookKacheriSlot}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    {/* 📡 LIVE QUEUE VISUALIZATION / KACHERI RADAR */}
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div>
@@ -1848,6 +1964,8 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
+                  </>
+                )}
 
               </div>
 
@@ -1975,10 +2093,39 @@ export default function Home() {
       {/* PHASE 3: 33 DISTRICTS & TALUKAS JURISDICTION + CAPPED SLOT ENGINE */}
       <SlotBookingModal
         isOpen={slotModalOpen}
-        onClose={() => setSlotModalOpen(false)}
+        onClose={() => {
+          setSlotModalOpen(false);
+          setTargetBookingTalukaId(undefined);
+          setTargetBookingDistrictId(undefined);
+        }}
         scheme={activeScheme}
         onConfirm={handleConfirmBooking}
+        initialDistrictId={targetBookingDistrictId || 'rajkot'}
+        initialTalukaId={targetBookingTalukaId || 'gondal'}
+        initialVillage="ગોમટા"
         lang={lang}
+      />
+
+      {/* CITIZEN AADHAAR PROFILE & FAMILY VAULT MODAL */}
+      <CitizenProfileModal
+        isOpen={citizenProfileModalOpen}
+        onClose={() => setCitizenProfileModalOpen(false)}
+        lang={lang}
+        onOpenLocationRadar={() => {
+          setCitizenProfileModalOpen(false);
+          setLocationRadarModalOpen(true);
+        }}
+      />
+
+      {/* STANDALONE CITIZEN LOCATION RADAR MODAL */}
+      <CitizenLocationRadar
+        isOpen={locationRadarModalOpen}
+        onClose={() => setLocationRadarModalOpen(false)}
+        lang={lang}
+        onSelectKacheriForBooking={(kacheriId, talukaId) => {
+          setLocationRadarModalOpen(false);
+          handleBookKacheriSlot(kacheriId, talukaId);
+        }}
       />
 
       {/* PHASE 3: DIGITAL TOKEN PASS MODAL */}

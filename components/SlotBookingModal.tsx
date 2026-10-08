@@ -55,6 +55,7 @@ export interface BookingDetails {
 }
 
 import { Language } from '@/lib/translations';
+import { DEFAULT_CITIZEN_PROFILE } from '@/lib/citizen-profile';
 
 interface SlotBookingModalProps {
   isOpen: boolean;
@@ -62,6 +63,9 @@ interface SlotBookingModalProps {
   scheme: SchemeItem | null;
   onConfirm: (details: BookingDetails) => void;
   lang?: Language;
+  initialDistrictId?: string;
+  initialTalukaId?: string;
+  initialVillage?: string;
 }
 
 export function SlotBookingModal({
@@ -69,11 +73,20 @@ export function SlotBookingModal({
   onClose,
   scheme,
   onConfirm,
-  lang = 'gu'
+  lang = 'gu',
+  initialDistrictId,
+  initialTalukaId,
+  initialVillage
 }: SlotBookingModalProps) {
-  // District & Taluka state
-  const [selectedDistrictId, setSelectedDistrictId] = useState<string>('rajkot');
-  const [selectedTalukaId, setSelectedTalukaId] = useState<string>('gondal');
+  // District & Taluka state (Defaulting to Aadhaar linked district & taluka)
+  const [selectedDistrictId, setSelectedDistrictId] = useState<string>(initialDistrictId || DEFAULT_CITIZEN_PROFILE.districtId);
+  const [selectedTalukaId, setSelectedTalukaId] = useState<string>(initialTalukaId || DEFAULT_CITIZEN_PROFILE.talukaId);
+
+  // Sync state when props change
+  React.useEffect(() => {
+    if (initialDistrictId) setSelectedDistrictId(initialDistrictId);
+    if (initialTalukaId) setSelectedTalukaId(initialTalukaId);
+  }, [initialDistrictId, initialTalukaId, isOpen]);
 
   // Service Center state (Requirement 3: Service Center Selection)
   const [selectedCenterId, setSelectedCenterId] = useState<string>('gondal-jsk');
@@ -488,16 +501,49 @@ export function SlotBookingModal({
             </div>
           )}
 
-          {/* STEP 1: JURISDICTION (DISTRICT & TALUKA) */}
+          {/* STEP 1: JURISDICTION (AADHAAR-LINKED DISTRICT, TALUKA & VILLAGE) */}
           <section className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="w-4 h-4 text-[#005A9C]" />
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                {isEn ? 'Step 1: Select District & Taluka' : isHi ? 'चरण १: जिला और तालुका चुनें' : isMr ? 'पायरी १: जिल्हा आणि तालुका निवडा' : 'પગલું ૧: જિલ્લો અને તાલુકો પસંદ કરો (District & Taluka)'}
-              </h4>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#005A9C]" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
+                  {isEn ? 'Step 1: Jurisdiction & Native Office (Aadhaar Linked)' : isHi ? 'चरण १: कार्यक्षेत्र एवं मूल कार्यालय (आधार लिंक्ड)' : isMr ? 'पायरी १: कार्यक्षेत्र व मूळ कार्यालय' : 'પગલું ૧: આધાર પ્રમાણિત કાર્યક્ષેત્ર અને કચેરી (District, Taluka & Village)'}
+                </h4>
+              </div>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-700" />
+                <span>{isEn ? 'Aadhaar Auto-Selected' : 'આધાર મુજબ આપોઆપ પસંદ'}</span>
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Aadhaar Verified Native Residence Banner */}
+            <div className="bg-gradient-to-r from-blue-50 to-emerald-50/70 border border-blue-200 rounded-xl p-3 mb-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#003366] text-white flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-4 h-4 text-[#FF9933]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase text-[#003366]">
+                      {isEn ? 'Aadhaar Verified Native Residence' : isHi ? 'आधार सत्यापित निवास' : 'આધાર કાર્ડ પ્રમાણિત રહેઠાણ'}
+                    </span>
+                    <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">
+                      {DEFAULT_CITIZEN_PROFILE.aadhaarMasked}
+                    </span>
+                  </div>
+                  <p className="text-xs font-black text-slate-800 mt-0.5">
+                    {isEn 
+                      ? 'Village: Gomta • Taluka: Gondal • District: Rajkot (360311)' 
+                      : 'ગામ: ગોમટા • તાલુકો: ગોંડલ • જિલ્લો: રાજકોટ (૩૬૦૩૧૧)'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] text-[#003366] font-bold bg-white px-2 py-1 rounded-md border border-slate-200 shrink-0">
+                {isEn ? 'Revenue Bound: Gondal Desk' : 'મહેસૂલી સત્તાક્ષેત્ર: ગોંડલ ડેસ્ક'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
                   {isEn ? 'District' : isHi ? 'जिला' : isMr ? 'जिल्हा (District)' : 'જિલ્લો (District)'}
@@ -531,6 +577,29 @@ export function SlotBookingModal({
                   ))}
                 </select>
               </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                  {isEn ? 'Aadhaar Village (Gam)' : isHi ? 'आधार गाँव' : isMr ? 'आधार गाव' : 'આધાર ગામ (Village)'}
+                </label>
+                <div className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 flex items-center justify-between">
+                  <span>{isEn ? (initialVillage || 'Gomta') : (initialVillage || 'ગોમટા')}</span>
+                  <span className="text-[9px] bg-blue-50 text-[#005A9C] font-bold px-1.5 py-0.5 rounded border border-blue-200">
+                    {isEn ? 'Verified' : 'પ્રમાણિત'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Jurisdiction Regulatory Notice */}
+            <div className="mt-3 bg-amber-50/90 border border-amber-300/80 rounded-xl p-2.5 text-[11px] text-amber-950 font-medium flex items-start gap-2">
+              <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                <strong>{isEn ? 'Gujarat Government Jurisdiction Rule:' : 'ગુજરાત સરકાર સત્તાવાર મહેસૂલી નિયમ:'}</strong>{' '}
+                {isEn 
+                  ? 'Income, Caste, and 7/12 land certificates are legally issued only by your resident Taluka Mamlatdar (Gondal). Aadhaar updates and universal services can be scheduled at any center.' 
+                  : 'આવક, જાતિ અને ૭/૧૨ ના દાખલા તમારા કાયમી રહેઠાણ મુજબ ગોંડલ મામલતદાર કચેરીમાંથી જ માન્ય રહેશે. આધાર બાયોમેટ્રિક/મોબાઇલ અપડેટ અને RTO સેવાઓ રાજ્યના કોઈપણ કેન્દ્ર પર લઈ શકાય છે.'}
+              </p>
             </div>
           </section>
 
