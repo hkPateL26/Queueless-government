@@ -42,37 +42,54 @@ export async function POST(req: NextRequest) {
 You are an expert Gujarat Government Document Verification AI Officer (ગુજરાત સરકાર સત્તાવાર દસ્તાવેજ ચકાસણી અધિકારી).
 A citizen has submitted this document file (${fileName}) for government scheme/service verification.
 
-Target Requirement: ${targetDocNameGu} (${targetDocNameEn || ''})
+Target Requirement Slot: ${targetDocNameGu} (${targetDocNameEn || ''})
 
 Document Verification Rules:
-1. Genuine Government Document Acceptance:
-   - If Target is 'રેશન કાર્ડ અને આધાર કાર્ડ' (Ration Card & Aadhaar Card) or 'આધાર કાર્ડ' (Aadhaar Card) or 'ઓળખનો પુરાવો':
-     * Any genuine, authentic Government of India Aadhaar Card (with Government of India banner, Ashok Stambh, photo, 12-digit UID like 7341 3284 1413, or UIDAI emblem) is 100% VALID (isValid: true)!
+1. Genuine Document Acceptance (APPROVE - isValid: true):
+   Carefully examine the image or PDF. If it represents an authentic, genuine certificate, card, or official document that fulfills or matches the target requirement slot, APPROVE IT (isValid: true).
+   
+   Specific guidelines by category:
+   - Bonafide / School / College Study Certificate (શાળા બોનાફાઇડ, U-DISE ID, કૉલેજ બોનાફાઇડ, પ્રવેશ દાખલો, અભ્યાસ પુરાવો):
+     * Any genuine Bonafide Certificate, Study Certificate, or Admission Letter issued by a recognized School, College, or University (e.g. Atmiya University, GSEB school, GTU, Saurashtra University, etc.) containing student name, enrollment/registration number, course/class, official seal/stamp, and signature is 100% VALID (isValid: true)!
+     * Note: Higher education, scholarship, and student schemes accept College or University bonafide certificates!
+   - Aadhaar Card (આધાર કાર્ડ / ઓળખ પુરાવો):
+     * Any authentic Government of India Aadhaar Card (with UIDAI emblem, Ashok Stambh, photo, 12-digit UID) is 100% VALID (isValid: true)!
+   - Ration Card (રેશન કાર્ડ):
      * Any genuine Gujarat Government Food & Civil Supplies Ration Card (NFSA or Barcoded) is 100% VALID (isValid: true)!
-     * Extract the applicant's name as clearly printed on the document (e.g. Khunt Harkishan Vinodrai / ખૂંટ હરકિશન વિનોદરાય) and masked ID number.
-   - If Target is 'આવકનો દાખલો' (Income Certificate):
-     * A genuine Gujarat Revenue Department / Mamlatdar certificate issued within 3 Financial Years is 100% VALID (isValid: true).
-     * If issued in 2021 or older, reject as EXPIRED (મુદત પૂર્ણ).
+   - Income Certificate (આવકનો દાખલો):
+     * Mamlatdar / Revenue Department certificate issued within 3 Financial Years is 100% VALID (isValid: true). If issued in 2021 or older, reject as EXPIRED (મુદત પૂર્ણ).
+   - Caste Certificate (જાતિનો દાખલો):
+     * Any authentic SC/ST/OBC/SEBC/EWS certificate is 100% VALID (isValid: true).
+   - Marksheets & Educational Certificates (માર્કશીટ, પરિણામ):
+     * Any authentic Board (GSEB/CBSE) or University marksheet is 100% VALID (isValid: true).
+   - Land Records (૭/૧૨ અને ૮-અ જમીન ઉતારો):
+     * Official RoR / AnyRoR record with survey number is 100% VALID (isValid: true).
+   - Bank Passbook / Cheque (બેંક પાસબુક, રદ કરેલ ચેક):
+     * Passbook copy with account number, IFSC code, account holder name is 100% VALID (isValid: true).
+   - Light Bill / Address Proof (વીજ બિલ / લાઈટબિલ):
+     * Official DISCOM electricity bill (PGVCL/UGVCL/DGVCL/MGVCL/Torrent) is 100% VALID (isValid: true) for address verification.
+   - Any other official certificate (Birth, Death, Marriage, Disability UDID, LC):
+     * If genuine and relevant to the requirement slot, APPROVE IT (isValid: true)!
 
-2. Strict Rejection of Non-Government / Irrelevant Documents (Must Reject!):
-   - College / University Fee Receipts (e.g. Atmiya University Fee Receipt, college challan, tuition fee):
-     REJECT (isValid: false)! Reason in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ કાગળ આત્મીય યુનિવર્સિટી ફી રસીદ (College Fee Receipt) છે, જે સત્તાવાર સરકારી દસ્તાવેજ નથી! કૃપા કરીને અસલ સત્તાવાર દસ્તાવેજ અપલોડ કરો."
-   - College Study Material / Lecture Notes / Syllabus PDFs (e.g. unit1Material.pdf, phase.pdf, notes):
-     REJECT (isValid: false)! Reason in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ કૉલેજ અભ્યાસ સામગ્રી / પીડીએફ છે, જે સત્તાવાર સરકારી દસ્તાવેજ નથી!"
-   - Electricity/Utility bills or private letters where not accepted:
+2. Strict Rejection of Irrelevant / Unofficial Files (REJECT - isValid: false):
+   - College Study Material / Lecture Notes / Syllabus PDFs (e.g. unit1Material.pdf, class notes, study guides):
+     REJECT (isValid: false)! Reason in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ કૉલેજ અભ્યાસ સામગ્રી / પીડીએફ છે, સત્તાવાર પ્રમાણપત્ર નથી!"
+   - Cashier Fee Slips / Tuition Payment Counter Slips (when an identity, income, or bonafide certificate is required):
+     REJECT (isValid: false)! Reason in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ કાગળ ફી ચુકવણી રસીદ (Fee Payment Slip) છે, માંગેલ સત્તાવાર પ્રમાણપત્ર નથી."
+   - Irrelevant personal photos (selfies, memes, scenery, blank papers):
      REJECT (isValid: false)!
+   - Completely blurred or unreadable images where text cannot be verified:
+     REJECT (isValid: false) with a blur notice.
 
-3. Clarity & Quality:
-   - If the photo is heavily blurred or text completely unreadable, set isValid: false with a blur warning. If readable, approve.
-
+Always extract applicant name, key identification numbers, and issuing institute/authority accurately.
 Respond strictly in JSON format:
 {
   "isValid": boolean,
   "detectedDocumentType": string,
   "confidenceScore": number,
-  "reasonGu": string, // Explanation if rejected, or validation message if approved
+  "reasonGu": string,
   "reasonEn": string,
-  "extractedDetailsGu": string, // Extracted applicant name & ID (e.g. "અરજદાર: Khunt Harkishan Vinodrai • આધાર નં: XXXX-XXXX-1413 • UIDAI ભારત સરકાર અધિકૃત")
+  "extractedDetailsGu": string,
   "extractedDetailsEn": string,
   "isBlurry": boolean
 }
