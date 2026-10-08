@@ -267,8 +267,13 @@ export async function inspectUploadedFileStrict(
 ): Promise<FileValidationInspectionResult> {
   const fileNameLower = file.name.toLowerCase();
 
-  // 1. First attempt: Real-time OpenAI GPT-4o-mini Vision via secure backend
-  if (file.type.startsWith('image/')) {
+  // 1. First attempt: Real-time Gemini Multimodal Vision API via secure backend (Supports Images & PDFs)
+  const isSupportedAiDoc = 
+    file.type.startsWith('image/') || 
+    file.type === 'application/pdf' || 
+    fileNameLower.endsWith('.pdf');
+
+  if (isSupportedAiDoc) {
     try {
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -285,8 +290,9 @@ export async function inspectUploadedFileStrict(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageBase64: base64,
-          mimeType: file.type || 'image/jpeg',
+          fileBase64: base64,
+          mimeType: file.type || (fileNameLower.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
+          fileName: file.name,
           targetDocNameGu,
           targetDocNameEn: targetDocNameEn || '',
           applicantName: 'હરિ પટેલ (Hari Patel)'
@@ -313,7 +319,42 @@ export async function inspectUploadedFileStrict(
     }
   }
   
-  // 2. Strict Negative Keyword & File Classifier (Fee Receipts, Utility Bills, College Docs)
+  // 2. Strict College Study Material & Random Notes Check (e.g. unit1Material.pdf, phase.pdf, notes)
+  const isCollegeStudyMaterial = 
+    fileNameLower.includes('unit') ||
+    fileNameLower.includes('material') ||
+    fileNameLower.includes('lecture') ||
+    fileNameLower.includes('notes') ||
+    fileNameLower.includes('syllabus') ||
+    fileNameLower.includes('assignment') ||
+    fileNameLower.includes('slide') ||
+    fileNameLower.includes('presentation') ||
+    fileNameLower.includes('phase') ||
+    fileNameLower.includes('portfolio') ||
+    fileNameLower.includes('resume') ||
+    fileNameLower.includes('cv') ||
+    fileNameLower.includes('putty') ||
+    fileNameLower.includes('ppks') ||
+    fileNameLower.includes('chapter') ||
+    fileNameLower.includes('book') ||
+    fileNameLower.includes('paper') ||
+    fileNameLower.includes('screencapture') ||
+    fileNameLower.includes('sudarshan') ||
+    fileNameLower.includes('punisher') ||
+    fileNameLower.includes('exam');
+
+  if (isCollegeStudyMaterial) {
+    return {
+      isValid: false,
+      status: 'failed',
+      confidenceScore: 0.99,
+      detectedDocumentType: 'કૉલેજ મટીરીયલ / અભ્યાસ નોટ્સ (Study Material)',
+      reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) કૉલેજ અભ્યાસ સામગ્રી / પીડીએફ છે, જે માંગેલ સત્તાવાર સરકારી ${targetDocNameGu} નથી! કૃપા કરીને સાચું સરકારી પ્રમાણપત્ર અપલોડ કરો.`,
+      reasonEn: `Invalid Document: Uploaded file (${file.name}) is college study material or private notes, not the required official government ${targetDocNameEn || targetDocNameGu}.`
+    };
+  }
+
+  // 3. Strict Negative Keyword & File Classifier (Fee Receipts, Utility Bills, College Docs)
   const isCollegeOrReceipt = 
     fileNameLower.includes('atmiya') ||
     fileNameLower.includes('receipt') ||
@@ -530,15 +571,16 @@ export async function inspectUploadedFileStrict(
       fileNameLower.includes('aavak') || 
       fileNameLower.includes('revenue') || 
       fileNameLower.includes('mamlatdar') ||
+      fileNameLower.includes('dakhlo') ||
       fileNameLower.includes('cert');
 
-    if (!looksLikeIncome && (fileNameLower.includes('whatsapp') || fileNameLower.includes('img') || fileNameLower.includes('photo'))) {
+    if (!looksLikeIncome) {
       return {
         isValid: false,
         status: 'failed',
-        confidenceScore: 0.85,
-        reasonGu: '❌ અમાન્ય પ્રમાણપત્ર: અપલોડ કરેલ કાગળમાં મહેસૂલ વિભાગનો સત્તાવાર બારકોડ કે મામલતદાર સહી-સિક્કો મળ્યો નથી.',
-        reasonEn: 'Invalid Certificate: No official Revenue Department barcode or issuing officer stamp detected.'
+        confidenceScore: 0.90,
+        reasonGu: `❌ અમાન્ય આવકનો દાખલો: અપલોડ કરેલ ફાઇલ (${file.name}) માં મહેસૂલ વિભાગનો સત્તાવાર બારકોડ કે મામલતદાર સહી-સિક્કો મળ્યો નથી.`,
+        reasonEn: `Invalid Certificate: The uploaded file (${file.name}) has no official Gujarat Revenue Department barcode or issuing authority seal.`
       };
     }
 
@@ -558,13 +600,13 @@ export async function inspectUploadedFileStrict(
       fileNameLower.includes('bpl') || 
       fileNameLower.includes('rashan');
 
-    if (!looksLikeRation && (fileNameLower.includes('whatsapp') || fileNameLower.includes('img') || fileNameLower.includes('photo'))) {
+    if (!looksLikeRation) {
       return {
         isValid: false,
         status: 'failed',
-        confidenceScore: 0.85,
-        reasonGu: '❌ અમાન્ય રેશન કાર્ડ: અન્ન અને નાગરિક પુરવઠા વિભાગનો બારકોડ કે NFSA કેટેગરી મળી નથી.',
-        reasonEn: 'Invalid Ration Card: No Food & Civil Supplies barcode or NFSA category detected.'
+        confidenceScore: 0.90,
+        reasonGu: `❌ અમાન્ય રેશન કાર્ડ: અપલોડ કરેલ ફાઇલ (${file.name}) માં અન્ન અને નાગરિક પુરવઠા વિભાગનો બારકોડ કે NFSA કેટેગરી મળી નથી. કૃપા કરીને સત્તાવાર રેશન કાર્ડ અપલોડ કરો.`,
+        reasonEn: `Invalid Ration Card: The uploaded file (${file.name}) does not match the official Food & Civil Supplies Ration Card format.`
       };
     }
 
@@ -577,11 +619,12 @@ export async function inspectUploadedFileStrict(
     };
   }
 
+  // DEFAULT MUST BE STRICTLY REJECTED - NEVER APPROVE AN UNKNOWN FILE!
   return {
-    isValid: true,
-    status: 'passed',
-    confidenceScore: 0.95,
-    extractedDetailsGu: 'સત્તાવાર મોહર પ્રમાણિત • નાગરિક ઓળખ મેચ: હરિ પટેલ',
-    extractedDetailsEn: 'Official Seal Verified • Matching Citizen Identity: Hari Patel'
+    isValid: false,
+    status: 'failed',
+    confidenceScore: 0.90,
+    reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) માંગેલ સત્તાવાર સરકારી ${targetDocNameGu} સાથે મેળ ખાતી નથી. કૃપા કરીને સત્તાવાર પ્રમાણપત્ર અપલોડ કરો.`,
+    reasonEn: `Invalid Document: Uploaded file (${file.name}) does not match the required official ${targetDocNameEn || targetDocNameGu}. Please upload an authentic certificate.`
   };
 }

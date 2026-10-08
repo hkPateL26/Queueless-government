@@ -3,118 +3,126 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { imageBase64, mimeType = 'image/jpeg', targetDocNameGu, targetDocNameEn, applicantName = 'Hari Patel (હરિ પટેલ)' } = body;
+    const { 
+      imageBase64, 
+      fileBase64, 
+      mimeType = 'image/jpeg', 
+      fileName = 'document', 
+      targetDocNameGu, 
+      targetDocNameEn, 
+      applicantName = 'હરિ પટેલ (Hari Patel)' 
+    } = body;
 
-    if (!imageBase64) {
-      return NextResponse.json({ error: 'Missing imageBase64' }, { status: 400 });
+    const dataBase64 = fileBase64 || imageBase64;
+    if (!dataBase64) {
+      return NextResponse.json({ error: 'Missing document data' }, { status: 400 });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: 'OPENAI_API_KEY not configured', fallback: true }, { status: 200 });
+      return NextResponse.json({ error: 'GEMINI_API_KEY not configured', fallback: true }, { status: 200 });
     }
 
     const systemPrompt = `
 You are an expert Gujarat Government Document Verification AI Officer (ગુજરાત સરકાર સત્તાવાર દસ્તાવેજ ચકાસણી અધિકારી).
-The citizen has submitted a document photo for official government scheme/service application.
+A citizen has submitted this document file (${fileName}) for official government verification.
 
 Target Required Document: ${targetDocNameGu} (${targetDocNameEn || ''})
-Expected Citizen Identity: ${applicantName}
+Expected Applicant Name: ${applicantName}
 
-Inspect the provided image in detail:
+Strict Examination Guidelines:
 1. Document Identification:
-   - What document is this? Is it truly the requested government document (${targetDocNameGu})?
-   - If it is NOT the requested document (e.g., college fee receipt, Atmiya University fee receipt, tuition challan, electricity bill, private letter, random photo, selfie), you MUST REJECT it.
-   - Specifically, if it is a College or University Fee Receipt (like Atmiya University), detect it and state clearly in Gujarati: "આત્મીય યુનિવર્સિટી ફી રસીદ (College Fee Receipt) છે, જે સત્તાવાર સરકારી આધાર કાર્ડ નથી".
+   - What document is this? Is it strictly and authentically the required document: '${targetDocNameGu}'?
+   - If it is ANYTHING else (e.g. college study material, university lecture notes, unit syllabus, assignment PDF, college fee receipt, Atmiya University fee receipt, light bill, bank slip, resume, portfolio, random photo, selfie), you MUST REJECT it (isValid: false).
+   - Specifically:
+     * If it is a college fee receipt (e.g., Atmiya University): State in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ કાગળ આત્મીય યુનિવર્સિટી ફી રસીદ (College Fee Receipt) છે, જે સત્તાવાર સરકારી ${targetDocNameGu} નથી! કૃપા કરીને અસલ સત્તાવાર દસ્તાવેજ અપલોડ કરો."
+     * If it is college study material / PDF notes (e.g. unit material, presentation, study PDF): State in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${fileName}) કૉલેજ અભ્યાસ સામગ્રી / પીડીએફ છે, જે સત્તાવાર સરકારી ${targetDocNameGu} નથી! કૃપા કરીને અસલ દસ્તાવેજ અપલોડ કરો."
+     * If it is a utility bill or other private document: State in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ કાગળ ખાનગી દસ્તાવેજ છે, જે માંગેલ સરકારી ${targetDocNameGu} સાથે મેળ ખાતો નથી."
 
-2. Quality & Authenticity Check:
-   - Check if the image is blurry, out-of-focus, cropped, unreadable, or has flash glare.
-   - If blurry or unreadable, set isValid: false with a clear explanation in Gujarati.
+2. Quality & Authenticity:
+   - If the image or PDF is blurry, dark, cropped, or illegible, set isValid: false and explain that the photo is out of focus or text is unreadable.
 
 3. Statutory Rules:
-   - If Target is 'આધાર કાર્ડ' (Aadhaar Card): Must have UIDAI emblem, 12-digit number (masked/unmasked), or Aadhaar QR code.
-   - If Target is 'આવકનો દાખલો' (Income Certificate): Must be issued by Gujarat Revenue Department / Mamlatdar within 3 Financial Years. If issued in 2021 or earlier, reject as EXPIRED (મુદત પૂર્ણ).
-   - If Target is 'રેશન કાર્ડ' (Ration Card): Must have Food & Civil Supplies barcode, booklet details or NFSA category.
+   - 'આધાર કાર્ડ' (Aadhaar Card): Must have UIDAI emblem, 12-digit number (masked/unmasked), or Aadhaar QR code.
+   - 'આવકનો દાખલો' (Income Certificate): Must be issued by Gujarat Revenue Department within 3 financial years. If issued in 2021 or older, reject as EXPIRED (મુદત પૂર્ણ).
+   - 'રેશન કાર્ડ' (Ration Card): Must have Food & Civil Supplies barcode, booklet details, or NFSA category.
 
-Output strictly in JSON:
+Respond strictly in JSON format:
 {
   "isValid": boolean,
   "detectedDocumentType": string,
-  "confidenceScore": number (between 0.0 and 1.0),
-  "reasonGu": string, // Detailed Gujarati explanation if rejected
-  "reasonEn": string, // English explanation if rejected
-  "extractedDetailsGu": string, // Gujarati details if approved (e.g. "અરજદાર: હરિ પટેલ • આધાર: XXXX-XXXX-8842 • UIDAI પ્રમાણિત")
-  "extractedDetailsEn": string, // English details if approved
-  "isBlurry": boolean,
-  "isCollegeOrFeeReceipt": boolean,
-  "isExpired": boolean
+  "confidenceScore": number,
+  "reasonGu": string,
+  "reasonEn": string,
+  "extractedDetailsGu": string,
+  "extractedDetailsEn": string,
+  "isBlurry": boolean
 }
 `;
 
-    const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
+    // Try gemini-3.1-flash-lite first, fallback to gemini-3.5-flash
+    const candidateModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash'];
+    let lastError: any = null;
+
+    for (const model of candidateModels) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
           {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `Please verify this uploaded document for '${targetDocNameGu}'. Is it authentic, clear, and matching?`
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${mimeType};base64,${imageBase64}`
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: systemPrompt },
+                    {
+                      inlineData: {
+                        mimeType: mimeType.includes('pdf') ? 'application/pdf' : mimeType || 'image/jpeg',
+                        data: dataBase64
+                      }
+                    }
+                  ]
                 }
+              ],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                temperature: 0.1
               }
-            ]
+            })
           }
-        ],
-        response_format: { type: 'json_object' },
-        max_tokens: 600,
-        temperature: 0.1
-      })
+        );
+
+        const data = await response.json();
+        if (data.error) {
+          lastError = data.error;
+          continue;
+        }
+
+        const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (textOutput) {
+          const parsed = JSON.parse(textOutput);
+          return NextResponse.json({
+            success: true,
+            source: `gemini-${model}`,
+            result: parsed
+          });
+        }
+      } catch (err: any) {
+        lastError = err;
+      }
+    }
+
+    return NextResponse.json({
+      success: false,
+      fallback: true,
+      error: lastError?.message || 'Gemini API call failed'
     });
-
-    const data = await openAiResponse.json();
-
-    if (data.error) {
-      console.warn('OpenAI API Error:', data.error.message || data.error);
-      return NextResponse.json({
-        success: false,
-        fallback: true,
-        error: data.error.message || 'OpenAI API Error',
-        errorCode: data.error.code || 'API_ERROR'
-      });
-    }
-
-    const contentText = data.choices?.[0]?.message?.content;
-    if (!contentText) {
-      return NextResponse.json({ success: false, fallback: true, error: 'Empty AI response' });
-    }
-
-    try {
-      const parsed = JSON.parse(contentText);
-      return NextResponse.json({
-        success: true,
-        source: 'openai-gpt-4o-mini',
-        result: parsed
-      });
-    } catch {
-      return NextResponse.json({ success: false, fallback: true, error: 'Invalid JSON response from AI' });
-    }
   } catch (error: any) {
-    console.error('AI Document Verification Error:', error);
-    return NextResponse.json({ success: false, fallback: true, error: error.message || 'Internal Error' }, { status: 500 });
+    console.error('Gemini Document Verification Error:', error);
+    return NextResponse.json(
+      { success: false, fallback: true, error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
