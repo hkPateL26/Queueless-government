@@ -30,6 +30,7 @@ import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { SchemeItem, getProcessingTimelineInfo } from '@/lib/schemes-data';
 import { GovLogo } from '@/components/GovLogo';
+import { SlotSkeleton } from '@/components/ui/Skeleton';
 
 export interface BookingDetails {
   district: DistrictItem;
@@ -91,6 +92,7 @@ export function SlotBookingModal({
   const [isPriority, setIsPriority] = useState<boolean>(false);
   const [priorityCategory, setPriorityCategory] = useState<PriorityCategory>('senior_citizen');
   const [conflictError, setConflictError] = useState<string | null>(null);
+  const [isRecalculatingSlots, setIsRecalculatingSlots] = useState<boolean>(false);
 
   const selectedDistrict = useMemo(() => {
     return GUJARAT_33_DISTRICTS.find(d => d.id === selectedDistrictId) || GUJARAT_33_DISTRICTS[0];
@@ -121,6 +123,8 @@ export function SlotBookingModal({
   // Handle District Change
   const handleDistrictChange = (distId: string) => {
     setSelectedDistrictId(distId);
+    setIsRecalculatingSlots(true);
+    setTimeout(() => setIsRecalculatingSlots(false), 200);
     const dist = GUJARAT_33_DISTRICTS.find(d => d.id === distId);
     if (dist && dist.talukas.length > 0) {
       const firstTal = dist.talukas[0];
@@ -136,6 +140,8 @@ export function SlotBookingModal({
   // Handle Taluka Change
   const handleTalukaChange = (talId: string) => {
     setSelectedTalukaId(talId);
+    setIsRecalculatingSlots(true);
+    setTimeout(() => setIsRecalculatingSlots(false), 200);
     const tal = selectedDistrict.talukas.find(t => t.id === talId);
     if (tal) {
       const centers = getTalukaServiceCenters(tal);
@@ -618,6 +624,8 @@ export function SlotBookingModal({
                 value={selectedDate}
                 onChange={(e) => {
                   setSelectedDate(e.target.value);
+                  setIsRecalculatingSlots(true);
+                  setTimeout(() => setIsRecalculatingSlots(false), 200);
                   setConflictError(null);
                   triggerHaptic('tap');
                 }}
@@ -689,6 +697,8 @@ export function SlotBookingModal({
                   {isEn ? 'Please choose another working day.' : isHi ? 'कृपया अन्य कार्य दिवस चुनें।' : isMr ? 'कृपया दुसरा कामकाजाचा दिवस निवडा.' : 'કૃપા કરીને અન્ય કામકાજનો દિવસ પસંદ કરો.'}
                 </p>
               </div>
+            ) : isRecalculatingSlots ? (
+              <SlotSkeleton count={6} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {slots.map((slot) => {

@@ -9,6 +9,7 @@ import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { Language, t } from '@/lib/translations';
 import { BookingDetails } from '@/components/SlotBookingModal';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 
 interface TokenTrackerModalProps {
   isOpen: boolean;
@@ -74,6 +75,7 @@ export function TokenTrackerModal({
   const initialToken = activeBooking?.tokenNumber?.replace('#', '') || currentUser?.token?.replace('#', '') || 'A-42';
   const [tokenInput, setTokenInput] = useState(initialToken);
   const [searchToken, setSearchToken] = useState(initialToken);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const isGu = lang === 'gu';
   const isHi = lang === 'hi';
@@ -97,14 +99,22 @@ export function TokenTrackerModal({
     e.preventDefault();
     triggerHaptic('tap');
     if (tokenInput.trim()) {
-      setSearchToken(tokenInput.trim());
+      setIsSearching(true);
+      setTimeout(() => {
+        setSearchToken(tokenInput.trim());
+        setIsSearching(false);
+      }, 250);
     }
   };
 
   const selectPreset = (tok: string) => {
     triggerHaptic('tap');
     setTokenInput(tok);
-    setSearchToken(tok);
+    setIsSearching(true);
+    setTimeout(() => {
+      setSearchToken(tok);
+      setIsSearching(false);
+    }, 220);
   };
 
   const handleVoiceCall = () => {
@@ -204,6 +214,9 @@ export function TokenTrackerModal({
           </div>
 
           {/* LIVE TOKEN STATUS CARD */}
+          {isSearching ? (
+            <CardSkeleton />
+          ) : (
           <div className="bg-slate-50 border-2 border-blue-200 rounded-2xl p-4 sm:p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono font-extrabold px-2.5 py-0.5 rounded-full bg-blue-100 text-[#003366]">
@@ -270,6 +283,7 @@ export function TokenTrackerModal({
               </button>
             </div>
           </div>
+          )}
         </div>
 
         {/* FOOTER ACTIONS */}

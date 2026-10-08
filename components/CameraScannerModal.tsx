@@ -3,19 +3,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Camera, Upload, AlertTriangle, CheckCircle, X, RefreshCw, Volume2, 
-  ShieldCheck, ArrowRight, Lock, Cloud, FolderOpen, FileText, FileCheck, 
-  FolderPlus, Eye, Calendar, UserCheck, AlertCircle, Sparkles, CheckCircle2
+  ArrowRight, Lock, Cloud, FileCheck, 
+  FolderPlus, Calendar, AlertCircle
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { 
   validateIncomeCertificateText, 
-  validateAadhaarNumber,
   SAMPLE_OCR_TEST_CASES, 
   ValidationResult 
 } from '@/lib/ocr-validator';
 import { SchemeItem } from '@/lib/schemes-data';
 import { GovLogo } from '@/components/GovLogo';
+import { Language } from '@/lib/translations';
+import { getLocalizedSchemeTitle } from '@/lib/scheme-translations';
 
 interface CameraScannerModalProps {
   scheme: SchemeItem;
@@ -23,6 +24,7 @@ interface CameraScannerModalProps {
   onClose: () => void;
   onVerifiedSuccess: () => void;
   isLoggedIn?: boolean;
+  lang?: Language;
 }
 
 export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
@@ -31,6 +33,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
   onClose,
   onVerifiedSuccess,
   isLoggedIn = false,
+  lang = 'gu',
 }) => {
   const [activeTab, setActiveTab] = useState<'camera' | 'drive'>('camera');
   const [scanning, setScanning] = useState(false);
@@ -44,6 +47,11 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
+
+  const isEn = lang === 'en';
+  const isHi = lang === 'hi';
+  const isMr = lang === 'mr';
+  const isGu = lang === 'gu';
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -83,14 +91,28 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
 
       if (result.status === 'passed') {
         triggerHaptic('success');
-        speakGuidance("દસ્તાવેજ પ્રી-ચેક સફળ રહ્યો છે. વિગતો સબમિશન માટે યોગ્ય જણાય છે.");
+        const passMsg = isEn 
+          ? "Document pre-check passed successfully. Details are verified for submission." 
+          : isHi 
+          ? "दस्तावेज़ पूर्व-सत्यापन सफल रहा। विवरण सबमिशन हेतु योग्य हैं।" 
+          : isMr 
+          ? "कागदपत्र पूर्व-तपासणी यशस्वी झाली. तपशील सादर करण्यासाठी योग्य आहेत." 
+          : "દસ્તાવેજ પ્રી-ચેક સફળ રહ્યો છે. વિગતો સબમિશન માટે યોગ્ય જણાય છે.";
+        speakGuidance(passMsg);
       } else if (result.status === 'needs_review') {
         triggerHaptic('warning');
-        setQualityWarning("સ્પષ્ટતા સુધારો: દસ્તાવેજનો ફોટો સીધો અને પર્યાપ્ત પ્રકાશમાં પાડો.");
-        speakGuidance(result.messageGu);
+        const warnMsg = isEn
+          ? "Improve clarity: Capture document straight under sufficient lighting."
+          : isHi
+          ? "स्पष्टता सुधारें: दस्तावेज़ का फोटो सीधा और पर्याप्त प्रकाश में लें।"
+          : isMr
+          ? "स्पष्टता सुधारा: कागदपत्राचा फोटो सरळ आणि पुरेशा प्रकाशात घ्या."
+          : "સ્પષ્ટતા સુધારો: દસ્તાવેજનો ફોટો સીધો અને પર્યાપ્ત પ્રકાશમાં પાડો.";
+        setQualityWarning(warnMsg);
+        speakGuidance(isEn ? result.messageEn : result.messageGu);
       } else {
         triggerHaptic('warning');
-        speakGuidance(result.messageGu);
+        speakGuidance(isEn ? result.messageEn : result.messageGu);
       }
     }, 1100);
   };
@@ -101,7 +123,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
       setSelectedFileMeta({
         name: file.name,
         size: `${(file.size / 1024).toFixed(1)} KB`,
-        source: 'સ્થાનિક ઉપકરણ ફાઇલ (Local File)'
+        source: isEn ? 'Local Device File' : isHi ? 'स्थानीय डिवाइस फ़ाइल' : isMr ? 'स्थानिक डिव्हाइस फाईल' : 'સ્થાનિક ઉપકરણ ફાઇલ'
       });
       handleRunOcr(SAMPLE_OCR_TEST_CASES.valid2025);
     }
@@ -113,7 +135,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
       setSelectedFileMeta({
         name: `📁 Folder (${files.length} Documents)`,
         size: `${files.length} files processed`,
-        source: 'ફોલ્ડર અપલોડ (Folder Upload)'
+        source: isEn ? 'Folder Upload' : isHi ? 'फ़ोल्डर अपलोड' : isMr ? 'फोल्डर अपलोड' : 'ફોલ્ડર અપલોડ'
       });
       handleRunOcr(SAMPLE_OCR_TEST_CASES.valid2025);
     }
@@ -133,6 +155,8 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
     handleRunOcr(SAMPLE_OCR_TEST_CASES.valid2025, manualDateInput);
   };
 
+  const localizedSchemeTitle = getLocalizedSchemeTitle(scheme, lang);
+
   return (
     <div 
       onClick={onClose}
@@ -149,10 +173,16 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             <GovLogo className="w-10 h-10 shrink-0 drop-shadow-md" />
             <div>
               <h3 className="font-extrabold text-sm sm:text-base leading-tight">
-                દસ્તાવેજ OCR & પૂર્વ-ચકાસણી (Document Pre-Verification)
+                {isEn 
+                  ? 'Document OCR & Pre-Verification' 
+                  : isHi 
+                  ? 'दस्तावेज़ OCR एवं पूर्व-सत्यापन' 
+                  : isMr 
+                  ? 'कागदपत्रे OCR आणि पूर्व-तपासणी' 
+                  : 'દસ્તાવેજ OCR & પૂર્વ-ચકાસણી (Document Pre-Verification)'}
               </h3>
               <p className="text-[11px] text-blue-200">
-                Client-Side OCR + Rule Engine • {scheme.titleGu}
+                Client-Side OCR + Rule Engine • {localizedSchemeTitle}
               </p>
             </div>
           </div>
@@ -162,6 +192,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               onClose();
             }}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0 cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -181,7 +212,9 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             }`}
           >
             <Camera className="w-3.5 h-3.5" />
-            <span>કેમેરા સ્કેનર (Camera Scanner)</span>
+            <span>
+              {isEn ? 'Camera Scanner' : isHi ? 'कैमरा स्कैनर' : isMr ? 'कॅमेरा स्कॅनर' : 'કેમેરા સ્કેનર (Camera Scanner)'}
+            </span>
           </button>
           <button
             onClick={() => {
@@ -195,7 +228,9 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             }`}
           >
             <Cloud className="w-3.5 h-3.5 text-[#005A9C]" />
-            <span>Cloud Import — Demo</span>
+            <span>
+              {isEn ? 'Cloud / Local Import (Demo)' : isHi ? 'क्लाउड / लोकल इम्पोर्ट (डेमो)' : isMr ? 'क्लाउड / स्थानिक आयात (डेमो)' : 'Cloud Import — Demo'}
+            </span>
           </button>
         </div>
 
@@ -217,9 +252,11 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                 ) : (
                   <div className="p-6 text-center text-slate-400 space-y-2">
                     <Camera className="w-10 h-10 mx-auto text-slate-500 stroke-1" />
-                    <p className="text-xs font-medium">કેમેરા વ્યુફાઇન્ડર (Live Camera Viewfinder)</p>
+                    <p className="text-xs font-medium">
+                      {isEn ? 'Live Camera Viewfinder' : isHi ? 'लाइव कैमरा दृश्य' : isMr ? 'थेट कॅमेरा व्ह्यू' : 'કેમેરા વ્યુફાઇન્ડર (Live Camera Viewfinder)'}
+                    </p>
                     <p className="text-[10px] text-slate-500">
-                      દસ્તાવેજના ૪ ખૂણા માર્ગદર્શક ફ્રેમમાં ગોઠવો
+                      {isEn ? 'Align 4 corners within guide frame' : isHi ? 'दस्तावेज़ के ४ कोने फ्रेम में संरेखित करें' : isMr ? 'कागदपत्राचे ४ कोपरे फ्रेममध्ये ठेवा' : 'દસ્તાવેજના ૪ ખૂણા માર્ગદર્શક ફ્રેમમાં ગોઠવો'}
                     </p>
                   </div>
                 )}
@@ -232,7 +269,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                   </div>
                   <div className="text-center">
                     <span className="text-[10px] font-bold bg-black/60 text-white px-2 py-0.5 rounded-full">
-                      દસ્તાવેજ સીધો અને સ્પષ્ટ રાખો
+                      {isEn ? 'Keep document straight & clear' : isHi ? 'दस्तावेज़ सीधा और स्पष्ट रखें' : isMr ? 'कागदपत्र सरळ आणि स्पष्ट ठेवा' : 'દસ્તાવેજ સીધો અને સ્પષ્ટ રાખો'}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -250,13 +287,13 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               {/* Quality Helper Checks */}
               <div className="grid grid-cols-3 gap-2 text-[10.5px] font-medium text-slate-600">
                 <span className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center gap-1">
-                  ✓ સ્પષ્ટ પ્રકાશ
+                  {isEn ? '✓ Clear Light' : isHi ? '✓ स्पष्ट प्रकाश' : isMr ? '✓ पुरेसा प्रकाश' : '✓ સ્પષ્ટ પ્રકાશ'}
                 </span>
                 <span className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center gap-1">
-                  ✓ ધૂંધળાપણું ન રાખો
+                  {isEn ? '✓ No Blur' : isHi ? '✓ धुंधला न हो' : isMr ? '✓ स्पष्टता' : '✓ ધૂંધળાપણું ન રાખો'}
                 </span>
                 <span className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center gap-1">
-                  ✓ ૪ ખૂણા દેખાય
+                  {isEn ? '✓ 4 Corners' : isHi ? '✓ ४ कोने दिखें' : isMr ? '✓ ४ कोपरे दिसावे' : '✓ ૪ ખૂણા દેખાય'}
                 </span>
               </div>
 
@@ -279,8 +316,12 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                   <Upload className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-[#003366]">સીધી ફાઇલ અથવા આખું ફોલ્ડર પસંદ કરો</p>
-                  <p className="text-[11px] text-slate-500">PDF, JPG, PNG અથવા આખું દસ્તાવેજ ફોલ્ડર અપલોડ કરી શકાય છે</p>
+                  <p className="text-xs font-black text-[#003366]">
+                    {isEn ? 'Select direct file or full document folder' : isHi ? 'सीधी फ़ाइल या पूरा दस्तावेज़ फ़ोल्डर चुनें' : isMr ? 'थेट फाईल किंवा संपूर्ण कागदपत्र फोल्डर निवडा' : 'સીધી ફાઇલ અથવા આખું ફોલ્ડર પસંદ કરો'}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {isEn ? 'PDF, JPG, PNG or document folders can be processed' : isHi ? 'PDF, JPG, PNG या दस्तावेज़ फ़ोल्डर अपलोड कर सकते हैं' : isMr ? 'PDF, JPG, PNG किंवा कागदपत्र फोल्डर अपलोड करू शकता' : 'PDF, JPG, PNG અથવા આખું દસ્તાવેજ ફોલ્ડર અપલોડ કરી શકાય છે'}
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
@@ -289,14 +330,14 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                     className="bg-[#005A9C] hover:bg-[#003366] text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition active:scale-95"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>📂 ફાઇલ અપલોડ કરો (Select File)</span>
+                    <span>{isEn ? '📂 Upload File' : isHi ? '📂 फ़ाइल अपलोड करें' : isMr ? '📂 फाईल अपलोड करा' : '📂 ફાઇલ અપલોડ કરો'}</span>
                   </button>
                   <button
                     onClick={() => folderInputRef.current?.click()}
                     className="bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold px-3.5 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer transition active:scale-95"
                   >
                     <FolderPlus className="w-3.5 h-3.5 text-[#FF9933]" />
-                    <span>📁 ફોલ્ડર અપલોડ કરો (Upload Folder)</span>
+                    <span>{isEn ? '📁 Upload Folder' : isHi ? '📁 फ़ोल्डर अपलोड करें' : isMr ? '📁 फोल्डर अपलोड करा' : '📁 ફોલ્ડર અપલોડ કરો'}</span>
                   </button>
                 </div>
 
@@ -322,8 +363,12 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                   <div className="flex items-center gap-2">
                     <Cloud className="w-4 h-4 text-[#005A9C]" />
                     <div>
-                      <p className="text-xs font-black text-[#003366]">Cloud Import — Demo (ટેસ્ટ નમૂના)</p>
-                      <p className="text-[10px] text-slate-500">Demonstration file samples for evaluation</p>
+                      <p className="text-xs font-black text-[#003366]">
+                        {isEn ? 'Cloud Import — Demo (Test Samples)' : isHi ? 'क्लाउड इम्पोर्ट — डेमो (परीक्षण नमूने)' : isMr ? 'क्लाउड आयात — डेमो (चाचणी नमुने)' : 'Cloud Import — Demo (ટેસ્ટ નમૂના)'}
+                      </p>
+                      <p className="text-[10px] text-slate-500">
+                        {isEn ? 'Demonstration file samples for verification' : 'ચકાસણી માટે ડેમો સેમ્પલ ફાઇલો'}
+                      </p>
                     </div>
                   </div>
                   <span className="text-[9.5px] font-extrabold bg-[#005A9C] text-white px-2 py-0.5 rounded-full">
@@ -342,12 +387,19 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                         PDF
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-800 group-hover:text-[#005A9C]">આવકનો_દાખલો_૨૦૨૫_ડીજીટલ.pdf</p>
-                        <p className="text-[10px] text-slate-400">ઇસ્યુ: ૨૨-૦૪-૨૦૨૫ • ૨૮૪ KB • <span className="text-emerald-700 font-bold">માન્ય મુદત</span></p>
+                        <p className="text-xs font-bold text-slate-800 group-hover:text-[#005A9C]">
+                          {isEn ? 'Income_Certificate_2025_Digital.pdf' : isHi ? 'आय_प्रमाण_पत्र_२०२५_डिजिटल.pdf' : isMr ? 'उत्पन्न_दाखला_२०२५_डिजिटल.pdf' : 'આવકનો_દાખલો_૨૦૨૫_ડીજીટલ.pdf'}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {isEn ? 'Issue: 22-04-2025 • 284 KB • ' : 'ઇસ્યુ: ૨૨-૦૪-૨૦૨૫ • ૨૮૪ KB • '}
+                          <span className="text-emerald-700 font-bold">
+                            {isEn ? 'Valid Period' : isHi ? 'वैध अवधि' : isMr ? 'वैध मुदत' : 'માન્ય મુદત'}
+                          </span>
+                        </p>
                       </div>
                     </div>
                     <span className="text-[11px] font-extrabold text-[#005A9C] bg-blue-50 border border-blue-200 px-2 py-1 rounded-lg group-hover:bg-[#005A9C] group-hover:text-white transition">
-                      ઇમ્પોર્ટ →
+                      {isEn ? 'Import →' : isHi ? 'इम्पोर्ट →' : isMr ? 'आयात →' : 'ઇમ્પોર્ટ →'}
                     </span>
                   </div>
 
@@ -361,12 +413,19 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                         PDF
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-800 group-hover:text-red-700">આવકનો_દાખલો_૨૦૨૧_જૂનો.pdf</p>
-                        <p className="text-[10px] text-slate-400">ઇસ્યુ: ૧૪-૦૮-૨૦૨૧ • ૧૯૨ KB • <span className="text-red-600 font-bold">મુદત બહાર (૩ વર્ષથી વધુ)</span></p>
+                        <p className="text-xs font-bold text-slate-800 group-hover:text-red-700">
+                          {isEn ? 'Income_Certificate_2021_Expired.pdf' : isHi ? 'आय_प्रमाण_पत्र_२०२१_पुराना.pdf' : isMr ? 'उत्पन्न_दाखला_२०२१_जुना.pdf' : 'આવકનો_દાખલો_૨૦૨૧_જૂનો.pdf'}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {isEn ? 'Issue: 14-08-2021 • 192 KB • ' : 'ઇસ્યુ: ૧૪-૦૮-૨૦૨૧ • ૧૯૨ KB • '}
+                          <span className="text-red-600 font-bold">
+                            {isEn ? 'Expired (>3 yrs)' : isHi ? 'अवधि समाप्त (>३ वर्ष)' : isMr ? 'मुदत संपली (>३ वर्षे)' : 'મુદત બહાર (૩ વર્ષથી વધુ)'}
+                          </span>
+                        </p>
                       </div>
                     </div>
                     <span className="text-[11px] font-extrabold text-red-700 bg-red-50 border border-red-200 px-2 py-1 rounded-lg group-hover:bg-red-600 group-hover:text-white transition">
-                      ટેસ્ટ →
+                      {isEn ? 'Test →' : isHi ? 'परीक्षण →' : isMr ? 'चाचणी →' : 'ટેસ્ટ →'}
                     </span>
                   </div>
 
@@ -380,12 +439,19 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                         JPG
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-slate-800 group-hover:text-amber-800">આવકનો_દાખલો_અસ્પષ્ટ_તારીખ.jpg</p>
-                        <p className="text-[10px] text-slate-400">ધૂંધળું લખાણ • ૩૧૦ KB • <span className="text-amber-800 font-bold">ચકાસણી જરૂરી (Needs Review)</span></p>
+                        <p className="text-xs font-bold text-slate-800 group-hover:text-amber-800">
+                          {isEn ? 'Income_Certificate_Unclear_Date.jpg' : isHi ? 'आय_प्रमाण_पत्र_अस्पष्ट_तिथि.jpg' : isMr ? 'उत्पन्न_दाखला_अस्पष्ट_तारीख.jpg' : 'આવકનો_દાખલો_અસ્પષ્ટ_તારીખ.jpg'}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {isEn ? 'Blurry Text • 310 KB • ' : 'ધૂંધળું લખાણ • ૩૧૦ KB • '}
+                          <span className="text-amber-800 font-bold">
+                            {isEn ? 'Needs Review' : isHi ? 'समीक्षा आवश्यक' : isMr ? 'तपासणी आवश्यक' : 'ચકાસણી જરૂરી'}
+                          </span>
+                        </p>
                       </div>
                     </div>
                     <span className="text-[11px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg group-hover:bg-amber-600 group-hover:text-white transition">
-                      ટેસ્ટ →
+                      {isEn ? 'Test →' : isHi ? 'परीक्षण →' : isMr ? 'चाचणी →' : 'ટેસ્ટ →'}
                     </span>
                   </div>
                 </div>
@@ -401,14 +467,14 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                     </div>
                   </div>
                   <span className="text-[10px] font-bold bg-emerald-100 text-[#138808] border border-emerald-300 px-2 py-0.5 rounded-full">
-                    પ્રી-ચેક તૈયાર
+                    {isEn ? 'Ready for OCR' : isHi ? 'सत्यापन हेतु तैयार' : isMr ? 'तपासणीसाठी तयार' : 'પ્રી-ચેક તૈયાર'}
                   </span>
                 </div>
               )}
             </div>
           )}
 
-          {/* 🔍 STRUCTURED OCR RESULTS UI (Requirements 9, 10, 16) */}
+          {/* 🔍 STRUCTURED OCR RESULTS UI */}
           {validationResult && (
             <div className="space-y-3 text-left">
               
@@ -443,22 +509,26 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                         }`}
                       >
                         {validationResult.status === 'passed' 
-                          ? '🟢 PRE-CHECK PASSED' 
+                          ? (isEn ? '🟢 PRE-CHECK PASSED' : isHi ? '🟢 पूर्व-सत्यापन सफल' : isMr ? '🟢 पूर्व-तपासणी यशस्वी' : '🟢 પ્રી-ચેક સફળ (PASSED)') 
                           : validationResult.status === 'needs_review'
-                          ? '🟡 NEEDS REVIEW'
-                          : '🔴 PRE-CHECK FAILED'}
+                          ? (isEn ? '🟡 NEEDS REVIEW' : isHi ? '🟡 समीक्षा आवश्यक' : isMr ? '🟡 तपासणी आवश्यक' : '🟡 ચકાસણી જરૂરી (NEEDS REVIEW)')
+                          : (isEn ? '🔴 PRE-CHECK FAILED' : isHi ? '🔴 पूर्व-सत्यापन असफल' : isMr ? '🔴 पूर्व-तपासणी अयशस्वी' : '🔴 પ્રી-ચેક અમાન્ય (FAILED)')}
                       </span>
 
                       <button
-                        onClick={() => speakGuidance(validationResult.messageGu)}
+                        onClick={() => speakGuidance(isEn ? validationResult.messageEn : validationResult.messageGu)}
                         className="text-slate-600 hover:text-slate-900 text-xs flex items-center gap-1 font-bold cursor-pointer"
                       >
-                        <Volume2 className="w-3.5 h-3.5" /> સાંભળો
+                        <Volume2 className="w-3.5 h-3.5" /> {isEn ? 'Listen' : isHi ? 'सुनें' : isMr ? 'ऐका' : 'સાંભળો'}
                       </button>
                     </div>
 
-                    <p className="text-xs font-bold leading-relaxed">{validationResult.messageGu}</p>
-                    <p className="text-[11px] text-slate-600">{validationResult.messageEn}</p>
+                    <p className="text-xs font-bold leading-relaxed">
+                      {isEn ? validationResult.messageEn : validationResult.messageGu}
+                    </p>
+                    {!isEn && (
+                      <p className="text-[11px] text-slate-600">{validationResult.messageEn}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -466,25 +536,39 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               {/* Extracted Information Box */}
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
                 <p className="text-[10.5px] font-black uppercase text-[#003366] tracking-wider">
-                  OCR દ્વારા વાંચેલી વિગતો (Extracted Information)
+                  {isEn 
+                    ? 'OCR Extracted Information' 
+                    : isHi 
+                    ? 'OCR द्वारा पढ़ी गई जानकारी' 
+                    : isMr 
+                    ? 'OCR द्वारे वाचलेली माहिती' 
+                    : 'OCR દ્વારા વાંચેલી વિગતો (Extracted Information)'}
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block">દસ્તાવેજ પ્રકાર:</span>
+                    <span className="text-[10px] text-slate-400 font-bold block">
+                      {isEn ? 'Document Type:' : isHi ? 'दस्तावेज़ प्रकार:' : isMr ? 'कागदपत्र प्रकार:' : 'દસ્તાવેજ પ્રકાર:'}
+                    </span>
                     <span className="font-extrabold text-slate-800">{validationResult.extractedData.documentType}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block">અરજદારનું નામ:</span>
+                    <span className="text-[10px] text-slate-400 font-bold block">
+                      {isEn ? 'Applicant Name:' : isHi ? 'आवेदक का नाम:' : isMr ? 'अर्जदाराचे नाव:' : 'અરજદારનું નામ:'}
+                    </span>
                     <span className="font-extrabold text-slate-800">{validationResult.extractedData.applicantName || '—'}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block">ઇસ્યુ તારીખ / વર્ષ:</span>
+                    <span className="text-[10px] text-slate-400 font-bold block">
+                      {isEn ? 'Issue Date / Year:' : isHi ? 'जारी तिथि / वर्ष:' : isMr ? 'जारी तारीख / वर्ष:' : 'ઇસ્યુ તારીખ / વર્ષ:'}
+                    </span>
                     <span className="font-extrabold text-[#005A9C]">
-                      {validationResult.extractedData.issueDate || 'અસ્પષ્ટ (Unclear)'}
+                      {validationResult.extractedData.issueDate || (isEn ? 'Unclear' : 'અસ્પષ્ટ')}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block">દાખલા નંબર:</span>
+                    <span className="text-[10px] text-slate-400 font-bold block">
+                      {isEn ? 'Certificate Number:' : isHi ? 'प्रमाणपत्र क्रमांक:' : isMr ? 'दाखला क्रमांक:' : 'દાખલા નંબર:'}
+                    </span>
                     <span className="font-extrabold text-slate-800 font-mono">
                       {validationResult.extractedData.certificateNumber || '—'}
                     </span>
@@ -495,14 +579,22 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               {/* Checks Checklist Table */}
               <div className="bg-white border border-slate-200 rounded-2xl p-3.5 space-y-2">
                 <p className="text-[10.5px] font-black uppercase text-[#003366] tracking-wider">
-                  ચકાસણી માપદંડ (Pre-Verification Checks)
+                  {isEn 
+                    ? 'Pre-Verification Checks Checklist' 
+                    : isHi 
+                    ? 'सत्यापन मानदंड सूची' 
+                    : isMr 
+                    ? 'पडताळणी निकष यादी' 
+                    : 'ચકાસણી માપદંડ (Pre-Verification Checks)'}
                 </p>
                 <div className="space-y-1.5">
                   {validationResult.checks.map((chk, i) => (
                     <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-100 last:border-0">
                       <div className="flex items-center gap-2">
                         <span>{chk.passed ? '✓' : '⚠️'}</span>
-                        <span className="font-bold text-slate-700">{chk.nameGu} ({chk.name})</span>
+                        <span className="font-bold text-slate-700">
+                          {isEn ? chk.name : `${chk.nameGu} (${chk.name})`}
+                        </span>
                       </div>
                       <span className={`text-[10.5px] font-bold ${chk.passed ? 'text-[#138808]' : 'text-amber-800'}`}>
                         {chk.detail}
@@ -512,32 +604,42 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                 </div>
               </div>
 
-              {/* Mandatory Government Officer Disclaimer (Requirement 3) */}
+              {/* Mandatory Government Officer Disclaimer */}
               <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-[10.5px] text-slate-600 space-y-1">
-                <p className="font-bold text-[#003366]">⚠️ પૂર્વ-ચકાસણી સૂચના (Important Notice):</p>
+                <p className="font-bold text-[#003366]">
+                  {isEn ? '⚠️ Important Notice:' : isHi ? '⚠️ पूर्व-सत्यापन सूचना:' : isMr ? '⚠️ पूर्व-तपासणी सूचना:' : '⚠️ પૂર્વ-ચકાસણી સૂચના (Important Notice):'}
+                </p>
                 <p>{validationResult.disclaimer}</p>
                 <p className="text-slate-500 text-[10px]">
-                  આ એક ઓટોમેટેડ પ્રી-ચેક છે જેથી કચેરીમાં અમાન્ય દસ્તાવેજને કારણે તમારો સમય ન બગડે. આખરી મંજૂરી અધિકૃત સરકારી અધિકારી દ્વારા આપવામાં આવશે.
+                  {isEn 
+                    ? 'This is an automated pre-check to prevent invalid document rejections at the counter. Final verification is conducted by authorized government personnel.' 
+                    : isHi 
+                    ? 'यह एक स्वचालित पूर्व-जांच है ताकि कार्यालय में अमान्य दस्तावेज के कारण समय व्यर्थ न हो। अंतिम स्वीकृति अधिकृत सरकारी अधिकारी द्वारा दी जाएगी।' 
+                    : isMr 
+                    ? 'ही एक स्वयंचलित पूर्व-तपासणी आहे जेणेकरून कार्यालयात अमान्य कागदपत्रामुळे वेळ वाया जाऊ नये. अंतिम मंजुरी अधिकृत शासकीय अधिकाऱ्याकडून दिली जाईल.' 
+                    : 'આ એક ઓટોમેટેડ પ્રી-ચેક છે જેથી કચેરીમાં અમાન્ય દસ્તાવેજને કારણે તમારો સમય ન બગડે. આખરી મંજૂરી અધિકૃત સરકારી અધિકારી દ્વારા આપવામાં આવશે.'}
                 </p>
               </div>
 
-              {/* Action Buttons for Failed or Needs Review states (Requirement 16) */}
+              {/* Action Buttons for Failed or Needs Review states */}
               {validationResult.status !== 'passed' && (
                 <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-2">
-                  <p className="text-xs font-bold text-amber-950">તમારી પાસે વિકલ્પો છે (Available Options):</p>
+                  <p className="text-xs font-bold text-amber-950">
+                    {isEn ? 'Available Options:' : isHi ? 'उपलब्ध विकल्प:' : isMr ? 'उपलब्ध पर्याय:' : 'તમારી પાસે વિકલ્પો છે (Available Options):'}
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => handleRunOcr(SAMPLE_OCR_TEST_CASES.valid2025)}
                       className="px-3 py-1.5 bg-white border border-amber-300 rounded-lg text-xs font-bold text-amber-900 hover:bg-amber-100 transition cursor-pointer"
                     >
-                      🔄 ફરી સ્પષ્ટ ફોટો પાડો (Retake)
+                      {isEn ? '🔄 Retake Clear Photo' : isHi ? '🔄 पुनः स्पष्ट फोटो लें' : isMr ? '🔄 पुन्हा स्पष्ट फोटो घ्या' : '🔄 ફરી સ્પષ્ટ ફોટો પાડો (Retake)'}
                     </button>
                     <button
                       onClick={() => setShowManualDateModal(true)}
                       className="px-3 py-1.5 bg-white border border-blue-300 rounded-lg text-xs font-bold text-[#005A9C] hover:bg-blue-50 transition cursor-pointer flex items-center gap-1"
                     >
                       <Calendar className="w-3.5 h-3.5" />
-                      <span>તારીખ જાતે દાખલ કરો (Enter Date)</span>
+                      <span>{isEn ? 'Enter Date Manually' : isHi ? 'तिथि स्वयं दर्ज करें' : isMr ? 'तारीख स्वतः प्रविष्ट करा' : 'તારીખ જાતે દાખલ કરો'}</span>
                     </button>
                     <button
                       onClick={() => {
@@ -546,7 +648,13 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                       }}
                       className="px-3 py-1.5 bg-[#003366] text-white rounded-lg text-xs font-extrabold hover:bg-[#002244] transition cursor-pointer"
                     >
-                      અધિકારી નિરીક્ષણ સાથે આગળ વધો (Continue with Officer Review) →
+                      {isEn 
+                        ? 'Continue with Officer Review →' 
+                        : isHi 
+                        ? 'अधिकारी समीक्षा के साथ आगे बढ़ें →' 
+                        : isMr 
+                        ? 'अधिकारी तपासणीसह पुढे जा →' 
+                        : 'અધિકારી નિરીક્ષણ સાથે આગળ વધો →'}
                     </button>
                   </div>
                 </div>
@@ -555,7 +663,9 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               {/* Manual Date Entry Modal */}
               {showManualDateModal && (
                 <div className="p-3 bg-white border-2 border-[#005A9C] rounded-2xl space-y-2">
-                  <p className="text-xs font-black text-[#003366]">પ્રમાણપત્ર ઇસ્યુ તારીખ દાખલ કરો:</p>
+                  <p className="text-xs font-black text-[#003366]">
+                    {isEn ? 'Enter Certificate Issue Date:' : isHi ? 'प्रमाणपत्र जारी तिथि दर्ज करें:' : isMr ? 'प्रमाणपत्र जारी तारीख प्रविष्ट करा:' : 'પ્રમાણપત્ર ઇસ્યુ તારીખ દાખલ કરો:'}
+                  </p>
                   <input
                     type="date"
                     value={manualDateInput}
@@ -567,13 +677,13 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                       onClick={() => setShowManualDateModal(false)}
                       className="px-3 py-1 text-xs text-slate-500 font-bold"
                     >
-                      રદ કરો
+                      {isEn ? 'Cancel' : isHi ? 'रद्द करें' : isMr ? 'रद्द करा' : 'રદ કરો'}
                     </button>
                     <button
                       onClick={handleManualDateSubmit}
                       className="px-3 py-1 bg-[#005A9C] text-white rounded-lg text-xs font-bold"
                     >
-                      ચકાસો (Verify)
+                      {isEn ? 'Verify Date' : isHi ? 'सत्यापित करें' : isMr ? 'पडताळा' : 'ચકાસો (Verify)'}
                     </button>
                   </div>
                 </div>
@@ -582,9 +692,15 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             </div>
           )}
 
-          {/* Aadhaar Privacy Notice (Requirement 13) */}
+          {/* Aadhaar Privacy Notice */}
           <div className="text-[10px] text-slate-400 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-left">
-            🔒 <strong>Aadhaar Number Masking & Privacy:</strong> Your Aadhaar information is used only for identity matching in this demonstration and is not displayed in full.
+            🔒 <strong>{isEn ? 'Aadhaar Masking & Privacy:' : 'આધાર માસ્કિંગ અને ગોપનીયતા:'}</strong> {isEn 
+              ? 'Your Aadhaar details are masked and processed strictly for identity confirmation during this session.' 
+              : isHi 
+              ? 'आपकी आधार जानकारी केवल पहचान सत्यापन के लिए सुरक्षित रूप से प्रयुक्त होती है।' 
+              : isMr 
+              ? 'तुमची आधार माहिती केवळ ओळख पडताळणीसाठी सुरक्षितपणे वापरली जाते.' 
+              : 'આધાર માહિતી ફક્ત સત્તાવાર ઓળખ ચકાસણી માટે સુરક્ષિત માસ્કિંગ સાથે પ્રોસેસ થાય છે.'}
           </div>
 
         </div>
@@ -597,7 +713,11 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition flex items-center justify-center gap-2 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${scanning ? 'animate-spin' : ''}`} />
-            <span>{scanning ? 'OCR પ્રી-ચેક ચાલુ છે...' : 'ફોટો કેપ્ચર & પ્રી-ચેક'}</span>
+            <span>
+              {scanning 
+                ? (isEn ? 'Running OCR Pre-Check...' : isHi ? 'OCR पूर्व-जांच जारी...' : isMr ? 'OCR पूर्व-तपासणी सुरू...' : 'OCR પ્રી-ચેક ચાલુ છે...') 
+                : (isEn ? 'Capture & Pre-Check' : isHi ? 'फोटो कैप्चर व पूर्व-जांच' : isMr ? 'फोटो कॅप्चर व पूर्व-तपासणी' : 'ફોટો કેપ્ચર & પ્રી-ચેક')}
+            </span>
           </button>
 
           <button
@@ -619,14 +739,18 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
             {isLoggedIn ? (
               <>
                 <span>
-                  {validationResult?.isValid ? 'ટોકન બુકિંગ આગળ વધો' : 'અધિકારી રિવ્યુ સાથે આગળ વધો'}
+                  {validationResult?.isValid 
+                    ? (isEn ? 'Proceed to Slot Booking' : isHi ? 'स्लॉट बुकिंग आगे बढ़ें' : isMr ? 'स्लॉट बुकिंग पुढे जा' : 'ટોકન બુકિંગ આગળ વધો') 
+                    : (isEn ? 'Continue with Officer Review' : isHi ? 'अधिकारी समीक्षा के साथ आगे बढ़ें' : isMr ? 'अधिकारी तपासणीसह पुढे जा' : 'અધિકારી રિવ્યુ સાથે આગળ વધો')}
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </>
             ) : (
               <>
                 <Lock className="w-3.5 h-3.5 text-[#FF9933]" />
-                <span>નાગરિક લૉગિન સાથે આગળ વધો</span>
+                <span>
+                  {isEn ? 'Proceed to Citizen Verification' : isHi ? 'नागरिक सत्यापन के साथ आगे बढ़ें' : isMr ? 'नागरिक पडताळणीसह पुढे जा' : 'નાગરિક ઓળખ ચકાસણી સાથે આગળ વધો'}
+                </span>
               </>
             )}
           </button>

@@ -23,6 +23,7 @@ import {
 import { triggerHaptic } from '@/lib/haptics';
 import { GovLogo } from '@/components/GovLogo';
 import { Language } from '@/lib/translations';
+import { SchemeCardSkeleton } from '@/components/ui/Skeleton';
 
 interface SchemesCatalogProps {
   onSelectScheme: (scheme: SchemeItem) => void;
@@ -41,6 +42,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(maxItems || 9);
+  const [isFiltering, setIsFiltering] = useState<boolean>(false);
 
   const isEn = lang === 'en';
   const isHi = lang === 'hi';
@@ -187,7 +189,11 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setIsFiltering(true);
+              setTimeout(() => setIsFiltering(false), 180);
+            }}
             placeholder={
               isEn 
                 ? 'Search schemes: Tractor, MYSY, Income...' 
@@ -220,6 +226,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                 setSelectedPersona(p.id);
                 setSelectedCategory(p.category);
               }
+              setIsFiltering(true);
+              setTimeout(() => setIsFiltering(false), 200);
             }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
               selectedPersona === p.id
@@ -242,6 +250,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
               triggerHaptic('tap');
               setSelectedPersona(null);
               setSelectedCategory(c.id);
+              setIsFiltering(true);
+              setTimeout(() => setIsFiltering(false), 200);
             }}
             className={`px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition flex items-center gap-2 cursor-pointer ${
               selectedCategory === c.id
@@ -255,7 +265,10 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
         ))}
       </div>
 
-      {/* Schemes Bento Grid */}
+      {/* Schemes Bento Grid / Skeleton Loading */}
+      {isFiltering ? (
+        <SchemeCardSkeleton count={visibleCount > 6 ? 6 : Math.max(visibleCount, 3)} />
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {displayedSchemes.map((scheme) => {
           const eligibility = getSchemeEligibility(scheme);
@@ -445,6 +458,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
           );
         })}
       </div>
+      )}
 
       {/* Pagination & "View All 39 Schemes" Controls */}
       {maxItems && displayedSchemes.length < filteredSchemes.length && (

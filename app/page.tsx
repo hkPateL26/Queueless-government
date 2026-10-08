@@ -25,9 +25,11 @@ import { GovJanSevaGateway } from '@/components/GovJanSevaGateway';
 import { AuthenticQrCode } from '@/components/AuthenticQrCode';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
+import { CounterGridSkeleton } from '@/components/ui/Skeleton';
 
 export default function Home() {
   const [view, setView] = useState<'landing' | 'dashboard' | 'services'>('landing');
+  const [isRadarLoading, setIsRadarLoading] = useState<boolean>(false);
   const [lang, setLang] = useState<Language>('gu');
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [loginMenuOpen, setLoginMenuOpen] = useState(false);
@@ -597,6 +599,8 @@ export default function Home() {
             <button 
               onClick={() => {
                 triggerHaptic('tap');
+                setIsRadarLoading(true);
+                setTimeout(() => setIsRadarLoading(false), 240);
                 setView('dashboard');
               }} 
               className={`transition cursor-pointer ${view === 'dashboard' ? 'text-[#005A9C] font-extrabold' : 'hover:text-[#005A9C]'}`}
@@ -1252,6 +1256,11 @@ export default function Home() {
                   </div>
 
                   {/* 6 Rich Counter Cards Grid */}
+                  {isRadarLoading ? (
+                    <div className="mt-4">
+                      <CounterGridSkeleton count={6} />
+                    </div>
+                  ) : (
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                     
                     {/* COUNTER 1 */}
@@ -1521,6 +1530,7 @@ export default function Home() {
                     </div>
 
                   </div>
+                  )}
 
                   {/* Sync and Guarantee Note */}
                   <div className="mt-5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
@@ -1629,18 +1639,9 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="pt-1">
-                <button
-                  onClick={() => loginAsDemo('farmer')}
-                  className="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-xl py-2 text-xs font-bold flex items-center justify-center gap-2 transition"
-                >
-                  <span>{t('demoLoginBtn', lang)}</span>
-                </button>
-              </div>
-
               <button
                 onClick={handleOtpSubmit}
-                className="w-full bg-[#005A9C] hover:bg-[#003366] text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2"
+                className="w-full bg-[#005A9C] hover:bg-[#003366] text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2 mt-2 cursor-pointer"
               >
                 <span>{t('getOtpBtn', lang)}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -1669,6 +1670,7 @@ export default function Home() {
           onClose={() => setScannerOpen(false)}
           onVerifiedSuccess={handleVerificationSuccess}
           isLoggedIn={!!currentUser}
+          lang={lang}
         />
       )}
 
