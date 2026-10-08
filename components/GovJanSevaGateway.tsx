@@ -64,8 +64,9 @@ export function GovJanSevaGateway({
   };
 
   const getTalukaDisplayName = (tal: typeof selectedTaluka) => {
-    if (isEn) return tal.officeNameEn || tal.nameEn;
-    return tal.officeNameGu || tal.nameGu;
+    if (isEn) return tal.nameEn;
+    if (isHi || isMr) return `${tal.nameGu} (${tal.nameEn})`;
+    return tal.nameGu;
   };
 
   return (
@@ -142,7 +143,7 @@ export function GovJanSevaGateway({
               <select
                 value={selectedDistrictId}
                 onChange={(e) => handleDistrictChange(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#003366] focus:border-[#005A9C] outline-none shadow-xs"
+                className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#003366] focus:border-[#005A9C] outline-none shadow-xs truncate"
               >
                 {GUJARAT_33_DISTRICTS.map((d) => (
                   <option key={d.id} value={d.id}>
@@ -163,7 +164,7 @@ export function GovJanSevaGateway({
                   triggerHaptic('tap');
                   setSelectedTalukaId(e.target.value);
                 }}
-                className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#003366] focus:border-[#005A9C] outline-none shadow-xs"
+                className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#003366] focus:border-[#005A9C] outline-none shadow-xs truncate"
               >
                 {selectedDistrict.talukas.map((t) => (
                   <option key={t.id} value={t.id}>

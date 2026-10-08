@@ -57,698 +57,631 @@ export interface DistrictItem {
   talukas: TalukaOffice[];
 }
 
+// Standard taluka counters helper according to Gujarat Revenue & Jan Seva norms
+function createStandardTalukaCounters(talukaNameGu: string, talukaNameEn: string): CounterDefinition[] {
+  return [
+    { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Social Welfare & Pension', officerName: 'કે. એમ. ત્રિવેદી', services: ['widow', 'pension', 'divyang', 'scholarship', 'welfare'] },
+    { number: 2, nameGu: 'જન સેવા પ્રમાણપત્રો (આવક/જાતિ)', nameEn: 'Certificates (Income/Caste)', officerName: 'પી. આર. જાડેજા', services: ['income', 'caste', 'ews', 'cremilayer'] },
+    { number: 3, nameGu: 'રેશનકાર્ડ & પુરવઠા સેવા', nameEn: 'Ration Card & Food Supply', officerName: 'એસ. ટી. પટેલ', services: ['ration', 'nfsa', 'bpl'] },
+    { number: 4, nameGu: 'ઈ-ધરા કેન્દ્ર (૭/૧૨ & ખેતી)', nameEn: 'E-Dhara (7/12 & Land Records)', officerName: 'વી. કે. મહેતા', services: ['land', '712', '8a', 'ikhedut', 'agriculture'] },
+    { number: 5, nameGu: 'આધાર કેન્દ્ર (UIDAI બાયોમેટ્રિક)', nameEn: 'Aadhaar Biometric Center', officerName: 'એ. જે. સોલંકી', services: ['aadhaar', 'biometric', 'update'] },
+    { number: 6, nameGu: 'આવાસ યોજના & જનરલ ડેસ્ક', nameEn: 'Housing & General Desk', officerName: 'એન. બી. ચાવડા', services: ['awas', 'housing', 'pmay', 'general'] }
+  ];
+}
+
+// Helper to construct a TalukaOffice
+function createTaluka(
+  id: string, 
+  nameGu: string, 
+  nameEn: string, 
+  customCounters?: CounterDefinition[]
+): TalukaOffice {
+  return {
+    id,
+    nameGu,
+    nameEn,
+    officeNameGu: `${nameGu} - જન સેવા કેન્દ્ર • મામલતદાર કચેરી`,
+    officeNameEn: `${nameEn} - Jan Seva Kendra • Mamlatdar Office`,
+    counters: customCounters || createStandardTalukaCounters(nameGu, nameEn)
+  };
+}
+
+// ============================================================================
+// ALL 33 OFFICIAL DISTRICTS OF GUJARAT & REAL REVENUE TALUKAS
+// ============================================================================
 export const GUJARAT_33_DISTRICTS: DistrictItem[] = [
+  // 1. RAJKOT (રાજકોટ - ૧૪ તાલુકાઓ)
   {
     id: 'rajkot',
     nameGu: 'રાજકોટ',
     nameEn: 'Rajkot',
     headquarters: 'રાજકોટ',
     talukas: [
-      {
-        id: 'gondal',
-        nameGu: 'ગોંડલ',
-        nameEn: 'Gondal',
-        officeNameGu: 'ગોંડલ - જન સેવા કેન્દ્ર • મામલતદાર કચેરી ગોંડલ',
-        officeNameEn: 'Gondal - Jan Seva Kendra • Mamlatdar Office Gondal',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Social Welfare & Pension', officerName: 'કે. એમ. ત્રિવેદી', services: ['widow', 'pension', 'divyang', 'scholarship'] },
-          { number: 2, nameGu: 'જન સેવા પ્રમાણપત્રો (આવક/જાતિ)', nameEn: 'Certificates (Income/Caste)', officerName: 'પી. આર. જાડેજા', services: ['income', 'caste', 'ews', 'cremilayer'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ & પુરવઠા સેવા', nameEn: 'Ration Card & Food Supply', officerName: 'એસ. ટી. પટેલ', services: ['ration', 'nfsa', 'bpl'] },
-          { number: 4, nameGu: 'ઈ-ધરા કેન્દ્ર (૭/૧૨ & ખેતી)', nameEn: 'E-Dhara (7/12 & Land Records)', officerName: 'વી. કે. મહેતા', services: ['land', '712', '8a', 'ikhedut', 'agriculture'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર (બાયોમેટ્રિક)', nameEn: 'Aadhaar Biometric Center', officerName: 'એ. જે. સોલંકી', services: ['aadhaar', 'biometric', 'update'] },
-          { number: 6, nameGu: 'આવાસ & સામાન્ય પૂછપરછ', nameEn: 'Housing Schemes & General Desk', officerName: 'એન. બી. ચાવડા', services: ['awas', 'housing', 'pmay', 'general'] }
-        ]
-      },
-      {
-        id: 'rajkot-west',
-        nameGu: 'રાજકોટ શહેર પશ્ચિમ (નાના મવા)',
-        nameEn: 'Rajkot City West (Nana Mava)',
-        officeNameGu: 'રાજકોટ પશ્ચિમ - મામલતદાર કચેરી જન સેવા કેન્દ્ર (નાના મવા રોડ)',
-        officeNameEn: 'Rajkot West - Mamlatdar Office Jan Seva Kendra (Nana Mava)',
-        counters: [
-          { number: 1, nameGu: 'પ્રમાણપત્ર શાખા (આવક/જાતિ)', nameEn: 'Certificates Desk', officerName: 'એસ. બી. જાડેજા', services: ['income', 'caste', 'ews'] },
-          { number: 2, nameGu: 'આધાર સુપર સેન્ટર', nameEn: 'Aadhaar Center', officerName: 'પી. કે. જોશી', services: ['aadhaar', 'biometric'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ ડેસ્ક', nameEn: 'Ration Desk', officerName: 'એન. આર. વાઘેલા', services: ['ration', 'nfsa'] },
-          { number: 4, nameGu: 'ઈ-ધરા જમીન મહેસૂલ', nameEn: 'E-Dhara Desk', officerName: 'એચ. સી. પંડ્યા', services: ['land', '712'] },
-          { number: 5, nameGu: 'સમાજ સુરક્ષા & પેન્શન', nameEn: 'Social Security', officerName: 'આર. એમ. દવે', services: ['widow', 'pension'] },
-          { number: 6, nameGu: 'સામાન્ય નાગરિક સેવા', nameEn: 'General Services', officerName: 'કે. ટી. મહેતા', services: ['general', 'awas'] }
-        ]
-      },
-      {
-        id: 'rajkot-east',
-        nameGu: 'રાજકોટ શહેર પૂર્વ (આજી વસાહત)',
-        nameEn: 'Rajkot City East (Aji GIDC)',
-        officeNameGu: 'રાજકોટ પૂર્વ - મામલતદાર કચેરી જન સેવા કેન્દ્ર (ભાવનગર રોડ)',
-        officeNameEn: 'Rajkot East - Mamlatdar Office Jan Seva Kendra (Bhavnagar Rd)',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ શાખા', nameEn: 'Social Welfare', officerName: 'એમ. પી. ગોહિલ', services: ['widow', 'pension'] },
-          { number: 2, nameGu: 'આવક & જાતિ પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'બી. એલ. ચાવડા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા & રેશનકાર્ડ', nameEn: 'Civil Supplies', officerName: 'ડી. કે. ઝાલા', services: ['ration', 'nfsa'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ નકલ', nameEn: 'E-Dhara Land', officerName: 'વી. આર. શાહ', services: ['land', '712'] },
-          { number: 5, nameGu: 'આધાર નોંધણી બારી', nameEn: 'Aadhaar Desk', officerName: 'જે. પી. પરમાર', services: ['aadhaar'] }
-        ]
-      },
-      {
-        id: 'rajkot-central',
-        nameGu: 'રાજકોટ સેન્ટ્રલ (કલેક્ટર કચેરી)',
-        nameEn: 'Rajkot Central (Collectorate)',
-        officeNameGu: 'રાજકોટ સેન્ટ્રલ - જિલ્લા કલેક્ટર કચેરી મુખ્ય જન સેવા કેન્દ્ર',
-        officeNameEn: 'Rajkot Central - District Collectorate Main Jan Seva Kendra',
-        counters: [
-          { number: 1, nameGu: 'જિલ્લા મહેસૂલી પ્રમાણપત્રો', nameEn: 'Revenue Desk', officerName: 'એ. એમ. શાહ', services: ['income', 'caste', 'ews'] },
-          { number: 2, nameGu: 'આધાર સુપર સેન્ટર (UIDAI)', nameEn: 'Aadhaar Super Center', officerName: 'વી. ટી. સોલંકી', services: ['aadhaar', 'biometric'] },
-          { number: 3, nameGu: 'જિલ્લા પુરવઠા શાખા', nameEn: 'Food Supplies', officerName: 'જી. પી. પટેલ', services: ['ration', 'nfsa'] },
-          { number: 4, nameGu: 'ઈ-ધરા અપીલ & જમીન રેકોર્ડ્સ', nameEn: 'Land Records RoR', officerName: 'કે. કે. ચાવડા', services: ['land', '712'] },
-          { number: 5, nameGu: 'સમાજ સુરક્ષા & દિવ્યાંગ સહાય', nameEn: 'Divyang & Pension', officerName: 'એન. એસ. જાડેજા', services: ['widow', 'pension', 'divyang'] },
-          { number: 6, nameGu: 'કલેક્ટર અપીલ & પૂછપરછ', nameEn: 'Collectorate Desk', officerName: 'આર. વી. ત્રિવેદી', services: ['general', 'scholarship'] }
-        ]
-      },
-      {
-        id: 'rajkot-rural',
-        nameGu: 'રાજકોટ ગ્રામ્ય',
-        nameEn: 'Rajkot Rural',
-        officeNameGu: 'રાજકોટ ગ્રામ્ય - તાલુકા મામલતદાર કચેરી જન સેવા કેન્દ્ર',
-        officeNameEn: 'Rajkot Rural - Taluka Mamlatdar Office Jan Seva Kendra',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Welfare & Pension', officerName: 'આર. એન. ગોહિલ', services: ['widow', 'pension', 'welfare'] },
-          { number: 2, nameGu: 'આવક & જાતિ પ્રમાણપત્રો', nameEn: 'Certificates (Income/Caste)', officerName: 'ડી. એચ. વાઘેલા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ ડેસ્ક', nameEn: 'Ration Desk', officerName: 'એમ. પી. પંચાલ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા (૭/૧૨ રેકોર્ડ્સ)', nameEn: 'E-Dhara (7/12 Land)', officerName: 'જે. કે. વ્યાસ', services: ['land', '712', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર બાયોમેટ્રિક', nameEn: 'Aadhaar Biometric', officerName: 'એચ. એલ. રાઠોડ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ & ગ્રામ વિકાસ', nameEn: 'Rural Housing Desk', officerName: 'બી. એમ. દવે', services: ['awas', 'pmay'] }
-        ]
-      },
-      {
-        id: 'kotda-sangani',
-        nameGu: 'કોટડા સાંગાણી',
-        nameEn: 'Kotda Sangani',
-        officeNameGu: 'કોટડા સાંગાણી - તાલુકા મામલતદાર કચેરી જન સેવા કેન્દ્ર',
-        officeNameEn: 'Kotda Sangani - Taluka Mamlatdar Office Jan Seva Kendra',
-        counters: [
-          { number: 1, nameGu: 'સામાજિક સુરક્ષા & પેન્શન', nameEn: 'Social Security', officerName: 'એમ. કે. રાઠોડ', services: ['widow', 'pension'] },
-          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ (આવક/જાતિ)', nameEn: 'Certificates', officerName: 'ડી. બી. ઝાલા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ & અન્ન વિતરણ', nameEn: 'Ration Desk', officerName: 'આર. વી. જોશી', services: ['ration'] },
-          { number: 4, nameGu: 'આધાર બાયોમેટ્રિક & અપડેટ', nameEn: 'Aadhaar Desk', officerName: 'પી. કે. પરમાર', services: ['aadhaar'] },
-          { number: 5, nameGu: 'ઈ-ધરા જમીન રેકોર્ડ્સ ૭/૧૨', nameEn: 'E-Dhara Land', officerName: 'વી. એસ. ચૌહાણ', services: ['land', '712', 'ikhedut'] }
-        ]
-      },
-      {
-        id: 'jetpur',
-        nameGu: 'જેતપુર',
-        nameEn: 'Jetpur',
-        officeNameGu: 'જેતપુર - જન સેવા કેન્દ્ર • મામલતદાર કચેરી જેતપુર',
-        officeNameEn: 'Jetpur - Jan Seva Kendra • Mamlatdar Office Jetpur',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Social Welfare', officerName: 'ટી. એસ. શેખ', services: ['welfare', 'pension'] },
-          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'કે. જી. રામાણી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા શાખા', nameEn: 'Food Supply', officerName: 'વી. એમ. બોરીચા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ખેતીવાડી', nameEn: 'E-Dhara Agri', officerName: 'એન. કે. ચોવટિયા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કાઉન્ટર', nameEn: 'Aadhaar Desk', officerName: 'એમ. ડી. જાની', services: ['aadhaar'] },
-          { number: 6, nameGu: 'સામાન્ય સેવા', nameEn: 'General Services', officerName: 'પી. સી. વાળા', services: ['general'] }
-        ]
-      },
-      {
-        id: 'dhoraji',
-        nameGu: 'ધોરાજી',
-        nameEn: 'Dhoraji',
-        officeNameGu: 'ધોરાજી - જન સેવા કેન્દ્ર • મામલતદાર કચેરી ધોરાજી',
-        officeNameEn: 'Dhoraji - Jan Seva Kendra • Mamlatdar Office Dhoraji',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Social Welfare', officerName: 'એચ. આર. પરમાર', services: ['welfare'] },
-          { number: 2, nameGu: 'આવક/જાતિ દાખલા', nameEn: 'Certificates', officerName: 'જે. બી. મકવાણા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા', nameEn: 'Supplies', officerName: 'કે. એમ. પટેલ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા જમીન', nameEn: 'E-Dhara', officerName: 'એસ. કે. જોષી', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'બી. ટી. સોલંકી', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સેવાઓ', nameEn: 'Housing Desk', officerName: 'એ. વી. મહેતા', services: ['awas'] }
-        ]
-      },
-      {
-        id: 'upleta',
-        nameGu: 'ઉપલેટા',
-        nameEn: 'Upleta',
-        officeNameGu: 'ઉપલેટા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી ઉપલેટા',
-        officeNameEn: 'Upleta - Jan Seva Kendra • Mamlatdar Office Upleta',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'બી. એમ. વાળા', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'કે. પી. સોલંકી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા & રેશન', nameEn: 'Supplies', officerName: 'આર. ડી. જાડેજા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ રેકોર્ડ', nameEn: 'E-Dhara', officerName: 'એમ. કે. મહેતા', services: ['land', '712'] },
-          { number: 5, nameGu: 'આધાર બાયોમેટ્રિક', nameEn: 'Aadhaar', officerName: 'એસ. એલ. પરમાર', services: ['aadhaar'] }
-        ]
-      },
-      {
-        id: 'lodhika',
-        nameGu: 'લોધિકા (જીઆઈડીસી)',
-        nameEn: 'Lodhika (GIDC)',
-        officeNameGu: 'લોધિકા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી લોધિકા',
-        officeNameEn: 'Lodhika - Jan Seva Kendra • Mamlatdar Office Lodhika',
-        counters: [
-          { number: 1, nameGu: 'સામાજિક સુરક્ષા શાખા', nameEn: 'Social Welfare', officerName: 'એમ. જે. ગોહિલ', services: ['welfare', 'pension'] },
-          { number: 2, nameGu: 'જન સેવા દાખલાઓ', nameEn: 'Certificates', officerName: 'કે. પી. પરમાર', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ & પુરવઠા', nameEn: 'Ration Desk', officerName: 'ડી. વી. મહેતા', services: ['ration'] },
-          { number: 4, nameGu: 'આધાર સુધારણા કાઉન્ટર', nameEn: 'Aadhaar Desk', officerName: 'આર. એન. ચૌધરી', services: ['aadhaar'] },
-          { number: 5, nameGu: 'ઈ-ધરા જમીન મહેસૂલ', nameEn: 'E-Dhara', officerName: 'બી. એલ. ત્રિવેદી', services: ['land', '712'] }
-        ]
-      },
-      {
-        id: 'jasdan',
-        nameGu: 'જસદણ',
-        nameEn: 'Jasdan',
-        officeNameGu: 'જસદણ - જન સેવા કેન્દ્ર • મામલતદાર કચેરી જસદણ',
-        officeNameEn: 'Jasdan - Jan Seva Kendra • Mamlatdar Office Jasdan',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Social Welfare', officerName: 'ડી. પી. ખાચર', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'આર. એમ. ડાભી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા ડેસ્ક', nameEn: 'Supplies', officerName: 'એન. વી. બારૈયા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'કે. એલ. મિયાત્રા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'એસ. જે. કંટારિયા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ યોજના', nameEn: 'Housing', officerName: 'એમ. કે. ઝાલા', services: ['awas'] }
-        ]
-      },
-      {
-        id: 'vinchhiya',
-        nameGu: 'વીંછીયા',
-        nameEn: 'Vinchhiya',
-        officeNameGu: 'વીંછીયા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી વીંછીયા',
-        officeNameEn: 'Vinchhiya - Jan Seva Kendra • Mamlatdar Office Vinchhiya',
-        counters: [
-          { number: 1, nameGu: 'સામાજિક સુરક્ષા', nameEn: 'Welfare', officerName: 'કે. આર. કોળી', services: ['welfare', 'pension'] },
-          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'પી. ડી. વાળા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ સેવા', nameEn: 'Ration', officerName: 'એમ. એસ. ચાવડા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ જમીન', nameEn: 'E-Dhara', officerName: 'એચ. જી. જોશી', services: ['land', '712'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'બી. એમ. રાઠોડ', services: ['aadhaar'] }
-        ]
-      },
-      {
-        id: 'paddhari',
-        nameGu: 'પડધરી',
-        nameEn: 'Paddhari',
-        officeNameGu: 'પડધરી - જન સેવા કેન્દ્ર • મામલતદાર કચેરી પડધરી',
-        officeNameEn: 'Paddhari - Jan Seva Kendra • Mamlatdar Office Paddhari',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એસ. ટી. જાડેજા', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા વિતરણ', nameEn: 'Certificates', officerName: 'વી. કે. પટેલ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા શાખા', nameEn: 'Ration', officerName: 'આર. એમ. મકવાણા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ખેતીવાડી', nameEn: 'E-Dhara', officerName: 'કે. પી. વ્યાસ', services: ['land', '712'] },
-          { number: 5, nameGu: 'આધાર કાઉન્ટર', nameEn: 'Aadhaar', officerName: 'જે. ડી. ચૌહાણ', services: ['aadhaar'] }
-        ]
-      },
-      {
-        id: 'jamkandorna',
-        nameGu: 'જામકંડોરણા',
-        nameEn: 'Jamkandorna',
-        officeNameGu: 'જામકંડોરણા - જન સેવા કેન્દ્ર • મામલતદાર કચેરી જામકંડોરણા',
-        officeNameEn: 'Jamkandorna - Jan Seva Kendra • Mamlatdar Office Jamkandorna',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Welfare', officerName: 'એ. કે. રાદડિયા', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'એમ. પી. જાડેજા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ & અન્ન પુરવઠા', nameEn: 'Ration', officerName: 'ડી. એસ. પટેલ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ નકલ', nameEn: 'E-Dhara', officerName: 'વી. એલ. સોજીત્રા', services: ['land', '712'] },
-          { number: 5, nameGu: 'આધાર સુવિધા ડેસ્ક', nameEn: 'Aadhaar', officerName: 'પી. કે. મોરડિયા', services: ['aadhaar'] }
-        ]
-      }
+      createTaluka('gondal', 'ગોંડલ', 'Gondal'),
+      createTaluka('rajkot-west', 'રાજકોટ શહેર પશ્ચિમ (નાના મવા)', 'Rajkot City West (Nana Mava)'),
+      createTaluka('rajkot-east', 'રાજકોટ શહેર પૂર્વ (આજી)', 'Rajkot City East (Aji)'),
+      createTaluka('rajkot-central', 'રાજકોટ સેન્ટ્રલ (કલેક્ટર કચેરી)', 'Rajkot Central (Collectorate)'),
+      createTaluka('rajkot-rural', 'રાજકોટ ગ્રામ્ય', 'Rajkot Rural'),
+      createTaluka('kotda-sangani', 'કોટડા સાંગાણી', 'Kotda Sangani'),
+      createTaluka('jetpur', 'જેતપુર', 'Jetpur'),
+      createTaluka('dhoraji', 'ધોરાજી', 'Dhoraji'),
+      createTaluka('upleta', 'ઉપલેટા', 'Upleta'),
+      createTaluka('lodhika', 'લોધિકા (જીઆઈડીસી)', 'Lodhika (GIDC)'),
+      createTaluka('jasdan', 'જસદણ', 'Jasdan'),
+      createTaluka('vinchhiya', 'વીંછીયા', 'Vinchhiya'),
+      createTaluka('paddhari', 'પડધરી', 'Paddhari'),
+      createTaluka('jamkandorna', 'જામકંડોરણા', 'Jamkandorna')
     ]
   },
+
+  // 2. AHMEDABAD (અમદાવાદ - ૧૩ તાલુકાઓ)
   {
     id: 'ahmedabad',
     nameGu: 'અમદાવાદ',
     nameEn: 'Ahmedabad',
     headquarters: 'અમદાવાદ',
     talukas: [
-      {
-        id: 'ahmedabad-city-west',
-        nameGu: 'અમદાવાદ પશ્ચિમ',
-        nameEn: 'Ahmedabad West',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી પશ્ચિમ અમદાવાદ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Ahmedabad West',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ & પેન્શન', nameEn: 'Social Welfare', officerName: 'એ. પી. શાહ', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા બારી (આવક/જાતિ)', nameEn: 'Certificates Desk', officerName: 'આર. કે. દેસાઈ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ સેવાઓ', nameEn: 'Ration Desk', officerName: 'જે. એમ. પટેલ', services: ['ration'] },
-          { number: 4, nameGu: 'જમીન મહેસૂલ શાખા', nameEn: 'Revenue Desk', officerName: 'પી. એલ. ત્રિવેદી', services: ['land', '712'] },
-          { number: 5, nameGu: 'બાયોમેટ્રિક આધાર કેન્દ્ર', nameEn: 'UIDAI Center', officerName: 'કે. એન. સોની', services: ['aadhaar'] },
-          { number: 6, nameGu: 'PMAY શહેરી આવાસ', nameEn: 'PMAY Urban', officerName: 'એસ. બી. મેવાડા', services: ['awas'] }
-        ]
-      },
-      {
-        id: 'daskroi',
-        nameGu: 'દસ્ક્રોઈ',
-        nameEn: 'Daskroi',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી દસ્ક્રોઈ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Daskroi',
-        counters: [
-          { number: 1, nameGu: 'સમાજ સુરક્ષા', nameEn: 'Social Security', officerName: 'એચ. કે. ઠાકોર', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'એમ. આર. રાવળ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા વિતરણ', nameEn: 'Supplies', officerName: 'બી. એસ. પ્રજાપતિ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'વી. ટી. પટેલ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'જે. એસ. ચૌહાણ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સેવાઓ', nameEn: 'Housing', officerName: 'ડી. એન. પંડ્યા', services: ['awas'] }
-        ]
-      },
-      {
-        id: 'sanand',
-        nameGu: 'સાણંદ',
-        nameEn: 'Sanand',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી સાણંદ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Sanand',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'કે. બી. વાઘેલા', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા બારી', nameEn: 'Certificates', officerName: 'એન. પી. જોશી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ', nameEn: 'Ration', officerName: 'એસ. એમ. પટેલ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ખેતી', nameEn: 'E-Dhara Land', officerName: 'પી. કે. બારોટ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'એ. આર. પરમાર', services: ['aadhaar'] },
-          { number: 6, nameGu: 'સામાન્ય સેવાઓ', nameEn: 'General', officerName: 'ટી. જે. વણકર', services: ['general'] }
-        ]
-      }
+      createTaluka('ahmedabad-city-west', 'અમદાવાદ પશ્ચિમ (ઉસ્માનપુરા)', 'Ahmedabad West (Usmanpura)'),
+      createTaluka('ahmedabad-city-east', 'અમદાવાદ પૂર્વ (વસ્ત્રાલ)', 'Ahmedabad East (Vastral)'),
+      createTaluka('ahmedabad-city-south', 'અમદાવાદ દક્ષિણ (મણિનગર)', 'Ahmedabad South (Maninagar)'),
+      createTaluka('ahmedabad-city-north', 'અમદાવાદ ઉત્તર (ચાંદખેડા)', 'Ahmedabad North (Chandkheda)'),
+      createTaluka('daskroi', 'દસ્ક્રોઈ', 'Daskroi'),
+      createTaluka('sanand', 'સાણંદ', 'Sanand'),
+      createTaluka('dholka', 'ધોળકા', 'Dholka'),
+      createTaluka('dhandhuka', 'ધંધુકા', 'Dhandhuka'),
+      createTaluka('bavla', 'બાવળા', 'Bavla'),
+      createTaluka('viramgam', 'વિરમગામ', 'Viramgam'),
+      createTaluka('mandal', 'માંડલ', 'Mandal'),
+      createTaluka('detroj', 'દેત્રોજ-રામપુરા', 'Detroj-Rampura'),
+      createTaluka('dholera', 'ધોલેરા', 'Dholera')
     ]
   },
+
+  // 3. SURAT (સુરત - ૧૨ તાલુકાઓ)
   {
     id: 'surat',
     nameGu: 'સુરત',
     nameEn: 'Surat',
     headquarters: 'સુરત',
     talukas: [
-      {
-        id: 'surat-city',
-        nameGu: 'સુરત શહેર (મજૂરા)',
-        nameEn: 'Surat City (Majura)',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી મજૂરા સુરત',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Majura Surat',
-        counters: [
-          { number: 1, nameGu: 'સમાજ સુરક્ષા & પેન્શન', nameEn: 'Social Security', officerName: 'જે. કે. મોદી', services: ['welfare'] },
-          { number: 2, nameGu: 'આવક/જાતિ પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'વી. એમ. પટેલ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ ડેસ્ક', nameEn: 'Ration Desk', officerName: 'એચ. પી. કાપડિયા', services: ['ration'] },
-          { number: 4, nameGu: 'જમીન મહેસૂલ શાખા', nameEn: 'Revenue Desk', officerName: 'ડી. એલ. ચૌધરી', services: ['land'] },
-          { number: 5, nameGu: 'બાયોમેટ્રિક આધાર', nameEn: 'Aadhaar Desk', officerName: 'એસ. એન. ગામીત', services: ['aadhaar'] },
-          { number: 6, nameGu: 'શહેરી આવાસ (PMAY)', nameEn: 'PMAY Urban', officerName: 'પી. આર. ગાંધી', services: ['awas'] }
-        ]
-      },
-      {
-        id: 'bardoli',
-        nameGu: 'બારડોલી',
-        nameEn: 'Bardoli',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી બારડોલી',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Bardoli',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એન. બી. પટેલ', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્ર વિતરણ', nameEn: 'Certificates', officerName: 'કે. આર. રાઠોડ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા સેવા', nameEn: 'Supplies', officerName: 'આર. ટી. વસાવા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ ખેતી', nameEn: 'E-Dhara Land', officerName: 'એમ. પી. દેસાઈ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'જે. એચ. મહેતા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ યોજના', nameEn: 'Housing', officerName: 'એસ. કે. હળપતિ', services: ['awas'] }
-        ]
-      }
+      createTaluka('surat-city-majura', 'સુરત શહેર (મજૂરા)', 'Surat City (Majura)'),
+      createTaluka('surat-city-adajan', 'સુરત શહેર (અડાજણ)', 'Surat City (Adajan)'),
+      createTaluka('surat-city-katargam', 'સુરત શહેર (કતારગામ)', 'Surat City (Katargam)'),
+      createTaluka('surat-choryasi', 'સુરત ચોર્યાસી', 'Surat Choryasi'),
+      createTaluka('olpad', 'ઓલપાડ', 'Olpad'),
+      createTaluka('kamrej', 'કામરેજ', 'Kamrej'),
+      createTaluka('bardoli', 'બારડોલી', 'Bardoli'),
+      createTaluka('palsana', 'પલસાણા', 'Palsana'),
+      createTaluka('mandvi-surat', 'માંડવી', 'Mandvi (Surat)'),
+      createTaluka('mangrol-surat', 'માંગરોળ', 'Mangrol (Surat)'),
+      createTaluka('mahuva-surat', 'મહુવા', 'Mahuva (Surat)'),
+      createTaluka('umarpada', 'ઉમરપાડા', 'Umarpada')
     ]
   },
+
+  // 4. VADODARA (વડોદરા - ૧૨ તાલુકાઓ)
   {
     id: 'vadodara',
     nameGu: 'વડોદરા',
     nameEn: 'Vadodara',
     headquarters: 'વડોદરા',
     talukas: [
-      {
-        id: 'vadodara-west',
-        nameGu: 'વડોદરા પશ્ચિમ (અકોટા)',
-        nameEn: 'Vadodara West (Akota)',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી અકોટા વડોદરા',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Akota Vadodara',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ પેન્શન', nameEn: 'Welfare', officerName: 'એ. એમ. પઠાણ', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો (આવક/જાતિ)', nameEn: 'Certificates', officerName: 'કે. પી. પંડ્યા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ શાખા', nameEn: 'Ration', officerName: 'વી. એસ. શાહ', services: ['ration'] },
-          { number: 4, nameGu: 'મહેસૂલ & ઈ-ધરા', nameEn: 'E-Dhara', officerName: 'પી. એન. જોષી', services: ['land'] },
-          { number: 5, nameGu: 'આધાર બાયોમેટ્રિક', nameEn: 'Aadhaar', officerName: 'આર. કે. પરમાર', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ & જનરલ', nameEn: 'Housing Desk', officerName: 'એસ. એલ. દરબાર', services: ['awas'] }
-        ]
-      }
+      createTaluka('vadodara-west', 'વડોદરા પશ્ચિમ (અકોટા)', 'Vadodara West (Akota)'),
+      createTaluka('vadodara-east', 'વડોદરા પૂર્વ (વાઘોડિયા રોડ)', 'Vadodara East (Vaghodia Rd)'),
+      createTaluka('vadodara-north', 'વડોદરા ઉત્તર (સમા)', 'Vadodara North (Sama)'),
+      createTaluka('vadodara-south', 'વડોદરા દક્ષિણ (માંજલપુર)', 'Vadodara South (Manjalpur)'),
+      createTaluka('vadodara-rural', 'વડોદરા ગ્રામ્ય', 'Vadodara Rural'),
+      createTaluka('padra', 'પાદરા', 'Padra'),
+      createTaluka('dabhoi', 'ડભોઈ', 'Dabhoi'),
+      createTaluka('karjan', 'કરજણ', 'Karjan'),
+      createTaluka('vaghodia', 'વાઘોડિયા', 'Vaghodia'),
+      createTaluka('savli', 'સાવલી', 'Savli'),
+      createTaluka('desar', 'દેસર', 'Desar'),
+      createTaluka('shinor', 'શિનોર', 'Shinor')
     ]
   },
+
+  // 5. GANDHINAGAR (ગાંધીનગર - ૪ તાલુકાઓ)
   {
     id: 'gandhinagar',
     nameGu: 'ગાંધીનગર',
     nameEn: 'Gandhinagar',
     headquarters: 'ગાંધીનગર',
     talukas: [
-      {
-        id: 'gandhinagar-city',
-        nameGu: 'ગાંધીનગર શહેર',
-        nameEn: 'Gandhinagar City',
-        officeNameGu: 'જન સેવા કેન્દ્ર • કલેક્ટર કચેરી સંકુલ ગાંધીનગર',
-        officeNameEn: 'Jan Seva Kendra • Collectorate Complex Gandhinagar',
-        counters: [
-          { number: 1, nameGu: 'સમાજ સુરક્ષા શાખા', nameEn: 'Social Welfare', officerName: 'એચ. એન. બ્રહ્મભટ્ટ', services: ['welfare'] },
-          { number: 2, nameGu: 'ડિજિટલ પ્રમાણપત્રો', nameEn: 'Digital Certificates', officerName: 'જે. આર. ચૌધરી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'અન્ન & નાગરિક પુરવઠા', nameEn: 'Food Supplies', officerName: 'કે. કે. પટેલ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા & જમીન સુધારણા', nameEn: 'E-Dhara Land', officerName: 'વી. બી. પ્રજાપતિ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'UIDAI આધાર કેન્દ્ર', nameEn: 'UIDAI Center', officerName: 'પી. એમ. રાવળ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'સ્ટેટ પ્રોટોકોલ & આવાસ', nameEn: 'State Housing Desk', officerName: 'એમ. ટી. વાઘેલા', services: ['awas'] }
-        ]
-      }
+      createTaluka('gandhinagar-city', 'ગાંધીનગર શહેર (સેક્ટર ૧૧)', 'Gandhinagar City (Sec 11)'),
+      createTaluka('kalol', 'કલોલ', 'Kalol'),
+      createTaluka('dahegam', 'દહેગામ', 'Dahegam'),
+      createTaluka('mansa', 'માણસા', 'Mansa')
     ]
   },
+
+  // 6. BHAVNAGAR (ભાવનગર - ૧૧ તાલુકાઓ)
   {
     id: 'bhavnagar',
     nameGu: 'ભાવનગર',
     nameEn: 'Bhavnagar',
     headquarters: 'ભાવનગર',
     talukas: [
-      {
-        id: 'bhavnagar-city',
-        nameGu: 'ભાવનગર શહેર',
-        nameEn: 'Bhavnagar City',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી ભાવનગર',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Bhavnagar',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Social Welfare', officerName: 'ડી. પી. ગોહિલ', services: ['welfare'] },
-          { number: 2, nameGu: 'આવક/જાતિ દાખલા', nameEn: 'Certificates', officerName: 'કે. એલ. જાડેજા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ શાખા', nameEn: 'Ration Supplies', officerName: 'એન. વી. ત્રિવેદી', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'આર. એમ. મોરી', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar Desk', officerName: 'પી. જે. સરવૈયા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સહાય', nameEn: 'Housing Desk', officerName: 'એસ. ટી. કાંબડ', services: ['awas'] }
-        ]
-      }
+      createTaluka('bhavnagar-city', 'ભાવનગર શહેર', 'Bhavnagar City'),
+      createTaluka('bhavnagar-rural', 'ભાવનગર ગ્રામ્ય', 'Bhavnagar Rural'),
+      createTaluka('sihor', 'સિહોર', 'Sihor'),
+      createTaluka('palitana', 'પાલિતાણા', 'Palitana'),
+      createTaluka('talaja', 'તળાજા', 'Talaja'),
+      createTaluka('mahuva-bhavnagar', 'મહુવા', 'Mahuva (Bhavnagar)'),
+      createTaluka('gariadhar', 'ગારીયાધાર', 'Gariadhar'),
+      createTaluka('ghogha', 'ઘોઘા', 'Ghogha'),
+      createTaluka('umrala', 'ઉમરાળા', 'Umrala'),
+      createTaluka('vallabhipur', 'વલ્લભીપુર', 'Vallabhipur'),
+      createTaluka('jesar', 'જેસર', 'Jesar')
     ]
   },
+
+  // 7. JAMNAGAR (જામનગર - ૭ તાલુકાઓ)
   {
     id: 'jamnagar',
     nameGu: 'જામનગર',
     nameEn: 'Jamnagar',
     headquarters: 'જામનગર',
     talukas: [
-      {
-        id: 'jamnagar-city',
-        nameGu: 'જામનગર શહેર',
-        nameEn: 'Jamnagar City',
-        officeNameGu: 'જન સેવા કેન્દ્ર • લાલ બંગલો મામલતદાર કચેરી જામનગર',
-        officeNameEn: 'Jan Seva Kendra • Lal Bunglow Mamlatdar Jamnagar',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એમ. કે. જાડેજા', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા બારી', nameEn: 'Certificates', officerName: 'પી. એન. ભટ્ટ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા', nameEn: 'Supplies', officerName: 'આર. કે. પટેલ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા', nameEn: 'E-Dhara', officerName: 'જે. એસ. વાળા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'વી. એમ. સોઢા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ યોજના', nameEn: 'Housing', officerName: 'કે. એચ. ચુડાસમા', services: ['awas'] }
-        ]
-      }
+      createTaluka('jamnagar-city', 'જામનગર શહેર (લાલ બંગલો)', 'Jamnagar City (Lal Bunglow)'),
+      createTaluka('jamnagar-rural', 'જામનગર ગ્રામ્ય', 'Jamnagar Rural'),
+      createTaluka('lalpur', 'લાલપુર', 'Lalpur'),
+      createTaluka('jamjodhpur', 'જામજોધપુર', 'Jamjodhpur'),
+      createTaluka('dhrol', 'ધ્રોલ', 'Dhrol'),
+      createTaluka('jodiya', 'જોડિયા', 'Jodiya'),
+      createTaluka('kalavad', 'કાલાવડ', 'Kalavad')
     ]
   },
+
+  // 8. JUNAGADH (જૂનાગઢ - ૧૦ તાલુકાઓ)
   {
     id: 'junagadh',
     nameGu: 'જૂનાગઢ',
     nameEn: 'Junagadh',
     headquarters: 'જૂનાગઢ',
     talukas: [
-      {
-        id: 'junagadh-city',
-        nameGu: 'જૂનાગઢ શહેર',
-        nameEn: 'Junagadh City',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી જૂનાગઢ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Junagadh',
-        counters: [
-          { number: 1, nameGu: 'સમાજ સુરક્ષા', nameEn: 'Welfare', officerName: 'બી. એચ. વાળા', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'કે. વી. સોલંકી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ', nameEn: 'Ration', officerName: 'એમ. એન. જોશી', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'આર. પી. ચાવડા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'એ. કે. બાંભણિયા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સહાય', nameEn: 'Housing', officerName: 'એસ. એમ. પરમાર', services: ['awas'] }
-        ]
-      }
+      createTaluka('junagadh-city', 'જૂનાગઢ શહેર', 'Junagadh City'),
+      createTaluka('junagadh-rural', 'જૂનાગઢ ગ્રામ્ય', 'Junagadh Rural'),
+      createTaluka('keshod', 'કેશોદ', 'Keshod'),
+      createTaluka('mangrol-junagadh', 'માંગરોળ', 'Mangrol (Junagadh)'),
+      createTaluka('manavadar', 'માણાવદર', 'Manavadar'),
+      createTaluka('visavadar', 'વિસાવદર', 'Visavadar'),
+      createTaluka('malia-hatina', 'માળિયા હાટીના', 'Malia Hatina'),
+      createTaluka('vanthali', 'વંથલી', 'Vanthali'),
+      createTaluka('mendarda', 'મેંદરડા', 'Mendarda'),
+      createTaluka('bhesan', 'ભેસાણ', 'Bhesan')
     ]
   },
+
+  // 9. KUTCH (કચ્છ - ૧૦ તાલુકાઓ)
   {
     id: 'kutch',
     nameGu: 'કચ્છ',
     nameEn: 'Kutch',
     headquarters: 'ભુજ',
     talukas: [
-      {
-        id: 'bhuj',
-        nameGu: 'ભુજ',
-        nameEn: 'Bhuj',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી ભુજ-કચ્છ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Bhuj-Kutch',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ & સરહદી સહાય', nameEn: 'Welfare & Border Grants', officerName: 'એ. જે. જાડેજા', services: ['welfare'] },
-          { number: 2, nameGu: 'આવક/જાતિ પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'કે. એમ. મહેશ્વરી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા સેવા', nameEn: 'Supplies', officerName: 'વી. ટી. ગઢવી', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા જમીન મહેસૂલ', nameEn: 'E-Dhara Land', officerName: 'પી. એલ. આહીર', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'બાયોમેટ્રિક આધાર', nameEn: 'Aadhaar', officerName: 'એચ. કે. છાંગા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'કચ્છ આવાસ પુનર્વસન', nameEn: 'Housing Desk', officerName: 'એન. એસ. ભટ્ટી', services: ['awas'] }
-        ]
-      }
+      createTaluka('bhuj', 'ભુજ', 'Bhuj'),
+      createTaluka('gandhidham', 'ગાંધીધામ', 'Gandhidham'),
+      createTaluka('anjar', 'અંજાર', 'Anjar'),
+      createTaluka('mandvi-kutch', 'માંડવી (કચ્છ)', 'Mandvi (Kutch)'),
+      createTaluka('mundra', 'મુંદ્રા', 'Mundra'),
+      createTaluka('nakhatrana', 'નખત્રાણા', 'Nakhatrana'),
+      createTaluka('abdasa', 'અબડાસા', 'Abdasa'),
+      createTaluka('lakhpat', 'લખપત', 'Lakhpat'),
+      createTaluka('rapar', 'રાપર', 'Rapar'),
+      createTaluka('bhachau', 'ભચાઉ', 'Bhachau')
     ]
   },
+
+  // 10. ANAND (આણંદ - ૮ તાલુકાઓ)
   {
     id: 'anand',
     nameGu: 'આણંદ',
     nameEn: 'Anand',
     headquarters: 'આણંદ',
     talukas: [
-      {
-        id: 'anand-city',
-        nameGu: 'આણંદ',
-        nameEn: 'Anand',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી આણંદ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Anand',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'આર. એમ. પટેલ', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'કે. કે. સોલંકી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ', nameEn: 'Ration', officerName: 'જે. પી. પરમાર', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'વી. એન. પંડ્યા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'એસ. બી. શાહ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ ડેસ્ક', nameEn: 'Housing', officerName: 'એમ. એચ. રોહિત', services: ['awas'] }
-        ]
-      }
+      createTaluka('anand-city', 'આણંદ', 'Anand'),
+      createTaluka('petlad', 'પેટલાદ', 'Petlad'),
+      createTaluka('khambhat', 'ખંભાત', 'Khambhat'),
+      createTaluka('borsad', 'બોરસદ', 'Borsad'),
+      createTaluka('umreth', 'ઉમરેઠ', 'Umreth'),
+      createTaluka('anklav', 'આંકલાવ', 'Anklav'),
+      createTaluka('sojitra', 'સોજિત્રા', 'Sojitra'),
+      createTaluka('tarapur', 'તારાપુર', 'Tarapur')
     ]
   },
-  {
-    id: 'mehsana',
-    nameGu: 'મહેસાણા',
-    nameEn: 'Mehsana',
-    headquarters: 'મહેસાણા',
-    talukas: [
-      {
-        id: 'mehsana-city',
-        nameGu: 'મહેસાણા',
-        nameEn: 'Mehsana',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી મહેસાણા',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Mehsana',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'પી. કે. ચૌધરી', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા બારી', nameEn: 'Certificates', officerName: 'એન. જે. પટેલ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા', nameEn: 'Supplies', officerName: 'કે. વી. પ્રજાપતિ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ખેતીવાડી', nameEn: 'E-Dhara', officerName: 'આર. બી. વ્યાસ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'એ. ટી. રાવળ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સેવા', nameEn: 'Housing', officerName: 'બી. એમ. ઠાકોર', services: ['awas'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'banaskantha',
-    nameGu: 'બનાસકાંઠા',
-    nameEn: 'Banaskantha',
-    headquarters: 'પાલનપુર',
-    talukas: [
-      {
-        id: 'palanpur',
-        nameGu: 'પાલનપુર',
-        nameEn: 'Palanpur',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી પાલનપુર',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Palanpur',
-        counters: [
-          { number: 1, nameGu: 'સમાજ સુરક્ષા & આદિજાતિ', nameEn: 'Social Welfare', officerName: 'વી. કે. જોશી', services: ['welfare'] },
-          { number: 2, nameGu: 'આવક/જાતિ પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'એમ. પી. ચૌધરી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા શાખા', nameEn: 'Food Supplies', officerName: 'આર. એસ. રાજપૂત', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨ કિસાન', nameEn: 'E-Dhara Land', officerName: 'જે. એન. પટેલ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર બાયોમેટ્રિક', nameEn: 'Aadhaar', officerName: 'કે. એલ. બારોટ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'પીએમ આવાસ ગ્રામીણ', nameEn: 'PMAY Gramin', officerName: 'એસ. ડી. વાઘેલા', services: ['awas'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'morbi',
-    nameGu: 'મોરબી',
-    nameEn: 'Morbi',
-    headquarters: 'મોરબી',
-    talukas: [
-      {
-        id: 'morbi-city',
-        nameGu: 'મોરબી',
-        nameEn: 'Morbi',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી મોરબી',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Morbi',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'કે. એચ. પટેલ', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'આર. વી. ઝાલા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા ડેસ્ક', nameEn: 'Supplies', officerName: 'એમ. એસ. ડાભી', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'એન. પી. કાલરિયા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'પી. કે. જાડેજા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સેવાઓ', nameEn: 'Housing', officerName: 'વી. એલ. વડગામા', services: ['awas'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'surendranagar',
-    nameGu: 'સુરેન્દ્રનગર',
-    nameEn: 'Surendranagar',
-    headquarters: 'સુરેન્દ્રનગર',
-    talukas: [
-      {
-        id: 'wadhwan',
-        nameGu: 'વઢવાણ',
-        nameEn: 'Wadhwan',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી વઢવાણ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Wadhwan',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એચ. એમ. રાણા', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'કે. બી. મકવાણા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા', nameEn: 'Supplies', officerName: 'જે. આર. મોરી', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'એસ. એન. પરમાર', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'બી. ટી. પંડ્યા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ યોજના', nameEn: 'Housing', officerName: 'એ. પી. શાહ', services: ['awas'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'amreli',
-    nameGu: 'અમરેલી',
-    nameEn: 'Amreli',
-    headquarters: 'અમરેલી',
-    talukas: [
-      {
-        id: 'amreli-city',
-        nameGu: 'અમરેલી',
-        nameEn: 'Amreli',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી અમરેલી',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Amreli',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એમ. આર. ભુવા', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા બારી', nameEn: 'Certificates', officerName: 'વી. કે. ગોંડલિયા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા', nameEn: 'Supplies', officerName: 'પી. એસ. કાછડિયા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'કે. ટી. વઘાસિયા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'એન. એમ. સાવલિયા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સેવા', nameEn: 'Housing', officerName: 'આર. ડી. સુહાગિયા', services: ['awas'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'navsari',
-    nameGu: 'નવસારી',
-    nameEn: 'Navsari',
-    headquarters: 'નવસારી',
-    talukas: [
-      {
-        id: 'navsari-city',
-        nameGu: 'નવસારી',
-        nameEn: 'Navsari',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી નવસારી',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Navsari',
-        counters: [
-          { number: 1, nameGu: 'સમાજ સુરક્ષા', nameEn: 'Welfare', officerName: 'જે. એમ. હળપતિ', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'કે. પી. પટેલ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા ડેસ્ક', nameEn: 'Supplies', officerName: 'આર. બી. નાયક', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'એચ. એન. દેસાઈ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર કેન્દ્ર', nameEn: 'Aadhaar', officerName: 'વી. એલ. રાઠોડ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ સેવાઓ', nameEn: 'Housing', officerName: 'એમ. એસ. વસાવા', services: ['awas'] }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'valsad',
-    nameGu: 'વલસાડ',
-    nameEn: 'Valsad',
-    headquarters: 'વલસાડ',
-    talukas: [
-      {
-        id: 'valsad-city',
-        nameGu: 'વલસાડ',
-        nameEn: 'Valsad',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી વલસાડ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Valsad',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એન. કે. પટેલ', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા બારી', nameEn: 'Certificates', officerName: 'પી. એમ. ભંડારી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા શાખા', nameEn: 'Supplies', officerName: 'એસ. ટી. ચૌધરી', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'કે. જે. દેસાઈ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'આર. એચ. આહીર', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ ડેસ્ક', nameEn: 'Housing', officerName: 'બી. પી. ટંડેલ', services: ['awas'] }
-        ]
-      }
-    ]
-  },
+
+  // 11. KHEDA (ખેડા - ૧૦ તાલુકાઓ)
   {
     id: 'kheda',
     nameGu: 'ખેડા',
     nameEn: 'Kheda',
     headquarters: 'નડિયાદ',
     talukas: [
-      {
-        id: 'nadiad',
-        nameGu: 'નડિયાદ',
-        nameEn: 'Nadiad',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી નડિયાદ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Nadiad',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એ. કે. વાઘેલા', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'કે. આર. જોશી', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'રેશનકાર્ડ', nameEn: 'Ration', officerName: 'એમ. પી. પટેલ', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા', nameEn: 'E-Dhara', officerName: 'વી. જે. શાહ', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર', nameEn: 'Aadhaar', officerName: 'પી. ડી. ચૌહાણ', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ', nameEn: 'Housing', officerName: 'એસ. એન. રાવળ', services: ['awas'] }
-        ]
-      }
+      createTaluka('nadiad', 'નડિયાદ', 'Nadiad'),
+      createTaluka('kheda-city', 'ખેડા', 'Kheda'),
+      createTaluka('kapadvanj', 'કપડવંજ', 'Kapadvanj'),
+      createTaluka('mahudha', 'મહુધા', 'Mahudha'),
+      createTaluka('matar', 'માતર', 'Matar'),
+      createTaluka('mehmedabad', 'મહેમદાવાદ', 'Mehmedabad'),
+      createTaluka('thasra', 'ઠાસરા', 'Thasra'),
+      createTaluka('galteshwar', 'ગળતેશ્વર', 'Galteshwar'),
+      createTaluka('vaso', 'વસો', 'Vaso'),
+      createTaluka('kathlal', 'કઠલાલ', 'Kathlal')
     ]
   },
+
+  // 12. MEHSANA (મહેસાણા - ૧૦ તાલુકાઓ)
+  {
+    id: 'mehsana',
+    nameGu: 'મહેસાણા',
+    nameEn: 'Mehsana',
+    headquarters: 'મહેસાણા',
+    talukas: [
+      createTaluka('mehsana-city', 'મહેસાણા', 'Mehsana'),
+      createTaluka('kadi', 'કડી', 'Kadi'),
+      createTaluka('visnagar', 'વિસનગર', 'Visnagar'),
+      createTaluka('vadnagar', 'વડનગર', 'Vadnagar'),
+      createTaluka('vijapur', 'વિજાપુર', 'Vijapur'),
+      createTaluka('kheralu', 'ખેરાલુ', 'Kheralu'),
+      createTaluka('unjha', 'ઊંઝા', 'Unjha'),
+      createTaluka('becharaji', 'બેચરાજી', 'Becharaji'),
+      createTaluka('satlasana', 'સતલાસણા', 'Satlasana'),
+      createTaluka('jotana', 'જોટાણા', 'Jotana')
+    ]
+  },
+
+  // 13. BANASKANTHA (બનાસકાંઠા - ૧૪ તાલુકાઓ)
+  {
+    id: 'banaskantha',
+    nameGu: 'બનાસકાંઠા',
+    nameEn: 'Banaskantha',
+    headquarters: 'પાલનપુર',
+    talukas: [
+      createTaluka('palanpur', 'પાલનપુર', 'Palanpur'),
+      createTaluka('deesa', 'ડીસા', 'Deesa'),
+      createTaluka('vadgam', 'વડગામ', 'Vadgam'),
+      createTaluka('danta', 'દાંતા', 'Danta'),
+      createTaluka('amirgadh', 'અમીરગઢ', 'Amirgadh'),
+      createTaluka('dantiwada', 'દાંતીવાડા', 'Dantiwada'),
+      createTaluka('dhanera', 'ધાનેરા', 'Dhanera'),
+      createTaluka('tharad', 'થરાદ', 'Tharad'),
+      createTaluka('vav', 'વાવ', 'Vav'),
+      createTaluka('suigam', 'સુઈગામ', 'Suigam'),
+      createTaluka('bhabhar', 'ભાભર', 'Bhabhar'),
+      createTaluka('deodar', 'દિયોદર', 'Deodar'),
+      createTaluka('kankrej', 'કાંકરેજ', 'Kankrej'),
+      createTaluka('lakhani', 'લાખણી', 'Lakhani')
+    ]
+  },
+
+  // 14. SABARKANTHA (સાબરકાંઠા - ૮ તાલુકાઓ)
+  {
+    id: 'sabarkantha',
+    nameGu: 'સાબરકાંઠા',
+    nameEn: 'Sabarkantha',
+    headquarters: 'હિંમતનગર',
+    talukas: [
+      createTaluka('himatnagar', 'હિંમતનગર', 'Himatnagar'),
+      createTaluka('idar', 'ઈડર', 'Idar'),
+      createTaluka('prantij', 'પ્રાંતિજ', 'Prantij'),
+      createTaluka('talod', 'તલોદ', 'Talod'),
+      createTaluka('khedbrahma', 'ખેડબ્રહ્મા', 'Khedbrahma'),
+      createTaluka('vadali', 'વડાલી', 'Vadali'),
+      createTaluka('vijaynagar', 'વિજયનગર', 'Vijaynagar'),
+      createTaluka('poshina', 'પોશીના', 'Poshina')
+    ]
+  },
+
+  // 15. PATAN (પાટણ - ૯ તાલુકાઓ)
   {
     id: 'patan',
     nameGu: 'પાટણ',
     nameEn: 'Patan',
     headquarters: 'પાટણ',
     talukas: [
-      {
-        id: 'patan-city',
-        nameGu: 'પાટણ',
-        nameEn: 'Patan',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી પાટણ',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Patan',
-        counters: [
-          { number: 1, nameGu: 'સમાજ સુરક્ષા', nameEn: 'Welfare', officerName: 'આર. કે. પ્રજાપતિ', services: ['welfare'] },
-          { number: 2, nameGu: 'પ્રમાણપત્રો', nameEn: 'Certificates', officerName: 'કે. એમ. પટેલ', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા', nameEn: 'Supplies', officerName: 'એન. એસ. ઠાકોર', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા', nameEn: 'E-Dhara', officerName: 'જે. વી. મોદી', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર', nameEn: 'Aadhaar', officerName: 'વી. ટી. જોશી', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ', nameEn: 'Housing', officerName: 'પી. એચ. દવે', services: ['awas'] }
-        ]
-      }
+      createTaluka('patan-city', 'પાટણ', 'Patan'),
+      createTaluka('siddhpur', 'સિદ્ધપુર', 'Siddhpur'),
+      createTaluka('chanasma', 'ચાણસ્મા', 'Chanasma'),
+      createTaluka('harij', 'હારીજ', 'Harij'),
+      createTaluka('radhanpur', 'રાધનપુર', 'Radhanpur'),
+      createTaluka('sami', 'સમી', 'Sami'),
+      createTaluka('shankheshwar', 'શંખેશ્વર', 'Shankheshwar'),
+      createTaluka('santalpur', 'સાંતલપુર', 'Santalpur'),
+      createTaluka('saraswati', 'સરસ્વતી', 'Saraswati')
     ]
   },
+
+  // 16. MORBI (મોરબી - ૫ તાલુકાઓ)
+  {
+    id: 'morbi',
+    nameGu: 'મોરબી',
+    nameEn: 'Morbi',
+    headquarters: 'મોરબી',
+    talukas: [
+      createTaluka('morbi-city', 'મોરબી', 'Morbi'),
+      createTaluka('wankaner', 'વાંકાનેર', 'Wankaner'),
+      createTaluka('halvad', 'હળવદ', 'Halvad'),
+      createTaluka('tankara', 'ટંકારા', 'Tankara'),
+      createTaluka('maliya-miyana', 'માળિયા-મિયાણા', 'Maliya-Miyana')
+    ]
+  },
+
+  // 17. SURENDRANAGAR (સુરેન્દ્રનગર - ૧૦ તાલુકાઓ)
+  {
+    id: 'surendranagar',
+    nameGu: 'સુરેન્દ્રનગર',
+    nameEn: 'Surendranagar',
+    headquarters: 'સુરેન્દ્રનગર',
+    talukas: [
+      createTaluka('wadhwan', 'વઢવાણ', 'Wadhwan'),
+      createTaluka('dhrangadhra', 'ધ્રાંગધ્રા', 'Dhrangadhra'),
+      createTaluka('dasada-patdi', 'દસાડા-પાટડી', 'Dasada-Patdi'),
+      createTaluka('limbdi', 'લીંબડી', 'Limbdi'),
+      createTaluka('chotila', 'ચોટીલા', 'Chotila'),
+      createTaluka('sayla', 'સાયલા', 'Sayla'),
+      createTaluka('muli', 'મૂળી', 'Muli'),
+      createTaluka('chuda', 'ચુડા', 'Chuda'),
+      createTaluka('thangadh', 'થાનગઢ', 'Thangadh'),
+      createTaluka('lakhtar', 'લખતર', 'Lakhtar')
+    ]
+  },
+
+  // 18. AMRELI (અમરેલી - ૧૧ તાલુકાઓ)
+  {
+    id: 'amreli',
+    nameGu: 'અમરેલી',
+    nameEn: 'Amreli',
+    headquarters: 'અમરેલી',
+    talukas: [
+      createTaluka('amreli-city', 'અમરેલી', 'Amreli'),
+      createTaluka('babra', ' બાબરા', 'Babra'),
+      createTaluka('dhari', 'ધારી', 'Dhari'),
+      createTaluka('bagasara', 'બગસરા', 'Bagasara'),
+      createTaluka('rajula', 'રાજુલા', 'Rajula'),
+      createTaluka('jafrabad', 'જાફરાબાદ', 'Jafrabad'),
+      createTaluka('savarkundla', 'સાવરકુંડલા', 'Savarkundla'),
+      createTaluka('khambha', 'ખાંભા', 'Khambha'),
+      createTaluka('lathi', 'લાઠી', 'Lathi'),
+      createTaluka('lilia', 'લીલીયા', 'Lilia'),
+      createTaluka('kunkavav-vadia', 'કુંકાવાવ-વાડિયા', 'Kunkavav Vadia')
+    ]
+  },
+
+  // 19. PORBANDAR (પોરબંદર - ૩ તાલુકાઓ)
   {
     id: 'porbandar',
     nameGu: 'પોરબંદર',
     nameEn: 'Porbandar',
     headquarters: 'પોરબંદર',
     talukas: [
-      {
-        id: 'porbandar-city',
-        nameGu: 'પોરબંદર',
-        nameEn: 'Porbandar',
-        officeNameGu: 'જન સેવા કેન્દ્ર • મામલતદાર કચેરી પોરબંદર',
-        officeNameEn: 'Jan Seva Kendra • Mamlatdar Office Porbandar',
-        counters: [
-          { number: 1, nameGu: 'સમાજ કલ્યાણ', nameEn: 'Welfare', officerName: 'એચ. પી. ઓડેદરા', services: ['welfare'] },
-          { number: 2, nameGu: 'દાખલા બારી', nameEn: 'Certificates', officerName: 'કે. એન. મોઢવાડિયા', services: ['income', 'caste'] },
-          { number: 3, nameGu: 'પુરવઠા', nameEn: 'Supplies', officerName: 'વી. આર. જાડેજા', services: ['ration'] },
-          { number: 4, nameGu: 'ઈ-ધરા ૭/૧૨', nameEn: 'E-Dhara', officerName: 'એમ. કે. બોખીરિયા', services: ['land', 'ikhedut'] },
-          { number: 5, nameGu: 'આધાર ડેસ્ક', nameEn: 'Aadhaar', officerName: 'જે. એસ. કુછડિયા', services: ['aadhaar'] },
-          { number: 6, nameGu: 'આવાસ ડેસ્ક', nameEn: 'Housing', officerName: 'પી. ટી. કારાવદરા', services: ['awas'] }
-        ]
-      }
+      createTaluka('porbandar-city', 'પોરબંદર', 'Porbandar'),
+      createTaluka('ranavav', 'રાણાવાવ', 'Ranavav'),
+      createTaluka('kutiyana', 'કુતિયાણા', 'Kutiyana')
+    ]
+  },
+
+  // 20. DEVBHUMI DWARKA (દેવભૂમિ દ્વારકા - ૪ તાલુકાઓ)
+  {
+    id: 'devbhumi-dwarka',
+    nameGu: 'દેવભૂમિ દ્વારકા',
+    nameEn: 'Devbhumi Dwarka',
+    headquarters: 'ખંભાળિયા',
+    talukas: [
+      createTaluka('khambhalia', 'ખંભાળિયા', 'Khambhalia'),
+      createTaluka('dwarka-okhamandal', 'દ્વારકા (ઓખામંડળ)', 'Dwarka (Okhamandal)'),
+      createTaluka('kalyanpur', 'કલ્યાણપુર', 'Kalyanpur'),
+      createTaluka('bhanvad', 'ભાણવડ', 'Bhanvad')
+    ]
+  },
+
+  // 21. GIR SOMNATH (ગીર સોમનાથ - ૬ તાલુકાઓ)
+  {
+    id: 'gir-somnath',
+    nameGu: 'ગીર સોમનાથ',
+    nameEn: 'Gir Somnath',
+    headquarters: 'વેરાવળ',
+    talukas: [
+      createTaluka('veraval-patan', 'વેરાવળ-પાટણ', 'Veraval-Patan'),
+      createTaluka('talala', 'તાલાળા', 'Talala'),
+      createTaluka('kodinar', 'કોડિનાર', 'Kodinar'),
+      createTaluka('sutrapada', 'સુત્રાપાડા', 'Sutrapada'),
+      createTaluka('una', 'ઉના', 'Una'),
+      createTaluka('gir-gadhada', 'ગીર ગઢડા', 'Gir Gadhada')
+    ]
+  },
+
+  // 22. BOTAD (બોટાદ - ૪ તાલુકાઓ)
+  {
+    id: 'botad',
+    nameGu: 'બોટાદ',
+    nameEn: 'Botad',
+    headquarters: 'બોટાદ',
+    talukas: [
+      createTaluka('botad-city', 'બોટાદ', 'Botad'),
+      createTaluka('gadhada', 'ગઢડા', 'Gadhada'),
+      createTaluka('barwala', 'બરવાળા', 'Barwala'),
+      createTaluka('ranpur', 'રાણપુર', 'Ranpur')
+    ]
+  },
+
+  // 23. ARAVALLI (અરવલ્લી - ૬ તાલુકાઓ)
+  {
+    id: 'aravalli',
+    nameGu: 'અરવલ્લી',
+    nameEn: 'Aravalli',
+    headquarters: 'મોડાસા',
+    talukas: [
+      createTaluka('modasa', 'મોડાસા', 'Modasa'),
+      createTaluka('malpur', 'માલપુર', 'Malpur'),
+      createTaluka('bayad', 'બાયડ', 'Bayad'),
+      createTaluka('dhansura', 'ધનસુરા', 'Dhansura'),
+      createTaluka('meghraj', 'મેઘરજ', 'Meghraj'),
+      createTaluka('bhiloda', 'ભિલોડા', 'Bhiloda')
+    ]
+  },
+
+  // 24. PANCHMAHAL (પંચમહાલ - ૭ તાલુકાઓ)
+  {
+    id: 'panchmahal',
+    nameGu: 'પંચમહાલ',
+    nameEn: 'Panchmahal',
+    headquarters: 'ગોધરા',
+    talukas: [
+      createTaluka('godhra', 'ગોધરા', 'Godhra'),
+      createTaluka('halol', 'હાલોલ', 'Halol'),
+      createTaluka('kalol-panchmahal', 'કાલોલ', 'Kalol (Panchmahal)'),
+      createTaluka('ghoghamba', 'ઘોઘંબા', 'Ghoghamba'),
+      createTaluka('shehera', 'શહેરા', 'Shehera'),
+      createTaluka('morva-hadaf', 'મોરવા હડફ', 'Morva Hadaf'),
+      createTaluka('jambughoda', 'જાંબુઘોડા', 'Jambughoda')
+    ]
+  },
+
+  // 25. DAHOD (દાહોદ - ૯ તાલુકાઓ)
+  {
+    id: 'dahod',
+    nameGu: 'દાહોદ',
+    nameEn: 'Dahod',
+    headquarters: 'દાહોદ',
+    talukas: [
+      createTaluka('dahod-city', 'દાહોદ', 'Dahod'),
+      createTaluka('zalod', 'ઝાલોદ', 'Zalod'),
+      createTaluka('limkheda', 'લીમખેડા', 'Limkheda'),
+      createTaluka('garbada', 'ગરબાડા', 'Garbada'),
+      createTaluka('devgadh-baria', 'દેવગઢ બારિયા', 'Devgadh Baria'),
+      createTaluka('fatepura', 'ફતેપુરા', 'Fatepura'),
+      createTaluka('dhanpur', 'ધાનપુર', 'Dhanpur'),
+      createTaluka('sanjeli', 'સંજેલી', 'Sanjeli'),
+      createTaluka('singvad', 'સિંગવડ', 'Singvad')
+    ]
+  },
+
+  // 26. MAHISAGAR (મહિસાગર - ૬ તાલુકાઓ)
+  {
+    id: 'mahisagar',
+    nameGu: 'મહિસાગર',
+    nameEn: 'Mahisagar',
+    headquarters: 'લુણાવાડા',
+    talukas: [
+      createTaluka('lunawada', 'લુણાવાડા', 'Lunawada'),
+      createTaluka('santrampur', 'સંતરામપુર', 'Santrampur'),
+      createTaluka('kadana', 'કડાણા', 'Kadana'),
+      createTaluka('virpur-mahisagar', 'વીરપુર', 'Virpur (Mahisagar)'),
+      createTaluka('balasinor', 'બાલાસિનોર', 'Balasinor'),
+      createTaluka('khanpur', 'ખાનપુર', 'Khanpur')
+    ]
+  },
+
+  // 27. CHHOTA UDEPUR (છોટા ઉદેપુર - ૬ તાલુકાઓ)
+  {
+    id: 'chhota-udepur',
+    nameGu: 'છોટા ઉદેપુર',
+    nameEn: 'Chhota Udepur',
+    headquarters: 'છોટા ઉદેપુર',
+    talukas: [
+      createTaluka('chhota-udepur-city', 'છોટા ઉદેપુર', 'Chhota Udepur'),
+      createTaluka('bodeli', 'બોડેલી', 'Bodeli'),
+      createTaluka('sankheda', 'સંખેડા', 'Sankheda'),
+      createTaluka('jetpur-pavi', 'જેતપુર પાવી', 'Jetpur Pavi'),
+      createTaluka('kavant', 'કવાંટ', 'Kavant'),
+      createTaluka('nasvadi', 'નસવાડી', 'Nasvadi')
+    ]
+  },
+
+  // 28. BHARUCH (ભરૂચ - ૯ તાલુકાઓ)
+  {
+    id: 'bharuch',
+    nameGu: 'ભરૂચ',
+    nameEn: 'Bharuch',
+    headquarters: 'ભરૂચ',
+    talukas: [
+      createTaluka('bharuch-city', 'ભરૂચ', 'Bharuch'),
+      createTaluka('ankleshwar', 'અંકલેશ્વર', 'Ankleshwar'),
+      createTaluka('jambusar', 'જંબુસર', 'Jambusar'),
+      createTaluka('amod', 'આમોદ', 'Amod'),
+      createTaluka('vagra', 'વાગરા', 'Vagra'),
+      createTaluka('hansot', 'હાંસોટ', 'Hansot'),
+      createTaluka('zaghadia', 'ઝઘડિયા', 'Zaghadia'),
+      createTaluka('valia', 'વાલિયા', 'Valia'),
+      createTaluka('netrang', 'નેત્રંગ', 'Netrang')
+    ]
+  },
+
+  // 29. NARMADA (નર્મદા - ૫ તાલુકાઓ)
+  {
+    id: 'narmada',
+    nameGu: 'નર્મદા',
+    nameEn: 'Narmada',
+    headquarters: 'રાજપીપળા',
+    talukas: [
+      createTaluka('rajpipla-nandod', 'નાંદોદ (રાજપીપળા)', 'Nandod (Rajpipla)'),
+      createTaluka('dediapada', 'દેડિયાપાડા', 'Dediapada'),
+      createTaluka('sagbara', 'સાગબારા', 'Sagbara'),
+      createTaluka('tilakwada', 'તિલકવાડા', 'Tilakwada'),
+      createTaluka('garudeshwar', 'ગરૂડેશ્વર', 'Garudeshwar')
+    ]
+  },
+
+  // 30. NAVSARI (નવસારી - ૬ તાલુકાઓ)
+  {
+    id: 'navsari',
+    nameGu: 'નવસારી',
+    nameEn: 'Navsari',
+    headquarters: 'નવસારી',
+    talukas: [
+      createTaluka('navsari-city', 'નવસારી', 'Navsari'),
+      createTaluka('jalalpore', 'જલાલપોર', 'Jalalpore'),
+      createTaluka('gandevi', 'ગણદેવી', 'Gandevi'),
+      createTaluka('chikhli', 'ચીખલી', 'Chikhli'),
+      createTaluka('vansda', 'વાંસદા', 'Vansda'),
+      createTaluka('khergam', 'ખેરગામ', 'Khergam')
+    ]
+  },
+
+  // 31. VALSAD (વલસાડ - ૬ તાલુકાઓ)
+  {
+    id: 'valsad',
+    nameGu: 'વલસાડ',
+    nameEn: 'Valsad',
+    headquarters: 'વલસાડ',
+    talukas: [
+      createTaluka('valsad-city', 'વલસાડ', 'Valsad'),
+      createTaluka('pardi', 'પારડી', 'Pardi'),
+      createTaluka('vapi', 'વાપી', 'Vapi'),
+      createTaluka('umbergaon', 'ઉમરગામ', 'Umbergaon'),
+      createTaluka('dharampur', 'ધરમપુર', 'Dharampur'),
+      createTaluka('kaprada', 'કપરાડા', 'Kaprada')
+    ]
+  },
+
+  // 32. DANG (ડાંગ - ૩ તાલુકાઓ)
+  {
+    id: 'dang',
+    nameGu: 'ડાંગ',
+    nameEn: 'Dang',
+    headquarters: 'આહવા',
+    talukas: [
+      createTaluka('ahwa', 'આહવા', 'Ahwa'),
+      createTaluka('waghai', 'વઘઈ', 'Waghai'),
+      createTaluka('subir', 'સુબીર', 'Subir')
+    ]
+  },
+
+  // 33. TAPI (તાપી - ૭ તાલુકાઓ)
+  {
+    id: 'tapi',
+    nameGu: 'તાપી',
+    nameEn: 'Tapi',
+    headquarters: 'વ્યારા',
+    talukas: [
+      createTaluka('vyara', 'વ્યારા', 'Vyara'),
+      createTaluka('songadh', 'સોનગઢ', 'Songadh'),
+      createTaluka('valod', 'વાલોડ', 'Valod'),
+      createTaluka('uchchhal', 'ઉચ્છલ', 'Uchchhal'),
+      createTaluka('nizar', 'નિઝર', 'Nizar'),
+      createTaluka('dolvan', 'ડોલવણ', 'Dolvan'),
+      createTaluka('kukarmunda', 'કુકરમુંડા', 'Kukarmunda')
     ]
   }
 ];
@@ -1014,4 +947,3 @@ export const VILLAGE_CLUSTERS_DATABASE: Record<string, VillageClusterCenter[]> =
 export function getNearbyVillageCluster(villageName: string = 'ગોમટા'): VillageClusterCenter[] {
   return VILLAGE_CLUSTERS_DATABASE['gomta'] || [];
 }
-

@@ -533,7 +533,7 @@ export default function CounterOperatorDesk() {
                 const d = GUJARAT_33_DISTRICTS.find(x => x.id === e.target.value);
                 if (d && d.talukas[0]) setSelectedTalukaId(d.talukas[0].id);
               }}
-              className="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:ring-2 focus:ring-[#003366]"
+              className="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:ring-2 focus:ring-[#003366] max-w-[160px] sm:max-w-[200px] truncate"
             >
               {GUJARAT_33_DISTRICTS.map(d => (
                 <option key={d.id} value={d.id}>{d.nameGu} ({d.nameEn})</option>
@@ -544,10 +544,10 @@ export default function CounterOperatorDesk() {
             <select
               value={selectedTalukaId}
               onChange={(e) => setSelectedTalukaId(e.target.value)}
-              className="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:ring-2 focus:ring-[#003366]"
+              className="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:ring-2 focus:ring-[#003366] max-w-[180px] sm:max-w-[220px] truncate"
             >
               {currentDistrict.talukas.map(t => (
-                <option key={t.id} value={t.id}>{t.nameGu} - {t.officeNameGu}</option>
+                <option key={t.id} value={t.id}>{t.nameGu} ({t.nameEn})</option>
               ))}
             </select>
 

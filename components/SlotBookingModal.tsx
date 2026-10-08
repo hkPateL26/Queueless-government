@@ -613,14 +613,14 @@ export function SlotBookingModal({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
                   {isEn ? 'District' : isHi ? 'जिला' : isMr ? 'जिल्हा (District)' : 'જિલ્લો (District)'}
                 </label>
                 <select
                   value={selectedDistrictId}
                   onChange={(e) => handleDistrictChange(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#005A9C]"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#005A9C] truncate"
                 >
                   {GUJARAT_33_DISTRICTS.map((dist) => (
                     <option key={dist.id} value={dist.id}>
@@ -630,30 +630,30 @@ export function SlotBookingModal({
                 </select>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
                   {isEn ? 'Taluka' : isHi ? 'तालुका' : isMr ? 'तालुका (Taluka)' : 'તાલુકો (Taluka)'}
                 </label>
                 <select
                   value={selectedTalukaId}
                   onChange={(e) => handleTalukaChange(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#005A9C]"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#005A9C] truncate"
                 >
                   {selectedDistrict.talukas.map((tal) => (
                     <option key={tal.id} value={tal.id}>
-                      {isEn ? `${tal.nameEn} - ${tal.officeNameEn}` : isMr ? `${tal.nameEn} - ${tal.officeNameEn}` : `${tal.nameGu} - ${tal.officeNameGu}`}
+                      {isEn ? `${tal.nameEn} (${tal.nameGu})` : isMr ? `${tal.nameEn} (${tal.nameGu})` : `${tal.nameGu} (${tal.nameEn})`}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
                   {isEn ? 'Aadhaar Village (Gam)' : isHi ? 'आधार गाँव' : isMr ? 'आधार गाव' : 'આધાર ગામ (Village)'}
                 </label>
                 <div className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 flex items-center justify-between">
-                  <span>{isEn ? (initialVillage || 'Gomta') : (initialVillage || 'ગોમટા')}</span>
-                  <span className="text-[9px] bg-blue-50 text-[#005A9C] font-bold px-1.5 py-0.5 rounded border border-blue-200">
+                  <span className="truncate">{isEn ? (initialVillage || 'Gomta') : (initialVillage || 'ગોમટા')}</span>
+                  <span className="text-[9px] bg-blue-50 text-[#005A9C] font-bold px-1.5 py-0.5 rounded border border-blue-200 shrink-0">
                     {isEn ? 'Verified' : 'પ્રમાણિત'}
                   </span>
                 </div>
