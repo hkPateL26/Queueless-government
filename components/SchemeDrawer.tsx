@@ -716,27 +716,13 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 
         {/* Bottom Drawer Actions (Fixed & Sticky) */}
         <div className="p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 space-y-2 shrink-0 sticky bottom-0 z-20">
-          <button
-            onClick={() => {
-              triggerHaptic('success');
-              onOpenScanner();
-            }}
-            className="w-full bg-[#005A9C] hover:bg-[#003366] text-white font-extrabold py-3 sm:py-3.5 px-3 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-center cursor-pointer"
-          >
-            <Camera className="w-4 h-4 text-[#FF9933] shrink-0" />
-            <span className="truncate">
-              {isEn ? 'Start Document Pre-Verification' : isHi ? 'दस्तावेज़ प्री-चेक शुरू करें' : isMr ? 'कागदपत्र पूर्व-तपासणी सुरू करा' : 'દસ્તાવેજ પ્રી-ચેક શરૂ કરો (Start Pre-Verification)'}
-            </span>
-            <ArrowRight className="w-4 h-4 shrink-0" />
-          </button>
-
           {onCollectToken && (
             <button
               onClick={() => {
                 triggerHaptic('tap');
                 onCollectToken(scheme);
               }}
-              className="w-full bg-amber-50 hover:bg-amber-100 text-[#003366] border border-amber-300 font-extrabold py-2.5 px-3 rounded-2xl text-[11px] sm:text-xs shadow-xs transition active:scale-95 flex items-center justify-center gap-2 text-center cursor-pointer"
+              className="w-full bg-[#003366] hover:bg-[#002244] text-white font-extrabold py-3.5 px-3 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-center cursor-pointer"
             >
               {isLoggedIn ? (
                 <>
