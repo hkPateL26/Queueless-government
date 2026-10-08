@@ -18,7 +18,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing document data' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    let apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const envPath = path.join(process.cwd(), '.env.local');
+        if (fs.existsSync(envPath)) {
+          const content = fs.readFileSync(envPath, 'utf8');
+          const m = content.match(/GEMINI_API_KEY\s*=\s*(.+)/);
+          if (m) apiKey = m[1].trim();
+        }
+      } catch (e) {
+        console.warn('Could not read .env.local file directly:', e);
+      }
+    }
+
     if (!apiKey) {
       return NextResponse.json({ error: 'GEMINI_API_KEY not configured', fallback: true }, { status: 200 });
     }

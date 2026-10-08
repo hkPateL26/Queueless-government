@@ -675,7 +675,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">
                         <Sparkles className="w-3 h-3 text-indigo-600" />
-                        <span>{isEn ? 'OpenAI Vision Verified' : 'AI વિઝન સ્કેનિંગ'}</span>
+                        <span>{isEn ? 'Google Gemini AI Verified' : 'Gemini AI વિઝન સ્કેનિંગ'}</span>
                       </div>
                     </div>
                   </div>
