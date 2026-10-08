@@ -38,62 +38,108 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'GEMINI_API_KEY not configured', fallback: true }, { status: 200 });
     }
 
-    const systemPrompt = `
-You are an expert Gujarat Government Document Verification AI Officer (ગુજરાત સરકાર સત્તાવાર દસ્તાવેજ ચકાસણી અધિકારી).
-A citizen has submitted this document file (${fileName}) for government scheme/service verification.
+    const expectedDocType = targetDocNameGu 
+      ? `${targetDocNameGu}${targetDocNameEn ? ` (${targetDocNameEn})` : ''}`
+      : 'Government Document (સત્તાવાર સરકારી દસ્તાવેજ)';
 
-Target Requirement Slot: ${targetDocNameGu} (${targetDocNameEn || ''})
+    const masterPrompt = `You are the STRICT Chief Document Verification Officer for an Official Government Portal.
+Your mandate: ZERO FRAUD, ZERO MISMATCH, STRICT QUALITY CONTROL.
+CRITICAL RULES & CONDITIONS:
+1. Identify the EXACT type of document shown in this image or PDF:
+   - "Academic Marksheet / Statement of Marks" (શૈક્ષણિક માર્કશીટ / ગુણપત્રક)
+   - "Birth Certificate" (જન્મનો દાખલો)
+   - "School Leaving Certificate / Transfer Certificate" (શાળા છોડ્યાનું પ્રમાણપત્ર / LC)
+   - "Aadhaar Card" (આધાર કાર્ડ)
+   - "PAN Card" (પાન કાર્ડ)
+   - "Ration Card" (રેશન કાર્ડ)
+   - "Income Certificate" (આવકનો દાખલો)
+   - "Caste Certificate" (જાતિનો દાખલો)
+   - "Electricity Bill / Utility Bill" (લાઈટ બિલ / વીજળી બિલ)
+   - "Property Tax Receipt / Index 2" (વેરા બિલ / દસ્તાવેજ)
+   - "Voter ID / Election Card" (ચૂંટણી કાર્ડ)
+   - "Driving License" (ડ્રાઇવિંગ લાયસન્સ)
+   - "Passport Size Photograph" (અરજદારનો રંગીન પાસપોર્ટ ફોટો)
+   - "Signature / Handwritten Stroke" (અરજદારની સહી)
+   - "Bonafide Certificate / School or College Study Proof" (શાળા / કૉલેજ / યુનિવર્સિટી બોનાફાઇડ પ્રમાણપત્ર)
+   - "Bank Passbook / Cancelled Cheque" (બેંક પાસબુક / રદ કરેલ ચેક)
+   - "7/12 & 8-A Land Record" (૭/૧૨ અને ૮-અ જમીન ઉતારો)
+   - "Other / Invalid Document"
 
-Document Verification Rules:
-1. Genuine Document Acceptance (APPROVE - isValid: true):
-   Carefully examine the image or PDF. If it represents an authentic, genuine certificate, card, or official document that fulfills or matches the target requirement slot, APPROVE IT (isValid: true).
-   
-   Specific guidelines by category:
-   - Bonafide / School / College Study Certificate (શાળા બોનાફાઇડ, U-DISE ID, કૉલેજ બોનાફાઇડ, પ્રવેશ દાખલો, અભ્યાસ પુરાવો):
-     * Any genuine Bonafide Certificate, Study Certificate, or Admission Letter issued by a recognized School, College, or University (e.g. Atmiya University, GSEB school, GTU, Saurashtra University, etc.) containing student name, enrollment/registration number, course/class, official seal/stamp, and signature is 100% VALID (isValid: true)!
-     * Note: Higher education, scholarship, and student schemes accept College or University bonafide certificates!
-   - Aadhaar Card (આધાર કાર્ડ / ઓળખ પુરાવો):
-     * Any authentic Government of India Aadhaar Card (with UIDAI emblem, Ashok Stambh, photo, 12-digit UID) is 100% VALID (isValid: true)!
-   - Ration Card (રેશન કાર્ડ):
-     * Any genuine Gujarat Government Food & Civil Supplies Ration Card (NFSA or Barcoded) is 100% VALID (isValid: true)!
-   - Income Certificate (આવકનો દાખલો):
-     * Mamlatdar / Revenue Department certificate issued within 3 Financial Years is 100% VALID (isValid: true). If issued in 2021 or older, reject as EXPIRED (મુદત પૂર્ણ).
-   - Caste Certificate (જાતિનો દાખલો):
-     * Any authentic SC/ST/OBC/SEBC/EWS certificate is 100% VALID (isValid: true).
-   - Marksheets & Educational Certificates (માર્કશીટ, પરિણામ):
-     * Any authentic Board (GSEB/CBSE) or University marksheet is 100% VALID (isValid: true).
-   - Land Records (૭/૧૨ અને ૮-અ જમીન ઉતારો):
-     * Official RoR / AnyRoR record with survey number is 100% VALID (isValid: true).
-   - Bank Passbook / Cheque (બેંક પાસબુક, રદ કરેલ ચેક):
-     * Passbook copy with account number, IFSC code, account holder name is 100% VALID (isValid: true).
-   - Light Bill / Address Proof (વીજ બિલ / લાઈટબિલ):
-     * Official DISCOM electricity bill (PGVCL/UGVCL/DGVCL/MGVCL/Torrent) is 100% VALID (isValid: true) for address verification.
-   - Any other official certificate (Birth, Death, Marriage, Disability UDID, LC):
-     * If genuine and relevant to the requirement slot, APPROVE IT (isValid: true)!
+2. STRICT MISMATCH ENFORCEMENT:
+   - If expected is "Passport Size Photograph / Photo Proof":
+     * The uploaded image MUST be a clear portrait of a human face (head & shoulders).
+     * If user uploaded a Signature (સહી), Marksheet, Certificate, Bill, or Document without a human face:
+       -> "matchesExpected": false
+       -> "isValidForGovt": false
+       -> "qualityScore": 5
+       -> "actionableAdvice": "❌ ખોટો ફોટો: તમે સહી અથવા અન્ય દસ્તાવેજ અપલોડ કર્યો છે. અહીં ફક્ત અરજદારનો અસલ પાસપોર્ટ સાઇઝ રંગીન ફોટો (ચહેરો) જ માન્ય છે."
+     * If it is a real human face portrait with plain/solid background:
+       -> "matchesExpected": true
+       -> "isValidForGovt": true
+       -> "qualityScore": 95
+       -> "actionableAdvice": "✅ માન્ય પાસપોર્ટ સાઇઝ ફોટો: ચહેરો સ્પષ્ટ છે અને સ્વીકાર્ય છે."
+   - If expected is "Birth Certificate" or "School Leaving Certificate" and the image is a Marksheet (Statement of Marks):
+     * A marksheet is NOT a proof of birth or leaving certificate!
+     -> "matchesExpected": false
+     -> "isValidForGovt": false
+     -> "qualityScore": 15
+     -> "actionableAdvice": "❌ ખોટો દસ્તાવેજ: તમે માર્કશીટ (ગુણપત્રક) અપલોડ કરી છે. અહીં માત્ર જન્મનો દાખલો અથવા LC જ માન્ય છે. માર્કશીટ ચાલશે નહીં."
+   - If expected is "Aadhaar Card / Photo ID" and user uploaded an "Electricity Bill":
+     -> "matchesExpected": false
+     -> "isValidForGovt": false
+     -> "qualityScore": 15
+     -> "actionableAdvice": "❌ ખોટો દસ્તાવેજ: તમે લાઈટ બિલ અપલોડ કર્યું છે. અહીં ઓળખ પુરાવા તરીકે આધાર કાર્ડ જ અપલોડ કરવું."
+   - If expected is "Bonafide Certificate / School or College Study Proof / શાળા બોનાફાઇડ":
+     * Any authentic School, College, or University Bonafide Certificate (such as Atmiya University) containing student name, registration number, official round seal and signature:
+     -> "matchesExpected": true
+     -> "isValidForGovt": true
+     -> "qualityScore": 95
+     -> "actionableAdvice": "✅ માન્ય બોનાફાઇડ પ્રમાણપત્ર: સંસ્થાની સત્તાવાર મોહર અને વિદ્યાર્થી વિગતો પ્રમાણિત છે."
+   - If expected is "Aadhaar Card" and the image is an authentic Aadhaar card:
+     -> "matchesExpected": true
+     -> "isValidForGovt": true
+     -> "qualityScore": 98
+     -> "actionableAdvice": "✅ માન્ય આધાર કાર્ડ: ભારત સરકાર / UIDAI સત્તાવાર ઓળખ કાર્ડ પ્રમાણિત છે."
+   - If expected is "Ration Card" and image is a Food & Civil Supplies Ration card:
+     -> "matchesExpected": true
+     -> "isValidForGovt": true
+     -> "qualityScore": 97
+     -> "actionableAdvice": "✅ માન્ય રેશન કાર્ડ: અન્ન અને નાગરિક પુરવઠા વિભાગનું સત્તાવાર રેશન કાર્ડ પ્રમાણિત છે."
+   - If expected is "Income Certificate" and image is Gujarat Revenue Dept income certificate:
+     -> "matchesExpected": true
+     -> "isValidForGovt": true
+     -> "qualityScore": 98
+     -> "actionableAdvice": "✅ માન્ય આવકનો દાખલો: મહેસૂલ વિભાગ દ્વારા પ્રમાણિત દાખલો સ્વીકાર્ય છે."
+   - If the image is extremely blurry, cropped, unreadable, or dark:
+     -> "matchesExpected": true (or false if unidentifiable)
+     -> "isValidForGovt": false
+     -> "qualityScore": 25
+     -> "actionableAdvice": "⚠️ ઝાંખો દસ્તાવેજ: દસ્તાવેજ વાંચી શકાતો નથી. કૃપા કરીને સ્પષ્ટ અને સીધો ફોટો ફરીથી પાડીને અપલોડ કરો."
 
-2. Strict Rejection of Irrelevant / Unofficial Files (REJECT - isValid: false):
-   - College Study Material / Lecture Notes / Syllabus PDFs (e.g. unit1Material.pdf, class notes, study guides):
-     REJECT (isValid: false)! Reason in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ કૉલેજ અભ્યાસ સામગ્રી / પીડીએફ છે, સત્તાવાર પ્રમાણપત્ર નથી!"
-   - Cashier Fee Slips / Tuition Payment Counter Slips (when an identity, income, or bonafide certificate is required):
-     REJECT (isValid: false)! Reason in Gujarati: "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ કાગળ ફી ચુકવણી રસીદ (Fee Payment Slip) છે, માંગેલ સત્તાવાર પ્રમાણપત્ર નથી."
-   - Irrelevant personal photos (selfies, memes, scenery, blank papers):
-     REJECT (isValid: false)!
-   - Completely blurred or unreadable images where text cannot be verified:
-     REJECT (isValid: false) with a blur notice.
-
-Always extract applicant name, key identification numbers, and issuing institute/authority accurately.
-Respond strictly in JSON format:
+3. RETURN FORMAT:
+Return ONLY a valid JSON object matching this schema without any markdown wrapping or text:
 {
-  "isValid": boolean,
-  "detectedDocumentType": string,
-  "confidenceScore": number,
-  "reasonGu": string,
-  "reasonEn": string,
-  "extractedDetailsGu": string,
-  "extractedDetailsEn": string,
-  "isBlurry": boolean
+  "documentType": string,
+  "documentNameGu": string,
+  "qualityScore": number,
+  "isValidForGovt": boolean,
+  "matchesExpected": boolean,
+  "needsUpdate": boolean,
+  "needsNewDocument": boolean,
+  "actionableAdvice": string,
+  "extractedInfo": {
+    "detectedName": string or null,
+    "documentNumberMasked": string or null,
+    "yearOrDate": string or null
+  },
+  "verificationPoints": [
+    { "point": string, "status": "pass" | "fail", "note": string }
+  ]
 }
-`;
+====================
+EXPECTED DOCUMENT REQUIREMENT FOR THIS SLOT: "${expectedDocType}"
+ORIGINAL FILENAME UPLOADED BY USER: "${fileName}"
+====================`;
 
     // Try gemini-3.1-flash-lite first, fallback to gemini-3.5-flash
     const candidateModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash'];
@@ -110,7 +156,7 @@ Respond strictly in JSON format:
               contents: [
                 {
                   parts: [
-                    { text: systemPrompt },
+                    { text: masterPrompt },
                     {
                       inlineData: {
                         mimeType: mimeType.includes('pdf') ? 'application/pdf' : mimeType || 'image/jpeg',
@@ -137,10 +183,64 @@ Respond strictly in JSON format:
         const textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (textOutput) {
           const parsed = JSON.parse(textOutput);
+
+          // 🛡️ Code-Level Double Safeguard:
+          // If mismatch or not valid for govt, strictly drop qualityScore and reject
+          if (parsed.matchesExpected === false) {
+            parsed.isValidForGovt = false;
+            if (parsed.qualityScore > 30) {
+              parsed.qualityScore = 15;
+            }
+          }
+
+          const isMismatch = parsed.matchesExpected === false || parsed.isValidForGovt === false || parsed.qualityScore < 40;
+          const isValid = !isMismatch;
+
+          const info = parsed.extractedInfo || {};
+          const partsGu: string[] = [];
+          const partsEn: string[] = [];
+
+          if (info.detectedName) {
+            partsGu.push(`અરજદાર/વિદ્યાર્થી: ${info.detectedName}`);
+            partsEn.push(`Applicant/Student: ${info.detectedName}`);
+          }
+          if (info.documentNumberMasked) {
+            partsGu.push(`નંબર: ${info.documentNumberMasked}`);
+            partsEn.push(`ID/Reg: ${info.documentNumberMasked}`);
+          }
+          if (info.yearOrDate) {
+            partsGu.push(`તારીખ/વર્ષ: ${info.yearOrDate}`);
+            partsEn.push(`Date/Year: ${info.yearOrDate}`);
+          }
+          if (parsed.actionableAdvice) {
+            partsGu.push(parsed.actionableAdvice);
+            partsEn.push(parsed.actionableAdvice);
+          }
+
+          const detailsGu = partsGu.length > 0 ? partsGu.join(' • ') : parsed.actionableAdvice;
+          const detailsEn = partsEn.length > 0 ? partsEn.join(' • ') : parsed.actionableAdvice;
+
           return NextResponse.json({
             success: true,
             source: `gemini-${model}`,
-            result: parsed
+            result: {
+              isValid,
+              status: isValid ? 'passed' : 'failed',
+              detectedDocumentType: parsed.documentType || parsed.documentNameGu,
+              documentNameGu: parsed.documentNameGu,
+              confidenceScore: (parsed.qualityScore || 90) / 100,
+              qualityScore: parsed.qualityScore,
+              reasonGu: parsed.actionableAdvice,
+              reasonEn: parsed.actionableAdvice,
+              actionableAdvice: parsed.actionableAdvice,
+              extractedDetailsGu: detailsGu,
+              extractedDetailsEn: detailsEn,
+              extractedInfo: parsed.extractedInfo,
+              verificationPoints: parsed.verificationPoints,
+              matchesExpected: parsed.matchesExpected,
+              isValidForGovt: parsed.isValidForGovt,
+              isBlurry: parsed.qualityScore < 30 && (parsed.actionableAdvice?.includes('ઝાંખો') || parsed.actionableAdvice?.includes('blurry'))
+            }
           });
         }
       } catch (err: any) {
