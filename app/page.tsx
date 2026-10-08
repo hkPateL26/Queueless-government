@@ -7,7 +7,7 @@ import {
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
   Users, Building, Award, Bell, CheckCircle2, ChevronDown, Download,
   Layers, ArrowLeft, Calendar, Home as HomeIcon, Radio, Globe, Headphones,
-  Compass
+  Compass, Sparkles
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -58,6 +58,19 @@ export default function Home() {
         setLang(savedLang);
       }
     } catch {}
+  }, []);
+
+  // Auto-prompt latest update changelog if citizen hasn't seen current version
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const lastSeen = localStorage.getItem('qless_last_seen_changelog');
+      if (!lastSeen || lastSeen !== CURRENT_APP_VERSION) {
+        const timer = setTimeout(() => {
+          setUpdateModalOpen(true);
+        }, 900);
+        return () => clearTimeout(timer);
+      }
+    }
   }, []);
 
   // Localized Citizen Identity Helpers (Dynamic for all 4 languages)
@@ -478,6 +491,19 @@ export default function Home() {
             </span>
             <span className="text-blue-300/40 hidden md:inline">|</span>
             <span className="text-blue-200 hidden md:inline font-mono text-[11px]">{t('topBarFramework', lang)}</span>
+
+            {/* ✨ DYNAMIC UPDATE & CHANGELOG BUTTON */}
+            <button
+              onClick={() => {
+                triggerHaptic('tap');
+                setUpdateModalOpen(true);
+              }}
+              className="bg-amber-400 hover:bg-amber-300 text-slate-900 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer shrink-0 animate-pulse border border-amber-300"
+              title="નવા અપડેટ્સ & ચેન્જલોગ જુઓ"
+            >
+              <Sparkles className="w-3 h-3 text-slate-900" />
+              <span>{CURRENT_APP_VERSION} {lang === 'gu' ? 'નવું શું છે?' : "What's New?"}</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
@@ -2186,6 +2212,10 @@ export default function Home() {
           setCitizenProfileModalOpen(false);
           setLocationRadarModalOpen(true);
         }}
+        onOpenUpdateModal={() => {
+          setCitizenProfileModalOpen(false);
+          setUpdateModalOpen(true);
+        }}
       />
 
       {/* STANDALONE CITIZEN LOCATION RADAR MODAL */}
@@ -2351,6 +2381,16 @@ export default function Home() {
             >
               <span>{t('footerCollectorLink', lang)}</span>
             </Link>
+            <button
+              onClick={() => {
+                triggerHaptic('tap');
+                setUpdateModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 rounded-lg font-bold text-xs transition cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
+              <span>{CURRENT_APP_VERSION} {lang === 'gu' ? 'નવા ફેરફારો & અપડેટ્સ' : "What's New"}</span>
+            </button>
           </div>
         </div>
       </footer>

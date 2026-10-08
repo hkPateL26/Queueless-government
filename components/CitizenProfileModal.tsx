@@ -17,6 +17,7 @@ import {
   GOV_DOCUMENT_VERIFICATION_RULES,
   getLiveReverseGeocodedLocation
 } from '@/lib/citizen-profile';
+import { CURRENT_APP_VERSION } from '@/lib/app-version';
 import { Language } from '@/lib/translations';
 import { GovLogo } from '@/components/GovLogo';
 
@@ -25,13 +26,15 @@ interface CitizenProfileModalProps {
   onClose: () => void;
   lang?: Language;
   onOpenLocationRadar?: () => void;
+  onOpenUpdateModal?: () => void;
 }
 
 export function CitizenProfileModal({
   isOpen,
   onClose,
   lang = 'gu',
-  onOpenLocationRadar
+  onOpenLocationRadar,
+  onOpenUpdateModal
 }: CitizenProfileModalProps) {
   const [profile, setProfile] = useState<CitizenAadhaarProfile>(DEFAULT_CITIZEN_PROFILE);
   const [activeTab, setActiveTab] = useState<'overview' | 'family' | 'jurisdiction'>('overview');
@@ -325,6 +328,19 @@ export function CitizenProfileModal({
                 <span className="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1.5 sm:px-2 py-0.5 rounded font-bold font-mono">
                   {lang === 'gu' ? 'આધાર પ્રમાણિત' : 'Aadhaar Verified'}
                 </span>
+                {onOpenUpdateModal && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onOpenUpdateModal();
+                    }}
+                    className="text-[9px] sm:text-[10px] bg-amber-400 text-slate-900 font-extrabold px-1.5 sm:px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer hover:bg-amber-300 transition shadow-2xs"
+                    title="નવા અપડેટ્સ & ચેન્જલોગ જુઓ"
+                  >
+                    <Sparkles className="w-3 h-3 text-slate-900" />
+                    <span>{CURRENT_APP_VERSION} {lang === 'gu' ? 'નવું શું છે?' : "What's New?"}</span>
+                  </button>
+                )}
               </div>
               <h2 className="text-sm sm:text-lg font-black text-white mt-0.5 truncate">
                 {lang === 'gu' ? `${profile.nameGu} • નાગરિક પ્રોફાઇલ અને પરિવાર` : `${profile.nameEn} • Citizen Profile & Family`}
