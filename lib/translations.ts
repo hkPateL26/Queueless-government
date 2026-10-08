@@ -836,6 +836,133 @@ export const TRANSLATIONS = {
     hi: 'चरण १ कतार दृश्य • चरण ६ सभी उपकरणों पर रीयल-टाइम सिंक्रोनाइज़ेशन प्रदान करता है।',
     mr: 'टप्पा १ रांग दृश्य • टप्पा ६ सर्व उपकरणांवर रिअल-टाइम समक्रमण प्रदान करतो.'
   },
+  publicRadarBannerBadge: {
+    en: 'Jan Seva Kendra Live Queue Display',
+    gu: 'જન સેવા કેન્દ્ર લાઈવ કતાર ડિસ્પ્લે',
+    hi: 'जन सेवा केंद्र लाइव कतार डिस्प्ले',
+    mr: 'जन सेवा केंद्र थेट रांग डिस्प्ले'
+  },
+  publicRadarBannerStatus: {
+    en: 'Public Status Board',
+    gu: 'જાહેર સ્થિતિ બોર્ડ',
+    hi: 'सार्वजनिक स्थिति बोर्ड',
+    mr: 'सार्वजनिक स्थिती फलक'
+  },
+  publicRadarBannerTitle: {
+    en: 'Live Queue & Counter Display',
+    gu: 'કચેરી લાઈવ કતાર અને કાઉન્ટર સ્થિતિ',
+    hi: 'कार्यालय लाइव कतार एवं काउंटर स्थिति',
+    mr: 'कार्यालय थेट रांग आणि काउंटर स्थिती'
+  },
+  publicRadarBannerSub: {
+    en: 'Skip physical lines! Book an appointment online before visiting, or track any live token in real-time.',
+    gu: 'કચેરીએ લાઈનમાં ઊભા રહ્યા વિના ઘરેથી જ ઓનલાઇન સ્લોટ બુક કરો અથવા તમારો લાઈવ ટોકન ટ્રેક કરો.',
+    hi: 'कार्यालय में कतार में खड़े हुए बिना घर से ही ऑनलाइन स्लॉट बुक करें अथवा लाइव टोकन ट्रैक करें।',
+    mr: 'कार्यालयात रांगेत उभे न राहता घरूनच ऑनलाइन स्लॉट बुक करा किंवा थेट टोकन ट्रॅक करा.'
+  },
+  btnBookSlotCTA: {
+    en: 'Book Slot / Token Online',
+    gu: 'ઓનલાઇન સ્લોટ / ટોકન બુક કરો',
+    hi: 'ऑनलाइन स्लॉट / टोकन बुक करें',
+    mr: 'ऑनलाइन स्लॉट / टोकन बुक करा'
+  },
+  btnTrackTokenCTA: {
+    en: 'Track Token',
+    gu: 'ટોકન ટ્રેક કરો',
+    hi: 'टोकन ट्रैक करें',
+    mr: 'टोकन ट्रॅक करा'
+  },
+  queueFreeDeskTitle: {
+    en: 'Queue-Free Citizen Entry Desk',
+    gu: 'નાગરિક કતાર મુક્તિ પ્રવેશ ડેસ્ક',
+    hi: 'नागरिक कतार मुक्ति प्रवेश डेस्क',
+    mr: 'नागरिक रांग मुक्ती प्रवेश डेस्क'
+  },
+  guestDeskBadge: {
+    en: 'Public Mode • Zero Wait',
+    gu: 'જાહેર મોડ • ઝીરો વેઇટિંગ',
+    hi: 'सार्वजनिक मोड • शून्य प्रतीक्षा',
+    mr: 'सार्वजनिक मोड • शून्य प्रतीक्षा'
+  },
+  guestDeskHeadline: {
+    en: 'Visit Kacheri Without Standing in Queue',
+    gu: 'લાઈનમાં ઊભા રહ્યા વિના કચેરીએ સેવા મેળવો',
+    hi: 'कतार में खड़े हुए बिना कार्यालय में सेवा प्राप्त करें',
+    mr: 'रांगेत उभे न राहता कार्यालयात सेवा मिळवा'
+  },
+  guestDeskDesc: {
+    en: 'Book your office appointment in 3 simple steps before visiting:',
+    gu: 'કચેરીએ જતા પહેલા ફક્ત ૩ સરળ સ્ટેપમાં સ્લોટ બુક કરો:',
+    hi: 'कार्यालय जाने से पहले केवल ३ आसान चरणों में स्लॉट बुक करें:',
+    mr: 'कार्यालयात जाण्यापूर्वी फक्त ३ सोप्या चरणांत स्लॉट बुक करा:'
+  },
+  guestStep1: {
+    en: '1. Select scheme & pre-verify documents',
+    gu: '૧. યોજના પસંદ કરી દસ્તાવેજ પ્રી-ચેક કરો',
+    hi: '१. योजना चुनकर दस्तावेज प्री-चेक करें',
+    mr: '१. योजना निवडून कागदपत्रे पूर्व-तपासा'
+  },
+  guestStep2: {
+    en: '2. Choose preferred date & time slot',
+    gu: '૨. અનુકૂળ તારીખ અને સમય સ્લોટ પસંદ કરો',
+    hi: '२. पसंदीदा तारीख एवं समय स्लॉट चुनें',
+    mr: '२. सोयीस्कर तारीख आणि वेळ स्लॉट निवडा'
+  },
+  guestStep3: {
+    en: '3. Receive QR pass & walk directly to counter',
+    gu: '૩. ડિજિટલ QR પાસ સાથે સીધા કાઉન્ટર પર પહોંચો',
+    hi: '३. डिजिटल QR पास के साथ सीधे काउंटर पर पहुंचें',
+    mr: '३. डिजिटल QR पाससह थेट काउंटरवर पोहोचा'
+  },
+  alreadyHaveTokenPrompt: {
+    en: 'Already booked an appointment?',
+    gu: 'પહેલેથી એપોઇન્ટમેન્ટ બુક કરેલ છે?',
+    hi: 'पहले से अपॉइंटमेंट बुक कर चुके हैं?',
+    mr: 'आधीच अपॉइंटमेंट बुक केली आहे का?'
+  },
+  loginPromptBtn: {
+    en: 'Citizen Login',
+    gu: 'નાગરિક લૉગિન',
+    hi: 'नागरिक लॉगिन',
+    mr: 'नागरिक लॉगिन'
+  },
+  loginToViewPassBtn: {
+    en: 'Login to View Pass',
+    gu: 'પાસ જોવા લૉગિન કરો',
+    hi: 'पास देखने के लिए लॉगिन करें',
+    mr: 'पास पाहण्यासाठी लॉगिन करा'
+  },
+  loggedInNoBookingTitle: {
+    en: 'Welcome',
+    gu: 'નમસ્તે',
+    hi: 'नमस्ते',
+    mr: 'नमस्कार'
+  },
+  loggedInNoBookingSub: {
+    en: 'You do not have any active appointments or tokens currently.',
+    gu: 'તમારી પાસે હાલ કોઈ સક્રિય એપોઇન્ટમેન્ટ કે ટોકન નથી.',
+    hi: 'वर्तमान में आपके पास कोई सक्रिय अपॉइंटमेंट या टोकन नहीं है।',
+    mr: 'तुमच्याकडे सध्या कोणतीही सक्रिय अपॉइंटमेंट किंवा टोकन नाही.'
+  },
+  noActiveTokenTitle: {
+    en: 'No Active Token',
+    gu: 'કોઈ સક્રિય ટોકન નથી',
+    hi: 'कोई सक्रिय टोकन नहीं',
+    mr: 'कोणताही सक्रिय टोकन नाही'
+  },
+  noActiveTokenDesc: {
+    en: 'Book an appointment slot to get direct queue-free service at the counter.',
+    gu: 'કચેરી કાઉન્ટર પર સીધા પ્રવેશ માટે નવો એપોઇન્ટમેન્ટ સ્લોટ બુક કરો.',
+    hi: 'कार्यालय काउंटर पर सीधे प्रवेश के लिए नया अपॉइंटमेंट स्लॉट बुक करें।',
+    mr: 'कार्यालय काउंटरवर थेट प्रवेशासाठी नवीन अपॉइंटमेंट स्लॉट बुक करा.'
+  },
+  yourDeskBadge: {
+    en: 'YOUR DESK',
+    gu: 'તમારું કાઉન્ટર',
+    hi: 'आपका काउंटर',
+    mr: 'आपले काउंटर'
+  },
+
 
   // Auth Modal
   authModalTitle: {
