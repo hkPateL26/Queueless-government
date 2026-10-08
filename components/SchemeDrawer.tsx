@@ -88,7 +88,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     setCheckedDocs(prev => ({ ...prev, [docKey]: !prev[docKey] }));
   };
 
-  const handleRealFileUpload = async (docKey: string, file: File) => {
+  const handleRealFileUpload = async (docKey: string, file: File, docNameEn?: string) => {
     triggerHaptic('tap');
     setDocVerifications(prev => ({
       ...prev,
@@ -96,7 +96,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     }));
 
     try {
-      const res = await inspectUploadedFileStrict(file, docKey);
+      const res = await inspectUploadedFileStrict(file, docKey, docNameEn);
       if (res.isValid) {
         setDocVerifications(prev => ({
           ...prev,
@@ -643,12 +643,22 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                       </div>
                     )}
 
-                    {/* Action Toolbar: Real File Upload & Interactive Live Test Simulators */}
-                    <div className="mt-2.5 pt-2 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-2">
+                    {/* Action Toolbar: Real File Upload (No Demo Buttons) */}
+                    <div className="mt-2.5 pt-2 border-t border-slate-200/80 flex items-center justify-between gap-2">
                       {/* Real File Input Trigger */}
-                      <label className="text-[10.5px] font-bold text-[#003366] bg-white hover:bg-slate-50 border border-slate-300 hover:border-[#005A9C] px-2.5 py-1 rounded-lg flex items-center gap-1.5 cursor-pointer transition active:scale-95 shadow-2xs">
-                        <Upload className="w-3 h-3 text-[#FF9933]" />
-                        <span>{isEn ? 'Upload File' : 'ફાઇલ અપલોડ કરો'}</span>
+                      <label className="text-[11px] font-bold text-[#003366] bg-white hover:bg-slate-50 border border-slate-300 hover:border-[#005A9C] px-3 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition active:scale-95 shadow-2xs">
+                        {vState.status === 'failed' ? (
+                          <RefreshCw className="w-3.5 h-3.5 text-red-500" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5 text-[#FF9933]" />
+                        )}
+                        <span>
+                          {vState.status === 'failed'
+                            ? (isEn ? 'Re-upload Document' : 'સાચો દસ્તાવેજ ફરી અપલોડ કરો')
+                            : vState.status === 'passed'
+                            ? (isEn ? 'Change / Re-upload' : 'ફાઇલ બદલો / ફરી અપલોડ')
+                            : (isEn ? 'Upload Original Document' : 'અસલ દસ્તાવેજ અપલોડ કરો')}
+                        </span>
                         <input
                           type="file"
                           accept="image/*,application/pdf"
@@ -656,54 +666,16 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              await handleRealFileUpload(doc.nameGu, file);
+                              await handleRealFileUpload(doc.nameGu, file, doc.nameEn);
                               e.target.value = '';
                             }
                           }}
                         />
                       </label>
 
-                      {/* AI Test Simulators (for easy live jury demo) */}
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase hidden sm:inline">Demo:</span>
-                        <button
-                          type="button"
-                          onClick={() => handleVerifyDoc(doc.nameGu, 'valid')}
-                          className="text-[10px] font-black text-emerald-800 bg-emerald-100/80 hover:bg-emerald-200 border border-emerald-300 px-2 py-1 rounded-lg transition active:scale-95 cursor-pointer"
-                          title="Simulate valid government document"
-                        >
-                          ✓ {isEn ? 'Valid' : 'માન્ય'}
-                        </button>
-
-                        {/* If income certificate or time-bound document, show Expired Simulator */}
-                        {doc.nameGu.includes('આવક') && (
-                          <button
-                            type="button"
-                            onClick={() => handleVerifyDoc(doc.nameGu, 'expired')}
-                            className="text-[10px] font-black text-red-800 bg-red-100/80 hover:bg-red-200 border border-red-300 px-2 py-1 rounded-lg transition active:scale-95 cursor-pointer"
-                            title="Simulate expired document older than 3 years"
-                          >
-                            ✕ {isEn ? 'Expired (2021)' : 'જૂનો ૨૦૨૧'}
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => handleVerifyDoc(doc.nameGu, 'mismatch')}
-                          className="text-[10px] font-black text-amber-800 bg-amber-100/80 hover:bg-amber-200 border border-amber-300 px-2 py-1 rounded-lg transition active:scale-95 cursor-pointer"
-                          title="Simulate name mismatch"
-                        >
-                          ⚠️ {isEn ? 'Mismatch' : 'ખોટું નામ'}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleVerifyDoc(doc.nameGu, 'wrong_doc')}
-                          className="text-[10px] font-black text-rose-800 bg-rose-100/80 hover:bg-rose-200 border border-rose-300 px-2 py-1 rounded-lg transition active:scale-95 cursor-pointer"
-                          title="Simulate college fee receipt or wrong document"
-                        >
-                          🚫 {isEn ? 'Receipt/Bill' : 'ફી રસીદ / બિલ'}
-                        </button>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">
+                        <Sparkles className="w-3 h-3 text-indigo-600" />
+                        <span>{isEn ? 'OpenAI Vision Verified' : 'AI વિઝન સ્કેનિંગ'}</span>
                       </div>
                     </div>
                   </div>

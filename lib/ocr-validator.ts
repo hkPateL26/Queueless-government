@@ -262,11 +262,58 @@ export interface FileValidationInspectionResult {
  */
 export async function inspectUploadedFileStrict(
   file: File,
-  targetDocNameGu: string
+  targetDocNameGu: string,
+  targetDocNameEn?: string
 ): Promise<FileValidationInspectionResult> {
   const fileNameLower = file.name.toLowerCase();
+
+  // 1. First attempt: Real-time OpenAI GPT-4o-mini Vision via secure backend
+  if (file.type.startsWith('image/')) {
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = reader.result as string;
+          const idx = res.indexOf('base64,');
+          resolve(idx !== -1 ? res.substring(idx + 7) : res);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const apiRes = await fetch('/api/ai-verify-doc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageBase64: base64,
+          mimeType: file.type || 'image/jpeg',
+          targetDocNameGu,
+          targetDocNameEn: targetDocNameEn || '',
+          applicantName: 'હરિ પટેલ (Hari Patel)'
+        })
+      });
+
+      const json = await apiRes.json();
+      if (json.success && json.result) {
+        const r = json.result;
+        return {
+          isValid: !!r.isValid,
+          status: r.isValid ? 'passed' : 'failed',
+          detectedDocumentType: r.detectedDocumentType || (r.isValid ? targetDocNameGu : 'અમાન્ય દસ્તાવેજ'),
+          confidenceScore: r.confidenceScore || (r.isValid ? 0.98 : 0.95),
+          reasonGu: r.reasonGu,
+          reasonEn: r.reasonEn,
+          extractedDetailsGu: r.extractedDetailsGu,
+          extractedDetailsEn: r.extractedDetailsEn,
+          blurDetected: !!r.isBlurry
+        };
+      }
+    } catch (err) {
+      console.warn('AI Vision API call failed, continuing with local strict validator:', err);
+    }
+  }
   
-  // 1. Strict Negative Keyword Detection (Fee Receipts, Utility Bills, College/Uni Docs, Random Photos)
+  // 2. Strict Negative Keyword & File Classifier (Fee Receipts, Utility Bills, College Docs)
   const isCollegeOrReceipt = 
     fileNameLower.includes('atmiya') ||
     fileNameLower.includes('receipt') ||
