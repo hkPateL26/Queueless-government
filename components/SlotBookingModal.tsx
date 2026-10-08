@@ -524,19 +524,25 @@ export function SlotBookingModal({
                       <IndianRupee className="w-3.5 h-3.5 text-[#138808]" />
                       <span>{isEn ? '2. Govt Fee?' : isHi ? '२. सरकारी शुल्क?' : isMr ? '२. शासकीय शुल्क?' : '૨. સરકારી ફી કેટલી?'}</span>
                     </span>
-                    <p className="text-sm font-black text-[#138808] mt-1.5">
-                      {scheme.fee === 0 
-                        ? (isEn ? '₹0 (Free)' : isHi ? '₹० (मुफ्त)' : isMr ? '₹० (मोफत)' : '₹૦ (સંપૂર્ણ મફત)') 
-                        : `₹${scheme.fee}`}
-                    </p>
+                    <div className="flex items-baseline gap-1.5 mt-1.5">
+                      <p className="text-sm font-black text-[#138808]">
+                        {scheme.fee === 0 
+                          ? (isEn ? '₹0 (Free)' : isHi ? '₹० (मुफ्त)' : isMr ? '₹० (मोफत)' : '₹૦ (સંપૂર્ણ મફત)') 
+                          : `₹${scheme.fee}`}
+                      </p>
+                      <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded border border-emerald-300">
+                        {isEn ? 'Token: ₹0 Free' : 'ટોકન પાસ: ₹૦ મફત'}
+                      </span>
+                    </div>
                     <p className="text-[10px] text-slate-500 mt-0.5">
                       {scheme.fee === 0 
-                        ? (isEn ? 'No government charge' : isMr ? 'कोणतेही शासकीय शुल्क नाही' : 'કોઈ સરકારી ચાર્જ નથી') 
-                        : (isEn ? 'Authorized service charge' : isMr ? 'नियमबद्ध सेवा शुल्क' : 'નિયત સરકારી સેવા ફી')}
+                        ? (isEn ? 'Zero charge for welfare scheme' : isMr ? 'कोणतेही शासकीय शुल्क नाही' : 'કલ્યાણકારી યોજના માટે કોઈ સરકારી ફી નથી') 
+                        : (isEn ? 'Authorized government user charge' : isMr ? 'नियमबद्ध सेवा शुल्क' : 'સત્તાવાર નિયત સરકારી સેવા ફી')}
                     </p>
                   </div>
-                  <p className="text-[9px] text-slate-400 font-medium mt-2 pt-1 border-t border-slate-100">
-                    {isEn ? 'Official counter receipt' : isMr ? 'काउंटरवर अधिकृत पावती' : 'કાઉન્ટર પર સત્તાવાર રસીદ'}
+                  <p className="text-[9px] text-slate-500 font-bold mt-2 pt-1 border-t border-slate-100 flex items-center justify-between">
+                    <span>{isEn ? 'Official Receipt' : 'સત્તાવાર રસીદ'}</span>
+                    <span className="text-emerald-700">{isEn ? 'Zero Touts/Brokers' : 'દલાલમુક્ત પ્રક્રિયા'}</span>
                   </p>
                 </div>
 
@@ -585,10 +591,10 @@ export function SlotBookingModal({
                       <span>{isEn ? '4. Counter Wait Time?' : isHi ? '४. काउंटर प्रतीक्षा समय?' : isMr ? '४. काउंटर प्रतीक्षा वेळ?' : '૪. કચેરી પ્રતીક્ષા સમય?'}</span>
                     </span>
                     <p className="text-xs font-black text-slate-800 mt-1.5">
-                      {isEn ? '~15-20 min (Counter Duration)' : isHi ? '~१५-२० मिनट (काउंटर पर)' : isMr ? '~१५-२० मिनिटे (काउंटरवर)' : '~૧૫-૨૦ મિનિટ (કાઉન્ટર પર)'}
+                      {isEn ? '~10-12 min (Desk Duration)' : isHi ? '~१०-१२ मिनट (काउंटर पर)' : isMr ? '~१०-१२ मिनिटे (काउंटरवर)' : '~૧૦-૧૨ મિનિટ (કાઉન્ટર સમય)'}
                     </p>
                     <p className="text-[10px] text-slate-500 mt-0.5">
-                      {isEn ? 'Zero-queue visit during slot' : isHi ? 'स्लॉट समय पर कतार-मुक्त कार्य' : isMr ? 'ठरलेल्या वेळेत रांगेविना काम' : 'સ્લોટ સમયે હાજર રહેવાથી લાઈન વગર કામ'}
+                      {isEn ? '1-Hr Arrival Window • Capped at 5' : isHi ? '१ घंटे का स्लॉट • अधिकतम ५ टोकन' : isMr ? '१ तासाचा स्लॉट • कमाल ५ टोकन' : '૧ કલાકની સ્માર્ટ વિન્ડો • ૫ ટોકન/કલાક મર્યાદા'}
                     </p>
                   </div>
                   <p className="text-[9px] text-emerald-700 font-bold mt-2 pt-1 border-t border-slate-100">
@@ -1095,20 +1101,31 @@ export function SlotBookingModal({
                       }`}
                     >
                       <div>
-                        <div className="text-xs font-bold flex items-center gap-1.5">
+                        <div className="text-xs font-bold flex items-center gap-1.5 flex-wrap">
                           <span>{slot.timeRange}</span>
+                          <span className={`text-[9px] font-black px-1.5 py-0.2 rounded ${
+                            isSelected ? 'bg-blue-800 text-amber-300' : 'bg-slate-100 text-slate-700'
+                          }`}>
+                            {isEn ? '1-Hr Window' : isHi ? '१ घंटे की विंडो' : isMr ? '१ तासाची विंडो' : '૧ કલાક વિન્ડો'}
+                          </span>
                           {isSelected && (
                             <CheckCircle2 className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                           )}
                         </div>
-                        <div className={`text-[10px] mt-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                          {isEn 
-                            ? `Booked: ${slot.bookedCount}/${slot.maxCapacity} • Left: ${slot.slotsAvailable}` 
-                            : isHi 
-                            ? `बुक: ${slot.bookedCount}/${slot.maxCapacity} • शेष: ${slot.slotsAvailable}` 
-                            : isMr 
-                            ? `नोंदणीकृत: ${slot.bookedCount}/${slot.maxCapacity} • शिल्लक: ${slot.slotsAvailable}` 
-                            : `બુક થયેલ: ${slot.bookedCount}/${slot.maxCapacity} • બાકી: ${slot.slotsAvailable}`}
+                        <div className={`text-[10px] mt-0.5 flex items-center gap-1.5 flex-wrap ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                          <span>
+                            {isEn 
+                              ? `Booked: ${slot.bookedCount}/${slot.maxCapacity} • Left: ${slot.slotsAvailable}` 
+                              : isHi 
+                              ? `बुक: ${slot.bookedCount}/${slot.maxCapacity} • शेष: ${slot.slotsAvailable}` 
+                              : isMr 
+                              ? `नोंदणीकृत: ${slot.bookedCount}/${slot.maxCapacity} • शिल्लक: ${slot.slotsAvailable}` 
+                              : `બુક થયેલ: ${slot.bookedCount}/${slot.maxCapacity} • બાકી: ${slot.slotsAvailable}`}
+                          </span>
+                          <span className="opacity-60">•</span>
+                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                            {isEn ? 'Desk: ~10-12m' : isHi ? 'काउंटर: ~१०-१२ मि.' : isMr ? 'काउंटर: ~१०-१२ मि.' : 'કાઉન્ટર: ~૧૦-૧૨ મિ.'}
+                          </span>
                         </div>
                       </div>
 
@@ -1128,6 +1145,74 @@ export function SlotBookingModal({
                 })}
               </div>
             )}
+
+            {/* 💡 TRANSPARENT SMART QUEUE & FAIRNESS PROTOCOL (FOR CITIZEN & JURY) */}
+            <div className="mt-3.5 p-3.5 bg-gradient-to-r from-blue-50/90 via-slate-50 to-emerald-50/70 border border-blue-200/90 rounded-xl space-y-2 text-xs">
+              <div className="flex items-center justify-between gap-2 border-b border-blue-200/60 pb-1.5 flex-wrap">
+                <span className="font-black text-[#003366] flex items-center gap-1.5">
+                  <span>⚖️</span>
+                  <span>
+                    {isEn 
+                      ? 'Smart Queue & Fairness Protocol (Official GAD Standards)' 
+                      : isHi 
+                      ? 'स्मार्ट कतार एवं निष्पक्षता प्रोटोकॉल (आधिकारिक मानक)' 
+                      : isMr 
+                      ? 'स्मार्ट रांग आणि निष्पक्षता प्रोटोकॉल (अधिकृत मानक)' 
+                      : 'સ્માર્ટ કતાર અને સમયસરતા પ્રોટોકોલ (સત્તાવાર GAD ધારાધોરણો)'}
+                  </span>
+                </span>
+                <span className="text-[9.5px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded border border-emerald-300">
+                  {isEn ? 'Token Fee: ₹0 Free' : isHi ? 'टोकन शुल्क: ₹० मुफ्त' : isMr ? 'टोकन शुल्क: ₹० मोफत' : 'ટોકન પાસ: ₹૦ મફત'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[10.5px]">
+                <div className="bg-white/90 p-2.5 rounded-lg border border-slate-200">
+                  <span className="font-black text-blue-900 block flex items-center gap-1">
+                    <span>🚌</span> {isEn ? '1-Hour Arrival Window' : isHi ? '१ घंटे की लचीली विंडो' : isMr ? '१ तासाची लवचिक विंडो' : '૧ કલાકની સ્માર્ટ વિન્ડો'}
+                  </span>
+                  <p className="text-slate-600 mt-1 leading-snug">
+                    {isEn 
+                      ? 'Rural transport buffer prevents slot expiry due to bus or road delays.' 
+                      : isHi 
+                      ? 'बस या यातायात में देरी होने पर भी स्लॉट रद्द नहीं होता।' 
+                      : isMr 
+                      ? 'एसटी बस किंवा वाहतूक विलंबाने स्लॉट रद्द होत नाही.' 
+                      : 'એસ.ટી. બસ કે ગ્રામ્ય મુસાફરીમાં વિલંબ થાય તો પણ ૧ કલાકની વિન્ડોમાં સ્લોટ રદ થતો નથી.'}
+                  </p>
+                </div>
+
+                <div className="bg-white/90 p-2.5 rounded-lg border border-slate-200">
+                  <span className="font-black text-emerald-900 block flex items-center gap-1">
+                    <span>⏱️</span> {isEn ? '~10-12 Min Turnaround' : isHi ? '~१०-१२ मिनट काउंटर समय' : isMr ? '~१०-१२ मिनिटे काउंटर वेळ' : 'કાઉન્ટર સરેરાશ સમય'}
+                  </span>
+                  <p className="text-slate-600 mt-1 leading-snug">
+                    {isEn 
+                      ? 'Cap of 5 tokens/hr per counter ensures zero waiting and crowd-free service.' 
+                      : isHi 
+                      ? 'GRTSA मानकों के अनुसार ५ टोकन/घंटा ताकि काउंटर पर कभी भीड़ न हो।' 
+                      : isMr 
+                      ? 'प्रति तास कमाल ५ टोकन मर्यादा जेणेकरून काउंटरवर गर्दी होणार नाही.' 
+                      : 'GRTSA મુજબ પ્રતિ અરજદાર ૧૦-૧૨ મિ. ૧ કલાકમાં માત્ર ૫ ટોકન જેથી કાઉન્ટર આગળ ભીડ ન થાય.'}
+                  </p>
+                </div>
+
+                <div className="bg-white/90 p-2.5 rounded-lg border border-slate-200">
+                  <span className="font-black text-amber-900 block flex items-center gap-1">
+                    <span>🔄</span> {isEn ? 'Late Arrival Grace' : isHi ? 'विलंब पर निष्पक्ष समायोजन' : isMr ? 'उशिरा आल्यास निष्पक्ष समायोजन' : 'મોડા પહોંચવા પર સુરક્ષા'}
+                  </span>
+                  <p className="text-slate-600 mt-1 leading-snug">
+                    {isEn 
+                      ? 'On-time citizens get priority. Late arrivals are served in saved gaps or hour-end buffer.' 
+                      : isHi 
+                      ? 'समय पर उपस्थित नागरिकों को प्राथमिकता; देरी होने पर अगले रिक्त अंतराल या अंतिम बफर में सेवा।' 
+                      : isMr 
+                      ? 'वेळेवर आलेल्या नागरिकांना प्राधान्य; विलंबाने आल्यास मधल्या वेळेत किंवा शेवटी सेवा.' 
+                      : 'સમયસર નાગરિકને પ્રથમ હક્ક. વિલંબ થાય તો આગળના નાગરિક પત્યા બાદના સેવ્ડ ગેપ કે કલાકના બફરમાં વારો લેવાશે.'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* STEP 5: CONFIGURABLE COUNTER ROUTING (IMAGE 3 ENHANCEMENT) */}

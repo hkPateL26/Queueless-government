@@ -374,7 +374,7 @@ export function DigitalTokenPass({
 
               <div className="bg-white p-2.5 rounded-xl border border-slate-200">
                 <span className="text-[10px] text-slate-500 font-semibold block flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-[#005A9C]" /> {isEn ? 'Time Slot' : isHi ? 'समय स्लॉट' : isMr ? 'वेळ स्लॉट' : 'સમય સ્લોટ'}
+                  <Clock className="w-3 h-3 text-[#005A9C]" /> {isEn ? 'Time Slot (1-Hr)' : isHi ? 'समय स्लॉट (१ घंटा)' : isMr ? 'वेळ स्लॉट (१ तास)' : 'સમય સ્લોટ (૧ કલાક)'}
                 </span>
                 <span className="font-bold text-slate-800 text-[11px] block mt-0.5">
                   {currentSlotTime}
@@ -389,6 +389,21 @@ export function DigitalTokenPass({
                   {isEn ? `Counter ${booking.counterNumber} (${booking.counterNameEn || booking.counterNameGu})` : `કાઉન્ટર ${booking.counterNumber} (${booking.counterNameGu})`}
                 </span>
               </div>
+            </div>
+
+            {/* Official Zero Fee & Turnaround Transparency Banner */}
+            <div className="bg-white p-2.5 rounded-xl border border-blue-200/80 flex flex-wrap items-center justify-between gap-2 text-[10.5px]">
+              <div className="flex items-center gap-2">
+                <span className="bg-emerald-100 text-emerald-800 font-black px-2 py-0.5 rounded border border-emerald-300">
+                  {isEn ? 'Token Fee: ₹0 (Free)' : isHi ? 'टोकन शुल्क: ₹० (मुफ्त)' : isMr ? 'टोकन शुल्क: ₹० (मोफत)' : 'અધિકૃત ટોકન પાસ: ₹૦ (સંપૂર્ણ મફત)'}
+                </span>
+                <span className="text-slate-600 font-medium">
+                  {isEn ? '• Est Desk Duration: ~10-12 min' : isHi ? '• काउंटर औसत समय: ~१०-१२ मि.' : isMr ? '• काउंटर सरासरी वेळ: ~१०-१२ मि.' : '• કાઉન્ટર સમય: ~૧૦-૧૨ મિનિટ'}
+                </span>
+              </div>
+              <span className="text-[9.5px] text-blue-900 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                {isEn ? '🛡️ Late Arrival Grace Active' : isHi ? '🛡️ विलंब निष्पक्षता सक्रिय' : isMr ? '🛡️ उशीर निष्पक्षता सक्रिय' : '🛡️ વિલંબ સુરક્ષા સક્રિય'}
+              </span>
             </div>
           </div>
 
@@ -456,26 +471,26 @@ export function DigitalTokenPass({
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
                   <span className="text-[10px] font-semibold text-gray-500 flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-[#005A9C]" />
-                    સમય સ્લોટ
+                    {isEn ? 'Time Slot (1-Hr Window)' : 'સમય સ્લોટ (૧ કલાક વિન્ડો)'}
                   </span>
                   <span className="text-xs font-bold text-gray-900 mt-1 block">
                     {currentSlotTime}
                   </span>
                   <span className="text-[10px] text-gray-500 font-mono">
-                    તારીખ: {selectedDate}
+                    {isEn ? `Date: ${selectedDate}` : `તારીખ: ${selectedDate}`}
                   </span>
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
                   <span className="text-[10px] font-semibold text-gray-500 flex items-center gap-1">
                     <UserCheck className="w-3.5 h-3.5 text-[#138808]" />
-                    કતારમાં સ્થિતિ
+                    {isEn ? 'Queue Turn' : 'કતારમાં સ્થિતિ'}
                   </span>
                   <span className="text-xs font-bold text-[#138808] mt-1 block">
-                    આગળ {aheadInQueue} નાગરિકો બાકી
+                    {isEn ? `${aheadInQueue} citizens ahead` : `આગળ ${aheadInQueue} નાગરિકો બાકી`}
                   </span>
                   <span className="text-[10px] text-gray-500">
-                    અંદાજિત રાહ: ~{estimatedMinutes} મિનિટ
+                    {isEn ? `Est wait: ~${estimatedMinutes}m (~10-12m/desk)` : `અંદાજિત રાહ: ~${estimatedMinutes} મિ. (~૧૦-૧૨ મિ./કાઉન્ટર)`}
                   </span>
                 </div>
               </div>

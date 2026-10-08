@@ -234,6 +234,34 @@ export function GovJanSevaGateway({
           </div>
         )}
 
+        {/* 🏛️ OFFICIAL STANDARDS TRANSPARENCY STRIP (GAD & GRTSA 2013) */}
+        <div className="bg-gradient-to-r from-amber-50/70 via-blue-50/60 to-emerald-50/70 border border-slate-200 rounded-2xl p-2.5 sm:p-3 text-xs space-y-1.5">
+          <div className="flex items-center justify-between gap-1 flex-wrap">
+            <span className="font-extrabold text-[#003366] text-[11px] flex items-center gap-1">
+              <span>🏛️</span>
+              <span>{isGu ? 'સત્તાવાર સરકારી ધારાધોરણો' : isHi ? 'आधिकारिक सरकारी मानक' : isMr ? 'अधिकृत शासकीय मानके' : 'Official Government Norms'}</span>
+            </span>
+            <span className="bg-emerald-100 text-emerald-800 text-[9.5px] font-black px-2 py-0.5 rounded border border-emerald-300">
+              {isGu ? 'ટોકન પાસ: ₹૦ મફત' : isHi ? 'टोकन शुल्क: ₹० मुफ्त' : isMr ? 'टोकन शुल्क: ₹० मोफत' : 'Token: ₹0 Free'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] text-slate-600">
+            <div className="bg-white p-1.5 rounded-lg border border-slate-200">
+              <span className="font-bold text-slate-800 block">⏱️ {isGu ? 'કાઉન્ટર સરેરાશ:' : 'Desk Time:'}</span>
+              <span className="text-emerald-700 font-bold">{isGu ? '~૧૦-૧૨ મિનિટ' : '~10-12 mins'}</span>
+            </div>
+            <div className="bg-white p-1.5 rounded-lg border border-slate-200">
+              <span className="font-bold text-slate-800 block">🚌 {isGu ? 'આગમન સ્લોટ:' : 'Arrival Slot:'}</span>
+              <span className="text-blue-700 font-bold">{isGu ? '૧ કલાક વિન્ડો' : '1-Hr Window'}</span>
+            </div>
+            <div className="bg-white p-1.5 rounded-lg border border-slate-200 col-span-2 sm:col-span-1">
+              <span className="font-bold text-slate-800 block">📜 {isGu ? 'ફ્લેગશિપ સેવાઓ:' : 'Services:'}</span>
+              <span className="text-amber-700 font-bold">{isGu ? 'ટોચની ૩૯ સેવાઓ' : 'Top 39 Services'}</span>
+            </div>
+          </div>
+        </div>
+
         {/* 🚀 PRIMARY OFFICIAL ACTION DESK */}
         <div className="space-y-2.5">
           
