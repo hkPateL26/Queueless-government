@@ -15,7 +15,10 @@ import { speakGuidance } from '@/lib/voice';
 import { 
   playNotificationChime, broadcastQueueEvent, subscribeToQueueEvents, QueueEvent 
 } from '@/lib/realtime-bus';
-import { GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice } from '@/lib/jurisdiction-data';
+import { 
+  GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice,
+  getLocalizedDistrictName, getLocalizedTalukaName 
+} from '@/lib/jurisdiction-data';
 import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { Language, GUJARAT_LANGUAGES } from '@/lib/translations';
@@ -265,6 +268,12 @@ const SERVICE_SLA_CONFIG = {
   warningMinutes: 10,
 };
 
+const getDefaultTransferRemarks = (l: Language): string => {
+  if (l === 'hi') return 'आवेदक को शपथ पत्र सत्यापन हेतु भेजा गया है।';
+  if (l === 'en') return 'Applicant forwarded for affidavit notarization.';
+  return 'અરજદારને સોગંદનામા માટે મોકલવામાં આવ્યા છે.';
+};
+
 export default function CounterOperatorDesk() {
   // Multi-Language State
   const [lang, setLang] = useState<Language>('gu');
@@ -284,7 +293,7 @@ export default function CounterOperatorDesk() {
   const [docModalOpen, setDocModalOpen] = useState<boolean>(false);
   const [transferModalOpen, setTransferModalOpen] = useState<boolean>(false);
   const [targetCounter, setTargetCounter] = useState<number>(2);
-  const [transferRemarks, setTransferRemarks] = useState<string>('અરજદારને સોગંદનામા માટે મોકલવામાં આવ્યા છે.');
+  const [transferRemarks, setTransferRemarks] = useState<string>(getDefaultTransferRemarks('gu'));
   const [queueTab, setQueueTab] = useState<'WAITING' | 'SKIPPED'>('WAITING');
 
   // Audit Log State
@@ -305,6 +314,7 @@ export default function CounterOperatorDesk() {
       const savedLang = localStorage.getItem('qless_preferred_lang') as Language | null;
       if (savedLang && (savedLang === 'gu' || savedLang === 'hi' || savedLang === 'en')) {
         setLang(savedLang);
+        setTransferRemarks(getDefaultTransferRemarks(savedLang));
       }
     } catch {}
   }, []);
@@ -316,6 +326,16 @@ export default function CounterOperatorDesk() {
     try {
       localStorage.setItem('qless_preferred_lang', newLang);
     } catch {}
+    
+    // Also sync default remarks if user has not customized them
+    const allDefaults = [
+      'અરજદારને સોગંદનામા માટે મોકલવામાં આવ્યા છે.',
+      'आवेदक को शपथ पत्र सत्यापन हेतु भेजा गया है।',
+      'Applicant forwarded for affidavit notarization.'
+    ];
+    if (allDefaults.includes(transferRemarks)) {
+      setTransferRemarks(getDefaultTransferRemarks(newLang));
+    }
   };
 
   const isGu = lang === 'gu';
@@ -645,7 +665,7 @@ export default function CounterOperatorDesk() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-[#1F2937] flex flex-col w-full">
       {/* 🚀 LIVE GUJARAT GOVERNMENT TELEMETRY & SYSTEM HEALTH MARQUEE */}
-      <GovTelemetryMarquee />
+      <GovTelemetryMarquee lang={lang} />
 
       {/* 🟠 DEMO MODE BANNER */}
       <div className="bg-amber-500 text-slate-900 text-xs px-4 py-1.5 font-bold flex flex-wrap items-center justify-between border-b border-amber-600 shadow-xs">
@@ -795,7 +815,7 @@ export default function CounterOperatorDesk() {
             >
               {GUJARAT_33_DISTRICTS.map(d => (
                 <option key={d.id} value={d.id}>
-                  {isEn ? `${d.nameEn} (${d.nameGu})` : `${d.nameGu} (${d.nameEn})`}
+                  {isEn ? `${d.nameEn} (${d.nameGu})` : isHi ? `${getLocalizedDistrictName(d, 'hi')} (${d.nameEn})` : `${d.nameGu} (${d.nameEn})`}
                 </option>
               ))}
             </select>
@@ -808,7 +828,7 @@ export default function CounterOperatorDesk() {
             >
               {currentDistrict.talukas.map(t => (
                 <option key={t.id} value={t.id}>
-                  {isEn ? `${t.nameEn} (${t.nameGu})` : `${t.nameGu} (${t.nameEn})`}
+                  {isEn ? `${t.nameEn} (${t.nameGu})` : isHi ? `${getLocalizedTalukaName(t, 'hi')} (${t.nameEn})` : `${t.nameGu} (${t.nameEn})`}
                 </option>
               ))}
             </select>
@@ -1152,7 +1172,10 @@ export default function CounterOperatorDesk() {
                     </button>
 
                     <button
-                      onClick={() => setTransferModalOpen(true)}
+                      onClick={() => {
+                        setTransferRemarks(getDefaultTransferRemarks(lang));
+                        setTransferModalOpen(true);
+                      }}
                       className="bg-blue-600 hover:bg-blue-700 text-white font-black py-3 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
                       title={isGu ? "બીજા કાઉન્ટર પર મોકલો" : isHi ? "अन्य काउंटर पर स्थानांतरित करें" : "Forward to Another Desk"}
                     >

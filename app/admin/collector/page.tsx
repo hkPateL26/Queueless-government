@@ -11,16 +11,16 @@ import {
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
-import { GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice } from '@/lib/jurisdiction-data';
+import { 
+  GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice, 
+  getLocalizedDistrictName, getLocalizedDistrictHq, 
+  getLocalizedTalukaName, getLocalizedTalukaOffice, guToDeva 
+} from '@/lib/jurisdiction-data';
 import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { Language, GUJARAT_LANGUAGES } from '@/lib/translations';
 
-interface DistrictMetric {
-  id: string;
-  nameGu: string;
-  nameEn: string;
-  headquarters: string;
+interface DistrictMetric extends DistrictItem {
   totalTokensToday: number;
   completedTokens: number;
   waitingCount: number;
@@ -114,7 +114,6 @@ export default function CollectorCommandDashboard() {
   const [delayAlerts, setDelayAlerts] = useState<QueueDelayAlert[]>(INITIAL_QUEUE_DELAYS);
   const [misModalOpen, setMisModalOpen] = useState<boolean>(false);
   const [filterMode, setFilterMode] = useState<'ALL' | 'CONGESTED' | 'DELAY_ALERT'>('ALL');
-  const [lastRefreshed, setLastRefreshed] = useState<string>('હમણાં જ (Live)');
 
   // Load language preference from LocalStorage on mount
   useEffect(() => {
@@ -163,10 +162,7 @@ export default function CollectorCommandDashboard() {
       }
 
       return {
-        id: d.id,
-        nameGu: d.nameGu,
-        nameEn: d.nameEn,
-        headquarters: d.headquarters,
+        ...d,
         totalTokensToday: totalTokens,
         completedTokens: completed,
         waitingCount: waiting,
@@ -258,7 +254,7 @@ export default function CollectorCommandDashboard() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] text-[#1F2937] flex flex-col w-full">
       {/* 🚀 LIVE GUJARAT GOVERNMENT TELEMETRY & SYSTEM HEALTH MARQUEE */}
-      <GovTelemetryMarquee />
+      <GovTelemetryMarquee lang={lang} />
 
       {/* 🟠 DEMO DATA & DEMO MODE BANNER */}
       <div className="bg-amber-500 text-slate-900 text-xs px-4 py-1.5 font-bold flex flex-wrap items-center justify-between border-b border-amber-600 shadow-xs">
@@ -550,10 +546,12 @@ export default function CollectorCommandDashboard() {
               </div>
             </div>
 
-            {/* 33 Districts Interactive Grid */}
+            {/* 33 Districts Interactive Grid with 100% Localized Names */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-[480px] overflow-y-auto pr-1">
               {filteredDistricts.map((metric) => {
                 const isSelected = metric.id === selectedDistrictId;
+                const localizedName = getLocalizedDistrictName(metric, lang);
+                const secondaryName = isEn ? metric.nameGu : metric.nameEn;
 
                 return (
                   <button
@@ -574,7 +572,7 @@ export default function CollectorCommandDashboard() {
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-black text-xs text-slate-900">
-                        {isEn ? metric.nameEn : metric.nameGu}
+                        {localizedName}
                       </span>
                       <span className={`w-2.5 h-2.5 rounded-full ${
                         metric.status === 'CONGESTED'
@@ -586,7 +584,7 @@ export default function CollectorCommandDashboard() {
                     </div>
 
                     <p className="text-[10px] text-slate-400 font-mono">
-                      {isEn ? metric.nameGu : metric.nameEn}
+                      {secondaryName}
                     </p>
                     
                     <div className="mt-2 flex items-center justify-between text-[10px]">
@@ -626,7 +624,7 @@ export default function CollectorCommandDashboard() {
               </div>
 
               <span>
-                {isGu ? `સિંક સમય: ${lastRefreshed}` : isHi ? `सिंक समय: ${lastRefreshed}` : `Sync: ${lastRefreshed}`}
+                {isGu ? "સિંક સમય: હમણાં જ (Live)" : isHi ? "सिंक समय: अभी (Live)" : "Sync: Just now (Live)"}
               </span>
             </div>
 
@@ -701,10 +699,14 @@ export default function CollectorCommandDashboard() {
                 </span>
               </div>
               <h3 className="text-lg font-black text-[#003366] mt-0.5">
-                {isEn ? `${selectedDistrictData.nameEn} District (${selectedDistrictData.nameGu})` : `${selectedDistrictData.nameGu} જિલ્લો (${selectedDistrictData.nameEn})`}
+                {isEn 
+                  ? `${selectedDistrictData.nameEn} District (${selectedDistrictData.nameGu})` 
+                  : isHi 
+                  ? `${getLocalizedDistrictName(selectedDistrictData, 'hi')} ज़िला (${selectedDistrictData.nameEn})` 
+                  : `${selectedDistrictData.nameGu} જિલ્લો (${selectedDistrictData.nameEn})`}
               </h3>
               <p className="text-xs text-slate-500">
-                {isGu ? "મુખ્ય મથક:" : isHi ? "मुख्यालय:" : "HQ:"} <strong>{selectedDistrictData.headquarters}</strong> • {isGu ? "કુલ ટોકન:" : isHi ? "कुल टोकन:" : "Total Tokens:"} <strong>{selectedDistrictMetric.totalTokensToday}</strong>
+                {isGu ? "મુખ્ય મથક:" : isHi ? "मुख्यालय:" : "HQ:"} <strong>{getLocalizedDistrictHq(selectedDistrictData, lang)}</strong> • {isGu ? "કુલ ટોકન:" : isHi ? "कुल टोकन:" : "Total Tokens:"} <strong>{selectedDistrictMetric.totalTokensToday}</strong>
               </p>
             </div>
 
@@ -717,10 +719,14 @@ export default function CollectorCommandDashboard() {
                 >
                   <div>
                     <h5 className="text-xs font-black text-slate-800">
-                      {isEn ? `${taluka.nameEn} Taluka` : `${taluka.nameGu} તાલુકો`}
+                      {isEn 
+                        ? `${taluka.nameEn} Taluka` 
+                        : isHi 
+                        ? `${getLocalizedTalukaName(taluka, 'hi')} तालुक` 
+                        : `${taluka.nameGu} તાલુકો`}
                     </h5>
                     <p className="text-[10px] text-slate-500 line-clamp-1">
-                      {isEn ? taluka.officeNameEn : taluka.officeNameGu}
+                      {getLocalizedTalukaOffice(taluka, lang)}
                     </p>
                     <span className="text-[9px] font-mono text-[#005A9C] font-bold">
                       {isGu ? "૬ કાઉન્ટર્સ સક્રિય • ક્ષમતા: કોન્ફિગરેબલ" : isHi ? "६ काउंटर सक्रिय • क्षमता: कॉन्फ़िगर करने योग्य" : "6 Desks Active • Capacity: Configurable"}

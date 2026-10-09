@@ -86,6 +86,47 @@ function createTaluka(
   };
 }
 
+/**
+ * Transliterates Gujarati script to Devanagari Hindi
+ */
+export function guToDeva(text: string): string {
+  if (!text) return '';
+  return text.split('').map(char => {
+    const code = char.charCodeAt(0);
+    if (code >= 0x0A81 && code <= 0x0AF1) {
+      return String.fromCharCode(code - 0x0180);
+    }
+    return char;
+  }).join('');
+}
+
+export function getLocalizedDistrictName(district: DistrictItem, lang: string): string {
+  if (lang === 'en') return district.nameEn;
+  if (lang === 'hi') return guToDeva(district.nameGu);
+  return district.nameGu;
+}
+
+export function getLocalizedDistrictHq(district: DistrictItem, lang: string): string {
+  if (lang === 'en') return district.nameEn;
+  if (lang === 'hi') return guToDeva(district.headquarters || district.nameGu);
+  return district.headquarters || district.nameGu;
+}
+
+export function getLocalizedTalukaName(taluka: TalukaOffice, lang: string): string {
+  if (lang === 'en') return taluka.nameEn;
+  if (lang === 'hi') return guToDeva(taluka.nameGu);
+  return taluka.nameGu;
+}
+
+export function getLocalizedTalukaOffice(taluka: TalukaOffice, lang: string): string {
+  if (lang === 'en') return taluka.officeNameEn;
+  if (lang === 'hi') {
+    const tName = guToDeva(taluka.nameGu);
+    return `${tName} - जन सेवा केंद्र • तहसीलदार कार्यालय`;
+  }
+  return taluka.officeNameGu;
+}
+
 // ============================================================================
 // ALL 33 OFFICIAL DISTRICTS OF GUJARAT & REAL REVENUE TALUKAS
 // ============================================================================

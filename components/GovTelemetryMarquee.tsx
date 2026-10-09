@@ -9,12 +9,24 @@ interface GovTelemetryMarqueeProps {
   lang?: Language;
 }
 
-export const GovTelemetryMarquee: React.FC<GovTelemetryMarqueeProps> = ({ lang = 'gu' }) => {
+export const GovTelemetryMarquee: React.FC<GovTelemetryMarqueeProps> = ({ lang: propLang }) => {
+  const [activeLang, setActiveLang] = useState<Language>(propLang || 'gu');
   const [cpu, setCpu] = useState(6);
   const [ram, setRam] = useState(14);
   const [latency, setLatency] = useState(38);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [liveServed, setLiveServed] = useState(12483);
+
+  useEffect(() => {
+    if (propLang) {
+      setActiveLang(propLang);
+    } else {
+      try {
+        const stored = localStorage.getItem('qless_preferred_lang') as Language;
+        if (stored) setActiveLang(stored);
+      } catch {}
+    }
+  }, [propLang]);
 
   // Realistic telemetry fluctuation every 4-6 seconds
   useEffect(() => {
@@ -38,42 +50,41 @@ export const GovTelemetryMarquee: React.FC<GovTelemetryMarqueeProps> = ({ lang =
     }, 600);
   };
 
+  const isEn = activeLang === 'en';
+  const isHi = activeLang === 'hi';
+
   // Translations for telemetry items
   const t = {
-    dpiLive: lang === 'en' ? 'DPI LIVE' : lang === 'hi' ? 'DPI लाइव' : 'DPI LIVE',
-    serverNode: 'node-01 (GSWAN Gandhinagar)',
+    dpiLive: isEn ? 'DPI LIVE' : isHi ? 'DPI लाइव' : 'DPI LIVE',
+    serverNode: isEn ? 'node-01 (GSWAN Gandhinagar)' : isHi ? 'नोड-०१ (GSWAN गांधीनगर)' : 'નોડ-૦૧ (GSWAN ગાંધીનગર)',
     cpuLabel: 'CPU',
     ramLabel: 'RAM',
-    coverage: lang === 'en' 
+    coverage: isEn 
       ? 'State Coverage: 33 Districts | 250+ Talukas | 39 Public Services' 
-      : lang === 'hi' 
+      : isHi 
       ? 'राज्य कवरेज: ३३ जिले | २५०+ तहसील | ३९ योजनाएं' 
-      : lang === 'mr'
-      ? 'राज्य व्याप्ती: ३३ जिल्हे | २५०+ तालुके | ३९ सार्वजनिक सेवा'
       : 'રાજ્ય કવરેજ: ૩૩ જિલ્લા | ૨૫૦+ તાલુકા | ૩૯ સેવાઓ',
-    uptime: lang === 'en'
+    uptime: isEn
       ? '99.98% System Uptime • GRTSA 2013 Statutory Compliance'
-      : lang === 'hi'
+      : isHi
       ? '99.98% अपटाइम • GRTSA २०१३ वैधानिक अनुपालन'
-      : lang === 'mr'
-      ? '९९.९८% अपटाइम • GRTSA २०१३ वैधानिक अनुपालन'
       : '99.98% અપટાઇમ • GRTSA ૨૦૧૩ સત્તાવાર માન્ય',
-    version: 'v2.5.9 (સત્તાવાર અપડેટ) DPI',
-    cloud: lang === 'en'
+    version: isEn ? 'v2.5.9 (Official Release) DPI' : isHi ? 'v2.5.9 (आधिकारिक संस्करण) DPI' : 'v2.5.9 (સત્તાવાર અપડેટ) DPI',
+    cloud: isEn
       ? 'DPI Cloud: Gujarat State Data Centre (GSDC) Active'
-      : lang === 'hi'
+      : isHi
       ? 'DPI क्लाउड: गुजरात राज्य डेटा केंद्र (GSDC) सक्रिय'
-      : lang === 'mr'
-      ? 'DPI क्लाऊड: गुजरात राज्य डेटा केंद्र (GSDC) सक्रिय'
       : 'DPI Cloud: ગુજરાત સ્ટેટ ડેટા સેન્ટર (GSDC) સક્રિય',
-    portalStats: lang === 'en'
+    portalStats: isEn
       ? `[DPI Portal] 39 Services | 36 Active Hubs | Served Today: ${liveServed.toLocaleString('en-IN')}`
-      : lang === 'hi'
-      ? `[DPI पोर्टल] ३९ सेवाएं | ३६ केंद्र | आज सेवा प्राप्त: ${liveServed.toLocaleString('en-IN')}`
-      : lang === 'mr'
-      ? `[DPI पोर्टल] ३९ सेवा | ३६ केंद्रे | आज सेवा लाभार्थी: ${liveServed.toLocaleString('en-IN')}`
-      : `[DPI પોર્ટલ] કુલ સેવાઓ: ૩૯ | સક્રિય કચેરીઓ: ૩૬ | આજે સેવા મેળવી: ${liveServed.toLocaleString('en-IN')}`,
-    security: lang === 'en' ? '256-Bit SSL Secured • NIC GSWAN' : '૨૫૬-બીટ SSL સુરક્ષિત • NIC GSWAN'
+      : isHi
+      ? `[DPI पोर्टल] ३९ सेवाएं | ३६ केंद्र | आज सेवा प्राप्त: ${liveServed.toLocaleString('hi-IN')}`
+      : `[DPI પોર્ટલ] કુલ સેવાઓ: ૩૯ | સક્રિય કચેરીઓ: ૩૬ | આજે સેવા મેળવી: ${liveServed.toLocaleString('gu-IN')}`,
+    security: isEn 
+      ? '256-Bit SSL Secured • NIC GSWAN' 
+      : isHi 
+      ? '२५६-बिट SSL सुरक्षित • NIC GSWAN' 
+      : '૨૫૬-બીટ SSL સુરક્ષિત • NIC GSWAN'
   };
 
   // The telemetry items array
@@ -216,7 +227,7 @@ export const GovTelemetryMarquee: React.FC<GovTelemetryMarqueeProps> = ({ lang =
 
           <button
             onClick={handleManualRefresh}
-            title="કનેક્શન પિંગ રિફ્રેશ કરો / Refresh Live Ping"
+            title={isEn ? "Refresh live connection ping" : isHi ? "कनेक्शन पिंग रीफ्रेश करें" : "કનેક્શન પિંગ રિફ્રેશ કરો"}
             className="w-5 h-5 rounded hover:bg-blue-900/60 flex items-center justify-center text-slate-300 hover:text-white transition active:scale-95"
           >
             <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin text-[#FF9933]' : ''}`} />
