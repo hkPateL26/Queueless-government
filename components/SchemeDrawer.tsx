@@ -709,6 +709,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                       </div>
                     </div>
                   </div>
+                );
               })}
             </div>
           </div>
