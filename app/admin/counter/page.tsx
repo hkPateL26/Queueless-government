@@ -7,7 +7,8 @@ import {
   Clock, ArrowRight, Search, Building, Users, Radio, FileText, 
   Coffee, ArrowRightLeft, RotateCcw, Check, X, ChevronDown, 
   ExternalLink, Eye, Printer, ArrowLeft, Sparkles, Star, Award, 
-  AlertCircle, Phone, Lock, ChevronRight, RefreshCw, Layers, History, BadgeCheck
+  AlertCircle, Phone, Lock, ChevronRight, RefreshCw, Layers, History, BadgeCheck,
+  Globe
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -17,117 +18,212 @@ import {
 import { GUJARAT_33_DISTRICTS, DistrictItem, TalukaOffice } from '@/lib/jurisdiction-data';
 import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
+import { Language, GUJARAT_LANGUAGES } from '@/lib/translations';
 
 interface QueueCitizen {
   id: string;
   tokenNumber: string;
-  citizenName: string;
+  citizenNameGu: string;
+  citizenNameHi: string;
+  citizenNameEn: string;
   phone: string;
   schemeTitleGu: string;
+  schemeTitleHi: string;
   schemeTitleEn: string;
   counterNumber: number;
-  isPriority: boolean; // Configurable policy: Senior Citizen (60+) / Divyangjan
+  isPriority: boolean;
   appliedTime: string;
-  waitingMinutes: number; // Citizen Waiting Time (before desk handling)
+  waitingMinutes: number;
   status: 'WAITING' | 'CALLED' | 'IN_SERVICE' | 'COMPLETED' | 'SKIPPED' | 'LATE';
   lateMinutes?: number;
   aadhaarLast4: string;
-  incomeDeclared: string;
-  aiOcrVerdict: string;
-  documents: { name: string; status: 'PRE_CHECK_PASSED' | 'PENDING' }[];
+  incomeDeclaredGu: string;
+  incomeDeclaredHi: string;
+  incomeDeclaredEn: string;
+  aiOcrVerdictGu: string;
+  aiOcrVerdictHi: string;
+  aiOcrVerdictEn: string;
+  documents: { 
+    nameGu: string; 
+    nameHi: string; 
+    nameEn: string; 
+    status: 'PRE_CHECK_PASSED' | 'PENDING' 
+  }[];
 }
 
 export interface AuditLogEntry {
   id: string;
   timestamp: string;
-  officerName: string;
+  officerNameGu: string;
+  officerNameHi: string;
+  officerNameEn: string;
   action: 'CALLED' | 'COMPLETED' | 'SKIPPED' | 'RECALLED' | 'TRANSFERRED' | 'LUNCH_BREAK';
   tokenNumber: string;
   counterNumber: number;
-  remarks: string;
+  remarksGu: string;
+  remarksHi: string;
+  remarksEn: string;
 }
 
 const INITIAL_QUEUE: QueueCitizen[] = [
   {
     id: 'tok-p07',
     tokenNumber: '#P-07',
-    citizenName: 'ગંગાબેન રમણિકભાઈ પટેલ (૬૪ વર્ષ)',
+    citizenNameGu: 'ગંગાબેન રમણિકભાઈ પટેલ (૬૪ વર્ષ)',
+    citizenNameHi: 'गंगाबेन रमणिकभाई पटेल (६४ वर्ष)',
+    citizenNameEn: 'Gangaben R. Patel (64 Yrs)',
     phone: '98251 XXXXX',
     schemeTitleGu: 'ગંગા સ્વરૂપા વિધવા સહાય યોજના',
-    schemeTitleEn: 'Ganga Swarupa Vidhva Sahay',
+    schemeTitleHi: 'गंगा स्वरूपा विधवा सहायता योजना',
+    schemeTitleEn: 'Ganga Swarupa Widow Assistance Scheme',
     counterNumber: 1,
     isPriority: true,
     appliedTime: '10:35 AM',
     waitingMinutes: 12,
     status: 'WAITING',
     aadhaarLast4: '7104',
-    incomeDeclared: '₹ ૯૫,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૯૫,૦૦૦ (નિયમ મુજબ મર્યાદા હેઠળ)',
+    incomeDeclaredGu: '₹ ૯૫,૦૦૦ (વાર્ષિક)',
+    incomeDeclaredHi: '₹ ९५,००० (वार्षिक)',
+    incomeDeclaredEn: '₹ 95,000 (Annual)',
+    aiOcrVerdictGu: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૯૫,૦૦૦ (નિયમ મુજબ મર્યાદા હેઠળ)',
+    aiOcrVerdictHi: '✓ स्वचालित पूर्व-जांच सफल: आय ₹९५,००० (नियम अनुसार सीमा के अंतर्गत)',
+    aiOcrVerdictEn: '✓ Automated Pre-check Passed: Income ₹95,000 (Within eligible threshold)',
     documents: [
-      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-7104)', status: 'PRE_CHECK_PASSED' },
-      { name: 'પતિના અવસાનનો દાખલો', status: 'PRE_CHECK_PASSED' },
-      { name: 'આવકનો દાખલો (સક્ષમ અધિકારી)', status: 'PRE_CHECK_PASSED' }
+      { 
+        nameGu: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-7104)', 
+        nameHi: 'आधार कार्ड (मास्क्ड आधार XXXX-XXXX-7104)', 
+        nameEn: 'Aadhaar Card (Masked XXXX-XXXX-7104)', 
+        status: 'PRE_CHECK_PASSED' 
+      },
+      { 
+        nameGu: 'પતિના અવસાનનો દાખલો', 
+        nameHi: 'पति का मृत्यु प्रमाण पत्र', 
+        nameEn: 'Husband Death Certificate', 
+        status: 'PRE_CHECK_PASSED' 
+      },
+      { 
+        nameGu: 'આવકનો દાખલો (સક્ષમ અધિકારી)', 
+        nameHi: 'आय प्रमाण पत्र (सक्षम अधिकारी)', 
+        nameEn: 'Income Certificate (Competent Authority)', 
+        status: 'PRE_CHECK_PASSED' 
+      }
     ]
   },
   {
     id: 'tok-a42',
     tokenNumber: '#A-42',
-    citizenName: 'મોહનભાઈ કરસનભાઈ પટેલ',
+    citizenNameGu: 'મોહનભાઈ કરસનભાઈ પટેલ',
+    citizenNameHi: 'मोहनभाई करसनभाई पटेल',
+    citizenNameEn: 'Mohanbhai Karsanbhai Patel',
     phone: '98765 XXXXX',
     schemeTitleGu: 'આવકનો દાખલો (રાજ્ય સરકાર પ્રમાણપત્ર)',
-    schemeTitleEn: 'Income Certificate',
+    schemeTitleHi: 'आय प्रमाण पत्र (राज्य सरकार)',
+    schemeTitleEn: 'State Income Certificate',
     counterNumber: 1,
     isPriority: false,
     appliedTime: '10:45 AM',
     waitingMinutes: 18,
     status: 'WAITING',
     aadhaarLast4: '8842',
-    incomeDeclared: '₹ ૧,૨૦,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૧,૨૦,૦૦૦ (તલાટી રિપોર્ટ સુસંગત)',
+    incomeDeclaredGu: '₹ ૧,૨૦,૦૦૦ (વાર્ષિક)',
+    incomeDeclaredHi: '₹ १,२०,००० (वार्षिक)',
+    incomeDeclaredEn: '₹ 1,20,000 (Annual)',
+    aiOcrVerdictGu: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૧,૨૦,૦૦૦ (તલાટી રિપોર્ટ સુસંગત)',
+    aiOcrVerdictHi: '✓ स्वचालित पूर्व-जांच सफल: आय ₹१,२०,००० (तलाटी रिपोर्ट अनुरूप)',
+    aiOcrVerdictEn: '✓ Automated Pre-check Passed: Income ₹1,20,000 (Verified by Talati)',
     documents: [
-      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-8842)', status: 'PRE_CHECK_PASSED' },
-      { name: 'ચાલુ વર્ષનો આવકનો દાખલો', status: 'PRE_CHECK_PASSED' },
-      { name: 'રેશન કાર્ડ નકલ', status: 'PRE_CHECK_PASSED' }
+      { 
+        nameGu: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-8842)', 
+        nameHi: 'आधार कार्ड (मास्क्ड आधार XXXX-XXXX-8842)', 
+        nameEn: 'Aadhaar Card (Masked XXXX-XXXX-8842)', 
+        status: 'PRE_CHECK_PASSED' 
+      },
+      { 
+        nameGu: 'ચાલુ વર્ષનો આવકનો દાખલો', 
+        nameHi: 'वर्तमान वर्ष का आय प्रमाण पत्र', 
+        nameEn: 'Current Year Income Proof', 
+        status: 'PRE_CHECK_PASSED' 
+      },
+      { 
+        nameGu: 'રેશન કાર્ડ નકલ', 
+        nameHi: 'राशन कार्ड प्रतिलिपि', 
+        nameEn: 'Ration Card Copy', 
+        status: 'PRE_CHECK_PASSED' 
+      }
     ]
   },
   {
     id: 'tok-a43',
     tokenNumber: '#A-43',
-    citizenName: 'રમેશભાઈ ગોવિંદભાઈ પરમાર',
+    citizenNameGu: 'રમેશભાઈ ગોવિંદભાઈ પરમાર',
+    citizenNameHi: 'रमेशभाई गोविंदभाई परमार',
+    citizenNameEn: 'Rameshbhai Govindbhai Parmar',
     phone: '94263 XXXXX',
     schemeTitleGu: 'બિન-અનામત વર્ગ (EWS) આવક પ્રમાણપત્ર',
-    schemeTitleEn: 'EWS Certificate',
+    schemeTitleHi: 'गैर-आरक्षित वर्ग (EWS) आय प्रमाण पत्र',
+    schemeTitleEn: 'Economically Weaker Section (EWS) Certificate',
     counterNumber: 1,
     isPriority: false,
     appliedTime: '10:55 AM',
     waitingMinutes: 14,
     status: 'WAITING',
     aadhaarLast4: '4192',
-    incomeDeclared: '₹ ૨,૪૦,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૨,૪૦,૦૦૦ (EWS મર્યાદા હેઠળ)',
+    incomeDeclaredGu: '₹ ૨,૪૦,૦૦૦ (વાર્ષિક)',
+    incomeDeclaredHi: '₹ २,४०,००० (वार्षिक)',
+    incomeDeclaredEn: '₹ 2,40,000 (Annual)',
+    aiOcrVerdictGu: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: આવક ₹૨,૪૦,૦૦૦ (EWS મર્યાદા હેઠળ)',
+    aiOcrVerdictHi: '✓ स्वचालित पूर्व-जांच सफल: आय ₹२,४०,००० (EWS सीमा अंतर्गत)',
+    aiOcrVerdictEn: '✓ Automated Pre-check Passed: Income ₹2,40,000 (Within EWS limit)',
     documents: [
-      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-4192)', status: 'PRE_CHECK_PASSED' },
-      { name: 'આવક પંચનામું', status: 'PRE_CHECK_PASSED' }
+      { 
+        nameGu: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-4192)', 
+        nameHi: 'आधार कार्ड (मास्क्ड आधार XXXX-XXXX-4192)', 
+        nameEn: 'Aadhaar Card (Masked XXXX-XXXX-4192)', 
+        status: 'PRE_CHECK_PASSED' 
+      },
+      { 
+        nameGu: 'આવક પંચનામું', 
+        nameHi: 'आय पंचनामा', 
+        nameEn: 'Income Panchnama Verification', 
+        status: 'PRE_CHECK_PASSED' 
+      }
     ]
   },
   {
     id: 'tok-a44',
     tokenNumber: '#A-44',
-    citizenName: 'ભાવનાબેન કિશોરભાઈ જોશી',
+    citizenNameGu: 'ભાવનાબેન કિશોરભાઈ જોશી',
+    citizenNameHi: 'भावनाबेन किशोरभाई जोशी',
+    citizenNameEn: 'Bhavnaben Kishorbhai Joshi',
     phone: '97120 XXXXX',
     schemeTitleGu: 'વિધવા પુનઃલગ્ન આર્થિક સહાય',
-    schemeTitleEn: 'Remarriage Assistance',
+    schemeTitleHi: 'विधवा पुनर्विवाह आर्थिक सहायता',
+    schemeTitleEn: 'Widow Remarriage Financial Assistance',
     counterNumber: 1,
     isPriority: false,
     appliedTime: '11:10 AM',
     waitingMinutes: 9,
     status: 'WAITING',
     aadhaarLast4: '9921',
-    incomeDeclared: '₹ ૧,૫૦,૦૦૦ (વાર્ષિક)',
-    aiOcrVerdict: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: દસ્તાવેજો સુસંગત',
+    incomeDeclaredGu: '₹ ૧,૫૦,૦૦૦ (વાર્ષિક)',
+    incomeDeclaredHi: '₹ १,५०,००० (वार्षिक)',
+    incomeDeclaredEn: '₹ 1,50,000 (Annual)',
+    aiOcrVerdictGu: '✓ ઓટોમેટેડ પ્રી-ચેક સફળ: દસ્તાવેજો સુસંગત',
+    aiOcrVerdictHi: '✓ स्वचालित पूर्व-जांच सफल: सभी दस्तावेज़ सत्यापित',
+    aiOcrVerdictEn: '✓ Automated Pre-check Passed: All documents compliant',
     documents: [
-      { name: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-9921)', status: 'PRE_CHECK_PASSED' },
-      { name: 'લગ્ન નોંધણી પ્રમાણપત્ર', status: 'PRE_CHECK_PASSED' }
+      { 
+        nameGu: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-9921)', 
+        nameHi: 'आधार कार्ड (मास्क्ड आधार XXXX-XXXX-9921)', 
+        nameEn: 'Aadhaar Card (Masked XXXX-XXXX-9921)', 
+        status: 'PRE_CHECK_PASSED' 
+      },
+      { 
+        nameGu: 'લગ્ન નોંધણી પ્રમાણપત્ર', 
+        nameHi: 'विवाह पंजीकरण प्रमाण पत्र', 
+        nameEn: 'Marriage Registration Certificate', 
+        status: 'PRE_CHECK_PASSED' 
+      }
     ]
   }
 ];
@@ -136,31 +232,44 @@ const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
   {
     id: 'aud-1',
     timestamp: '10:30:15 AM',
-    officerName: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
+    officerNameGu: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
+    officerNameHi: 'श्री के. एम. त्रिवेदी (नायब तहसीलदार)',
+    officerNameEn: 'Shri K. M. Trivedi (Dy. Mamlatdar)',
     action: 'CALLED',
     tokenNumber: '#A-40',
     counterNumber: 1,
-    remarks: 'નિયમિત કતાર ક્રમ મુજબ બોલાવ્યા'
+    remarksGu: 'નિયમિત કતાર ક્રમ મુજબ બોલાવ્યા',
+    remarksHi: 'नियमित कतार क्रम अनुसार बुलाया गया',
+    remarksEn: 'Called as per regular queue sequence'
   },
   {
     id: 'aud-2',
     timestamp: '10:35:48 AM',
-    officerName: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
+    officerNameGu: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
+    officerNameHi: 'श्री के. एम. त्रिवेदी (नायब तहसीलदार)',
+    officerNameEn: 'Shri K. M. Trivedi (Dy. Mamlatdar)',
     action: 'COMPLETED',
     tokenNumber: '#A-40',
     counterNumber: 1,
-    remarks: 'આવક પ્રમાણપત્ર અરજી મંજૂર (સેવા સમય: ૫:૩૩)'
+    remarksGu: 'આવક પ્રમાણપત્ર અરજી મંજૂર (સેવા સમય: ૫:૩૩)',
+    remarksHi: 'आय प्रमाण पत्र आवेदन स्वीकृत (सेवा समय: ५:३३)',
+    remarksEn: 'Income certificate application approved (Service time: 5:33)'
   }
 ];
 
-// Configurable Service Handling Target (in minutes)
 const SERVICE_SLA_CONFIG = {
-  serviceName: 'આવક & જાતિ પ્રમાણપત્રો (Revenue Desk)',
+  serviceNameGu: 'આવક & જાતિ પ્રમાણપત્રો (Revenue Desk)',
+  serviceNameHi: 'आय एवं जाति प्रमाण पत्र (राजस्व डेस्क)',
+  serviceNameEn: 'Income & Caste Certificates (Revenue Desk)',
   targetMinutes: 15,
   warningMinutes: 10,
 };
 
 export default function CounterOperatorDesk() {
+  // Multi-Language State
+  const [lang, setLang] = useState<Language>('gu');
+  const [langDropdownOpen, setLangDropdownOpen] = useState<boolean>(false);
+
   // Jurisdiction & Officer Profile
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('rajkot');
   const [selectedTalukaId, setSelectedTalukaId] = useState<string>('gondal');
@@ -189,6 +298,29 @@ export default function CounterOperatorDesk() {
     priorityServed: 7,
     skippedCount: 2
   });
+
+  // Load language preference from LocalStorage on mount
+  useEffect(() => {
+    try {
+      const savedLang = localStorage.getItem('qless_preferred_lang') as Language | null;
+      if (savedLang && (savedLang === 'gu' || savedLang === 'hi' || savedLang === 'en')) {
+        setLang(savedLang);
+      }
+    } catch {}
+  }, []);
+
+  const handleLanguageChange = (newLang: Language) => {
+    triggerHaptic('tap');
+    setLang(newLang);
+    setLangDropdownOpen(false);
+    try {
+      localStorage.setItem('qless_preferred_lang', newLang);
+    } catch {}
+  };
+
+  const isGu = lang === 'gu';
+  const isHi = lang === 'hi';
+  const isEn = lang === 'en';
 
   const currentDistrict = useMemo(() => 
     GUJARAT_33_DISTRICTS.find(d => d.id === selectedDistrictId) || GUJARAT_33_DISTRICTS[0],
@@ -236,15 +368,19 @@ export default function CounterOperatorDesk() {
   };
 
   // Add audit trail event
-  const addAuditLog = (action: AuditLogEntry['action'], tokenNumber: string, remarks: string) => {
+  const addAuditLog = (action: AuditLogEntry['action'], tokenNumber: string, remarksGu: string, remarksHi: string, remarksEn: string) => {
     const newEntry: AuditLogEntry = {
       id: `aud-${Date.now()}`,
-      timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      officerName: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
+      timestamp: new Date().toLocaleTimeString(isGu ? 'gu-IN' : isHi ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      officerNameGu: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
+      officerNameHi: 'श्री के. एम. त्रिवेदी (नायब तहसीलदार)',
+      officerNameEn: 'Shri K. M. Trivedi (Dy. Mamlatdar)',
       action,
       tokenNumber,
       counterNumber: selectedCounter,
-      remarks
+      remarksGu,
+      remarksHi,
+      remarksEn
     };
     setAuditLogs(prev => [newEntry, ...prev]);
   };
@@ -254,7 +390,6 @@ export default function CounterOperatorDesk() {
     triggerHaptic('success');
     playNotificationChime();
 
-    // Pick target citizen or priority-policy-eligible citizen first, then next waiting
     let nextCitizen: QueueCitizen | undefined = targetCitizen;
     if (!nextCitizen) {
       const priorityNext = queue.find(c => (c.status === 'WAITING' || c.status === 'LATE') && c.isPriority);
@@ -262,30 +397,30 @@ export default function CounterOperatorDesk() {
     }
 
     if (!nextCitizen) {
-      alert("કતારમાં હાલ કોઈ નવો નાગરિક પ્રતીક્ષામાં નથી.");
+      alert(isGu ? "કતારમાં હાલ કોઈ નવો નાગરિક પ્રતીક્ષામાં નથી." : isHi ? "कतार में वर्तमान में कोई नागरिक प्रतीक्षारत नहीं है।" : "No pending citizens in the waiting queue.");
       return;
     }
 
-    // Double-action protection: check if already in service
     if (currentServing && currentServing.id === nextCitizen.id) {
-      alert(`ટોકન ${nextCitizen.tokenNumber} હાલમાં આ કાઉન્ટર પર સક્રિય છે.`);
+      alert(isGu ? `ટોકન ${nextCitizen.tokenNumber} હાલમાં આ કાઉન્ટર પર સક્રિય છે.` : isHi ? `टोकन ${nextCitizen.tokenNumber} वर्तमान में इस काउंटर पर सक्रिय है।` : `Token ${nextCitizen.tokenNumber} is currently active at this desk.`);
       return;
     }
 
     setCurrentServing(nextCitizen);
     setElapsedSeconds(0);
 
-    // Update state to IN_SERVICE
     setQueue(prev => prev.map(c => 
       c.id === nextCitizen!.id ? { ...c, status: 'IN_SERVICE' } : c
     ));
 
-    // Audit log
-    addAuditLog('CALLED', nextCitizen.tokenNumber, nextCitizen.isPriority 
-      ? 'અગ્રતા નીતિ હેઠળ પ્રાથમિકતાથી બોલાવ્યા' 
-      : 'નિયમિત કતાર ક્રમ મુજબ બોલાવ્યા');
+    addAuditLog(
+      'CALLED', 
+      nextCitizen.tokenNumber, 
+      nextCitizen.isPriority ? 'અગ્રતા નીતિ હેઠળ પ્રાથમિકતાથી બોલાવ્યા' : 'નિયમિત કતાર ક્રમ મુજબ બોલાવ્યા',
+      nextCitizen.isPriority ? 'प्राथमिकता नीति अंतर्गत पहले बुलाया गया' : 'नियमित कतार क्रम अनुसार बुलाया गया',
+      nextCitizen.isPriority ? 'Called with high priority under senior/divyang policy' : 'Called as per regular queue order'
+    );
 
-    // Broadcast through backend realtime layer
     broadcastQueueEvent({
       type: 'TOKEN_CALLED',
       tokenNumber: nextCitizen.tokenNumber,
@@ -295,11 +430,12 @@ export default function CounterOperatorDesk() {
       timestamp: Date.now()
     });
 
-    // Voice announcement in Gujarati (with audio chime and visual fallback)
-    const voiceMsg = nextCitizen.isPriority
-      ? `ધ્યાન આપો, પ્રાથમિકતા ટોકન નંબર ${nextCitizen.tokenNumber}, કાઉન્ટર ${selectedCounter} પર ઉપસ્થિત થાવ.`
-      : `ધ્યાન આપો, કાઉન્ટર ${selectedCounter} પર ટોકન નંબર ${nextCitizen.tokenNumber} નો વારો આવી ગયો છે.`;
-    speakGuidance(voiceMsg);
+    const voiceMsg = isGu 
+      ? (nextCitizen.isPriority ? `ધ્યાન આપો, પ્રાથમિકતા ટોકન નંબર ${nextCitizen.tokenNumber}, કાઉન્ટર ${selectedCounter} પર ઉપસ્થિત થાવ.` : `ધ્યાન આપો, કાઉન્ટર ${selectedCounter} પર ટોકન નંબર ${nextCitizen.tokenNumber} નો વારો આવી ગયો છે.`)
+      : isHi
+      ? (nextCitizen.isPriority ? `कृपया ध्यान दें, प्राथमिकता टोकन नंबर ${nextCitizen.tokenNumber}, काउंटर ${selectedCounter} पर उपस्थित हों।` : `कृपया ध्यान दें, काउंटर ${selectedCounter} पर टोकन नंबर ${nextCitizen.tokenNumber} की बारी आ गई है।`)
+      : (nextCitizen.isPriority ? `Attention please, Priority Token Number ${nextCitizen.tokenNumber}, please proceed to Counter ${selectedCounter}.` : `Attention please, Token Number ${nextCitizen.tokenNumber}, please proceed to Counter ${selectedCounter}.`);
+    speakGuidance(voiceMsg, lang);
   };
 
   // 2. RE-CALL ACTIVE OR SKIPPED CITIZEN
@@ -310,7 +446,13 @@ export default function CounterOperatorDesk() {
     triggerHaptic('tap');
     playNotificationChime();
 
-    addAuditLog('RECALLED', target.tokenNumber, 'અરજદારને પુનઃ ઘોષણા દ્વારા બોલાવવામાં આવ્યા');
+    addAuditLog(
+      'RECALLED', 
+      target.tokenNumber, 
+      'અરજદારને પુનઃ ઘોષણા દ્વારા બોલાવવામાં આવ્યા',
+      'आवेदक को पुनः घोषणा द्वारा बुलाया गया',
+      'Citizen recalled via public audio chime announcement'
+    );
 
     broadcastQueueEvent({
       type: 'TOKEN_RECALLED',
@@ -321,7 +463,12 @@ export default function CounterOperatorDesk() {
       timestamp: Date.now()
     });
 
-    speakGuidance(`ધ્યાન આપો, કાઉન્ટર ${selectedCounter} પર ટોકન નંબર ${target.tokenNumber} ને ફરીથી બોલાવવામાં આવે છે.`);
+    const voiceMsg = isGu
+      ? `ધ્યાન આપો, કાઉન્ટર ${selectedCounter} પર ટોકન નંબર ${target.tokenNumber} ને ફરીથી બોલાવવામાં આવે છે.`
+      : isHi
+      ? `कृपया ध्यान दें, काउंटर ${selectedCounter} पर टोकन नंबर ${target.tokenNumber} को पुनः बुलाया जा रहा है।`
+      : `Attention please, Token Number ${target.tokenNumber} is being recalled to Counter ${selectedCounter}.`;
+    speakGuidance(voiceMsg, lang);
   };
 
   // 3. COMPLETE SERVICE & ISSUE PASS
@@ -340,7 +487,13 @@ export default function CounterOperatorDesk() {
       priorityServed: completed.isPriority ? prev.priorityServed + 1 : prev.priorityServed
     }));
 
-    addAuditLog('COMPLETED', completed.tokenNumber, `કામગીરી પૂર્ણ. સેવા સમય: ${formatTime(elapsedSeconds)}`);
+    addAuditLog(
+      'COMPLETED', 
+      completed.tokenNumber, 
+      `કામગીરી પૂર્ણ. સેવા સમય: ${formatTime(elapsedSeconds)}`,
+      `कार्य पूर्ण. सेवा समय: ${formatTime(elapsedSeconds)}`,
+      `Service completed. Desk handling time: ${formatTime(elapsedSeconds)}`
+    );
 
     broadcastQueueEvent({
       type: 'TOKEN_COMPLETED',
@@ -349,12 +502,25 @@ export default function CounterOperatorDesk() {
       timestamp: Date.now()
     });
 
-    speakGuidance(`ટોકન નંબર ${completed.tokenNumber} ની કામગીરી પૂર્ણ થયેલ છે.`);
-    alert(`✅ સફળતાપૂર્વક નિકાલ!\n\nટોકન: ${completed.tokenNumber} (${completed.citizenName})\nડેસ્ક સેવા સમય: ${formatTime(elapsedSeconds)}\nસ્થિતિ: અધિકૃત સરકારી અધિકારી દ્વારા ખરાઈ પૂર્ણ.`);
+    const citizenName = isGu ? completed.citizenNameGu : isHi ? completed.citizenNameHi : completed.citizenNameEn;
+    const voiceMsg = isGu 
+      ? `ટોકન નંબર ${completed.tokenNumber} ની કામગીરી સફળતાપૂર્વક પૂર્ણ થયેલ છે.`
+      : isHi
+      ? `टोकन नंबर ${completed.tokenNumber} का कार्य सफलतापूर्वक पूर्ण हो गया है।`
+      : `Token number ${completed.tokenNumber} service has been completed successfully.`;
+    speakGuidance(voiceMsg, lang);
+
+    const alertMsg = isGu
+      ? `✅ સફળતાપૂર્વક નિકાલ!\n\nટોકન: ${completed.tokenNumber} (${citizenName})\nડેસ્ક સેવા સમય: ${formatTime(elapsedSeconds)}\nસ્થિતિ: અધિકૃત સરકારી અધિકારી દ્વારા ખરાઈ પૂર્ણ.`
+      : isHi
+      ? `✅ सफलतापूर्वक निपटान!\n\nटोकन: ${completed.tokenNumber} (${citizenName})\nडेस्क सेवा समय: ${formatTime(elapsedSeconds)}\nस्थिति: अधिकृत सरकारी अधिकारी द्वारा सत्यापन पूर्ण।`
+      : `✅ Service Completed Successfully!\n\nToken: ${completed.tokenNumber} (${citizenName})\nDesk Handling Time: ${formatTime(elapsedSeconds)}\nStatus: Verified & Approved by Authorized Public Officer.`;
+    alert(alertMsg);
+
     setCurrentServing(null);
   };
 
-  // 4. SKIP / ABSENT (Keeps record, does not delete)
+  // 4. SKIP / ABSENT
   const handleSkipAbsent = () => {
     if (!currentServing) return;
     triggerHaptic('warning');
@@ -366,7 +532,13 @@ export default function CounterOperatorDesk() {
 
     setStats(prev => ({ ...prev, skippedCount: prev.skippedCount + 1 }));
 
-    addAuditLog('SKIPPED', skipped.tokenNumber, 'અરજદાર ગેરહાજર (Citizen absent)');
+    addAuditLog(
+      'SKIPPED', 
+      skipped.tokenNumber, 
+      'અરજદાર ગેરહાજર (Citizen absent)',
+      'आवेदक अनुपस्थित (Citizen absent)',
+      'Applicant marked absent (Citizen absent)'
+    );
 
     broadcastQueueEvent({
       type: 'TOKEN_SKIPPED',
@@ -375,7 +547,12 @@ export default function CounterOperatorDesk() {
       timestamp: Date.now()
     });
 
-    speakGuidance(`ટોકન નંબર ${skipped.tokenNumber} ગેરહાજર નોંધાયેલ છે.`);
+    const voiceMsg = isGu
+      ? `ટોકન નંબર ${skipped.tokenNumber} ગેરહાજર નોંધાયેલ છે.`
+      : isHi
+      ? `टोकन नंबर ${skipped.tokenNumber} अनुपस्थित दर्ज किया गया है।`
+      : `Token number ${skipped.tokenNumber} marked absent.`;
+    speakGuidance(voiceMsg, lang);
     setCurrentServing(null);
   };
 
@@ -390,7 +567,9 @@ export default function CounterOperatorDesk() {
     addAuditLog(
       'TRANSFERRED', 
       transferred.tokenNumber, 
-      `કાઉન્ટર ${selectedCounter} થી કાઉન્ટર ${targetCounter} પર ટ્રાન્સફર. કારણ: ${transferRemarks}`
+      `કાઉન્ટર ${selectedCounter} થી કાઉન્ટર ${targetCounter} પર ટ્રાન્સફર. કારણ: ${transferRemarks}`,
+      `काउंटर ${selectedCounter} से काउंटर ${targetCounter} पर स्थानांतरित. कारण: ${transferRemarks}`,
+      `Transferred from Desk ${selectedCounter} to Desk ${targetCounter}. Reason: ${transferRemarks}`
     );
 
     broadcastQueueEvent({
@@ -407,7 +586,13 @@ export default function CounterOperatorDesk() {
       }
     });
 
-    alert(`🔄 કાઉન્ટર ટ્રાન્સફર નોંધાયું!\n\nટોકન: ${transferred.tokenNumber}\nમૂળ કાઉન્ટર: કાઉન્ટર ${selectedCounter}\nનવું કાઉન્ટર: કાઉન્ટર ${targetCounter}\nનોંધ: ${transferRemarks}`);
+    const alertMsg = isGu
+      ? `🔄 કાઉન્ટર ટ્રાન્સફર નોંધાયું!\n\nટોકન: ${transferred.tokenNumber}\nમૂળ કાઉન્ટર: કાઉન્ટર ${selectedCounter}\nનવું કાઉન્ટર: કાઉન્ટર ${targetCounter}\nનોંધ: ${transferRemarks}`
+      : isHi
+      ? `🔄 काउंटर स्थानांतरण दर्ज!\n\nटोकन: ${transferred.tokenNumber}\nमूल काउंटर: काउंटर ${selectedCounter}\nनया काउंटर: काउंटर ${targetCounter}\nटिप्पणी: ${transferRemarks}`
+      : `🔄 Counter Forwarded!\n\nToken: ${transferred.tokenNumber}\nSource Desk: Counter ${selectedCounter}\nTarget Desk: Counter ${targetCounter}\nRemarks: ${transferRemarks}`;
+    alert(alertMsg);
+
     setTransferModalOpen(false);
     setCurrentServing(null);
   };
@@ -418,7 +603,13 @@ export default function CounterOperatorDesk() {
     const newState = !isLunchRecess;
     setIsLunchRecess(newState);
 
-    addAuditLog('LUNCH_BREAK', '—', newState ? 'ભોજન વિરામ શરૂ (1:10 PM - 2:00 PM)' : 'કામગીરી પુનઃ શરૂ');
+    addAuditLog(
+      'LUNCH_BREAK', 
+      '—', 
+      newState ? 'ભોજન વિરામ શરૂ (1:10 PM - 2:00 PM)' : 'કામગીરી પુનઃ શરૂ',
+      newState ? 'भोजन अवकाश प्रारंभ (1:10 PM - 2:00 PM)' : 'कार्य पुनः प्रारंभ',
+      newState ? 'Lunch recess started (1:10 PM - 2:00 PM)' : 'Desk services resumed'
+    );
 
     broadcastQueueEvent({
       type: 'COUNTER_STATUS_CHANGED',
@@ -429,9 +620,15 @@ export default function CounterOperatorDesk() {
     });
 
     if (newState) {
-      speakGuidance(`કાઉન્ટર ${selectedCounter} પર લંચ રિસેસ શરૂ થયેલ છે.`);
+      speakGuidance(
+        isGu ? `કાઉન્ટર ${selectedCounter} પર લંચ રિસેસ શરૂ થયેલ છે.` : isHi ? `काउंटर ${selectedCounter} पर भोजन अवकाश शुरू हुआ है।` : `Counter ${selectedCounter} is now on lunch recess.`,
+        lang
+      );
     } else {
-      speakGuidance(`કાઉન્ટર ${selectedCounter} પર કામગીરી પુનઃ શરૂ થયેલ છે.`);
+      speakGuidance(
+        isGu ? `કાઉન્ટર ${selectedCounter} પર કામગીરી પુનઃ શરૂ થયેલ છે.` : isHi ? `काउंटर ${selectedCounter} पर कार्य पुनः शुरू हुआ है।` : `Counter ${selectedCounter} desk is now open and active.`,
+        lang
+      );
     }
   };
 
@@ -457,12 +654,20 @@ export default function CounterOperatorDesk() {
             🟠 DEMO MODE
           </span>
           <span>
-            ડેમો ઓફિસર પર્સોના (મૂલ્યાંકન હેતુ) • વાસ્તવિક સરકારી ડિપ્લોયમેન્ટ માટે ભૂમિકા-આધારિત પ્રમાણીકરણ (RBAC) આવશ્યક છે.
+            {isGu 
+              ? 'ડેમો ઓફિસર પર્સોના (મૂલ્યાંકન હેતુ) • વાસ્તવિક સરકારી ડિપ્લોયમેન્ટ માટે ભૂમિકા-આધારિત પ્રમાણીકરણ (RBAC) આવશ્યક છે.'
+              : isHi
+              ? 'डेमो अधिकारी व्यक्तित्व (मूल्यांकन हेतु) • वास्तविक सरकारी परिनियोजन के लिए भूमिका-आधारित प्रमाणीकरण (RBAC) आवश्यक है।'
+              : 'Demo Officer Persona (Evaluation Mode) • Production deployment requires Role-Based Access Control (RBAC).'}
           </span>
         </div>
         <div className="flex items-center gap-2 text-[11px]">
           <span className={`w-2 h-2 rounded-full ${realtimeConnected ? 'bg-emerald-900 animate-pulse' : 'bg-red-800'}`} />
-          <span>{realtimeConnected ? 'રીઅલ-ટાઇમ બેકએન્ડ સિંક સક્રિય' : 'પુનઃ કનેક્ટિંગ...'}</span>
+          <span>
+            {realtimeConnected 
+              ? (isGu ? 'રીઅલ-ટાઇમ બેકએન્ડ સિંક સક્રિય' : isHi ? 'रीयल-टाइम बैकएंड सिंक सक्रिय' : 'Real-time Backend Sync Active')
+              : (isGu ? 'પુનઃ કનેક્ટિંગ...' : isHi ? 'पुनः कनेक्ट हो रहा है...' : 'Reconnecting...')}
+          </span>
         </div>
       </div>
 
@@ -473,10 +678,12 @@ export default function CounterOperatorDesk() {
             <Link 
               href="/"
               className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1 text-xs font-bold"
-              title="નાગરિક પોર્ટલ પર પાછા જાઓ"
+              title={isGu ? "નાગરિક પોર્ટલ પર પાછા જાઓ" : isHi ? "नागरिक पोर्टल पर वापस जाएं" : "Return to Citizen Portal"}
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">નાગરિક પોર્ટલ</span>
+              <span className="hidden sm:inline">
+                {isGu ? "નાગરિક પોર્ટલ" : isHi ? "नागरिक पोर्टल" : "Citizen Portal"}
+              </span>
             </Link>
             
             <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
@@ -484,30 +691,79 @@ export default function CounterOperatorDesk() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black tracking-widest text-[#FF9933] uppercase bg-amber-950/40 border border-amber-800/40 px-1.5 py-0.5 rounded">
-                  જન સેવા અધિકારી ડેસ્ક • પ્રશાસનિક પોર્ટલ
+                  {isGu ? "જન સેવા અધિકારી ડેસ્ક • પ્રશાસનિક પોર્ટલ" : isHi ? "जन सेवा अधिकारी डेस्क • प्रशासनिक पोर्टल" : "Jan Seva Officer Desk • Admin Portal"}
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] text-emerald-300 font-bold hidden md:inline">લાઇવ સિંક્રોનાઇઝ્ડ</span>
+                <span className="text-[10px] text-emerald-300 font-bold hidden md:inline">
+                  {isGu ? "લાઇવ સિંક્રોનાઇઝ્ડ" : isHi ? "लाइव सिंक्रोनाइज़्ड" : "Live Synchronized"}
+                </span>
               </div>
               <h1 className="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2">
-                <span>કાઉન્ટર ઓપરેટર કન્સોલ • ઈ-જન સેવા ડેસ્ક</span>
+                <span>
+                  {isGu ? "કાઉન્ટર ઓપરેટર કન્સોલ • ઈ-જન સેવા ડેસ્ક" : isHi ? "काउंटर ऑपरेटर कंसोल • ई-जन सेवा डेस्क" : "Counter Operator Console • e-Jan Seva Desk"}
+                </span>
               </h1>
             </div>
           </div>
 
-          {/* Officer Persona & Collector Link */}
+          {/* Right Controls: Language Selector, Collector Dashboard, Officer Profile */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* 🌐 ADMIN LANGUAGE SWITCHER DROPDOWN */}
+            <div className="relative">
+              <button
+                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition flex items-center gap-1.5 border border-white/20 shadow-xs"
+                title="Select Language / ભાષા બદલો"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#FF9933]" />
+                <span className="font-bold">
+                  {lang === 'gu' ? 'ગુજરાતી' : lang === 'hi' ? 'हिन्दी' : 'English'}
+                </span>
+                <ChevronDown className="w-3 h-3 text-white/70" />
+              </button>
+
+              {langDropdownOpen && (
+                <div 
+                  className="absolute right-0 mt-2 w-44 bg-white rounded-2xl shadow-2xl border border-slate-200 py-1.5 z-50 text-slate-800 text-xs animate-in fade-in"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    {isGu ? "ભાષા પસંદ કરો" : isHi ? "भाषा चुनें" : "Select Language"}
+                  </div>
+                  {GUJARAT_LANGUAGES.map((item) => (
+                    <button
+                      key={item.code}
+                      onClick={() => handleLanguageChange(item.code)}
+                      className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-100 transition ${
+                        lang === item.code ? 'bg-blue-50 text-[#003366] font-black' : 'font-medium'
+                      }`}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-xs">{item.nativeLabel}</span>
+                        <span className="text-[10px] text-slate-400">{item.englishLabel}</span>
+                      </div>
+                      {lang === item.code && <Check className="w-4 h-4 text-[#003366]" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <Link
               href="/admin/collector"
               className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-[#FF9933] border border-[#FF9933]/50 text-[11px] sm:text-xs font-black transition flex items-center gap-1"
-              title="કલેક્ટર કમાન્ડ સેન્ટર"
+              title={isGu ? "કલેક્ટર કમાન્ડ સેન્ટર" : isHi ? "कलेक्टर कमांड सेंटर" : "Collector Apex Command Center"}
             >
-              <span>👑 કલેક્ટર ડેશબોર્ડ</span>
+              <span>{isGu ? "👑 કલેક્ટર ડેશબોર્ડ" : isHi ? "👑 कलेक्टर डैशबोर्ड" : "👑 Collector Command"}</span>
             </Link>
             
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-black text-white">શ્રી કે. એમ. ત્રિવેદી</p>
-              <p className="text-[10px] text-blue-200 font-mono">નાયબ મામલતદાર • ડેમો પર્સોના</p>
+              <p className="text-xs font-black text-white">
+                {isGu ? "શ્રી કે. એમ. ત્રિવેદી" : isHi ? "श्री के. एम. त्रिवेदी" : "Shri K. M. Trivedi"}
+              </p>
+              <p className="text-[10px] text-blue-200 font-mono">
+                {isGu ? "નાયબ મામલતદાર • ડેમો પર્સોના" : isHi ? "नायब तहसीलदार • डेमो व्यक्तित्व" : "Dy. Mamlatdar • Demo Persona"}
+              </p>
             </div>
             <div className="w-9 h-9 rounded-full bg-amber-400/20 border-2 border-[#FF9933] text-[#FF9933] flex items-center justify-center font-black text-sm shadow">
               KT
@@ -522,7 +778,9 @@ export default function CounterOperatorDesk() {
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="flex items-center gap-1.5 font-bold text-[#003366]">
               <Building className="w-4 h-4 text-[#005A9C]" />
-              <span>કચેરી & કાઉન્ટર રૂપરેખા:</span>
+              <span>
+                {isGu ? "કચેરી & કાઉન્ટર રૂપરેખા:" : isHi ? "कार्यालय एवं काउंटर रूपरेखा:" : "Office & Counter Config:"}
+              </span>
             </div>
 
             {/* District Selector */}
@@ -536,7 +794,9 @@ export default function CounterOperatorDesk() {
               className="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:ring-2 focus:ring-[#003366] max-w-[160px] sm:max-w-[200px] truncate"
             >
               {GUJARAT_33_DISTRICTS.map(d => (
-                <option key={d.id} value={d.id}>{d.nameGu} ({d.nameEn})</option>
+                <option key={d.id} value={d.id}>
+                  {isEn ? `${d.nameEn} (${d.nameGu})` : `${d.nameGu} (${d.nameEn})`}
+                </option>
               ))}
             </select>
 
@@ -547,7 +807,9 @@ export default function CounterOperatorDesk() {
               className="bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:ring-2 focus:ring-[#003366] max-w-[180px] sm:max-w-[220px] truncate"
             >
               {currentDistrict.talukas.map(t => (
-                <option key={t.id} value={t.id}>{t.nameGu} ({t.nameEn})</option>
+                <option key={t.id} value={t.id}>
+                  {isEn ? `${t.nameEn} (${t.nameGu})` : `${t.nameGu} (${t.nameEn})`}
+                </option>
               ))}
             </select>
 
@@ -556,14 +818,26 @@ export default function CounterOperatorDesk() {
               value={selectedCounter}
               onChange={(e) => setSelectedCounter(Number(e.target.value))}
               className="bg-blue-50 border border-blue-300 font-black text-[#003366] rounded-lg px-2.5 py-1 text-xs focus:ring-2 focus:ring-[#003366]"
-              title="કોન્ફિગરેબલ સેવા કાઉન્ટર્સ"
+              title={isGu ? "કોન્ફિગરેબલ સેવા કાઉન્ટર્સ" : isHi ? "कॉन्फ़िगर करने योग्य सेवा काउंटर्स" : "Configurable Service Counters"}
             >
-              <option value={1}>કાઉન્ટર ૧: આવક & પ્રમાણપત્રો (Revenue)</option>
-              <option value={2}>કાઉન્ટર ૨: રેશન કાર્ડ & અન્ન પુરવઠો</option>
-              <option value={3}>કાઉન્ટર ૩: ઈ-ધરા ૭/૧૨ જમીન રેકોર્ડ</option>
-              <option value={4}>કાઉન્ટર ૪: સામાજિક સુરક્ષા & પેન્શન</option>
-              <option value={5}>કાઉન્ટર ૫: આયુષ્માન ભારત & આરોગ્ય</option>
-              <option value={6}>કાઉન્ટર ૬: સોગંદનામું & નોટરી એટેસ્ટેશન</option>
+              <option value={1}>
+                {isGu ? "કાઉન્ટર ૧: આવક & પ્રમાણપત્રો (Revenue)" : isHi ? "काउंटर १: आय एवं प्रमाण पत्र (राजस्व)" : "Counter 1: Income & Certificates (Revenue)"}
+              </option>
+              <option value={2}>
+                {isGu ? "કાઉન્ટર ૨: રેશન કાર્ડ & અન્ન પુરવઠો" : isHi ? "काउंटर २: राशन कार्ड एवं खाद्य आपूर्ति" : "Counter 2: Ration Card & Food Supplies"}
+              </option>
+              <option value={3}>
+                {isGu ? "કાઉન્ટર ૩: ઈ-ધરા ૭/૧૨ જમીન રેકોર્ડ" : isHi ? "काउंटर ३: ई-धरा ७/१२ भूमि रिकॉर्ड" : "Counter 3: e-Dhara 7/12 Land Records"}
+              </option>
+              <option value={4}>
+                {isGu ? "કાઉન્ટર ૪: સામાજિક સુરક્ષા & પેન્શન" : isHi ? "काउंटर ४: सामाजिक सुरक्षा एवं पेंशन" : "Counter 4: Social Security & Pension"}
+              </option>
+              <option value={5}>
+                {isGu ? "કાઉન્ટર ૫: આયુષ્માન ભારત & આરોગ્ય" : isHi ? "काउंटर ५: आयुष्मान भारत एवं स्वास्थ्य" : "Counter 5: Ayushman Bharat & Health"}
+              </option>
+              <option value={6}>
+                {isGu ? "કાઉન્ટર ૬: સોગંદનામું & નોટરી એટેસ્ટેશન" : isHi ? "काउंटर ६: शपथ पत्र एवं नोटरी सत्यापन" : "Counter 6: Affidavit & Notary Attestation"}
+              </option>
             </select>
           </div>
 
@@ -574,7 +848,9 @@ export default function CounterOperatorDesk() {
               className="px-3 py-1 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 border border-slate-300 transition"
             >
               <History className="w-3.5 h-3.5 text-[#005A9C]" />
-              <span>ઓડિટ લોગ ({auditLogs.length})</span>
+              <span>
+                {isGu ? `ઓડિટ લોગ (${auditLogs.length})` : isHi ? `ऑडिट लॉग (${auditLogs.length})` : `Audit Log (${auditLogs.length})`}
+              </span>
             </button>
 
             <button
@@ -586,7 +862,11 @@ export default function CounterOperatorDesk() {
               }`}
             >
               <Coffee className="w-3.5 h-3.5" />
-              <span>{isLunchRecess ? '⚠️ લંચ રિસેસ સક્રિય (પુનઃ શરૂ કરો)' : '☕ લંચ રિસેસ (1:10 PM)'}</span>
+              <span>
+                {isLunchRecess 
+                  ? (isGu ? '⚠️ લંચ રિસેસ સક્રિય (પુનઃ શરૂ કરો)' : isHi ? '⚠️ भोजन अवकाश सक्रिय (पुनः शुरू करें)' : '⚠️ Lunch Recess Active (Resume)')
+                  : (isGu ? '☕ લંચ રિસેસ (1:10 PM)' : isHi ? '☕ भोजन अवकाश (1:10 PM)' : '☕ Lunch Recess (1:10 PM)')}
+              </span>
             </button>
           </div>
         </div>
@@ -600,8 +880,12 @@ export default function CounterOperatorDesk() {
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase">પેન્ડિંગ કતાર</p>
-              <p className="text-lg font-black text-[#003366]">{waitingCount} નાગરિકો</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase">
+                {isGu ? "પેન્ડિંગ કતાર" : isHi ? "प्रतीक्षारत कतार" : "Pending Queue"}
+              </p>
+              <p className="text-lg font-black text-[#003366]">
+                {waitingCount} {isGu ? "નાગરિકો" : isHi ? "नागरिक" : "Citizens"}
+              </p>
             </div>
           </div>
 
@@ -610,8 +894,12 @@ export default function CounterOperatorDesk() {
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase">આજે નિકાલ</p>
-              <p className="text-lg font-black text-emerald-700">{stats.servedToday} પૂર્ણ</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase">
+                {isGu ? "આજે નિકાલ" : isHi ? "आज निपटान" : "Served Today"}
+              </p>
+              <p className="text-lg font-black text-emerald-700">
+                {stats.servedToday} {isGu ? "પૂર્ણ" : isHi ? "पूर्ण" : "Done"}
+              </p>
             </div>
           </div>
 
@@ -620,8 +908,12 @@ export default function CounterOperatorDesk() {
               <Star className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase">અગ્રતા નીતિ નિકાલ</p>
-              <p className="text-lg font-black text-amber-700">{stats.priorityServed} અગ્રતા</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase">
+                {isGu ? "અગ્રતા નીતિ નિકાલ" : isHi ? "प्राथमिकता निपटान" : "Priority Served"}
+              </p>
+              <p className="text-lg font-black text-amber-700">
+                {stats.priorityServed} {isGu ? "અગ્રતા" : isHi ? "प्राथमिकता" : "Priority"}
+              </p>
             </div>
           </div>
 
@@ -630,8 +922,12 @@ export default function CounterOperatorDesk() {
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase">સરેરાશ ડેસ્ક સમય</p>
-              <p className="text-lg font-black text-indigo-700">{stats.avgMinutes} મિનિટ</p>
+              <p className="text-[10px] text-slate-500 font-bold uppercase">
+                {isGu ? "સરેરાશ ડેસ્ક સમય" : isHi ? "औसत डेस्क समय" : "Avg Desk Time"}
+              </p>
+              <p className="text-lg font-black text-indigo-700">
+                {stats.avgMinutes} {isGu ? "મિનિટ" : isHi ? "मिनट" : "mins"}
+              </p>
             </div>
           </div>
         </div>
@@ -645,10 +941,12 @@ export default function CounterOperatorDesk() {
               <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-[#005A9C]" />
                 <h4 className="text-xs font-black text-[#003366] uppercase tracking-wide">
-                  પ્રશાસનિક ઓડિટ ટ્રેઇલ (Administrative Audit Log)
+                  {isGu ? "પ્રશાસનિક ઓડિટ ટ્રેઇલ (Administrative Audit Log)" : isHi ? "प्रशासनिक ऑडिट ट्रेल (Administrative Audit Log)" : "Administrative Audit Trail Log"}
                 </h4>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono">દરેક ક્રિયાનું ઓટોમેટેડ ઓડિટ રેકોર્ડિંગ</span>
+              <span className="text-[10px] text-slate-500 font-mono">
+                {isGu ? "દરેક ક્રિયાનું ઓટોમેટેડ ઓડિટ રેકોર્ડિંગ" : isHi ? "प्रत्येक क्रिया का स्वचालित ऑडिट रिकॉर्डिंग" : "Automated Audit Trail Recording"}
+              </span>
             </div>
 
             <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
@@ -668,10 +966,12 @@ export default function CounterOperatorDesk() {
                       {log.action}
                     </span>
                     <span className="font-mono font-bold text-[#003366]">{log.tokenNumber}</span>
-                    <span className="text-slate-700">{log.remarks}</span>
+                    <span className="text-slate-700">
+                      {isGu ? log.remarksGu : isHi ? log.remarksHi : log.remarksEn}
+                    </span>
                   </div>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    કાઉન્ટર {log.counterNumber} • {log.officerName}
+                    {isGu ? `કાઉન્ટર ${log.counterNumber} • ${log.officerNameGu}` : isHi ? `काउंटर ${log.counterNumber} • ${log.officerNameHi}` : `Desk ${log.counterNumber} • ${log.officerNameEn}`}
                   </span>
                 </div>
               ))}
@@ -692,13 +992,19 @@ export default function CounterOperatorDesk() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
                 <span className="text-xs font-black uppercase tracking-wider">
-                  કાઉન્ટર {selectedCounter} • લાઈવ ડેસ્ક સંચાલન (Now Serving)
+                  {isGu 
+                    ? `કાઉન્ટર ${selectedCounter} • લાઈવ ડેસ્ક સંચાલન (Now Serving)` 
+                    : isHi 
+                    ? `काउंटर ${selectedCounter} • लाइव डेस्क प्रबंधन (Now Serving)` 
+                    : `Desk ${selectedCounter} • Live Desk Handling (Now Serving)`}
                 </span>
               </div>
               {currentServing && (
                 <div className="bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1 rounded-full text-xs font-mono font-black flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>ડેસ્ક સેવા સમય: {formatTime(elapsedSeconds)}</span>
+                  <span>
+                    {isGu ? `ડેસ્ક સેવા સમય: ${formatTime(elapsedSeconds)}` : isHi ? `डेस्क सेवा समय: ${formatTime(elapsedSeconds)}` : `Desk Time: ${formatTime(elapsedSeconds)}`}
+                  </span>
                 </div>
               )}
             </div>
@@ -716,22 +1022,26 @@ export default function CounterOperatorDesk() {
                         </span>
                         {currentServing.isPriority && (
                           <span className="bg-[#FF9933] text-slate-900 font-black text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                            ⭐ અગ્રતા પાસ (Configurable Priority Policy)
+                            {isGu ? "⭐ અગ્રતા પાસ (Senior/Divyang Policy)" : isHi ? "⭐ प्राथमिकता पास (Senior/Divyang Policy)" : "⭐ Priority Pass (Senior/Divyang Policy)"}
                           </span>
                         )}
                       </div>
                       <h3 className="text-lg font-black text-slate-900 mt-1">
-                        {currentServing.citizenName}
+                        {isGu ? currentServing.citizenNameGu : isHi ? currentServing.citizenNameHi : currentServing.citizenNameEn}
                       </h3>
                       <p className="text-xs text-[#005A9C] font-bold">
-                        {currentServing.schemeTitleGu}
+                        {isGu ? currentServing.schemeTitleGu : isHi ? currentServing.schemeTitleHi : currentServing.schemeTitleEn}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] text-slate-400 block font-mono">મોબાઈલ</span>
+                      <span className="text-[10px] text-slate-400 block font-mono">
+                        {isGu ? "મોબાઈલ" : isHi ? "मोबाइल" : "Phone"}
+                      </span>
                       <span className="text-xs font-mono font-bold text-slate-700">{currentServing.phone}</span>
-                      <span className="text-[10px] text-slate-400 block font-mono mt-1">ઓળખ (Masked)</span>
+                      <span className="text-[10px] text-slate-400 block font-mono mt-1">
+                        {isGu ? "ઓળખ (Masked)" : isHi ? "पहचान (Masked)" : "Identity (Masked)"}
+                      </span>
                       <span className="text-xs font-mono font-bold text-slate-700">XXXX-{currentServing.aadhaarLast4}</span>
                     </div>
                   </div>
@@ -739,17 +1049,25 @@ export default function CounterOperatorDesk() {
                   {/* ⏱️ TIME SEPARATION HUD: WAITING TIME vs DESK HANDLING TIME */}
                   <div className="grid grid-cols-3 gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs">
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold block uppercase">કતાર પ્રતીક્ષા સમય</span>
-                      <span className="font-mono font-black text-slate-800 text-sm">{currentServing.waitingMinutes} મિનિટ</span>
+                      <span className="text-[10px] text-slate-500 font-bold block uppercase">
+                        {isGu ? "કતાર પ્રતીક્ષા સમય" : isHi ? "कतार प्रतीक्षा समय" : "Queue Waiting Time"}
+                      </span>
+                      <span className="font-mono font-black text-slate-800 text-sm">
+                        {currentServing.waitingMinutes} {isGu ? "મિનિટ" : isHi ? "मिनट" : "mins"}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold block uppercase">ડેસ્ક સેવા સમય</span>
+                      <span className="text-[10px] text-slate-500 font-bold block uppercase">
+                        {isGu ? "ડેસ્ક સેવા સમય" : isHi ? "डेस्क सेवा समय" : "Desk Handling Time"}
+                      </span>
                       <span className="font-mono font-black text-[#005A9C] text-sm">{formatTime(elapsedSeconds)}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 font-bold block uppercase">કુલ મુલાકાત સમય</span>
+                      <span className="text-[10px] text-slate-500 font-bold block uppercase">
+                        {isGu ? "કુલ મુલાકાત સમય" : isHi ? "कुल मुलाकात समय" : "Total Visit Time"}
+                      </span>
                       <span className="font-mono font-black text-indigo-700 text-sm">
-                        {currentServing.waitingMinutes + Math.floor(elapsedSeconds / 60)} મિનિટ
+                        {currentServing.waitingMinutes + Math.floor(elapsedSeconds / 60)} {isGu ? "મિનિટ" : isHi ? "मिनट" : "mins"}
                       </span>
                     </div>
                   </div>
@@ -759,23 +1077,26 @@ export default function CounterOperatorDesk() {
                     <div className="flex items-center justify-between text-xs font-black text-emerald-900">
                       <span className="flex items-center gap-1.5">
                         <Sparkles className="w-4 h-4 text-emerald-600" />
-                        દસ્તાવેજ પ્રી-વેરિફિકેશન સમીક્ષા (Pre-check Results)
+                        {isGu ? "દસ્તાવેજ પ્રી-વેરિફિકેશન સમીક્ષા (Pre-check Results)" : isHi ? "दस्तावेज़ पूर्व-सत्यापन समीक्षा (Pre-check Results)" : "Document Pre-verification Review (Pre-check)"}
                       </span>
                       <span className="text-[10px] bg-emerald-200/80 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
-                        Pre-check Passed
+                        {isGu ? "પ્રી-ચેક સફળ" : isHi ? "पूर्व-जांच सफल" : "Pre-check Passed"}
                       </span>
                     </div>
                     <p className="text-xs text-emerald-800 font-semibold leading-relaxed">
-                      {currentServing.aiOcrVerdict}
+                      {isGu ? currentServing.aiOcrVerdictGu : isHi ? currentServing.aiOcrVerdictHi : currentServing.aiOcrVerdictEn}
                     </p>
                     <div className="flex items-center justify-between pt-1 border-t border-emerald-200 text-[11px] text-emerald-900">
-                      <span>ઘોષિત વાર્ષિક આવક: <strong>{currentServing.incomeDeclared}</strong></span>
+                      <span>
+                        {isGu ? "ઘોષિત વાર્ષિક આવક:" : isHi ? "घोषित वार्षिक आय:" : "Declared Annual Income:"}{' '}
+                        <strong>{isGu ? currentServing.incomeDeclaredGu : isHi ? currentServing.incomeDeclaredHi : currentServing.incomeDeclaredEn}</strong>
+                      </span>
                       <button
                         onClick={() => setDocModalOpen(true)}
                         className="underline font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        અપલોડ કરેલ કાગળો જુઓ
+                        {isGu ? "અપલોડ કરેલ કાગળો જુઓ" : isHi ? "अपलोड किए गए दस्तावेज़ देखें" : "View Uploaded Documents"}
                       </button>
                     </div>
                   </div>
@@ -784,10 +1105,16 @@ export default function CounterOperatorDesk() {
                   <div>
                     <div className="flex items-center justify-between text-[11px] font-bold mb-1">
                       <span className="text-slate-600">
-                        સેવા હેન્ડલિંગ ટાર્ગેટ ({SERVICE_SLA_CONFIG.serviceName}):
+                        {isGu ? "સેવા હેન્ડલિંગ ટાર્ગેટ:" : isHi ? "सेवा प्रबंधन लक्ष्य:" : "Service Handling Target:"}{' '}
+                        ({isGu ? SERVICE_SLA_CONFIG.serviceNameGu : isHi ? SERVICE_SLA_CONFIG.serviceNameHi : SERVICE_SLA_CONFIG.serviceNameEn})
                       </span>
                       <span className={isOverTarget ? 'text-red-600 font-black' : isApproachingTarget ? 'text-amber-600 font-black' : 'text-emerald-700 font-black'}>
-                        {isOverTarget ? '🔴 લક્ષ્ય ઓળંગેલ (Target Exceeded)' : isApproachingTarget ? '🟡 લક્ષ્ય નજીક (Approaching Target)' : '🟢 લક્ષ્ય હેઠળ (Within Target)'} • {formatTime(elapsedSeconds)} / {SERVICE_SLA_CONFIG.targetMinutes}:00
+                        {isOverTarget 
+                          ? (isGu ? '🔴 લક્ષ્ય ઓળંગેલ (Target Exceeded)' : isHi ? '🔴 लक्ष्य पार (Target Exceeded)' : '🔴 Target Exceeded') 
+                          : isApproachingTarget 
+                            ? (isGu ? '🟡 લક્ષ્ય નજીક (Approaching Target)' : isHi ? '🟡 लक्ष्य के करीब (Approaching Target)' : '🟡 Approaching Target') 
+                            : (isGu ? '🟢 લક્ષ્ય હેઠળ (Within Target)' : isHi ? '🟢 लक्ष्य के अंतर्गत (Within Target)' : '🟢 Within Target')
+                        } • {formatTime(elapsedSeconds)} / {SERVICE_SLA_CONFIG.targetMinutes}:00
                       </span>
                     </div>
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -809,37 +1136,37 @@ export default function CounterOperatorDesk() {
                     <button
                       onClick={handleMarkComplete}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
-                      title="કામગીરી સફળતાપૂર્વક પૂર્ણ કરો"
+                      title={isGu ? "કામગીરી સફળતાપૂર્વક પૂર્ણ કરો" : isHi ? "कार्य सफलतापूर्वक पूर्ण करें" : "Complete Service Successfully"}
                     >
                       <Check className="w-4 h-4" />
-                      <span>પૂર્ણ (Done)</span>
+                      <span>{isGu ? "પૂર્ણ (Done)" : isHi ? "पूर्ण (Done)" : "Done"}</span>
                     </button>
 
                     <button
                       onClick={() => handleReCall()}
                       className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-3 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
-                      title="અવાજ અને ચાઇમ દ્વારા ફરીથી બોલાવો"
+                      title={isGu ? "અવાજ અને ચાઇમ દ્વારા ફરીથી બોલાવો" : isHi ? "ध्वनि और घंटी द्वारा पुनः बुलाएं" : "Re-call Citizen via Voice Chime"}
                     >
                       <Volume2 className="w-4 h-4" />
-                      <span>ફરીથી બોલાવો</span>
+                      <span>{isGu ? "ફરીથી બોલાવો" : isHi ? "पुनः बुलाएं" : "Re-call"}</span>
                     </button>
 
                     <button
                       onClick={() => setTransferModalOpen(true)}
                       className="bg-blue-600 hover:bg-blue-700 text-white font-black py-3 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
-                      title="બીજા કાઉન્ટર પર મોકલો"
+                      title={isGu ? "બીજા કાઉન્ટર પર મોકલો" : isHi ? "अन्य काउंटर पर स्थानांतरित करें" : "Forward to Another Desk"}
                     >
                       <ArrowRightLeft className="w-4 h-4" />
-                      <span>ટ્રાન્સફર</span>
+                      <span>{isGu ? "ટ્રાન્સફર" : isHi ? "स्थानांतरित" : "Transfer"}</span>
                     </button>
 
                     <button
                       onClick={handleSkipAbsent}
                       className="bg-slate-200 hover:bg-red-50 text-slate-700 hover:text-red-600 font-black py-3 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-                      title="ગેરહાજર નોંધો (ઓડિટ રેકોર્ડ રહેશે)"
+                      title={isGu ? "ગેરહાજર નોંધો (ઓડિટ રેકોર્ડ રહેશે)" : isHi ? "अनुपस्थित दर्ज करें (ऑडिट रिकॉर्ड रहेगा)" : "Mark Absent (Audit Preserved)"}
                     >
                       <X className="w-4 h-4" />
-                      <span>ગેરહાજર (Skip)</span>
+                      <span>{isGu ? "ગેરહાજર (Skip)" : isHi ? "अनुपस्थित (Skip)" : "Absent (Skip)"}</span>
                     </button>
                   </div>
 
@@ -852,10 +1179,14 @@ export default function CounterOperatorDesk() {
                   </div>
                   <div>
                     <h3 className="text-base font-black text-slate-800">
-                      કાઉન્ટર હાલ મુક્ત છે (Ready for Next Citizen)
+                      {isGu ? "કાઉન્ટર હાલ મુક્ત છે (Ready for Next Citizen)" : isHi ? "काउंटर वर्तमान में खाली है (अगले नागरिक के लिए तैयार)" : "Counter is Ready for Next Citizen"}
                     </h3>
                     <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                      આગામી અરજદારને બોલાવવા માટે નીચે આપેલા બટન પર ક્લિક કરો. કોન્ફિગરેબલ અગ્રતા નીતિ મુજબ પાત્ર નાગરિકોને પ્રથમ બોલાવાશે.
+                      {isGu 
+                        ? "આગામી અરજદારને બોલાવવા માટે નીચે આપેલા બટન પર ક્લિક કરો. કોન્ફિગરેબલ અગ્રતા નીતિ મુજબ પાત્ર નાગરિકોને પ્રથમ બોલાવાશે."
+                        : isHi
+                        ? "अगले आवेदक को बुलाने के लिए नीचे दिए गए बटन पर क्लिक करें। प्राथमिकता नीति अनुसार पात्र नागरिकों को पहले बुलाया जाएगा।"
+                        : "Click the button below to call the next applicant. Eligible senior/divyang citizens will be prioritized automatically."}
                     </p>
                   </div>
 
@@ -865,7 +1196,9 @@ export default function CounterOperatorDesk() {
                     className="bg-[#003366] hover:bg-[#002244] disabled:bg-slate-300 text-white font-black py-3.5 px-6 rounded-2xl text-sm flex items-center justify-center gap-2 mx-auto shadow-xl transition active:scale-95 cursor-pointer"
                   >
                     <Volume2 className="w-5 h-5 text-[#FF9933]" />
-                    <span>આગામી ટોકન બોલાવો (Call Next)</span>
+                    <span>
+                      {isGu ? "આગામી ટોકન બોલાવો (Call Next)" : isHi ? "अगला टोकन बुलाएं (Call Next)" : "Call Next Token"}
+                    </span>
                   </button>
                 </div>
               )}
@@ -876,7 +1209,7 @@ export default function CounterOperatorDesk() {
           <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
             <span className="font-bold text-slate-700 flex items-center gap-1.5">
               <Radio className="w-4 h-4 text-emerald-600 animate-pulse" />
-              કતાર સૂચના નિયંત્રણ:
+              {isGu ? "કતાર સૂચના નિયંત્રણ:" : isHi ? "कतार सूचना नियंत्रण:" : "Queue Broadcast Controls:"}
             </span>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -884,25 +1217,30 @@ export default function CounterOperatorDesk() {
                 onClick={() => {
                   triggerHaptic('tap');
                   playNotificationChime();
-                  speakGuidance(`ધ્યાન આપો, તમામ અરજદારો પોતાના અસલ આધાર કાર્ડ સાથે કાઉન્ટર ૧ પાસે લાઈનમાં ઉપસ્થિત રહે.`);
+                  const msg = isGu 
+                    ? `ધ્યાન આપો, તમામ અરજદારો પોતાના અસલ આધાર કાર્ડ સાથે કાઉન્ટર ૧ પાસે લાઈનમાં ઉપસ્થિત રહે.`
+                    : isHi
+                    ? `कृपया ध्यान दें, सभी आवेदक अपने मूल आधार कार्ड के साथ काउंटर १ के पास कतार में उपस्थित रहें।`
+                    : `Attention please, all applicants are requested to remain in line near Counter 1 with their original Aadhaar card.`;
+                  speakGuidance(msg, lang);
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition flex items-center gap-1.5"
-                title="સામાન્ય કતાર સૂચના"
+                title={isGu ? "સામાન્ય કતાર સૂચના" : isHi ? "सामान्य कतार सूचना" : "General Queue Announcement"}
               >
                 <Volume2 className="w-3.5 h-3.5 text-[#005A9C]" />
-                <span>સામાન્ય સૂચના અવાજ</span>
+                <span>{isGu ? "સામાન્ય સૂચના અવાજ" : isHi ? "सामान्य घोषणा ध्वनि" : "Public Audio Chime"}</span>
               </button>
 
               <button
                 onClick={() => {
                   triggerHaptic('success');
-                  alert("નવા ટોકન્સ રીઅલ-ટાઇમ બેકએન્ડ પરથી રિફ્રેશ થયા.");
+                  alert(isGu ? "નવા ટોકન્સ રીઅલ-ટાઇમ બેકએન્ડ પરથી રિફ્રેશ થયા." : isHi ? "नए टोकन रीयल-टाइम बैकएंड से रीफ्रेश हो गए हैं।" : "Queue data synchronized with real-time backend.");
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition flex items-center gap-1.5"
-                title="કતાર ડેટા રિફ્રેશ"
+                title={isGu ? "કતાર ડેટા રિફ્રેશ" : isHi ? "कतार डेटा रीफ्रेश" : "Refresh Queue Data"}
               >
                 <RefreshCw className="w-3.5 h-3.5 text-emerald-600" />
-                <span>કતાર રીફ્રેશ</span>
+                <span>{isGu ? "કતાર રીફ્રેશ" : isHi ? "कतार रीफ्रेश" : "Refresh Queue"}</span>
               </button>
             </div>
           </div>
@@ -917,9 +1255,13 @@ export default function CounterOperatorDesk() {
               <div>
                 <h3 className="text-sm font-black text-[#003366] flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#FF9933]" />
-                  <span>પ્રતીક્ષારત નાગરિકોની કતાર ({waitingCount})</span>
+                  <span>
+                    {isGu ? `પ્રતીક્ષારત નાગરિકોની કતાર (${waitingCount})` : isHi ? `प्रतीक्षारत नागरिकों की कतार (${waitingCount})` : `Waiting Citizens Queue (${waitingCount})`}
+                  </span>
                 </h3>
-                <p className="text-[10px] text-slate-400">અગ્રતા નીતિ એન્જિન • વરિષ્ઠ/દિવ્યાંગજન</p>
+                <p className="text-[10px] text-slate-400">
+                  {isGu ? "અગ્રતા નીતિ એન્જિન • વરિષ્ઠ/દિવ્યાંગજન" : isHi ? "प्राथमिकता नीति इंजन • वरिष्ठ/दिव्यांगजन" : "Priority Policy Engine • Senior/Divyang"}
+                </p>
               </div>
 
               {/* Tabs for Waiting vs Skipped */}
@@ -928,13 +1270,13 @@ export default function CounterOperatorDesk() {
                   onClick={() => setQueueTab('WAITING')}
                   className={`px-2 py-1 rounded-lg transition ${queueTab === 'WAITING' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}
                 >
-                  પ્રતીક્ષા ({waitingCount})
+                  {isGu ? `પ્રતીક્ષા (${waitingCount})` : isHi ? `प्रतीक्षा (${waitingCount})` : `Waiting (${waitingCount})`}
                 </button>
                 <button
                   onClick={() => setQueueTab('SKIPPED')}
                   className={`px-2 py-1 rounded-lg transition ${queueTab === 'SKIPPED' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-600'}`}
                 >
-                  ગેરહાજર ({skippedList.length})
+                  {isGu ? `ગેરહાજર (${skippedList.length})` : isHi ? `अनुपस्थित (${skippedList.length})` : `Absent (${skippedList.length})`}
                 </button>
               </div>
             </div>
@@ -943,6 +1285,8 @@ export default function CounterOperatorDesk() {
             <div className="space-y-2.5 overflow-y-auto max-h-[580px] pr-1">
               {(queueTab === 'WAITING' ? waitingList : skippedList).map((citizen) => {
                 const isCurrentlyServing = currentServing?.id === citizen.id;
+                const citizenName = isGu ? citizen.citizenNameGu : isHi ? citizen.citizenNameHi : citizen.citizenNameEn;
+                const schemeTitle = isGu ? citizen.schemeTitleGu : isHi ? citizen.schemeTitleHi : citizen.schemeTitleEn;
 
                 return (
                   <div
@@ -968,40 +1312,40 @@ export default function CounterOperatorDesk() {
                           
                           {citizen.isPriority && (
                             <span className="bg-[#FF9933] text-slate-900 font-black text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                              ⭐ અગ્રતા
+                              ⭐ {isGu ? "અગ્રતા" : isHi ? "प्राथमिकता" : "Priority"}
                             </span>
                           )}
 
                           {citizen.status === 'SKIPPED' && (
                             <span className="bg-red-100 text-red-800 font-bold text-[9px] px-1.5 py-0.5 rounded-full">
-                              ગેરહાજર
+                              {isGu ? "ગેરહાજર" : isHi ? "अनुपस्थित" : "Absent"}
                             </span>
                           )}
 
                           {citizen.status === 'LATE' && (
                             <span className="bg-amber-100 text-amber-800 font-bold text-[9px] px-1.5 py-0.5 rounded-full">
-                              +{citizen.lateMinutes}m મોડું
+                              +{citizen.lateMinutes}m {isGu ? "મોડું" : isHi ? "देर" : "Late"}
                             </span>
                           )}
 
                           {isCurrentlyServing && (
                             <span className="bg-emerald-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-full animate-pulse">
-                              હાલમાં ચાલુ
+                              {isGu ? "હાલમાં ચાલુ" : isHi ? "वर्तमान में चालू" : "In Service"}
                             </span>
                           )}
                         </div>
 
                         <h4 className="text-xs font-black text-slate-900 mt-1 line-clamp-1">
-                          {citizen.citizenName}
+                          {citizenName}
                         </h4>
                         <p className="text-[11px] text-slate-500 line-clamp-1">
-                          {citizen.schemeTitleGu}
+                          {schemeTitle}
                         </p>
                       </div>
 
                       <div className="text-right shrink-0">
                         <span className="text-[10px] text-slate-400 font-mono block">
-                          પ્રતીક્ષા: {citizen.waitingMinutes}m
+                          {isGu ? "પ્રતીક્ષા:" : isHi ? "प्रतीक्षा:" : "Waiting:"} {citizen.waitingMinutes}m
                         </span>
 
                         {!isCurrentlyServing && citizen.status !== 'COMPLETED' && (
@@ -1009,7 +1353,11 @@ export default function CounterOperatorDesk() {
                             onClick={() => citizen.status === 'SKIPPED' ? handleReCall(citizen) : handleCallNext(citizen)}
                             className="mt-1.5 bg-[#003366] hover:bg-[#002244] text-white font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition active:scale-95 shadow-xs"
                           >
-                            <span>{citizen.status === 'SKIPPED' ? 'રી-કોલ' : 'બોલાવો'}</span>
+                            <span>
+                              {citizen.status === 'SKIPPED' 
+                                ? (isGu ? 'રી-કોલ' : isHi ? 'पुनः बुलाएं' : 'Re-call')
+                                : (isGu ? 'બોલાવો' : isHi ? 'बुलाएं' : 'Call')}
+                            </span>
                             <ChevronRight className="w-3 h-3" />
                           </button>
                         )}
@@ -1041,8 +1389,12 @@ export default function CounterOperatorDesk() {
                   <FileText className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-[#003366]">અરજદાર દસ્તાવેજ નિરીક્ષણ (Officer Review)</h4>
-                  <p className="text-[10px] text-slate-400 font-mono">ટોકન: {currentServing.tokenNumber} • {currentServing.citizenName}</p>
+                  <h4 className="text-xs font-black text-[#003366]">
+                    {isGu ? "અરજદાર દસ્તાવેજ નિરીક્ષણ (Officer Review)" : isHi ? "आवेदक दस्तावेज़ निरीक्षण (Officer Review)" : "Applicant Document Review & Inspection"}
+                  </h4>
+                  <p className="text-[10px] text-slate-400 font-mono">
+                    {isGu ? "ટોકન:" : isHi ? "टोकन:" : "Token:"} {currentServing.tokenNumber} • {isGu ? currentServing.citizenNameGu : isHi ? currentServing.citizenNameHi : currentServing.citizenNameEn}
+                  </p>
                 </div>
               </div>
               <button 
@@ -1058,24 +1410,31 @@ export default function CounterOperatorDesk() {
                 <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span className="font-bold text-slate-800">{doc.name}</span>
+                    <span className="font-bold text-slate-800">
+                      {isGu ? doc.nameGu : isHi ? doc.nameHi : doc.nameEn}
+                    </span>
                   </div>
                   <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                    પ્રી-ચેક પાસ (Pre-check Passed)
+                    {isGu ? "પ્રી-ચેક પાસ (Pre-check Passed)" : isHi ? "पूर्व-जांच सफल (Pre-check Passed)" : "Pre-check Passed"}
                   </span>
                 </div>
               ))}
             </div>
 
             <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900">
-              <strong>અધિકારી સમીક્ષા આવશ્યક:</strong> આ દસ્તાવેજોનું સિસ્ટમ પ્રી-ચેક (OCR + Rule Engine) પૂર્ણ થયેલ છે. આખરી વહીવટી ખરાઈ અને મંજૂરી સત્તાવાર સરકારી અધિકારી દ્વારા કરવામાં આવે છે.
+              <strong>{isGu ? "અધિકારી સમીક્ષા આવશ્યક:" : isHi ? "अधिकारी समीक्षा आवश्यक:" : "Officer Review Required:"}</strong>{' '}
+              {isGu 
+                ? "આ દસ્તાવેજોનું સિસ્ટમ પ્રી-ચેક (OCR + Rule Engine) પૂર્ણ થયેલ છે. આખરી વહીવટી ખરાઈ અને મંજૂરી સત્તાવાર સરકારી અધિકારી દ્વારા કરવામાં આવે છે."
+                : isHi
+                ? "इन दस्तावेज़ों की प्रणाली पूर्व-जांच (OCR + Rule Engine) पूर्ण हो चुकी है। अंतिम प्रशासनिक सत्यापन एवं स्वीकृति अधिकृत सरकारी अधिकारी द्वारा की जाती है।"
+                : "System pre-check (OCR + Rules) has passed. Final administrative validation and approval is executed by the designated public officer."}
             </div>
 
             <button
               onClick={() => setDocModalOpen(false)}
               className="w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition"
             >
-              નિરીક્ષણ પૂર્ણ (Close Preview)
+              {isGu ? "નિરીક્ષણ પૂર્ણ (Close Preview)" : isHi ? "निरीक्षण समाप्त (Close Preview)" : "Close Document Preview"}
             </button>
           </div>
         </div>
@@ -1097,8 +1456,12 @@ export default function CounterOperatorDesk() {
                   <ArrowRightLeft className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-[#003366]">કાઉન્ટર ફોરવર્ડ / ટ્રાન્સફર</h4>
-                  <p className="text-[10px] text-slate-400 font-mono">ટોકન: {currentServing.tokenNumber}</p>
+                  <h4 className="text-xs font-black text-[#003366]">
+                    {isGu ? "કાઉન્ટર ફોરવર્ડ / ટ્રાન્સફર" : isHi ? "काउंटर फॉरवर्ड / स्थानांतरण" : "Counter Forward / Transfer"}
+                  </h4>
+                  <p className="text-[10px] text-slate-400 font-mono">
+                    {isGu ? "ટોકન:" : isHi ? "टोकन:" : "Token:"} {currentServing.tokenNumber}
+                  </p>
                 </div>
               </div>
               <button 
@@ -1111,26 +1474,41 @@ export default function CounterOperatorDesk() {
 
             <div className="space-y-3 text-xs">
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-slate-600">
-                મૂળ કાઉન્ટર: <strong>કાઉન્ટર {selectedCounter} (આવક & પ્રમાણપત્રો)</strong>
+                {isGu ? "મૂળ કાઉન્ટર:" : isHi ? "मूल काउंटर:" : "Source Desk:"}{' '}
+                <strong>{isGu ? `કાઉન્ટર ${selectedCounter} (આવક & પ્રમાણપત્રો)` : isHi ? `काउंटर ${selectedCounter} (आय एवं प्रमाण पत्र)` : `Counter ${selectedCounter} (Income & Certificates)`}</strong>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">કયા કાઉન્ટર પર મોકલવા માંગો છો?</label>
+                <label className="font-bold text-slate-700 block mb-1">
+                  {isGu ? "કયા કાઉન્ટર પર મોકલવા માંગો છો?" : isHi ? "किस काउंटर पर भेजना चाहते हैं?" : "Select Target Service Counter:"}
+                </label>
                 <select
                   value={targetCounter}
                   onChange={(e) => setTargetCounter(Number(e.target.value))}
                   className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800"
                 >
-                  <option value={2}>કાઉન્ટર ૨: રેશન કાર્ડ & અન્ન પુરવઠો</option>
-                  <option value={3}>કાઉન્ટર ૩: ઈ-ધરા ૭/૧૨ જમીન રેકોર્ડ</option>
-                  <option value={4}>કાઉન્ટર ૪: સામાજિક સુરક્ષા & પેન્શન</option>
-                  <option value={5}>કાઉન્ટર ૫: આયુષ્માન ભારત & આરોગ્ય</option>
-                  <option value={6}>કાઉન્ટર ૬: સોગંદનામું & નોટરી એટેસ્ટેશન</option>
+                  <option value={2}>
+                    {isGu ? "કાઉન્ટર ૨: રેશન કાર્ડ & અન્ન પુરવઠો" : isHi ? "काउंटर २: राशन कार्ड एवं खाद्य आपूर्ति" : "Counter 2: Ration Card & Food Supplies"}
+                  </option>
+                  <option value={3}>
+                    {isGu ? "કાઉન્ટર ૩: ઈ-ધરા ૭/૧૨ જમીન રેકોર્ડ" : isHi ? "काउंटर ३: ई-धरा ७/१२ भूमि रिकॉर्ड" : "Counter 3: e-Dhara 7/12 Land Records"}
+                  </option>
+                  <option value={4}>
+                    {isGu ? "કાઉન્ટર ૪: સામાજિક સુરક્ષા & પેન્શન" : isHi ? "काउंटर ४: सामाजिक सुरक्षा एवं पेंशन" : "Counter 4: Social Security & Pension"}
+                  </option>
+                  <option value={5}>
+                    {isGu ? "કાઉન્ટર ૫: આયુષ્માન ભારત & આરોગ્ય" : isHi ? "काउंटर ५: आयुष्मान भारत एवं स्वास्थ्य" : "Counter 5: Ayushman Bharat & Health"}
+                  </option>
+                  <option value={6}>
+                    {isGu ? "કાઉન્ટર ૬: સોગંદનામું & નોટરી એટેસ્ટેશન" : isHi ? "काउंटर ६: शपथ पत्र एवं नोटरी सत्यापन" : "Counter 6: Affidavit & Notary Attestation"}
+                  </option>
                 </select>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">ટ્રાન્સફર નોંધ / કારણ (Remarks):</label>
+                <label className="font-bold text-slate-700 block mb-1">
+                  {isGu ? "ટ્રાન્સફર નોંધ / કારણ (Remarks):" : isHi ? "स्थानांतरण टिप्पणी / कारण (Remarks):" : "Forwarding Remarks / Reason:"}
+                </label>
                 <textarea
                   value={transferRemarks}
                   onChange={(e) => setTransferRemarks(e.target.value)}
@@ -1145,13 +1523,13 @@ export default function CounterOperatorDesk() {
                 onClick={() => setTransferModalOpen(false)}
                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition"
               >
-                રદ કરો
+                {isGu ? "રદ કરો" : isHi ? "रद्द करें" : "Cancel"}
               </button>
               <button
                 onClick={handleConfirmTransfer}
                 className="flex-1 bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition"
               >
-                ટ્રાન્સફર મંજૂર કરો
+                {isGu ? "ટ્રાન્સફર મંજૂર કરો" : isHi ? "स्थानांतरण स्वीकृत करें" : "Approve Transfer"}
               </button>
             </div>
           </div>
