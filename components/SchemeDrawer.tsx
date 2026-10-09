@@ -58,6 +58,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
   const [docVerifications, setDocVerifications] = useState<Record<string, DocVerificationState>>({});
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+  const [showValidationNotice, setShowValidationNotice] = useState(false);
 
   // Subscribe to speech synthesis state
   useEffect(() => {
@@ -67,6 +68,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   // Body scroll lock and voice stop on drawer open/close
   useEffect(() => {
     if (isOpen && scheme) {
+      setShowValidationNotice(false);
       const orig = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
@@ -83,9 +85,22 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const isMr = lang === 'mr';
   const isGu = lang === 'gu';
 
+  // Calculate Mandatory vs Optional documents
+  const mandatoryDocs = scheme.requiredDocs.filter(d => d.required !== false);
+  const effectiveMandatoryDocs = mandatoryDocs.length > 0 ? mandatoryDocs : scheme.requiredDocs;
+  const totalMandatory = effectiveMandatoryDocs.length;
+  
+  const verifiedMandatoryDocs = effectiveMandatoryDocs.filter(
+    d => docVerifications[d.nameGu]?.status === 'passed'
+  );
+  const isAllMandatoryVerified = totalMandatory > 0 && verifiedMandatoryDocs.length === totalMandatory;
+  const missingMandatoryDocs = effectiveMandatoryDocs.filter(
+    d => docVerifications[d.nameGu]?.status !== 'passed'
+  );
+
   const totalDocs = scheme.requiredDocs.length;
-  const verifiedCount = Object.values(checkedDocs).filter(Boolean).length;
-  const progressPercent = Math.round((verifiedCount / totalDocs) * 100);
+  const verifiedCount = Object.values(docVerifications).filter(v => v.status === 'passed').length;
+  const progressPercent = Math.round((verifiedMandatoryDocs.length / totalMandatory) * 100);
   const sourceInfo = getSchemeOfficialSource(scheme);
   const benefit = getSchemeStructuredBenefit(scheme);
   const timelineInfo = getProcessingTimelineInfo(scheme);
@@ -93,6 +108,41 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const toggleDoc = (docKey: string) => {
     triggerHaptic('tap');
     setCheckedDocs(prev => ({ ...prev, [docKey]: !prev[docKey] }));
+  };
+
+  const handleCollectTokenClick = () => {
+    if (!isAllMandatoryVerified) {
+      triggerHaptic('warning');
+      setShowValidationNotice(true);
+
+      const missingNames = missingMandatoryDocs.map((d, i) => `${i + 1}. ${getLocalizedDocName(d, lang)}`).join('\n');
+      
+      const alertMsg = isEn
+        ? `⚠️ Mandatory Documents AI-Verification Required!\n\nTo generate an official government token pass, all mandatory documents must be uploaded and verified by Gemini AI first:\n\nPending Documents (${missingMandatoryDocs.length}):\n${missingNames}\n\nPlease click 'Upload Original Document' above to upload a clear photo or PDF.`
+        : isHi
+        ? `⚠️ अनिवार्य दस्तावेज़ AI सत्यापन आवश्यक है!\n\nसरकारी टोकन प्राप्त करने के लिए कृपया पहले सभी अनिवार्य दस्तावेज़ अपलोड और AI द्वारा सत्यापित करें:\n\nलंबित दस्तावेज़ (${missingMandatoryDocs.length}):\n${missingNames}\n\nकृपया ऊपर दिए गए 'मूल दस्तावेज़ अपलोड करें' बटन से फोटो या PDF अपलोड करें।`
+        : isMr
+        ? `⚠️ आवश्यक कागदपत्रे AI पडताळणी आवश्यक आहे!\n\nशासकीय टोकन मिळवण्यासाठी कृपया आधी सर्व आवश्यक कागदपत्रे अपलोड आणि प्रमाणित करा:\n\nलंबित कागदपत्रे (${missingMandatoryDocs.length}):\n${missingNames}\n\nकृपया 'मूळ कागदपत्र अपलोड करा' वरून फोटो किंवा PDF अपलोड करा.`
+        : `⚠️ ફરજિયાત દસ્તાવેજ અપલોડ અને AI વેરિફિકેશન અનિવાર્ય છે!\n\nકચેરી ટોકન જનરેટ કરવા માટે તમામ ફરજિયાત દસ્તાવેજો અપલોડ કરી Gemini AI દ્વારા વેરિફાઈ કરવા અનિવાર્ય છે!\n\nબાકી રહેલ ફરજિયાત દસ્તાવેજો (${missingMandatoryDocs.length}):\n${missingNames}\n\nકૃપા કરીને પહેલાં ઉપર આપેલા 'અસલ દસ્તાવેજ અપલોડ કરો' બટન પરથી અસલ ફોટો કે PDF અપલોડ કરો.`;
+
+      speakGuidance(
+        isEn 
+          ? "Please upload and verify all mandatory documents before collecting your token." 
+          : isHi 
+          ? "टोकन प्राप्त करने के लिए कृपया पहले सभी अनिवार्य दस्तावेज़ अपलोड और सत्यापित करें।" 
+          : "ટોકન મેળવવા માટે પહેલાં તમામ ફરજિયાત દસ્તાવેજો અપલોડ અને AI વેરિફાઈ કરો.",
+        lang
+      );
+
+      alert(alertMsg);
+      return;
+    }
+
+    // When all mandatory docs are AI verified, proceed to token collection!
+    triggerHaptic('success');
+    if (onCollectToken) {
+      onCollectToken(scheme);
+    }
   };
 
   const handleRealFileUpload = async (docKey: string, file: File, docNameEn?: string) => {
@@ -549,27 +599,32 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           {/* Document Readiness Progress Gauge */}
           <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 shadow-xs">
             <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-[#003366]">
-                {isEn ? 'Document Readiness Score' : isHi ? 'दस्तावेज़ तत्परता स्कोर' : isMr ? 'कागदपत्रे तयारी गुण (Score)' : 'દસ્તાવેજ ઉપલબ્ધતા (Readiness Score)'}
+              <span className="text-[#003366] flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#FF9933]" />
+                <span>{isEn ? 'Mandatory Documents AI-Verification' : isHi ? 'अनिवार्य दस्तावेज़ AI सत्यापन' : isMr ? 'आवश्यक कागदपत्रे AI पडताळणी' : 'ફરજિયાત દસ્તાવેજ AI વેરિફિકેશન'}</span>
               </span>
-              <span className={`${progressPercent === 100 ? 'text-[#138808]' : 'text-[#FF9933]'}`}>
-                {verifiedCount}/{totalDocs} {isEn ? 'docs ready' : isMr ? 'कागदपत्रे तयार' : isHi ? 'दस्तावेज तैयार' : 'કાગળો તૈયાર'} ({progressPercent}%)
+              <span className={`font-black ${isAllMandatoryVerified ? 'text-[#138808]' : 'text-[#FF9933]'}`}>
+                {verifiedMandatoryDocs.length}/{totalMandatory} {isEn ? 'verified' : isHi ? 'सत्यापित' : isMr ? 'प्रमाणित' : 'પ્રમાણિત'} ({progressPercent}%)
               </span>
             </div>
             <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#005A9C] via-[#FF9933] to-[#138808] transition-all duration-300"
+                className={`h-full transition-all duration-500 ${
+                  isAllMandatoryVerified 
+                    ? 'bg-emerald-600' 
+                    : 'bg-gradient-to-r from-amber-500 to-[#FF9933]'
+                }`}
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
             <p className="text-[10px] text-slate-500">
               {isEn 
-                ? 'Check documents you have or use the camera for automated pre-verification.' 
+                ? 'Upload original photos or PDFs below. Gemini AI automatically validates seals, QR codes, and authenticity.' 
                 : isMr
-                ? 'तुमच्याकडे असलेल्या कागदपत्रांवर खूण करा किंवा कॅमेऱ्याद्वारे पूर्व-तपासणी करा.'
+                ? 'खाली दिलेली मूळ कागदपत्रे किंवा PDF अपलोड करा. जेमिनी AI द्वारे शिक्के व QR कोडची स्वयंचलित पडताळणी केली जाईल.'
                 : isHi
-                ? 'उपलब्ध दस्तावेजों पर टिक करें या कैमरा से स्वचालित सत्यापन करें।'
-                : 'તમારી પાસે હાજર કાગળો પર ટિક કરો અથવા કેમેરા વડે પ્રી-ચેક કરો.'}
+                ? 'नीचे मूल दस्तावेज़ फोटो या PDF अपलोड करें। जेमिनी AI द्वारा मुहर और QR कोड का स्वचालित सत्यापन होगा।'
+                : 'નીચે અસલ દસ્તાવેજનો ફોટો કે PDF અપલોડ કરો. Gemini AI દ્વારા સત્તાવાર મોહર અને QR કોડનું ઓટોમેટેડ પ્રી-વેરિફિકેશન થશે.'}
             </p>
           </div>
 
@@ -763,27 +818,87 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         </div>
 
         {/* Bottom Drawer Actions (Fixed & Sticky) */}
-        <div className="p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 space-y-2 shrink-0 sticky bottom-0 z-20">
+        <div className="p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 space-y-2.5 shrink-0 sticky bottom-0 z-20">
+          
+          {/* Verification Status Notice Card */}
+          {!isAllMandatoryVerified ? (
+            <div className={`p-3 rounded-2xl border transition-all ${
+              showValidationNotice 
+                ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300/50 animate-pulse' 
+                : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${showValidationNotice ? 'text-amber-600' : 'text-slate-500'}`} />
+                <div className="text-[11px] leading-snug">
+                  <p className="font-extrabold text-slate-800">
+                    {isEn 
+                      ? `Mandatory Docs: ${verifiedMandatoryDocs.length}/${totalMandatory} AI-Verified` 
+                      : isHi 
+                      ? `अनिवार्य दस्तावेज़: ${verifiedMandatoryDocs.length}/${totalMandatory} AI सत्यापित` 
+                      : isMr 
+                      ? `आवश्यक कागदपत्रे: ${verifiedMandatoryDocs.length}/${totalMandatory} AI प्रमाणित` 
+                      : `ફરજિયાત દસ્તાવેજો: ${verifiedMandatoryDocs.length}/${totalMandatory} AI પ્રમાણિત`}
+                  </p>
+                  <p className="text-slate-600 mt-0.5">
+                    {isEn 
+                      ? 'Upload original photos or PDFs for all mandatory documents above to collect token.' 
+                      : isHi 
+                      ? 'टोकन प्राप्त करने के लिए कृपया ऊपर दिए गए सभी अनिवार्य दस्तावेज़ अपलोड करें।' 
+                      : isMr 
+                      ? 'टोकन मिळवण्यासाठी कृपया सर्व आवश्यक कागदपत्रे अपलोड करा.' 
+                      : 'કચેરી ટોકન મેળવવા માટે ઉપર આપેલા તમામ ફરજિયાત દસ્તાવેજો અપલોડ કરો.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center gap-2 text-emerald-900 text-[11px] font-bold">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>
+                {isEn 
+                  ? '✓ All mandatory documents AI-verified! You can now collect your live token.' 
+                  : isHi 
+                  ? '✓ सभी अनिवार्य दस्तावेज़ AI सत्यापित हैं! अब आप टोकन प्राप्त कर सकते हैं।' 
+                  : isMr 
+                  ? '✓ सर्व आवश्यक कागदपत्रे AI प्रमाणित झाली आहेत! आता आपण टोकन मिळवू शकता.' 
+                  : '✓ તમામ ફરજિયાત દસ્તાવેજો Gemini AI દ્વારા પ્રમાણિત થયેલ છે! હવે ટોકન મેળવો.'}
+              </span>
+            </div>
+          )}
+
           {onCollectToken && (
             <button
-              onClick={() => {
-                triggerHaptic('tap');
-                onCollectToken(scheme);
-              }}
-              className="w-full bg-[#003366] hover:bg-[#002244] text-white font-extrabold py-3.5 px-3 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-center cursor-pointer"
+              onClick={handleCollectTokenClick}
+              className={`w-full font-extrabold py-3.5 px-3 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-center cursor-pointer ${
+                isAllMandatoryVerified
+                  ? 'bg-emerald-700 hover:bg-emerald-800 text-white ring-2 ring-emerald-500/40 shadow-lg'
+                  : 'bg-[#003366] hover:bg-[#002244] text-white'
+              }`}
             >
-              {isLoggedIn ? (
+              {isAllMandatoryVerified ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4 text-[#138808] shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-white shrink-0 animate-pulse" />
                   <span>
-                    {isEn ? 'Book Appointment Slot / Collect Token' : isHi ? 'कार्यालय टोकन प्राप्त करें' : isMr ? 'कार्यालयीन टोकन मिळवा / स्लॉट बुक करा' : 'કચેરી ટોકન કલેક્ટ કરો (Collect Live Token)'}
+                    {isEn 
+                      ? '✓ All Docs Verified • Collect Live Token' 
+                      : isHi 
+                      ? '✓ सभी दस्तावेज़ सत्यापित • कार्यालय टोकन प्राप्त करें' 
+                      : isMr 
+                      ? '✓ सर्व कागदपत्रे प्रमाणित • थेट टोकन मिळवा' 
+                      : '✓ તમામ દસ્તાવેજ પ્રમાણિત • કચેરી ટોકન કલેક્ટ કરો'}
                   </span>
                 </>
               ) : (
                 <>
                   <Lock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                   <span>
-                    {isEn ? 'Login to Book Slot (Citizen Identity Check)' : isHi ? 'टोकन हेतु पहचान सत्यापन करें' : isMr ? 'टोकनसाठी नागरिक ओळख पडताळणी करा' : 'ટોકન મેળવવા લૉગિન કરો (Citizen Identity Check)'}
+                    {isEn 
+                      ? `Upload Docs to Collect Token (${verifiedMandatoryDocs.length}/${totalMandatory})` 
+                      : isHi 
+                      ? `टोकन हेतु दस्तावेज़ अपलोड करें (${verifiedMandatoryDocs.length}/${totalMandatory})` 
+                      : isMr 
+                      ? `टोकनसाठी कागदपत्रे अपलोड करा (${verifiedMandatoryDocs.length}/${totalMandatory})` 
+                      : `ટોકન મેળવવા દસ્તાવેજ અપલોડ કરો (${verifiedMandatoryDocs.length}/${totalMandatory})`}
                   </span>
                 </>
               )}

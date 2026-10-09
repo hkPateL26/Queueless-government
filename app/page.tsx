@@ -374,11 +374,31 @@ export default function Home() {
     setView('landing');
   };
 
+  const handleRequestSlotBooking = (preferredScheme?: SchemeItem) => {
+    triggerHaptic('tap');
+    const target = preferredScheme || activeScheme;
+    if (!target) {
+      // If no scheme is active, navigate to schemes catalog so citizen can choose their service & upload documents
+      setView('services');
+      const msg = lang === 'en'
+        ? "Please select your required public scheme to upload documents and generate your token."
+        : lang === 'hi'
+        ? "कृपया पहले अपनी योजना चुनें और दस्तावेज़ अपलोड कर टोकन प्राप्त करें।"
+        : "કૃપા કરીને પહેલાં જે યોજનાનો ટોકન મેળવવો હોય તે યોજના પસંદ કરી જરૂરી દસ્તાવેજો અપલોડ કરો.";
+      speakGuidance(msg, lang);
+      return;
+    }
+
+    // Open Scheme Drawer for the target scheme so the citizen uploads & verifies mandatory documents
+    setActiveScheme(target);
+    setDrawerOpen(true);
+  };
+
   const handleBookKacheriSlot = (_kacheriId: string, talukaId: string) => {
     triggerHaptic('tap');
     setTargetBookingDistrictId('rajkot');
     setTargetBookingTalukaId(talukaId);
-    setSlotModalOpen(true);
+    handleRequestSlotBooking();
   };
 
   const handleRunningLate = () => {
@@ -416,7 +436,7 @@ export default function Home() {
         : "ટોકન મેળવવા માટે પહેલાં નાગરિક ઓળખ ચકાસણી કરવી જરૂરી છે.";
       speakGuidance(voiceMsg, lang);
       setPendingTokenScheme(scheme);
-      setLoginPromptReason(lang === 'en' ? `🔒 Citizen identity check is required to collect token for "${schemeTitle}".` : lang === 'hi' ? `🔒 "${schemeTitle}" का टोकन प्राप्त करने के लिए नागरिक पहचान सत्यापन आवश्यक है।` : `🔒 "${schemeTitle}" નો કચેરી ટોકન કલેક્ટ કરવા માટે નાગરિક ઓળખ ચકાસણી જરૂરી છે.`);
+      setLoginPromptReason(lang === 'en' ? `🔒 Citizen identity check is required to collect token for "${schemeTitle}".` : lang === 'hi' ? `🔒 "${schemeTitle}" का टोकન प्राप्त करने के लिए नागरिक पहचान सत्यापन आवश्यक है।` : `🔒 "${schemeTitle}" નો કચેરી ટોકન કલેક્ટ કરવા માટે નાગરિક ઓળખ ચકાસણી જરૂરી છે.`);
       setDrawerOpen(false);
       setAuthModalOpen(true);
       return;
@@ -999,7 +1019,7 @@ export default function Home() {
                 currentUser={currentUser}
                 activeBooking={activeBooking}
                 onOpenTokenTracker={() => setTokenTrackerModalOpen(true)}
-                onOpenSlotModal={() => setSlotModalOpen(true)}
+                onOpenSlotModal={() => handleRequestSlotBooking()}
                 onOpenTokenPassModal={() => setTokenPassModalOpen(true)}
                 lang={lang}
               />
@@ -1378,10 +1398,7 @@ export default function Home() {
 
                       <div className="pt-2 flex flex-col sm:flex-row lg:flex-col gap-2.5">
                         <button
-                          onClick={() => {
-                            triggerHaptic('tap');
-                            setSlotModalOpen(true);
-                          }}
+                          onClick={() => handleRequestSlotBooking()}
                           className="flex-1 w-full bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-black py-3 px-4 rounded-xl text-xs sm:text-sm shadow-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Calendar className="w-4 h-4 text-slate-900" />
@@ -1440,10 +1457,7 @@ export default function Home() {
 
                       <div className="pt-2 flex flex-col sm:flex-row lg:flex-col gap-2.5">
                         <button
-                          onClick={() => {
-                            triggerHaptic('tap');
-                            setSlotModalOpen(true);
-                          }}
+                          onClick={() => handleRequestSlotBooking()}
                           className="flex-1 w-full bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-black py-3 px-4 rounded-xl text-xs sm:text-sm shadow-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Calendar className="w-4 h-4 text-slate-900" />
@@ -2333,7 +2347,10 @@ export default function Home() {
       <TokenTrackerModal
         isOpen={tokenTrackerModalOpen}
         onClose={() => setTokenTrackerModalOpen(false)}
-        onBookSlot={() => setSlotModalOpen(true)}
+        onBookSlot={() => {
+          setTokenTrackerModalOpen(false);
+          handleRequestSlotBooking();
+        }}
         onViewRadar={() => setView('dashboard')}
         activeBooking={activeBooking}
         currentUser={currentUser}
