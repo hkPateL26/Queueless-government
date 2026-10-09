@@ -526,10 +526,7 @@ export async function inspectUploadedFileStrict(
       fileNameLower.includes('adhar') || 
       fileNameLower.includes('id_card');
 
-    const isRealPhotoOrImage = file.type.startsWith('image/') && !visualIsCollegeReceipt && !isCollegeStudyMaterial;
-
-    // If it neither has Aadhaar filename nor Aadhaar visual tricolor characteristics nor a valid real photo
-    if (!looksLikeAadhaarName && !visualHasAadhaarColors && !isRealPhotoOrImage) {
+    if (!looksLikeAadhaarName && !visualHasAadhaarColors) {
       return {
         isValid: false,
         status: 'failed',
@@ -565,6 +562,27 @@ export async function inspectUploadedFileStrict(
       targetDocNameEn.toLowerCase().includes('admission')
     ))
   ) {
+    const isBonafideName =
+      fileNameLower.includes('bonafide') ||
+      fileNameLower.includes('school') ||
+      fileNameLower.includes('college') ||
+      fileNameLower.includes('student') ||
+      fileNameLower.includes('admission') ||
+      fileNameLower.includes('certificate') ||
+      fileNameLower.includes('atmiya') ||
+      fileNameLower.includes('uni');
+
+    if (!isBonafideName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.91,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) સત્તાવાર બોનાફાઇડ પ્રમાણપત્ર નથી. શાળા/કૉલેજનું પ્રમાણપત્ર અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not a recognized bonafide certificate.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -587,6 +605,25 @@ export async function inspectUploadedFileStrict(
       };
     }
 
+    const isIncomeName =
+      fileNameLower.includes('income') ||
+      fileNameLower.includes('aavak') ||
+      fileNameLower.includes('dakhlo') ||
+      fileNameLower.includes('certificate') ||
+      fileNameLower.includes('revenue') ||
+      fileNameLower.includes('mamlatdar');
+
+    if (!isIncomeName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.92,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) સત્તાવાર આવકનો દાખલો નથી. મામલતદાર/તાલુકા કચેરી દ્વારા જારી કરેલ આવકનો દાખલો જ અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not an authentic Income Certificate.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -599,6 +636,24 @@ export async function inspectUploadedFileStrict(
 
   // 10. Ration Card (રેશન કાર્ડ)
   if (targetDocNameGu.includes('રેશન')) {
+    const isRationName =
+      fileNameLower.includes('ration') ||
+      fileNameLower.includes('rashan') ||
+      fileNameLower.includes('nfsa') ||
+      fileNameLower.includes('purvatha') ||
+      fileNameLower.includes('card');
+
+    if (!isRationName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.91,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) રેશન કાર્ડ નથી. અન્ન અને નાગરિક પુરવઠા વિભાગનું સત્તાવાર રેશન કાર્ડ અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not a Ration Card.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -611,6 +666,24 @@ export async function inspectUploadedFileStrict(
 
   // 11. Caste Certificate (જાતિનો દાખલો)
   if (targetDocNameGu.includes('જાતિ') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('caste'))) {
+    const isCasteName =
+      fileNameLower.includes('caste') ||
+      fileNameLower.includes('jati') ||
+      fileNameLower.includes('samaj') ||
+      fileNameLower.includes('certificate') ||
+      fileNameLower.includes('dakhlo');
+
+    if (!isCasteName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.91,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) જાતિનું પ્રમાણપત્ર નથી. સક્ષમ અધિકારી દ્વારા જારી કરેલ જાતિનો દાખલો અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not a Caste Certificate.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -621,8 +694,35 @@ export async function inspectUploadedFileStrict(
     };
   }
 
-  // 12. Land Records (૭/૧૨ અને ૮-અ જમીન ઉતારો)
+  // 12. Land Records (૭/૧૨ અને ૮-અ જમીન ઉતારો / નકલ)
   if (targetDocNameGu.includes('૭/૧૨') || targetDocNameGu.includes('જમીન') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('land'))) {
+    const isLandName = 
+      fileNameLower.includes('7/12') || 
+      fileNameLower.includes('7-12') || 
+      fileNameLower.includes('7_12') || 
+      fileNameLower.includes('712') || 
+      fileNameLower.includes('8-a') || 
+      fileNameLower.includes('8_a') || 
+      fileNameLower.includes('8a') || 
+      fileNameLower.includes('anyror') || 
+      fileNameLower.includes('ror') || 
+      fileNameLower.includes('land') || 
+      fileNameLower.includes('jamin') || 
+      fileNameLower.includes('utaro') || 
+      fileNameLower.includes('khedut') ||
+      fileNameLower.includes('khatavahi');
+
+    if (!isLandName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.93,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) ૭/૧૨ કે ૮-અ જમીન ઉતારો નથી. AnyRoR પોર્ટલ (anyror.gujarat.gov.in) પરથી ડાઉનલોડ કરેલ અથવા કચેરીની સત્તાવાર ૭/૧૨ અને ૮-અ જમીનની નકલ જ અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not a 7/12 or 8-A Land Record. Please upload an authentic AnyRoR revenue record.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -635,6 +735,26 @@ export async function inspectUploadedFileStrict(
 
   // 13. Bank Passbook / Cheque (બેંક પાસબુક)
   if (targetDocNameGu.includes('બેંક') || targetDocNameGu.includes('પાસબુક') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('bank'))) {
+    const isBankName =
+      fileNameLower.includes('bank') ||
+      fileNameLower.includes('passbook') ||
+      fileNameLower.includes('cheque') ||
+      fileNameLower.includes('statement') ||
+      fileNameLower.includes('sbi') ||
+      fileNameLower.includes('bob') ||
+      fileNameLower.includes('hdfc');
+
+    if (!isBankName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.91,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) બેંક પાસબુક નથી. ખાતા નંબર અને IFSC કોડ દર્શાવતી સત્તાવાર બેંક પાસબુક અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not a Bank Passbook.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -647,6 +767,26 @@ export async function inspectUploadedFileStrict(
 
   // 14. Marksheet (માર્કશીટ / પરિણામ)
   if (targetDocNameGu.includes('માર્કશીટ') || targetDocNameGu.includes('ધોરણ') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('marksheet'))) {
+    const isMarksheetName =
+      fileNameLower.includes('marksheet') ||
+      fileNameLower.includes('result') ||
+      fileNameLower.includes('score') ||
+      fileNameLower.includes('gseb') ||
+      fileNameLower.includes('cbse') ||
+      fileNameLower.includes('std') ||
+      fileNameLower.includes('dhoran');
+
+    if (!isMarksheetName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.91,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) સત્તાવાર માર્કશીટ નથી. માન્ય બોર્ડ/યુનિવર્સિટીનું ગુણપત્રક અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not an authentic Marksheet.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -659,6 +799,27 @@ export async function inspectUploadedFileStrict(
 
   // 15. Electricity / Light Bill (વીજ બિલ / લાઈટબિલ)
   if (targetDocNameGu.includes('લાઈટ') || targetDocNameGu.includes('વીજ') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('bill'))) {
+    const isBillName =
+      fileNameLower.includes('bill') ||
+      fileNameLower.includes('light') ||
+      fileNameLower.includes('electricity') ||
+      fileNameLower.includes('pgvcl') ||
+      fileNameLower.includes('ugvcl') ||
+      fileNameLower.includes('dgvcl') ||
+      fileNameLower.includes('mgvcl') ||
+      fileNameLower.includes('torrent');
+
+    if (!isBillName) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.91,
+        detectedDocumentType: 'અન્ય અમાન્ય ફાઇલ',
+        reasonGu: `❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ (${file.name}) વીજળી બિલ નથી. સત્તાવાર DISCOM વીજ બિલ અપલોડ કરો.`,
+        reasonEn: `Invalid Document: Uploaded file (${file.name}) is not an Electricity Bill.`
+      };
+    }
+
     return {
       isValid: true,
       status: 'passed',
@@ -669,19 +830,7 @@ export async function inspectUploadedFileStrict(
     };
   }
 
-  // 16. Any Other Authentic Document Uploaded by Citizen
-  if (file.type.startsWith('image/') || file.type === 'application/pdf' || fileNameLower.endsWith('.pdf')) {
-    return {
-      isValid: true,
-      status: 'passed',
-      confidenceScore: 0.96,
-      detectedDocumentType: `${targetDocNameGu} (સત્તાવાર દસ્તાવેજ)`,
-      extractedDetailsGu: `અરજદાર: Khunt Harkishan Vinodrai • સત્તાવાર ${targetDocNameGu} ચકાસાયેલ`,
-      extractedDetailsEn: `Applicant: Khunt Harkishan Vinodrai • Verified ${targetDocNameEn || targetDocNameGu}`
-    };
-  }
-
-  // DEFAULT STRICT REJECTION FOR NON-DOCUMENTS
+  // DEFAULT STRICT REJECTION FOR NON-MATCHING DOCUMENTS (NO BLIND APPROVALS)
   return {
     isValid: false,
     status: 'failed',

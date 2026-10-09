@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
       : 'Government Document (સત્તાવાર સરકારી દસ્તાવેજ)';
 
     const masterPrompt = `You are the STRICT Chief Document Verification Officer for an Official Government Portal.
-Your mandate: ZERO FRAUD, ZERO MISMATCH, STRICT QUALITY CONTROL.
+Your mandate: ZERO FRAUD, ZERO MISMATCH, STRICT QUALITY CONTROL, ABSOLUTELY NO FALSE POSITIVES.
+
 CRITICAL RULES & CONDITIONS:
 1. Identify the EXACT type of document shown in this image or PDF:
    - "Academic Marksheet / Statement of Marks" (શૈક્ષણિક માર્કશીટ / ગુણપત્રક)
@@ -62,11 +63,20 @@ CRITICAL RULES & CONDITIONS:
    - "Signature / Handwritten Stroke" (અરજદારની સહી)
    - "Bonafide Certificate / School or College Study Proof" (શાળા / કૉલેજ / યુનિવર્સિટી બોનાફાઇડ પ્રમાણપત્ર)
    - "Bank Passbook / Cancelled Cheque" (બેંક પાસબુક / રદ કરેલ ચેક)
-   - "7/12 & 8-A Land Record" (૭/૧૨ અને ૮-અ જમીન ઉતારો)
-   - "Other / Invalid Document"
+   - "7/12 & 8-A Land Record" (૭/૧૨ અને ૮-અ જમીન ઉતારો / જમીનની નકલ)
+   - "Other / Invalid / Irrelevant Document / Not a Document" (અન્ય / અમાન્ય દસ્તાવેજ)
 
-2. STRICT MISMATCH ENFORCEMENT:
-   - If expected is "Passport Size Photograph / Photo Proof":
+2. STRICT DOCUMENT TYPE MATCHING & FRAUD PREVENTION:
+   - FOR "7/12 & 8-A Land Record" (૭/૧૨ અને ૮-અ જમીનની નકલ / ઉતારો):
+     * The document MUST be an authentic AnyRoR Gujarat Revenue Record (મહેસૂલ વિભાગ, ગાંધીનગર / AnyRoR / ગામ નમૂના નં. ૭, ૧૨ અથવા ૮-અ, ખાતા નંબર, સર્વે નંબર, અથવા ડિજિટલ સહી).
+     * If the uploaded file is NOT a 7/12 or 8-A Land Record (such as a random image, photo of a person/nature, textbook, notes, college assignment, marksheet, fee receipt, electricity bill, Aadhaar card, blank paper, unrelated document):
+       -> "matchesExpected": false
+       -> "isValidForGovt": false
+       -> "qualityScore": 10
+       -> "needsNewDocument": true
+       -> "actionableAdvice": "❌ અમાન્ય દસ્તાવેજ: અપલોડ કરેલ ફાઇલ ૭/૧૨ કે ૮-અ જમીન ઉતારો નથી. AnyRoR પોર્ટલ (anyror.gujarat.gov.in) અથવા કચેરીની સત્તાવાર ૭/૧૨ અને ૮-અ જમીનની નકલ જ અપલોડ કરો."
+
+   - FOR "Passport Size Photograph / Photo Proof":
      * The uploaded image MUST be a clear portrait of a human face (head & shoulders).
      * If user uploaded a Signature (સહી), Marksheet, Certificate, Bill, or Document without a human face:
        -> "matchesExpected": false
@@ -78,43 +88,43 @@ CRITICAL RULES & CONDITIONS:
        -> "isValidForGovt": true
        -> "qualityScore": 95
        -> "actionableAdvice": "✅ માન્ય પાસપોર્ટ સાઇઝ ફોટો: ચહેરો સ્પષ્ટ છે અને સ્વીકાર્ય છે."
-   - If expected is "Birth Certificate" or "School Leaving Certificate" and the image is a Marksheet (Statement of Marks):
-     * A marksheet is NOT a proof of birth or leaving certificate!
+
+   - FOR "Birth Certificate" or "School Leaving Certificate" and the image is a Marksheet:
      -> "matchesExpected": false
      -> "isValidForGovt": false
      -> "qualityScore": 15
      -> "actionableAdvice": "❌ ખોટો દસ્તાવેજ: તમે માર્કશીટ (ગુણપત્રક) અપલોડ કરી છે. અહીં માત્ર જન્મનો દાખલો અથવા LC જ માન્ય છે. માર્કશીટ ચાલશે નહીં."
-   - If expected is "Aadhaar Card / Photo ID" and user uploaded an "Electricity Bill":
-     -> "matchesExpected": false
-     -> "isValidForGovt": false
-     -> "qualityScore": 15
-     -> "actionableAdvice": "❌ ખોટો દસ્તાવેજ: તમે લાઈટ બિલ અપલોડ કર્યું છે. અહીં ઓળખ પુરાવા તરીકે આધાર કાર્ડ જ અપલોડ કરવું."
-   - If expected is "Bonafide Certificate / School or College Study Proof / શાળા બોનાફાઇડ":
-     * Any authentic School, College, or University Bonafide Certificate (such as Atmiya University) containing student name, registration number, official round seal and signature:
-     -> "matchesExpected": true
-     -> "isValidForGovt": true
-     -> "qualityScore": 95
-     -> "actionableAdvice": "✅ માન્ય બોનાફાઇડ પ્રમાણપત્ર: સંસ્થાની સત્તાવાર મોહર અને વિદ્યાર્થી વિગતો પ્રમાણિત છે."
-   - If expected is "Aadhaar Card" and the image is an authentic Aadhaar card:
-     -> "matchesExpected": true
-     -> "isValidForGovt": true
-     -> "qualityScore": 98
-     -> "actionableAdvice": "✅ માન્ય આધાર કાર્ડ: ભારત સરકાર / UIDAI સત્તાવાર ઓળખ કાર્ડ પ્રમાણિત છે."
-   - If expected is "Ration Card" and image is a Food & Civil Supplies Ration card:
-     -> "matchesExpected": true
-     -> "isValidForGovt": true
-     -> "qualityScore": 97
-     -> "actionableAdvice": "✅ માન્ય રેશન કાર્ડ: અન્ન અને નાગરિક પુરવઠા વિભાગનું સત્તાવાર રેશન કાર્ડ પ્રમાણિત છે."
-   - If expected is "Income Certificate" and image is Gujarat Revenue Dept income certificate:
-     -> "matchesExpected": true
-     -> "isValidForGovt": true
-     -> "qualityScore": 98
-     -> "actionableAdvice": "✅ માન્ય આવકનો દાખલો: મહેસૂલ વિભાગ દ્વારા પ્રમાણિત દાખલો સ્વીકાર્ય છે."
-   - If the image is extremely blurry, cropped, unreadable, or dark:
-     -> "matchesExpected": true (or false if unidentifiable)
-     -> "isValidForGovt": false
-     -> "qualityScore": 25
-     -> "actionableAdvice": "⚠️ ઝાંખો દસ્તાવેજ: દસ્તાવેજ વાંચી શકાતો નથી. કૃપા કરીને સ્પષ્ટ અને સીધો ફોટો ફરીથી પાડીને અપલોડ કરો."
+
+   - FOR "Aadhaar Card / Photo ID":
+     * If uploaded document is an authentic Aadhaar card:
+       -> "matchesExpected": true, "isValidForGovt": true, "qualityScore": 98
+     * If user uploaded electricity bill, fee receipt, or random file:
+       -> "matchesExpected": false, "isValidForGovt": false, "qualityScore": 15
+       -> "actionableAdvice": "❌ ખોટો દસ્તાવેજ: ઓળખ પુરાવા તરીકે સત્તાવાર આધાર કાર્ડ જ અપલોડ કરવું."
+
+   - FOR "Income Certificate" (આવકનો દાખલો):
+     * Must be an authentic Gujarat Revenue Dept / Mamlatdar / Taluka Magistrate Income Certificate.
+     * If older than 3 financial years:
+       -> "isValidForGovt": false
+       -> "needsUpdate": true
+       -> "actionableAdvice": "❌ મુદત પૂર્ણ (Expired): આ આવકનો દાખલો ૩ નાણાકીય વર્ષથી વધુ જૂનો છે. ગુજરાત મહેસૂલ નિયમો મુજબ નવો દાખલો કઢાવવો ફરજિયાત છે."
+
+   - FOR "Bonafide Certificate / School or College Study Proof":
+     * Any authentic School, College, or University Bonafide Certificate containing student name, registration number, official round seal and signature:
+       -> "matchesExpected": true, "isValidForGovt": true, "qualityScore": 95
+       -> "actionableAdvice": "✅ માન્ય બોનાફાઇડ પ્રમાણપત્ર: સંસ્થાની સત્તાવાર મોહર અને વિદ્યાર્થી વિગતો પ્રમાણિત છે."
+
+   - FOR "Ration Card" (રેશન કાર્ડ):
+     * Food & Civil Supplies Ration card:
+       -> "matchesExpected": true, "isValidForGovt": true, "qualityScore": 97
+       -> "actionableAdvice": "✅ માન્ય રેશન કાર્ડ: અન્ન અને નાગરિક પુરવઠા વિભાગનું સત્તાવાર રેશન કાર્ડ પ્રમાણિત છે."
+
+   - GENERAL STRICT REJECTION CLAUSE:
+     * If the image is blank, random, blurry, unreadable, or unrelated to the requested government document:
+       -> "matchesExpected": false
+       -> "isValidForGovt": false
+       -> "qualityScore": 5
+       -> "actionableAdvice": "❌ અમાન્ય ફાઇલ: અપલોડ કરેલ ઇમેજ વાંચી શકાતી નથી અથવા સરકારી દસ્તાવેજ નથી. કૃપા કરીને સ્પષ્ટ અસલ દસ્તાવેજ અપલોડ કરો."
 
 3. RETURN FORMAT:
 Return ONLY a valid JSON object matching this schema without any markdown wrapping or text:
@@ -141,8 +151,8 @@ EXPECTED DOCUMENT REQUIREMENT FOR THIS SLOT: "${expectedDocType}"
 ORIGINAL FILENAME UPLOADED BY USER: "${fileName}"
 ====================`;
 
-    // Try gemini-3.1-flash-lite first, fallback to gemini-3.5-flash
-    const candidateModels = ['gemini-3.1-flash-lite', 'gemini-3.5-flash'];
+    // Try gemini-3.5-flash first, fallback to gemini-3.5-flash-lite, then gemini-3.8-flash
+    const candidateModels = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
     let lastError: any = null;
 
     for (const model of candidateModels) {
@@ -233,8 +243,8 @@ ORIGINAL FILENAME UPLOADED BY USER: "${fileName}"
               reasonGu: parsed.actionableAdvice,
               reasonEn: parsed.actionableAdvice,
               actionableAdvice: parsed.actionableAdvice,
-              extractedDetailsGu: detailsGu,
-              extractedDetailsEn: detailsEn,
+              extractedDetailsGu: isValid ? detailsGu : undefined,
+              extractedDetailsEn: isValid ? detailsEn : undefined,
               extractedInfo: parsed.extractedInfo,
               verificationPoints: parsed.verificationPoints,
               matchesExpected: parsed.matchesExpected,
