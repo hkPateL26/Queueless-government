@@ -470,8 +470,10 @@ export function SlotBookingModal({
         "અગ્રતા ટોકન માટે સરકારી દસ્તાવેજ ચકાસણી અનિવાર્ય છે.",
         lang
       );
-      alert(lang === 'en'
+      setConflictError(lang === 'en'
         ? "⚠️ Proof verification required for Priority Appointment (#P-). Please verify UDID/Medical certificate or select a verified senior citizen family member."
+        : lang === 'hi'
+        ? "⚠️ प्राथमिकता टोकन (#P-) के लिए सरकारी दस्तावेज़ सत्यापन अनिवार्य है। कृपया दस्तावेज़ नंबर दर्ज कर 'AI सत्यापन' बटन दबाएं।"
         : "⚠️ અગ્રતા ટોકન (#P-) મેળવવા માટે સરકારી દસ્તાવેજ ચકાસણી અનિવાર્ય છે. કૃપા કરીને દસ્તાવેજ નંબર દાખલ કરી 'AI ચકાસણી' બટન દબાવો અથવા પરિવારના વરિષ્ઠ સભ્ય પસંદ કરો.");
       return;
     }

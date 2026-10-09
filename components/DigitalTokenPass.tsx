@@ -64,6 +64,8 @@ export function DigitalTokenPass({
   const [smsModalOpen, setSmsModalOpen] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [channelsModalOpen, setChannelsModalOpen] = useState<boolean>(false);
+  const [smsCopied, setSmsCopied] = useState<boolean>(false);
+  const [showDocReminder, setShowDocReminder] = useState<boolean>(false);
 
   const isAnySubModalOpen = lateModalOpen || rescheduleModalOpen || cancelModalOpen || verifierOpen || smsModalOpen || whatsAppModalOpen || channelsModalOpen;
 
@@ -1150,11 +1152,14 @@ export function DigitalTokenPass({
                 onClick={() => {
                   triggerHaptic('success');
                   navigator.clipboard?.writeText(`🏛️ GSDC-GUJGOV: Token ${booking.tokenNumber} (${centerName}) confirmed.`);
-                  alert(isEn ? "SMS text copied to clipboard!" : isHi ? "SMS टेक्स्ट क्लिपबोर्ड पर कॉपी हुआ!" : isMr ? "SMS मजकूर कॉपी झाला!" : "SMS લખાણ ક્લિપબોર્ડ પર કોપી થયું!");
+                  setSmsCopied(true);
+                  setTimeout(() => setSmsCopied(false), 2000);
                 }}
                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition"
               >
-                {isEn ? 'Copy Text' : isHi ? 'टेक्स्ट कॉपी करें' : isMr ? 'मजकूर कॉपी करा' : 'ટેક્સ્ટ કોપી કરો'}
+                {smsCopied 
+                  ? (isEn ? "✓ Copied to clipboard!" : isHi ? "✓ क्लिपबोर्ड पर कॉपी हुआ!" : isMr ? "✓ मजकूर कॉपी झाला!" : "✓ લખાણ ક્લિપબોર્ડ પર કોપી થયું!")
+                  : (isEn ? 'Copy Text' : isHi ? 'टेक्स्ट कॉपी करें' : isMr ? 'मजकूर कॉपी करा' : 'ટેક્સ્ટ કોપી કરો')}
               </button>
               <button
                 onClick={() => setSmsModalOpen(false)}
@@ -1266,7 +1271,7 @@ export function DigitalTokenPass({
                     <button
                       onClick={() => {
                         triggerHaptic('tap');
-                        alert(isEn ? "Carry original Aadhaar card, income certificate and 2 photos." : isHi ? "आधार कार्ड, आय प्रमाण पत्र और 2 फोटो मूल साथ लाएं।" : isMr ? "आधार कार्ड, उत्पन्न दाखला आणि २ फोटो सोबत आणा." : "આધાર કાર્ડ, આવકનો દાખલો અને ૨ ફોટા અસલ સાથે લાવવા.");
+                        setShowDocReminder(prev => !prev);
                       }}
                       className="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-1.5 px-3 rounded-lg border border-slate-200 flex items-center justify-center gap-1.5 text-[11px] transition"
                     >
@@ -1275,7 +1280,25 @@ export function DigitalTokenPass({
                     </button>
                   </div>
 
-                  <span className="text-[9px] text-slate-400 block text-right">10:32 AM</span>
+                  {showDocReminder && (
+                    <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10.5px] text-amber-900 font-medium space-y-1 animate-in fade-in">
+                      <p className="font-bold text-amber-950 flex items-center gap-1">
+                        <FileCheck2 className="w-3.5 h-3.5 text-amber-700" />
+                        <span>{isEn ? 'Documents to Carry:' : isHi ? 'साथ लाने हेतु दस्तावेज़:' : isMr ? 'सोबत आणायची कागदपत्रे:' : 'સાથે લાવવાના કાગળો:'}</span>
+                      </p>
+                      <p>
+                        {isEn 
+                          ? '1. Original Aadhaar Card\n2. Income / Caste Certificate (if applicable)\n3. 2 Passport-size Photographs' 
+                          : isHi 
+                          ? '१. मूल आधार कार्ड\n२. आय / जाति प्रमाण पत्र\n३. २ पासपोर्ट फोटो' 
+                          : isMr 
+                          ? '१. मूळ आधार कार्ड\n२. उत्पन्न / जात प्रमाणपत्र\n३. २ पासपोर्ट फोटो' 
+                          : '૧. અસલ આધાર કાર્ડ\n૨. આવક / જાતિનો દાખલો\n૩. ૨ પાસપોર્ટ સાઇઝ ફોટા'}
+                      </p>
+                    </div>
+                  )}
+
+                  <span className="text-[9px] text-slate-400 block text-right mt-1">10:32 AM</span>
                 </div>
               </div>
             </div>

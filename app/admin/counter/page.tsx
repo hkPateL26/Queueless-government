@@ -299,6 +299,7 @@ export default function CounterOperatorDesk() {
   // Audit Log State
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(INITIAL_AUDIT_LOGS);
   const [auditPanelOpen, setAuditPanelOpen] = useState<boolean>(false);
+  const [counterToast, setCounterToast] = useState<{ title: string; message: string; type?: 'info' | 'success' | 'warning' } | null>(null);
 
   // Officer stats
   const [stats, setStats] = useState({
@@ -417,12 +418,20 @@ export default function CounterOperatorDesk() {
     }
 
     if (!nextCitizen) {
-      alert(isGu ? "કતારમાં હાલ કોઈ નવો નાગરિક પ્રતીક્ષામાં નથી." : isHi ? "कतार में वर्तमान में कोई नागरिक प्रतीक्षारत नहीं है।" : "No pending citizens in the waiting queue.");
+      setCounterToast({
+        title: isGu ? "કતાર ખાલી છે" : isHi ? "कतार खाली है" : "Queue Empty",
+        message: isGu ? "કતારમાં હાલ કોઈ નવો નાગરિક પ્રતીક્ષામાં નથી." : isHi ? "कतार में वर्तमान में कोई नागरिक प्रतीक्षारत नहीं है।" : "No pending citizens in the waiting queue.",
+        type: 'info'
+      });
       return;
     }
 
     if (currentServing && currentServing.id === nextCitizen.id) {
-      alert(isGu ? `ટોકન ${nextCitizen.tokenNumber} હાલમાં આ કાઉન્ટર પર સક્રિય છે.` : isHi ? `टोकन ${nextCitizen.tokenNumber} वर्तमान में इस काउंटर पर सक्रिय है।` : `Token ${nextCitizen.tokenNumber} is currently active at this desk.`);
+      setCounterToast({
+        title: isGu ? "ટોકન સક્રિય છે" : isHi ? "टोकन सक्रिय है" : "Token Already Active",
+        message: isGu ? `ટોકન ${nextCitizen.tokenNumber} હાલમાં આ કાઉન્ટર પર સક્રિય છે.` : isHi ? `टोकन ${nextCitizen.tokenNumber} वर्तमान में इस काउंटर पर सक्रिय है।` : `Token ${nextCitizen.tokenNumber} is currently active at this desk.`,
+        type: 'info'
+      });
       return;
     }
 
@@ -530,12 +539,11 @@ export default function CounterOperatorDesk() {
       : `Token number ${completed.tokenNumber} service has been completed successfully.`;
     speakGuidance(voiceMsg, lang);
 
-    const alertMsg = isGu
-      ? `✅ સફળતાપૂર્વક નિકાલ!\n\nટોકન: ${completed.tokenNumber} (${citizenName})\nડેસ્ક સેવા સમય: ${formatTime(elapsedSeconds)}\nસ્થિતિ: અધિકૃત સરકારી અધિકારી દ્વારા ખરાઈ પૂર્ણ.`
-      : isHi
-      ? `✅ सफलतापूर्वक निपटान!\n\nटोकन: ${completed.tokenNumber} (${citizenName})\nडेस्क सेवा समय: ${formatTime(elapsedSeconds)}\nस्थिति: अधिकृत सरकारी अधिकारी द्वारा सत्यापन पूर्ण।`
-      : `✅ Service Completed Successfully!\n\nToken: ${completed.tokenNumber} (${citizenName})\nDesk Handling Time: ${formatTime(elapsedSeconds)}\nStatus: Verified & Approved by Authorized Public Officer.`;
-    alert(alertMsg);
+    setCounterToast({
+      title: isGu ? "✅ સફળતાપૂર્વક નિકાલ!" : isHi ? "✅ सफलतापूर्वक निपटान!" : "✅ Service Completed!",
+      message: `${completed.tokenNumber} (${citizenName}) • ${formatTime(elapsedSeconds)}`,
+      type: 'success'
+    });
 
     setCurrentServing(null);
   };
@@ -606,12 +614,11 @@ export default function CounterOperatorDesk() {
       }
     });
 
-    const alertMsg = isGu
-      ? `🔄 કાઉન્ટર ટ્રાન્સફર નોંધાયું!\n\nટોકન: ${transferred.tokenNumber}\nમૂળ કાઉન્ટર: કાઉન્ટર ${selectedCounter}\nનવું કાઉન્ટર: કાઉન્ટર ${targetCounter}\nનોંધ: ${transferRemarks}`
-      : isHi
-      ? `🔄 काउंटर स्थानांतरण दर्ज!\n\nटोकन: ${transferred.tokenNumber}\nमूल काउंटर: काउंटर ${selectedCounter}\nनया काउंटर: काउंटर ${targetCounter}\nटिप्पणी: ${transferRemarks}`
-      : `🔄 Counter Forwarded!\n\nToken: ${transferred.tokenNumber}\nSource Desk: Counter ${selectedCounter}\nTarget Desk: Counter ${targetCounter}\nRemarks: ${transferRemarks}`;
-    alert(alertMsg);
+    setCounterToast({
+      title: isGu ? "🔄 કાઉન્ટર ટ્રાન્સફર નોંધાયું!" : isHi ? "🔄 काउंटर स्थानांतरण दर्ज!" : "🔄 Counter Forwarded!",
+      message: `${transferred.tokenNumber} ➜ ${isGu ? `કાઉન્ટર ${targetCounter}` : isHi ? `काउंटर ${targetCounter}` : `Desk ${targetCounter}`} (${transferRemarks})`,
+      type: 'info'
+    });
 
     setTransferModalOpen(false);
     setCurrentServing(null);
@@ -1257,7 +1264,11 @@ export default function CounterOperatorDesk() {
               <button
                 onClick={() => {
                   triggerHaptic('success');
-                  alert(isGu ? "નવા ટોકન્સ રીઅલ-ટાઇમ બેકએન્ડ પરથી રિફ્રેશ થયા." : isHi ? "नए टोकन रीयल-टाइम बैकएंड से रीफ्रेश हो गए हैं।" : "Queue data synchronized with real-time backend.");
+                  setCounterToast({
+                    title: isGu ? "🔄 રીઅલ-ટાઇમ સિંક" : isHi ? "🔄 रीयल-टाइम सिंक" : "🔄 Sync Complete",
+                    message: isGu ? "નવા ટોકન્સ રીઅલ-ટાઇમ બેકએન્ડ પરથી રિફ્રેશ થયા." : isHi ? "नए टोकन रीयल-टाइम बैकएंड से रीफ्रेश हो गए हैं।" : "Queue data synchronized with real-time backend.",
+                    type: 'success'
+                  });
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition flex items-center gap-1.5"
                 title={isGu ? "કતાર ડેટા રિફ્રેશ" : isHi ? "कतार डेटा रीफ्रेश" : "Refresh Queue Data"}
@@ -1559,6 +1570,42 @@ export default function CounterOperatorDesk() {
         </div>
       )}
 
+      {/* 🚀 Floating Counter Notification Toast */}
+      {counterToast && (
+        <div className="fixed bottom-6 right-6 z-[130] max-w-md w-full p-4 animate-in slide-in-from-bottom-5 fade-in duration-200 pointer-events-auto">
+          <div className="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-4 shadow-2xl border border-blue-400/40 flex items-start gap-3">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+              counterToast.type === 'success' 
+                ? 'bg-emerald-500/20 border border-emerald-400/30 text-emerald-400' 
+                : counterToast.type === 'warning'
+                ? 'bg-amber-500/20 border border-amber-400/30 text-amber-400'
+                : 'bg-blue-500/20 border border-blue-400/30 text-blue-400'
+            }`}>
+              {counterToast.type === 'success' ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              ) : counterToast.type === 'warning' ? (
+                <AlertTriangle className="w-5 h-5 text-amber-400" />
+              ) : (
+                <Sparkles className="w-5 h-5 text-blue-400" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-extrabold text-white text-xs sm:text-sm">
+                {counterToast.title}
+              </h4>
+              <p className="text-slate-200 text-xs mt-0.5 leading-relaxed">
+                {counterToast.message}
+              </p>
+            </div>
+            <button
+              onClick={() => setCounterToast(null)}
+              className="p-1 text-slate-400 hover:text-white rounded-lg transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

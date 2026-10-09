@@ -878,7 +878,7 @@
     </div>
     <div class="flex items-center gap-2 w-full sm:w-auto">
       <button onclick="document.getElementById('pwaBanner').classList.add('hidden')" class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100">પછીથી</button>
-      <button onclick="alert('PWA Installed!'); document.getElementById('pwaBanner').classList.add('hidden')" class="flex-1 sm:flex-none px-5 py-2 rounded-xl text-xs font-extrabold bg-[#FF9933] text-slate-900 shadow-md">ઇન્સ્ટોલ કરો</button>
+      <button onclick="document.getElementById('pwaBanner').classList.add('hidden')" class="flex-1 sm:flex-none px-5 py-2 rounded-xl text-xs font-extrabold bg-[#FF9933] text-slate-900 shadow-md">ઇન્સ્ટોલ કરો</button>
     </div>
   </div>
 
@@ -1753,7 +1753,6 @@
       updateLiveDashboard();
 
       speakGujaratiGuidance("તમારો ટોકન ૩ સ્લોટ પાછળ ખસેડવામાં આવ્યો છે. કાઉન્ટર તમારો નંબર છોડશે નહીં.");
-      alert(`⚠️ મોડું થવાની વિનંતી મંજૂર!\n\nતમારો ટોકન ૩ સ્લોટ (+૩૬ મિનિટ) આગળ ધકેલવામાં આવ્યો છે.\nનવો અંદાજિત સમય: +${currentBooking.lateMinutes} મિનિટ પછી.\nકાઉન્ટર અધિકારી તમારો વારો સ્કીપ નહીં કરે.`);
     }
 
     function handleRunningLate() {

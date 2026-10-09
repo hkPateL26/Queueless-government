@@ -7,7 +7,7 @@ import {
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
   Users, Building, Award, Bell, CheckCircle2, ChevronDown, Download,
   Layers, ArrowLeft, Calendar, Home as HomeIcon, Radio, Globe, Headphones,
-  Compass, Sparkles, ExternalLink
+  Compass, Sparkles, ExternalLink, X
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -129,6 +129,7 @@ export default function Home() {
   const [tokenPassModalOpen, setTokenPassModalOpen] = useState(false);
   const [activeBooking, setActiveBooking] = useState<BookingDetails | null>(null);
   const [lateShiftMinutes, setLateShiftMinutes] = useState<number>(0);
+  const [toastNotification, setToastNotification] = useState<{ title: string; message: string; type?: 'info' | 'success' | 'warning' } | null>(null);
 
   const [currentUser, setCurrentUser] = useState<{
     name: string;
@@ -410,7 +411,15 @@ export default function Home() {
       ? "विलंब दर्ज सफल! काउंटर अधिकारी को आपके नए आगमन समय की सूचना दे दी गई है।"
       : "વિલંબ નોંધણી સફળ! કાઉન્ટર અધિકારીને તમારા નવા અંદાજિત સમયની જાણ કરવામાં આવી છે.";
     speakGuidance(msg, lang);
-    alert(lang === 'en' ? "⚠️ Delay Reported!\n\nYour appointment slot has been shifted by 20 minutes." : lang === 'hi' ? "⚠️ विलंब दर्ज!\n\nआपका अपॉइंटमेंट समय २० मिनट आगे बढ़ा दिया गया है।" : "⚠️ વિલંબ નોંધણી મંજૂર!\n\nતમારી અપોઇન્ટમેન્ટનો સમય ૨૦ મિનિટ આગળ ખસેડવામાં આવ્યો છે. કાઉન્ટર અધિકારીને સિસ્ટમ દ્વારા જાણ થઈ ગઈ છે જેથી તમારો વારો સ્કીપ નહીં થાય.");
+    setToastNotification({
+      title: lang === 'en' ? "⏱️ Delay Reported (+20 Mins)" : lang === 'hi' ? "⏱️ विलंब दर्ज (+२० मिनट)" : "⏱️ વિલંબ નોંધણી મંજૂર (+૨૦ મિનિટ)",
+      message: lang === 'en' 
+        ? "Your appointment slot has been shifted by 20 minutes. Counter officer notified." 
+        : lang === 'hi' 
+        ? "आपका अपॉइंटमेंट समय २० मिनट आगे बढ़ा दिया गया है। काउंटर अधिकारी को सूचित किया गया।" 
+        : "તમારી અપોઇન્ટમેન્ટનો સમય ૨૦ મિનિટ આગળ ખસેડવામાં આવ્યો છે. કાઉન્ટર અધિકારીને સિસ્ટમ દ્વારા જાણ થઈ ગઈ છે જેથી તમારો વારો સ્કીપ નહીં થાય.",
+      type: 'warning'
+    });
   };
 
   const handleSelectScheme = (scheme: SchemeItem) => {
@@ -2483,6 +2492,30 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      {/* 🚀 Floating In-App Toast Notification */}
+      {toastNotification && (
+        <div className="fixed bottom-6 right-6 z-[130] max-w-md w-full p-4 animate-in slide-in-from-bottom-5 fade-in duration-200 pointer-events-auto">
+          <div className="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-4 shadow-2xl border border-amber-400/40 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 shrink-0">
+              <Clock className="w-5 h-5 text-amber-400 animate-pulse" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-extrabold text-amber-400 text-xs sm:text-sm">
+                {toastNotification.title}
+              </h4>
+              <p className="text-slate-200 text-xs mt-0.5 leading-relaxed">
+                {toastNotification.message}
+              </p>
+            </div>
+            <button
+              onClick={() => setToastNotification(null)}
+              className="p-1 text-slate-400 hover:text-white rounded-lg transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

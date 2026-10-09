@@ -83,6 +83,7 @@ export function CitizenProfileModal({
   const [enteredOtp, setEnteredOtp] = useState('');
   const [otpError, setOtpError] = useState<string | null>(null);
   const [isGpsRefreshing, setIsGpsRefreshing] = useState(false);
+  const [memberFormError, setMemberFormError] = useState<string | null>(null);
 
   // Live Location State with Reverse Geocoding
   const [liveLocation, setLiveLocation] = useState<{
@@ -288,22 +289,23 @@ export function CitizenProfileModal({
   // Start AI Verification
   const handleStartAiVerification = () => {
     if (!newMemberName.trim()) {
-      alert(isEn ? 'Please enter member full name as per Aadhaar.' : isHi ? 'कृपया आधार अनुसार सदस्य का पूरा नाम दर्ज करें।' : isMr ? 'कृपया आधारानुसार सदस्याचे पूर्ण नाव प्रविष्ट करा.' : 'કૃપા કરીને સભ્યનું પૂરું નામ આધાર કાર્ડ મુજબ દાખલ કરો.');
+      setMemberFormError(isEn ? 'Please enter member full name as per Aadhaar.' : isHi ? 'कृपया आधार अनुसार सदस्य का पूरा नाम दर्ज करें।' : isMr ? 'कृपया आधारानुसार सदस्याचे पूर्ण नाव प्रविष्ट करा.' : 'કૃપા કરીને સભ્યનું પૂરું નામ આધાર કાર્ડ મુજબ દાખલ કરો.');
       return;
     }
     if (newMemberAadhaar.length < 4) {
-      alert(isEn ? 'Please enter last 4 digits of Aadhaar number.' : isHi ? 'कृपया आधार संख्या के अंतिम 4 अंक दर्ज करें।' : isMr ? 'कृपया आधार क्रमांकाचे शेवटचे ४ अंक प्रविष्ट करा.' : 'કૃપા કરીને આધાર કાર્ડના છેલ્લા ૪ અંક દાખલ કરો.');
+      setMemberFormError(isEn ? 'Please enter last 4 digits of Aadhaar number.' : isHi ? 'कृपया आधार संख्या के अंतिम 4 अंक दर्ज करें।' : isMr ? 'कृपया आधार क्रमांकाचे शेवटचे ४ अंक प्रविष्ट करा.' : 'કૃપા કરીને આધાર કાર્ડના છેલ્લા ૪ અંક દાખલ કરો.');
       return;
     }
     if (!uploadedFileName) {
-      alert(isEn ? 'Please upload official statutory proof document (PDF or Image).' : isHi ? 'कृपया आधिकारिक सरकारी प्रमाण दस्तावेज़ (PDF या छवि) अपलोड करें।' : isMr ? 'कृपया अधिकृत शासकीय पुरावा कागदपत्र (PDF किंवा छायाचित्र) अपलोड करा.' : 'કૃપા કરીને સત્તાવાર સરકારી પ્રમાણિત દસ્તાવેજ (PDF અથવા ફોટો) અપલોડ કરો.');
+      setMemberFormError(isEn ? 'Please upload official statutory proof document (PDF or Image).' : isHi ? 'कृपया आधिकारिक सरकारी प्रमाण दस्तावेज़ (PDF या छवि) अपलोड करें।' : isMr ? 'कृपया अधिकृत शासकीय पुरावा कागदपत्र (PDF किंवा छायाचित्र) अपलोड करा.' : 'કૃપા કરીને સત્તાવાર સરકારી પ્રમાણિત દસ્તાવેજ (PDF અથવા ફોટો) અપલોડ કરો.');
       return;
     }
     if (!statutoryAgreed) {
-      alert(isEn ? 'Please accept the statutory declaration compliance.' : isHi ? 'कृपया वैधानिक घोषणा की पुष्टि करें।' : isMr ? 'कृपया वैधानिक हमीपत्रास सहमती द्या.' : 'કૃપા કરીને કાયદેસર બાંહેધરી સ્વીકારો.');
+      setMemberFormError(isEn ? 'Please accept the statutory declaration compliance.' : isHi ? 'कृपया वैधानिक घोषणा की पुष्टि करें।' : isMr ? 'कृपया वैधानिक हमीपत्रास सहमती द्या.' : 'કૃપા કરીને કાયદેસર બાંહેધરી સ્વીકારો.');
       return;
     }
 
+    setMemberFormError(null);
     triggerHaptic('tap');
     setAiChecking(true);
     setAiCheckingStep(isEn ? 'Step 1/3: Reading Government Security Seals...' : isHi ? 'चरण 1/3: सरकारी सुरक्षा मुहर की जांच...' : isMr ? 'टप्पा 1/3: शासकीय सुरक्षा शिक्का तपासणी...' : 'પગલું ૧/૩: સરકારી હોલોગ્રામ & સિક્કાની ચકાસણી...');
@@ -951,6 +953,14 @@ export function CitizenProfileModal({
                           </label>
                         </div>
                       </div>
+
+                      {/* Form Validation Warning Notice */}
+                      {memberFormError && (
+                        <div className="sm:col-span-2 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-bold flex items-center gap-2 animate-in fade-in">
+                          <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                          <span>{memberFormError}</span>
+                        </div>
+                      )}
 
                       {/* AI Verification Action */}
                       <div className="sm:col-span-2 pt-1 flex items-center justify-end gap-2">

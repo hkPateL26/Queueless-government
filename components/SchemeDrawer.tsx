@@ -59,6 +59,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const [docVerifications, setDocVerifications] = useState<Record<string, DocVerificationState>>({});
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [showValidationNotice, setShowValidationNotice] = useState(false);
+  const [missingDocsModalOpen, setMissingDocsModalOpen] = useState(false);
 
   // Subscribe to speech synthesis state
   useEffect(() => {
@@ -69,6 +70,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   useEffect(() => {
     if (isOpen && scheme) {
       setShowValidationNotice(false);
+      setMissingDocsModalOpen(false);
       const orig = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
@@ -114,16 +116,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     if (!isAllMandatoryVerified) {
       triggerHaptic('warning');
       setShowValidationNotice(true);
-
-      const missingNames = missingMandatoryDocs.map((d, i) => `${i + 1}. ${getLocalizedDocName(d, lang)}`).join('\n');
-      
-      const alertMsg = isEn
-        ? `⚠️ Mandatory Documents AI-Verification Required!\n\nTo generate an official government token pass, all mandatory documents must be uploaded and verified by Gemini AI first:\n\nPending Documents (${missingMandatoryDocs.length}):\n${missingNames}\n\nPlease click 'Upload Original Document' above to upload a clear photo or PDF.`
-        : isHi
-        ? `⚠️ अनिवार्य दस्तावेज़ AI सत्यापन आवश्यक है!\n\nसरकारी टोकन प्राप्त करने के लिए कृपया पहले सभी अनिवार्य दस्तावेज़ अपलोड और AI द्वारा सत्यापित करें:\n\nलंबित दस्तावेज़ (${missingMandatoryDocs.length}):\n${missingNames}\n\nकृपया ऊपर दिए गए 'मूल दस्तावेज़ अपलोड करें' बटन से फोटो या PDF अपलोड करें।`
-        : isMr
-        ? `⚠️ आवश्यक कागदपत्रे AI पडताळणी आवश्यक आहे!\n\nशासकीय टोकन मिळवण्यासाठी कृपया आधी सर्व आवश्यक कागदपत्रे अपलोड आणि प्रमाणित करा:\n\nलंबित कागदपत्रे (${missingMandatoryDocs.length}):\n${missingNames}\n\nकृपया 'मूळ कागदपत्र अपलोड करा' वरून फोटो किंवा PDF अपलोड करा.`
-        : `⚠️ ફરજિયાત દસ્તાવેજ અપલોડ અને AI વેરિફિકેશન અનિવાર્ય છે!\n\nકચેરી ટોકન જનરેટ કરવા માટે તમામ ફરજિયાત દસ્તાવેજો અપલોડ કરી Gemini AI દ્વારા વેરિફાઈ કરવા અનિવાર્ય છે!\n\nબાકી રહેલ ફરજિયાત દસ્તાવેજો (${missingMandatoryDocs.length}):\n${missingNames}\n\nકૃપા કરીને પહેલાં ઉપર આપેલા 'અસલ દસ્તાવેજ અપલોડ કરો' બટન પરથી અસલ ફોટો કે PDF અપલોડ કરો.`;
+      setMissingDocsModalOpen(true);
 
       speakGuidance(
         isEn 
@@ -133,8 +126,6 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           : "ટોકન મેળવવા માટે પહેલાં તમામ ફરજિયાત દસ્તાવેજો અપલોડ અને AI વેરિફાઈ કરો.",
         lang
       );
-
-      alert(alertMsg);
       return;
     }
 
@@ -629,7 +620,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           </div>
 
           {/* Required Documents Interactive Checklist */}
-          <div className="space-y-2.5">
+          <div id="docs-checklist-section" className="space-y-2.5">
             <h4 className="text-xs font-black text-[#003366] uppercase tracking-wider flex items-center gap-1.5">
               <FileCheck2 className="w-4 h-4 text-[#005A9C]" />
               <span>
@@ -907,6 +898,143 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         </div>
 
       </div>
+
+      {/* 🚀 Sleek In-App Modal for Mandatory Documents Verification */}
+      {missingDocsModalOpen && (
+        <div 
+          className="fixed inset-0 z-[120] bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setMissingDocsModalOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-3xl max-w-md w-full shadow-2xl border-2 border-amber-300 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-amber-500 via-[#FF9933] to-amber-600 text-slate-950 p-4 sm:p-5 flex items-start justify-between relative overflow-hidden">
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-11 h-11 rounded-2xl bg-white/95 shadow-md flex items-center justify-center text-amber-700 shrink-0">
+                  <AlertTriangle className="w-6 h-6 animate-pulse text-amber-600" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-slate-900 text-amber-300 text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider">
+                      {isEn ? 'Verification Required' : isHi ? 'सत्यापन आवश्यक' : 'ચકાસણી અનિવાર્ય'}
+                    </span>
+                  </div>
+                  <h3 className="text-sm sm:text-base font-black text-slate-950 mt-1 leading-snug">
+                    {isEn 
+                      ? 'Mandatory Document AI-Verification Required' 
+                      : isHi 
+                      ? 'अनिवार्य दस्तावेज़ AI सत्यापन आवश्यक है' 
+                      : 'ફરજિયાત દસ્તાવેજ અપલોડ & AI વેરિફિકેશન'}
+                  </h3>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setMissingDocsModalOpen(false)}
+                className="p-1.5 rounded-full bg-black/10 hover:bg-black/20 text-slate-900 transition cursor-pointer relative z-10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-4 sm:p-5 space-y-3.5 max-h-[60vh] overflow-y-auto">
+              <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-3 flex items-start gap-2 text-xs text-amber-950 leading-relaxed font-medium">
+                <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <p>
+                  {isEn 
+                    ? 'To generate an official government token pass, all mandatory documents must be uploaded and verified by Gemini AI first.' 
+                    : isHi 
+                    ? 'आधिकारिक सरकारी टोकन पास प्राप्त करने के लिए नीचे दिए गए सभी अनिवार्य दस्तावेज़ अपलोड और AI द्वारा सत्यापित होने चाहिए।' 
+                    : 'સત્તાવાર કચેરી ટોકન પાસ જનરેટ કરવા માટે નીચે દર્શાવેલ તમામ ફરજિયાત દસ્તાવેજો અપલોડ કરી Gemini AI દ્વારા પ્રી-વેરિફાઈ કરવા અનિવાર્ય છે.'}
+                </p>
+              </div>
+
+              {/* Progress Count */}
+              <div className="flex items-center justify-between text-xs px-1 font-bold">
+                <span className="text-slate-600">
+                  {isEn ? 'Pending Mandatory Documents:' : isHi ? 'लंबित अनिवार्य दस्तावेज़:' : 'બાકી રહેલ ફરજિયાત દસ્તાવેજો:'}
+                </span>
+                <span className="text-amber-800 bg-amber-100 border border-amber-200 px-2.5 py-0.5 rounded-full font-black text-[11px]">
+                  {missingMandatoryDocs.length} {isEn ? 'Pending' : isHi ? 'लंबित' : 'બાકી'}
+                </span>
+              </div>
+
+              {/* Missing Documents Checklist Cards */}
+              <div className="space-y-2">
+                {missingMandatoryDocs.map((doc, idx) => (
+                  <div 
+                    key={doc.nameGu}
+                    className="p-2.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-2.5 text-xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="w-6 h-6 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-[11px] shrink-0">
+                        {idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 truncate">
+                          {getLocalizedDocName(doc, lang)}
+                        </p>
+                        <p className="text-[10px] text-slate-500 truncate">
+                          {isEn ? doc.nameGu : doc.nameEn}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 bg-red-50 text-red-700 border border-red-200 text-[10px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1">
+                      <Lock className="w-2.5 h-2.5" />
+                      {isEn ? 'Upload Needed' : isHi ? 'अपलोड करें' : 'અપલોડ જરૂરી'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-2 text-[11px] text-emerald-900">
+                <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <p>
+                  {isEn 
+                    ? '💡 Tip: You can upload original photos or PDF files directly from your mobile camera or gallery.' 
+                    : isHi 
+                    ? '💡 सुझाव: आप अपने फोन कैमरे या गैलरी से सीधे मूल फोटो या PDF अपलोड कर सकते हैं।' 
+                    : '💡 સૂચન: તમે તમારા ફોન કેમેરા અથવા ગેલેરીમાંથી અસલ ફોટો કે PDF ફાઈલ સીધી અપલોડ કરી શકો છો.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setMissingDocsModalOpen(false);
+                  triggerHaptic('tap');
+                  setTimeout(() => {
+                    const el = document.getElementById('docs-checklist-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 150);
+                }}
+                className="flex-1 bg-gradient-to-r from-[#003366] to-[#005A9C] hover:from-[#002244] hover:to-[#003366] text-white font-extrabold py-3 px-3 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Upload className="w-4 h-4 text-[#FF9933]" />
+                <span>
+                  {isEn ? '📸 Upload Documents Now' : isHi ? '📸 अभी दस्तावेज़ अपलोड करें' : '📸 હમણાં દસ્તાવેજ અપલોડ કરો'}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setMissingDocsModalOpen(false);
+                }}
+                className="px-4 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl text-xs sm:text-sm transition cursor-pointer"
+              >
+                {isEn ? 'Close' : isHi ? 'बंद करें' : 'સમજાઈ ગયું'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

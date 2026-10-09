@@ -7,7 +7,7 @@ import {
   ArrowRight, FileText, CheckCircle2, ChevronRight, Download, 
   Printer, ArrowLeft, RefreshCw, BarChart3, TrendingUp, AlertCircle, 
   Send, Sparkles, Filter, ExternalLink, Activity, Award, Star,
-  Lock, EyeOff, Check, Globe, ChevronDown
+  Lock, EyeOff, Check, Globe, ChevronDown, X
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -114,6 +114,7 @@ export default function CollectorCommandDashboard() {
   const [delayAlerts, setDelayAlerts] = useState<QueueDelayAlert[]>(INITIAL_QUEUE_DELAYS);
   const [misModalOpen, setMisModalOpen] = useState<boolean>(false);
   const [filterMode, setFilterMode] = useState<'ALL' | 'CONGESTED' | 'DELAY_ALERT'>('ALL');
+  const [actionNotification, setActionNotification] = useState<{ title: string; message: string } | null>(null);
 
   // Load language preference from LocalStorage on mount
   useEffect(() => {
@@ -242,13 +243,10 @@ export default function CollectorCommandDashboard() {
     const alertCounter = isGu ? alertRecord.counterNameGu : isHi ? alertRecord.counterNameHi : alertRecord.counterNameEn;
     const alertReason = isGu ? alertRecord.delayReasonGu : isHi ? alertRecord.delayReasonHi : alertRecord.delayReasonEn;
 
-    const alertMsg = isGu
-      ? `🚨 પ્રશાસનિક કતાર વિલંબ એલર્ટ (Demo Alert Created)\n\nજિલ્લો: ${alertDistrict}\nકચેરી: ${alertTaluka}\nકાઉન્ટર: ${alertRecord.counterNumber} (${alertCounter})\nટોકન: ${alertRecord.tokenNumber}\nકારણ: ${alertReason} (${alertRecord.waitingMinutes} મિનિટ પ્રતીક્ષા)\nસ્થિતિ: ડેમો એલર્ટ ડેશબોર્ડ પર સક્રિય નોંધાયેલ.`
-      : isHi
-      ? `🚨 प्रशासनिक कतार विलंब अलर्ट (Demo Alert Created)\n\nजिला: ${alertDistrict}\nकार्यालय: ${alertTaluka}\nकाउंटर: ${alertRecord.counterNumber} (${alertCounter})\nटोकन: ${alertRecord.tokenNumber}\nकारण: ${alertReason} (${alertRecord.waitingMinutes} मिनट प्रतीक्षा)\nस्थिति: डेमो अलर्ट डैशबोर्ड पर सक्रिय रूप से दर्ज।`
-      : `🚨 Administrative Queue Delay Alert (Demo Escalation Created)\n\nDistrict: ${alertDistrict}\nOffice: ${alertTaluka}\nDesk: ${alertRecord.counterNumber} (${alertCounter})\nToken: ${alertRecord.tokenNumber}\nReason: ${alertReason} (${alertRecord.waitingMinutes} mins waiting)\nStatus: Live monitoring escalation logged.`;
-    
-    alert(alertMsg);
+    setActionNotification({
+      title: isGu ? "🚨 પ્રશાસનિક કતાર વિલંબ એલર્ટ સફળતાપૂર્વક નોંધાયું" : isHi ? "🚨 प्रशासनिक कतार विलंब अलर्ट दर्ज" : "🚨 Queue Delay Escalation Logged",
+      message: `${alertDistrict} • ${alertTaluka} • ${alertCounter} (${alertRecord.tokenNumber}) — ${alertReason}`
+    });
   };
 
   return (
@@ -895,6 +893,30 @@ export default function CollectorCommandDashboard() {
         </div>
       )}
 
+      {/* 🚨 Floating Admin Notification Toast */}
+      {actionNotification && (
+        <div className="fixed bottom-6 right-6 z-[130] max-w-md w-full p-4 animate-in slide-in-from-bottom-5 fade-in duration-200 pointer-events-auto">
+          <div className="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-4 shadow-2xl border border-red-500/40 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-400/30 flex items-center justify-center text-red-400 shrink-0">
+              <AlertTriangle className="w-5 h-5 text-red-400 animate-pulse" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-extrabold text-red-400 text-xs sm:text-sm">
+                {actionNotification.title}
+              </h4>
+              <p className="text-slate-200 text-xs mt-0.5 leading-relaxed">
+                {actionNotification.message}
+              </p>
+            </div>
+            <button
+              onClick={() => setActionNotification(null)}
+              className="p-1 text-slate-400 hover:text-white rounded-lg transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
