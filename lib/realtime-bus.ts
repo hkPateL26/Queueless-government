@@ -22,6 +22,8 @@ export interface QueueEvent {
     | 'TOKEN_RECALLED'
     | 'TOKEN_TRANSFERRED'
     | 'TOKEN_CANCELLED'
+    | 'TOKEN_BOOKED_REALTIME'
+    | 'TOKEN_PAYMENT_COLLECTED'
     | 'LATE_SHIFTED' 
     | 'OFFICER_STATUS'
     | 'OFFICER_STATUS_CHANGED'
@@ -31,6 +33,7 @@ export interface QueueEvent {
   counterNumber?: number;
   counterNameGu?: string;
   talukaId?: string;
+  districtId?: string;
   timestamp: number;
   sequence?: number;
   payload?: any;

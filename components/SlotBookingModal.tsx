@@ -5,7 +5,7 @@ import {
   Building2, MapPin, Calendar, Clock, AlertTriangle, 
   CheckCircle2, X, ChevronRight, ChevronDown, ChevronUp, ShieldCheck, ArrowRight,
   Info, Sparkles, UserCheck, Utensils, Navigation,
-  FileCheck, IndianRupee, AlertCircle, Upload
+  FileCheck, IndianRupee, AlertCircle, Upload, CreditCard, Landmark, Banknote, QrCode, Receipt, Lock
 } from 'lucide-react';
 import { 
   GUJARAT_33_DISTRICTS, 
@@ -30,31 +30,10 @@ import {
 } from '@/lib/slot-engine';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
+import { broadcastQueueEvent } from '@/lib/realtime-bus';
 import { SchemeItem, getProcessingTimelineInfo } from '@/lib/schemes-data';
 import { GovLogo } from '@/components/GovLogo';
 import { SlotSkeleton } from '@/components/ui/Skeleton';
-
-export interface BookingDetails {
-  district: DistrictItem;
-  taluka: TalukaOffice;
-  serviceCenter: ServiceCenter;
-  date: string;
-  slot: TimeSlot;
-  counterNumber: number;
-  counterNameGu: string;
-  counterNameEn: string;
-  officerName: string;
-  tokenNumber: string;
-  isPriority?: boolean;
-  priorityCategory?: PriorityCategory;
-  leaveHomeBy?: string;
-  estimatedTravelMinutes?: number;
-  safetyBufferMinutes?: number;
-  status: BookingStatus;
-  verifiableQrPayload?: string;
-  qrSignatureHash?: string;
-  validUntil?: string;
-}
 
 const DISTRICT_NAMES_HI: Record<string, string> = {
   rajkot: 'राजकोट',
@@ -149,6 +128,34 @@ function getLocalizedAvailability(center: ServiceCenter, isHi: boolean, isEn: bo
 
 import { Language } from '@/lib/translations';
 import { DEFAULT_CITIZEN_PROFILE } from '@/lib/citizen-profile';
+import { 
+  VerifiedDocumentItem, 
+  GovernmentPaymentRecord 
+} from '@/lib/slot-engine';
+
+export interface BookingDetails {
+  district: DistrictItem;
+  taluka: TalukaOffice;
+  serviceCenter: ServiceCenter;
+  date: string;
+  slot: TimeSlot;
+  counterNumber: number;
+  counterNameGu: string;
+  counterNameEn: string;
+  officerName: string;
+  tokenNumber: string;
+  isPriority?: boolean;
+  priorityCategory?: PriorityCategory;
+  leaveHomeBy?: string;
+  estimatedTravelMinutes?: number;
+  safetyBufferMinutes?: number;
+  status: BookingStatus;
+  verifiableQrPayload?: string;
+  qrSignatureHash?: string;
+  validUntil?: string;
+  uploadedDocuments?: VerifiedDocumentItem[];
+  payment?: GovernmentPaymentRecord;
+}
 
 interface SlotBookingModalProps {
   isOpen: boolean;
@@ -159,7 +166,9 @@ interface SlotBookingModalProps {
   initialDistrictId?: string;
   initialTalukaId?: string;
   initialVillage?: string;
+  uploadedDocs?: VerifiedDocumentItem[];
 }
+
 
 export function SlotBookingModal({
   isOpen,
@@ -169,7 +178,8 @@ export function SlotBookingModal({
   lang = 'gu',
   initialDistrictId,
   initialTalukaId,
-  initialVillage
+  initialVillage,
+  uploadedDocs
 }: SlotBookingModalProps) {
   // District & Taluka state (Defaulting to Aadhaar linked district & taluka)
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>(initialDistrictId || DEFAULT_CITIZEN_PROFILE.districtId);
@@ -205,6 +215,17 @@ export function SlotBookingModal({
   const [customProofNumber, setCustomProofNumber] = useState<string>('GJ-03-UDID-8842');
   const [isAiVerifying, setIsAiVerifying] = useState<boolean>(false);
   const [aiVerificationPassed, setAiVerificationPassed] = useState<boolean>(true);
+
+  // Government Payment Gateway States (Cyber Treasury & Cash at Counter)
+  const [paymentModalOpen, setPaymentModalOpen] = useState<boolean>(false);
+  const [paymentMode, setPaymentMode] = useState<'ONLINE_CYBER_TREASURY' | 'CASH_AT_COUNTER'>('ONLINE_CYBER_TREASURY');
+  const [onlineMethod, setOnlineMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
+  const [upiApp, setUpiApp] = useState<'gpay' | 'phonepe' | 'paytm' | 'bhim'>('gpay');
+  const [cardHolder, setCardHolder] = useState<string>('HARI PARSOTTAMBHAI PATEL');
+  const [cardNumber, setCardNumber] = useState<string>('4591 •••• •••• 8842');
+  const [selectedBank, setSelectedBank] = useState<string>('State Bank of India (SBI)');
+  const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+  const [paymentStepText, setPaymentStepText] = useState<string>('');
 
   const nearbyClusters = useMemo(() => {
     return getNearbyVillageCluster(initialVillage || 'ગોમટા');
@@ -478,17 +499,18 @@ export function SlotBookingModal({
       return;
     }
 
-    triggerHaptic('success');
+    triggerHaptic('tap');
     speakGuidance(
-      lang === 'hi' ? "स्लॉट बुकिंग सफल! आपका आधिकारिक कार्यालय टोकन जारी हो गया है।" :
-      lang === 'mr' ? "स्लॉट बुकिंग यशस्वी! आपला अधिकृत कार्यालयीन टोकन जारी झाला आहे." :
-      lang === 'en' ? "Slot booking successful! Your official office token has been issued." :
-      lang === 'khi' ? "સ્લોટ બુકિંગ સફળ! તમોજો કચેરી ટોકન જારી થી વ્યો આય." :
-      "સ્લોટ બુકિંગ સફળ! તમારો કચેરી ટોકન જારી થયો છે.",
+      lang === 'hi' ? "स्लॉट मान्य है। कृपया सरकारी शुल्क भुगतान विधि चुनें।" :
+      lang === 'en' ? "Slot validated. Please select the government payment method." :
+      "સ્લોટ પસંદગી માન્ય થઈ છે. કૃપા કરીને સત્તાવાર સરકારી સેવા ફી ચૂકવણી મોડ પસંદ કરો.",
       lang
     );
+    setPaymentModalOpen(true);
+  };
 
-    // Generate token number: #P-07 for Priority ONLY IF verified, otherwise #A-42
+  const handleExecutePaymentAndIssueToken = () => {
+    const isPriorityVerified = isPriority && (selectedPriorityMemberId === 'mem-4' || aiVerificationPassed);
     let tokenNumber = '';
     const activePriorityCat: PriorityCategory = isPriorityVerified ? priorityCategory : 'none';
     if (isPriorityVerified) {
@@ -499,6 +521,8 @@ export function SlotBookingModal({
       const tokenNum = Math.floor(10 + Math.random() * 89);
       tokenNumber = `#${tokenLetter}-${tokenNum}`;
     }
+
+    const feeAmount = scheme?.fee ?? 20;
 
     // Generate privacy-safe Signed / Tamper-Evident QR Token Payload (Requirement 10)
     const signedQr = generateSignedQrPayload({
@@ -512,27 +536,118 @@ export function SlotBookingModal({
       slotTime: selectedSlot.timeRange
     });
 
-    onConfirm({
-      district: selectedDistrict,
-      taluka: selectedTaluka,
-      serviceCenter: selectedCenter,
-      date: selectedDate,
-      slot: selectedSlot,
-      counterNumber: routing.counterNumber,
-      counterNameGu: counterDetails.nameGu,
-      counterNameEn: counterDetails.nameEn,
-      officerName: counterDetails.officerName,
-      tokenNumber,
-      isPriority,
-      priorityCategory: activePriorityCat,
-      leaveHomeBy: transitEstimate.leaveHomeBy,
-      estimatedTravelMinutes: transitEstimate.travelMins,
-      safetyBufferMinutes: transitEstimate.bufferMins,
-      status: 'CONFIRMED' as BookingStatus,
-      verifiableQrPayload: signedQr.payloadJson,
-      qrSignatureHash: signedQr.hash,
-      validUntil: signedQr.validUntil
-    });
+    const finalizeBooking = (paymentRecord: GovernmentPaymentRecord) => {
+      const bookingData: BookingDetails = {
+        district: selectedDistrict,
+        taluka: selectedTaluka,
+        serviceCenter: selectedCenter,
+        date: selectedDate,
+        slot: selectedSlot,
+        counterNumber: routing.counterNumber,
+        counterNameGu: counterDetails.nameGu,
+        counterNameEn: counterDetails.nameEn,
+        officerName: counterDetails.officerName,
+        tokenNumber,
+        isPriority,
+        priorityCategory: activePriorityCat,
+        leaveHomeBy: transitEstimate.leaveHomeBy,
+        estimatedTravelMinutes: transitEstimate.travelMins,
+        safetyBufferMinutes: transitEstimate.bufferMins,
+        status: 'CONFIRMED' as BookingStatus,
+        verifiableQrPayload: signedQr.payloadJson,
+        qrSignatureHash: signedQr.hash,
+        validUntil: signedQr.validUntil,
+        uploadedDocuments: uploadedDocs || [],
+        payment: paymentRecord
+      };
+
+      // Save to real queue tokens store for officer dynamic queue desk
+      try {
+        const stored = localStorage.getItem('qless_real_queue_tokens');
+        const list: BookingDetails[] = stored ? JSON.parse(stored) : [];
+        const updated = [bookingData, ...list.filter(t => t.tokenNumber !== tokenNumber)].slice(0, 50);
+        localStorage.setItem('qless_real_queue_tokens', JSON.stringify(updated));
+      } catch (err) {
+        console.error('Failed to sync queue token to local storage:', err);
+      }
+
+      // Broadcast real-time event to Admin Counter and Collector desks
+      broadcastQueueEvent({
+        type: 'TOKEN_BOOKED_REALTIME',
+        tokenNumber,
+        counterNumber: routing.counterNumber,
+        talukaId: selectedTaluka.id,
+        timestamp: Date.now(),
+        payload: {
+          booking: bookingData,
+          citizenName: DEFAULT_CITIZEN_PROFILE.nameGu,
+          schemeTitle: scheme?.titleGu || 'જન સેવા'
+        }
+      });
+
+      triggerHaptic('success');
+      speakGuidance(
+        paymentRecord.status === 'PAID'
+          ? (lang === 'hi' ? "ई-चालान भुगतान सफल! आपका आधिकारिक सरकारी टोकन पास जारी हो गया है।" : "સાયબર ટ્રેઝરી ઈ-ચલણ પેમેન્ટ સફળ! તમારો સત્તાવાર કચેરી ટોકન પાસ જારી થઈ ગયો છે.")
+          : (lang === 'hi' ? "काउंटर चालान जारी! काउंटर पर नकद जमा करने हेतु टोकन स्वीकृत।" : "કચેરી કાઉન્ટર ચલણ જારી! કાઉન્ટર પર રોકડ ચુકવણી માટે ટોકન માન્ય થયો છે."),
+        lang
+      );
+
+      setPaymentModalOpen(false);
+      onConfirm(bookingData);
+    };
+
+    if (feeAmount === 0) {
+      const freeRecord: GovernmentPaymentRecord = {
+        status: 'PAID',
+        mode: 'GOVT_EXEMPT_FREE',
+        amount: 0,
+        grasChallanNo: `NIL-CHALLAN-GJ-2026-${Math.floor(10000 + Math.random() * 90000)}`,
+        paidAt: new Date().toISOString(),
+        gatewayName: 'Gujarat Govt Welfare Subsidy (100% Free / Nil Fee)'
+      };
+      finalizeBooking(freeRecord);
+      return;
+    }
+
+    if (paymentMode === 'CASH_AT_COUNTER') {
+      const cashRecord: GovernmentPaymentRecord = {
+        status: 'PAY_AT_COUNTER',
+        mode: 'CASH_AT_COUNTER',
+        amount: feeAmount,
+        kacheriChallanNo: `KACHERI-CASH-GJ-2026-X${Math.floor(100000 + Math.random() * 900000)}`,
+        instructionsGu: `કચેરી કાઉન્ટર ${routing.counterNumber} પર પહોંચીને ₹${feeAmount} રોકડ જમા કરાવો અને સત્તાવાર રસીદ મેળવો.`,
+        instructionsEn: `Pay ₹${feeAmount} in cash at Counter ${routing.counterNumber} upon token call to receive the official government receipt.`
+      };
+      finalizeBooking(cashRecord);
+      return;
+    }
+
+    // Online Cyber Treasury Payment Flow with Animated Government Gateway Handshake
+    setIsProcessingPayment(true);
+    setPaymentStepText(isEn ? 'Connecting to Gujarat Cyber Treasury (GRAS) Gateway...' : isHi ? 'गुजरात साइबर ट्रेजरी (GRAS) गेटवे से कनेक्शन जारी...' : 'ગુજરાત સાયબર ટ્રેઝરી (GRAS) ગેટવે સાથે જોડાણ થઈ રહ્યું છે...');
+
+    setTimeout(() => {
+      setPaymentStepText(isEn ? 'Authorizing & generating official GRAS e-Challan...' : isHi ? 'सत्यापन एवं आधिकारिक GRAS ई-चालान जनरेट हो रहा है...' : 'ચુકવણી અધિકૃત કરી સત્તાવાર GRAS ઈ-ચલણ તૈયાર થઈ રહ્યું છે...');
+    }, 600);
+
+    setTimeout(() => {
+      setPaymentStepText(isEn ? 'Payment verified! e-Challan ready.' : isHi ? 'भुगतान सफल! ई-चालान तैयार।' : 'ચુકવણી સફળ! સરકારી ઈ-ચલણ રસીદ તૈયાર.');
+    }, 1100);
+
+    setTimeout(() => {
+      setIsProcessingPayment(false);
+      const onlineRecord: GovernmentPaymentRecord = {
+        status: 'PAID',
+        mode: 'ONLINE_CYBER_TREASURY',
+        amount: feeAmount,
+        cyberTreasuryTxnId: `CYBER-GJ-2026-X${Math.floor(100000 + Math.random() * 900000)}`,
+        grasChallanNo: `GRAS/2026/04/${Math.floor(100000 + Math.random() * 900000)}`,
+        paidAt: new Date().toISOString(),
+        gatewayName: onlineMethod === 'upi' ? `Cyber Treasury UPI (${upiApp.toUpperCase()})` : onlineMethod === 'card' ? 'Cyber Treasury RuPay / Debit Card' : `Cyber Treasury NetBanking (${selectedBank})`
+      };
+      finalizeBooking(onlineRecord);
+    }, 1400);
   };
 
   return (
@@ -1649,31 +1764,415 @@ export function SlotBookingModal({
 
         </div>
 
-        {/* FOOTER ACTIONS - STICKY BOTTOM BAR */}
-        <div className="bg-white/95 backdrop-blur-md p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0 sticky bottom-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-lg">
-          <button
-            onClick={() => {
-              triggerHaptic('tap');
-              onClose();
-            }}
-            className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
+        {/* CYBER TREASURY GUJARAT PAYMENT GATEWAY OVERLAY MODAL */}
+        {paymentModalOpen && (
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-60 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
           >
-            {isEn ? 'Cancel' : isHi ? 'रद्द करें' : isMr ? 'रद्द करा' : 'રદ કરો (Cancel)'}
-          </button>
+            <div className="bg-white w-full max-w-xl rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95">
+              
+              {/* TREASURY HEADER */}
+              <div className="bg-[#003366] text-white p-4 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
+                <div className="flex items-center gap-3">
+                  <GovLogo className="w-10 h-10 shrink-0 drop-shadow-md" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-black">
+                        {isEn ? 'Cyber Treasury Gujarat (GRAS)' : isHi ? 'साइबर ट्रेजरी गुजरात (GRAS)' : 'ગુજરાત સાયબર ટ્રેઝરી (GRAS e-Payment)'}
+                      </h3>
+                      <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {isEn ? 'Official' : 'સત્તાવાર'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-blue-200 mt-0.5">
+                      {isEn ? 'Finance Department • Government of Gujarat' : isHi ? 'वित्त विभाग • गुजरात सरकार' : 'નાણાં વિભાગ, ગુજરાત સરકાર • સત્તાવાર ફી રસીદ ગેટવે'}
+                    </p>
+                  </div>
+                </div>
+                {!isProcessingPayment && (
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setPaymentModalOpen(false);
+                    }}
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
 
-          <button
-            disabled={holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'}
-            onClick={handleFinalConfirm}
-            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-black text-xs sm:text-sm flex items-center gap-2 shadow-md transition cursor-pointer ${
-              holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'
-                ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                : 'bg-[#003366] hover:bg-[#002244] active:scale-[0.98] text-white hover:shadow-lg'
-            }`}
-          >
-            <span>{isEn ? 'Confirm Appointment Slot' : isHi ? 'स्लॉट पुष्टि करें' : isMr ? 'अपॉइंटमेंट स्लॉट निश्चित करा' : 'ટોકન સ્લોટ કન્ફર્મ કરો'}</span>
-            <ArrowRight className="w-4 h-4 text-[#FF9933] shrink-0" />
-          </button>
-        </div>
+              {/* PROCESSING SCREEN */}
+              {isProcessingPayment ? (
+                <div className="p-8 sm:p-12 text-center space-y-4 flex flex-col items-center justify-center my-auto">
+                  <div className="w-16 h-16 rounded-full border-4 border-[#005A9C] border-t-transparent animate-spin flex items-center justify-center">
+                    <IndianRupee className="w-6 h-6 text-[#003366]" />
+                  </div>
+                  <h4 className="text-base sm:text-lg font-black text-[#003366]">
+                    {isEn ? 'Processing Government e-Challan...' : isHi ? 'सरकारी ई-चालान भुगतान प्रक्रिया जारी...' : 'સરકારી ઈ-ચલણ ચૂકવણી પ્રક્રિયા ચાલુ છે...'}
+                  </h4>
+                  <p className="text-xs font-bold text-slate-600 animate-pulse bg-blue-50 border border-blue-200 px-4 py-2 rounded-xl">
+                    {paymentStepText}
+                  </p>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {isEn ? 'Do not refresh or close window' : 'મહેરબાની કરીને પેજ રિફ્રેશ કે બંધ કરશો નહીં'}
+                  </span>
+                </div>
+              ) : (
+                /* PAYMENT SELECTION BODY */
+                <div className="p-4 sm:p-6 overflow-y-auto modal-scroll-area space-y-4 text-[#1F2937]">
+                  
+                  {/* SERVICE & STATUTORY FEE SUMMARY CARD */}
+                  <div className="bg-gradient-to-br from-slate-50 to-blue-50/60 border border-slate-200 rounded-2xl p-3.5 sm:p-4 space-y-2.5">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                      <span className="text-[10.5px] font-black uppercase tracking-wider text-slate-500">
+                        {isEn ? 'Citizen Service e-Challan Bill' : isHi ? 'नागरिक सेवा ई-चालान बिल' : 'નાગરિક સેવા ઈ-ચલણ વિગતો'}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-slate-600">
+                        Aadhaar: {DEFAULT_CITIZEN_PROFILE.aadhaarMasked}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-500 block">{isEn ? 'Service / Scheme:' : 'સેવા / યોજના:'}</span>
+                        <p className="font-bold text-[#003366] truncate">{scheme ? scheme.titleGu : 'સરકારી જન સેવા'}</p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 block">{isEn ? 'Target Office:' : 'કચેરી / સેવા કેન્દ્ર:'}</span>
+                        <p className="font-bold text-slate-800 truncate">{selectedCenter.nameGu}</p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 block">{isEn ? 'Citizen Name:' : 'નાગરિકનું નામ:'}</span>
+                        <p className="font-bold text-slate-800">{DEFAULT_CITIZEN_PROFILE.nameGu}</p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 block">{isEn ? 'Allocated Counter:' : 'ફાળવેલ કાઉન્ટર:'}</span>
+                        <p className="font-bold text-[#005A9C]">કાઉન્ટર {routing.counterNumber} ({counterDetails.nameGu})</p>
+                      </div>
+                    </div>
+
+                    {/* STATUTORY FEE TOTAL */}
+                    <div className="bg-white border border-blue-200 rounded-xl p-3 flex items-center justify-between pt-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                          ₹
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-slate-800">
+                            {isEn ? 'Total Government Fee' : isHi ? 'कुल सरकारी शुल्क' : 'કુલ નિયત સરકારી સેવા ફી'}
+                          </p>
+                          <p className="text-[10px] text-slate-500">
+                            {(scheme?.fee ?? 20) === 0 ? '૧૦૦% સરકારી સબસિડી (મફત)' : 'સરકારી નિયમ મુજબ સત્તાવાર સેવા ચાર્જ'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-black text-emerald-700">
+                          {(scheme?.fee ?? 20) === 0 ? '₹૦ (મફત)' : `₹${scheme?.fee ?? 20}`}
+                        </span>
+                        <span className="block text-[9px] text-emerald-600 font-bold">
+                          {(scheme?.fee ?? 20) === 0 ? 'Nil Fee Scheme' : 'Official Challan'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PAYMENT MODE SELECTION */}
+                  {(scheme?.fee ?? 20) > 0 ? (
+                    <div className="space-y-3">
+                      <label className="text-xs font-black text-[#003366] block">
+                        {isEn ? 'Choose Official Payment Mode *' : isHi ? 'भुगतान विधि चुनें *' : 'સત્તાવાર ચુકવણી પદ્ધતિ પસંદ કરો *'}
+                      </label>
+
+                      {/* OPTION 1: ONLINE CYBER TREASURY */}
+                      <div 
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setPaymentMode('ONLINE_CYBER_TREASURY');
+                        }}
+                        className={`p-3.5 rounded-2xl border-2 transition cursor-pointer flex flex-col gap-2.5 ${
+                          paymentMode === 'ONLINE_CYBER_TREASURY' 
+                            ? 'bg-blue-50/80 border-[#005A9C] shadow-sm' 
+                            : 'bg-white border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <input 
+                              type="radio" 
+                              checked={paymentMode === 'ONLINE_CYBER_TREASURY'} 
+                              onChange={() => setPaymentMode('ONLINE_CYBER_TREASURY')}
+                              className="w-4 h-4 text-[#005A9C] accent-[#005A9C] cursor-pointer"
+                            />
+                            <div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-xs font-black text-[#003366]">
+                                  {isEn ? '⚡ Online Cyber Treasury (Instant e-Challan)' : isHi ? '⚡ ऑनलाइन साइबर ट्रेजरी (तत्काल ई-चालान)' : '⚡ ઓનલાઇન સાયબર ટ્રેઝરી (તાત્કાલિક e-Challan)'}
+                                </span>
+                                <span className="bg-[#FF9933] text-slate-900 text-[9px] font-black px-2 py-0.2 rounded-full uppercase">
+                                  {isEn ? 'Recommended' : 'ભલામણ કરેલ'}
+                                </span>
+                              </div>
+                              <p className="text-[10.5px] text-slate-600 mt-0.5">
+                                {isEn ? 'Instant receipt via UPI (GPay/PhonePe), Debit Card or Net Banking' : 'UPI (Google Pay, PhonePe), ડેબિટ કાર્ડ અથવા નેટ બેન્કિંગ દ્વારા તાત્કાલિક સરકારી રસીદ'}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-xs font-black text-emerald-700">₹{scheme?.fee ?? 20}</span>
+                        </div>
+
+                        {/* SUB-METHODS FOR ONLINE PAYMENT */}
+                        {paymentMode === 'ONLINE_CYBER_TREASURY' && (
+                          <div className="pt-2 border-t border-blue-200/80 space-y-2.5 animate-in fade-in">
+                            <div className="grid grid-cols-3 gap-1.5">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  triggerHaptic('tap');
+                                  setOnlineMethod('upi');
+                                }}
+                                className={`p-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition border ${
+                                  onlineMethod === 'upi' ? 'bg-[#003366] text-white border-[#003366]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                }`}
+                              >
+                                <QrCode className="w-3.5 h-3.5" />
+                                <span>UPI / QR</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  triggerHaptic('tap');
+                                  setOnlineMethod('card');
+                                }}
+                                className={`p-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition border ${
+                                  onlineMethod === 'card' ? 'bg-[#003366] text-white border-[#003366]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                }`}
+                              >
+                                <CreditCard className="w-3.5 h-3.5" />
+                                <span>{isEn ? 'Debit Card' : 'ડેબિટ કાર્ડ'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  triggerHaptic('tap');
+                                  setOnlineMethod('netbanking');
+                                }}
+                                className={`p-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition border ${
+                                  onlineMethod === 'netbanking' ? 'bg-[#003366] text-white border-[#003366]' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                }`}
+                              >
+                                <Landmark className="w-3.5 h-3.5" />
+                                <span>{isEn ? 'NetBanking' : 'નેટ બેન્કિંગ'}</span>
+                              </button>
+                            </div>
+
+                            {/* UPI APP SELECTION */}
+                            {onlineMethod === 'upi' && (
+                              <div className="bg-white p-3 rounded-xl border border-blue-200 space-y-2">
+                                <span className="text-[10px] font-bold text-slate-600 block">
+                                  {isEn ? 'Select UPI App for Cyber Treasury Payment:' : 'સાયબર ટ્રેઝરી ચુકવણી માટે UPI એપ પસંદ કરો:'}
+                                </span>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                                  {[
+                                    { id: 'gpay', name: 'Google Pay', icon: '🟢' },
+                                    { id: 'phonepe', name: 'PhonePe', icon: '🟣' },
+                                    { id: 'paytm', name: 'Paytm UPI', icon: '🔵' },
+                                    { id: 'bhim', name: 'BHIM UPI', icon: '🇮🇳' },
+                                  ].map((app) => (
+                                    <button
+                                      key={app.id}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        triggerHaptic('tap');
+                                        setUpiApp(app.id as any);
+                                      }}
+                                      className={`p-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition ${
+                                        upiApp === app.id ? 'bg-blue-100/70 text-[#003366] border-[#005A9C]' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                                      }`}
+                                    >
+                                      <span>{app.icon}</span>
+                                      <span className="text-[11px] truncate">{app.name}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                                <p className="text-[9.5px] text-emerald-700 font-bold flex items-center gap-1 pt-1">
+                                  <ShieldCheck className="w-3.5 h-3.5" />
+                                  <span>{isEn ? 'Zero Convenience Fee • NPCI Verified' : 'ઝીરો વધારાનો ચાર્જ • NPCI સત્તાવાર સુરક્ષિત ગેટવે'}</span>
+                                </p>
+                              </div>
+                            )}
+
+                            {/* DEBIT CARD DETAILS */}
+                            {onlineMethod === 'card' && (
+                              <div className="bg-white p-3 rounded-xl border border-blue-200 space-y-2 text-xs">
+                                <div>
+                                  <label className="text-[10px] font-bold text-slate-600 block mb-1">
+                                    {isEn ? 'RuPay / Debit Card Number' : 'RuPay / ડેબિટ કાર્ડ નંબર'}
+                                  </label>
+                                  <input 
+                                    type="text" 
+                                    value={cardNumber}
+                                    onChange={(e) => setCardNumber(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-mono font-bold text-slate-800"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="text-[10px] font-bold text-slate-600 block mb-1">{isEn ? 'Card Holder' : 'કાર્ડધારકનું નામ'}</label>
+                                    <input 
+                                      type="text" 
+                                      value={cardHolder}
+                                      onChange={(e) => setCardHolder(e.target.value)}
+                                      className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-bold text-slate-800 text-[11px]"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[10px] font-bold text-slate-600 block mb-1">Expiry / CVV</label>
+                                    <div className="flex gap-1.5">
+                                      <input type="text" defaultValue="08/28" className="w-1/2 bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center font-mono font-bold text-slate-800" />
+                                      <input type="password" defaultValue="•••" className="w-1/2 bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center font-mono font-bold text-slate-800" />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* NET BANKING */}
+                            {onlineMethod === 'netbanking' && (
+                              <div className="bg-white p-3 rounded-xl border border-blue-200 space-y-1.5 text-xs">
+                                <label className="text-[10px] font-bold text-slate-600 block">
+                                  {isEn ? 'Select Authorized Bank:' : 'સત્તાવાર બેંક પસંદ કરો:'}
+                                </label>
+                                <select
+                                  value={selectedBank}
+                                  onChange={(e) => setSelectedBank(e.target.value)}
+                                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-800 text-xs"
+                                >
+                                  <option value="State Bank of India (SBI)">State Bank of India (SBI)</option>
+                                  <option value="Bank of Baroda (BOB)">Bank of Baroda (BOB)</option>
+                                  <option value="HDFC Bank">HDFC Bank</option>
+                                  <option value="ICICI Bank">ICICI Bank</option>
+                                  <option value="Axis Bank">Axis Bank</option>
+                                  <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                                  <option value="Saurashtra Gramin Bank">Saurashtra Gramin Bank (SGB)</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* OPTION 2: PAY CASH AT KACHERI COUNTER */}
+                      <div 
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setPaymentMode('CASH_AT_COUNTER');
+                        }}
+                        className={`p-3.5 rounded-2xl border-2 transition cursor-pointer flex flex-col gap-2 ${
+                          paymentMode === 'CASH_AT_COUNTER' 
+                            ? 'bg-amber-50/80 border-amber-500 shadow-sm' 
+                            : 'bg-white border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <input 
+                              type="radio" 
+                              checked={paymentMode === 'CASH_AT_COUNTER'} 
+                              onChange={() => setPaymentMode('CASH_AT_COUNTER')}
+                              className="w-4 h-4 text-amber-600 accent-amber-600 cursor-pointer"
+                            />
+                            <div>
+                              <span className="text-xs font-black text-amber-950">
+                                {isEn ? '💵 Pay Cash at Kacheri Counter' : isHi ? '💵 कचेरी काउंटर पर नकद भुगतान' : '💵 કચેરી કાઉન્ટર પર રોકડ ચુકવણી (Pay Cash at Desk)'}
+                              </span>
+                              <p className="text-[10.5px] text-amber-900/80 mt-0.5">
+                                {isEn ? `Pay ₹${scheme?.fee ?? 20} cash directly to desk officer upon token call.` : `કાઉન્ટર પર ટોકન વારો આવે ત્યારે અધિકારીને રૂબરૂ ₹${scheme?.fee ?? 20} રોકડ જમા કરાવો.`}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-xs font-black text-amber-800">₹{scheme?.fee ?? 20}</span>
+                        </div>
+
+                        {paymentMode === 'CASH_AT_COUNTER' && (
+                          <div className="bg-white/90 border border-amber-300 rounded-xl p-2.5 text-[10.5px] text-amber-950 font-bold flex items-center gap-2 animate-in fade-in">
+                            <Banknote className="w-4 h-4 text-amber-600 shrink-0" />
+                            <span>
+                              {isEn 
+                                ? `A Kacheri Cash Challan will be generated. The officer will collect cash & issue receipt.` 
+                                : `કાઉન્ટર ચલણ જનરેટ થશે. કાઉન્ટર અધિકારી રોકડ સ્વીકારી સિસ્ટમમાં રસીદ જનરેટ કરશે.`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  ) : (
+                    /* ZERO FEE / GOVT EXEMPT SCHEME */
+                    <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 text-center space-y-2">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto">
+                        <CheckCircle2 className="w-6 h-6" />
+                      </div>
+                      <h4 className="text-sm font-black text-emerald-950">
+                        {isEn ? '🏛️ 100% Free Government Welfare Service' : isHi ? '🏛️ १००% निःशुल्क सरकारी कल्याणकारी सेवा' : '🏛️ ૧૦૦% સરકારી છૂટછાટ (મફત સેવા)'}
+                      </h4>
+                      <p className="text-xs text-emerald-800">
+                        {isEn ? 'This scheme has zero government statutory charge. Official Nil-Challan will be issued.' : 'આ કલ્યાણકારી યોજના માટે કોઈ સરકારી ફી નથી. સત્તાવાર મફત e-Challan ટોકન પાસ સાથે જારી થશે.'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* STATUTORY DISCLAIMER */}
+                  <div className="bg-slate-100 rounded-xl p-2.5 text-[10px] text-slate-500 flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>
+                      {isEn ? 'Statutory Treasury Security: Zero touts, 100% direct government revenue accounting.' : 'સત્તાવાર સાયબર ટ્રેઝરી સુરક્ષા: સંપૂર્ણ સરકારી મહેસૂલ એકાઉન્ટિંગ, દલાલમુક્ત પારદર્શક પ્રક્રિયા.'}
+                    </span>
+                  </div>
+
+                </div>
+              )}
+
+              {/* PAYMENT FOOTER BUTTONS */}
+              {!isProcessingPayment && (
+                <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setPaymentModalOpen(false);
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+                  >
+                    {isEn ? 'Back' : isHi ? 'वापस' : 'પાછળ જાઓ'}
+                  </button>
+
+                  <button
+                    onClick={handleExecutePaymentAndIssueToken}
+                    className="px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#003366] hover:bg-[#002244] active:scale-[0.98] text-white flex items-center gap-2 shadow-md transition cursor-pointer"
+                  >
+                    <span>
+                      {paymentMode === 'ONLINE_CYBER_TREASURY' && (scheme?.fee ?? 20) > 0
+                        ? (isEn ? `Pay ₹${scheme?.fee ?? 20} Online & Get Token` : `ઓનલાઇન ચૂકવણી કરો (₹${scheme?.fee ?? 20})`)
+                        : paymentMode === 'CASH_AT_COUNTER'
+                        ? (isEn ? `Generate Kacheri Cash Token` : `કચેરી કાઉન્ટર ચલણ ટોકન મેળવો`)
+                        : (isEn ? 'Confirm & Issue Free Token' : 'સત્તાવાર ટોકન મેળવો (₹૦)')}
+                    </span>
+                    <ArrowRight className="w-4 h-4 text-[#FF9933] shrink-0" />
+                  </button>
+                </div>
+              )}
+
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

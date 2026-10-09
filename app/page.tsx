@@ -17,6 +17,7 @@ import { SchemesCatalog } from '@/components/SchemesCatalog';
 import { SchemeDrawer } from '@/components/SchemeDrawer';
 import { CameraScannerModal } from '@/components/CameraScannerModal';
 import { SlotBookingModal, BookingDetails } from '@/components/SlotBookingModal';
+import { VerifiedDocumentItem } from '@/lib/slot-engine';
 import { DigitalTokenPass } from '@/components/DigitalTokenPass';
 import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
@@ -74,30 +75,83 @@ export default function Home() {
     }
   }, []);
 
-  // Localized Citizen Identity Helpers (Dynamic for gu, hi, en)
-  const getCitizenDisplayName = (l: Language) => {
-    switch (l) {
-      case 'gu': return 'હરિ પટેલ';
-      case 'hi': return 'हरि पटेल';
-      case 'en': default: return 'Hari Patel';
+  // Localized Citizen Identity Helpers (Dynamic for gu, hi, en, mr, etc.)
+  const getCitizenDisplayName = (l: Language, rawName?: string) => {
+    const raw = (rawName || '').trim();
+    if (!raw || ['હરિ પટેલ', 'हरि पटेल', 'Hari Patel', 'हरी पटेल'].includes(raw)) {
+      switch (l) {
+        case 'gu': return 'હરિ પટેલ';
+        case 'hi': return 'हरि पटेल';
+        case 'mr': return 'हरी पटेल';
+        case 'en': default: return 'Hari Patel';
+      }
     }
+    return raw;
   };
 
-  const getCitizenRoleArea = (l: Language) => {
-    switch (l) {
-      case 'gu': return 'નાગરિક • રાજકોટ ગ્રામ્ય';
-      case 'hi': return 'नागरिक • राजकोट ग्रामीण';
-      case 'en': default: return 'Citizen • Rajkot Rural';
+  const getCitizenRole = (l: Language, rawRole?: string) => {
+    const raw = (rawRole || '').trim();
+    if (!raw || ['નાગરિક', 'नागरिक', 'Citizen'].includes(raw)) {
+      switch (l) {
+        case 'gu': return 'નાગરિક';
+        case 'hi': return 'नागरिक';
+        case 'mr': return 'नागरिक';
+        case 'en': default: return 'Citizen';
+      }
     }
+    return raw;
   };
 
-  // Language switch handler with persistence
+  const getCitizenArea = (l: Language, rawArea?: string) => {
+    const raw = (rawArea || '').trim();
+    if (!raw || ['રાજકોટ ગ્રામ્ય', 'રાજકોટ ગ્રામીણ', 'राजकोट ग्रामीण', 'Rajkot Rural'].includes(raw)) {
+      switch (l) {
+        case 'gu': return 'રાજકોટ ગ્રામ્ય';
+        case 'hi': return 'राजकोट ग्रामीण';
+        case 'mr': return 'राजकोट ग्रामीण';
+        case 'en': default: return 'Rajkot Rural';
+      }
+    }
+    if (raw.includes('ગોંડલ') || raw.includes('गोंडल') || raw.includes('Gondal')) {
+      switch (l) {
+        case 'gu': return 'ગોંડલ, રાજકોટ';
+        case 'hi': return 'गोंडल, राजकोट';
+        case 'mr': return 'गोंडल, राजकोट';
+        case 'en': default: return 'Gondal, Rajkot';
+      }
+    }
+    return raw;
+  };
+
+  const getCitizenRoleArea = (l: Language, rawArea?: string, rawRole?: string) => {
+    const role = getCitizenRole(l, rawRole);
+    const area = getCitizenArea(l, rawArea);
+    return `${role} • ${area}`;
+  };
+
+  // Language switch handler with persistence & instant user relocalization
   const handleSelectLang = (newLang: Language) => {
     triggerHaptic('tap');
     setLang(newLang);
     try {
       localStorage.setItem('qless_preferred_lang', newLang);
     } catch {}
+
+    // Immediately synchronize logged-in user profile to newly selected language!
+    setCurrentUser(prev => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        name: getCitizenDisplayName(newLang, prev.name),
+        role: getCitizenRole(newLang, prev.role),
+        area: getCitizenArea(newLang, prev.area),
+      };
+      try {
+        localStorage.setItem('qless_current_user', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
     setLangMenuOpen(false);
   };
 
@@ -129,6 +183,7 @@ export default function Home() {
   const [tokenPassModalOpen, setTokenPassModalOpen] = useState(false);
   const [activeBooking, setActiveBooking] = useState<BookingDetails | null>(null);
   const [lateShiftMinutes, setLateShiftMinutes] = useState<number>(0);
+  const [uploadedDocsForBooking, setUploadedDocsForBooking] = useState<VerifiedDocumentItem[]>([]);
   const [toastNotification, setToastNotification] = useState<{ title: string; message: string; type?: 'info' | 'success' | 'warning' } | null>(null);
 
   const [currentUser, setCurrentUser] = useState<{
@@ -141,6 +196,7 @@ export default function Home() {
   // SESSION & VIEW PERSISTENCE (Survives Page Refresh / F5)
   useEffect(() => {
     try {
+      const activeLang = (localStorage.getItem('qless_preferred_lang') as Language) || lang || 'gu';
       const savedUserStr = localStorage.getItem('qless_current_user');
       if (savedUserStr) {
         const parsed = JSON.parse(savedUserStr);
@@ -149,7 +205,15 @@ export default function Home() {
           localStorage.removeItem('qless_current_user');
           setCurrentUser(null);
         } else {
-          setCurrentUser(parsed);
+          // Re-localize user data to the active language right on mount
+          const localizedUser = {
+            ...parsed,
+            name: getCitizenDisplayName(activeLang, parsed.name),
+            role: getCitizenRole(activeLang, parsed.role),
+            area: getCitizenArea(activeLang, parsed.area),
+          };
+          setCurrentUser(localizedUser);
+          localStorage.setItem('qless_current_user', JSON.stringify(localizedUser));
         }
       }
       const savedBookingStr = localStorage.getItem('qless_active_booking');
@@ -271,11 +335,11 @@ export default function Home() {
     setAuthModalOpen(false);
 
     const userObj = {
-          name: getCitizenDisplayName(lang),
-          role: lang === 'gu' ? 'નાગરિક' : lang === 'hi' ? 'नागरिक' : lang === 'mr' ? 'नागरिक' : 'Citizen',
-          area: lang === 'gu' ? 'રાજકોટ ગ્રામ્ય' : lang === 'hi' ? 'राजकोट ग्रामीण' : lang === 'mr' ? 'राजकोट ग्रामीण' : 'Rajkot Rural',
-          token: '#A-42',
-        };
+      name: getCitizenDisplayName(lang),
+      role: getCitizenRole(lang),
+      area: getCitizenArea(lang),
+      token: '#A-42',
+    };
 
     setCurrentUser(userObj);
 
@@ -308,8 +372,10 @@ export default function Home() {
     
     const userObj = {
       name: getCitizenDisplayName(lang),
-      role: lang === 'gu' ? 'નાગરિક' : lang === 'hi' ? 'नागरिक' : lang === 'mr' ? 'नागरिक' : 'Citizen',
-      area: pendingSlotBooking ? `${pendingSlotBooking.taluka.nameGu}, ${pendingSlotBooking.district.nameGu}` : (lang === 'gu' ? 'રાજકોટ ગ્રામ્ય' : lang === 'hi' ? 'राजकोट ग्रामीण' : lang === 'mr' ? 'राजकोट ग्रामीण' : 'Rajkot Rural'),
+      role: getCitizenRole(lang),
+      area: pendingSlotBooking 
+        ? (lang === 'en' ? `${pendingSlotBooking.taluka.nameEn || pendingSlotBooking.taluka.nameGu}, ${pendingSlotBooking.district.nameEn || pendingSlotBooking.district.nameGu}` : `${pendingSlotBooking.taluka.nameGu}, ${pendingSlotBooking.district.nameGu}`) 
+        : getCitizenArea(lang),
       token: pendingSlotBooking ? pendingSlotBooking.tokenNumber : '',
     };
     setCurrentUser(userObj);
@@ -433,8 +499,11 @@ export default function Home() {
   };
 
   // VALIDATION CHECK: Require Login to Collect Token from Drawer
-  const handleCollectToken = (scheme: SchemeItem) => {
+  const handleCollectToken = (scheme: SchemeItem, verifiedDocs?: VerifiedDocumentItem[]) => {
     setActiveScheme(scheme);
+    if (verifiedDocs && verifiedDocs.length > 0) {
+      setUploadedDocsForBooking(verifiedDocs);
+    }
     if (!currentUser) {
       triggerHaptic('warning');
       const schemeTitle = lang === 'en' ? (scheme.titleEn || scheme.titleGu) : scheme.titleGu;
@@ -519,12 +588,14 @@ export default function Home() {
     setSlotModalOpen(false);
     setCurrentUser(prev => prev ? {
       ...prev,
-      area: `${details.taluka.nameGu}, ${details.district.nameGu}`,
+      name: getCitizenDisplayName(lang, prev.name),
+      role: getCitizenRole(lang, prev.role),
+      area: lang === 'en' ? `${details.taluka.nameEn || details.taluka.nameGu}, ${details.district.nameEn || details.district.nameGu}` : `${details.taluka.nameGu}, ${details.district.nameGu}`,
       token: details.tokenNumber
     } : {
       name: getCitizenDisplayName(lang),
-      role: lang === 'gu' ? 'નાગરિક' : lang === 'hi' ? 'नागरिक' : lang === 'mr' ? 'नागरिक' : 'Citizen',
-      area: `${details.taluka.nameGu}, ${details.district.nameGu}`,
+      role: getCitizenRole(lang),
+      area: lang === 'en' ? `${details.taluka.nameEn || details.taluka.nameGu}, ${details.district.nameEn || details.district.nameGu}` : `${details.taluka.nameGu}, ${details.district.nameGu}`,
       token: details.tokenNumber
     });
     setTokenPassModalOpen(true);
@@ -922,11 +993,11 @@ export default function Home() {
                       <span className="hidden xs:inline">{lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen'}</span>
                     </span>
                     <p className="font-extrabold text-[#003366] text-xs sm:text-sm group-hover:text-[#005A9C] truncate max-w-[70px] xs:max-w-[120px] sm:max-w-none">
-                      {currentUser?.name || getCitizenDisplayName(lang)}
+                      {getCitizenDisplayName(lang, currentUser?.name)}
                     </p>
                   </div>
                   <p className="text-[9px] text-[#005A9C] font-bold hidden sm:block mt-0.5 whitespace-nowrap">
-                    {currentUser?.role ? `${currentUser.role} • ${currentUser.area || 'ગુજરાત'}` : getCitizenRoleArea(lang)}
+                    {getCitizenRoleArea(lang, currentUser?.area, currentUser?.role)}
                   </p>
                 </div>
                 <button 
@@ -1146,10 +1217,10 @@ export default function Home() {
                   >
                     <div className="text-left text-xs leading-tight">
                       <p className="font-extrabold text-[#003366] group-hover:text-[#005A9C] whitespace-nowrap flex items-center gap-1.5">
-                        <span>{currentUser.name || getCitizenDisplayName(lang)}</span>
+                        <span>{getCitizenDisplayName(lang, currentUser?.name)}</span>
                         <span className="text-[9px] bg-blue-100 text-[#005A9C] font-mono px-1 py-0.2 rounded font-bold">UID</span>
                       </p>
-                      <p className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{currentUser.role || 'નાગરિક'} • {currentUser.area || 'ગુજરાત'}</p>
+                      <p className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{getCitizenRoleArea(lang, currentUser?.area, currentUser?.role)}</p>
                     </div>
                   </button>
                 )}
@@ -1177,7 +1248,7 @@ export default function Home() {
                       </span>
                     </div>
                     <h2 className="text-lg sm:text-xl font-black text-white mt-1">
-                      {currentUser?.name || getCitizenDisplayName(lang)} • {activeBooking.tokenNumber}
+                      {getCitizenDisplayName(lang, currentUser?.name)} • {activeBooking.tokenNumber}
                     </h2>
                     <p className="text-xs text-blue-100 mt-0.5">
                       {t('counterLabel', lang)} {activeBooking.counterNumber} • {lang === 'en' ? (activeBooking.counterNameEn || activeBooking.counterNameGu) : activeBooking.counterNameGu}
@@ -1222,7 +1293,7 @@ export default function Home() {
                       </span>
                     </div>
                     <h2 className="text-lg sm:text-xl font-black text-white mt-1">
-                      {t('loggedInNoBookingTitle', lang)}, {currentUser.name || getCitizenDisplayName(lang)}!
+                      {t('loggedInNoBookingTitle', lang)}, {getCitizenDisplayName(lang, currentUser?.name)}!
                     </h2>
                     <p className="text-xs text-blue-100 mt-0.5">
                       {t('loggedInNoBookingSub', lang)}
@@ -1353,7 +1424,7 @@ export default function Home() {
                         onClick={() => {
                           triggerHaptic('tap');
                           const tokenStr = activeBooking.tokenNumber;
-                          const citizenName = currentUser?.name || getCitizenDisplayName(lang);
+                          const citizenName = getCitizenDisplayName(lang, currentUser?.name);
                           const counterNum = activeBooking.counterNumber;
                           speakGuidance(
                             lang === 'en'
@@ -2295,6 +2366,7 @@ export default function Home() {
         initialDistrictId={targetBookingDistrictId || 'rajkot'}
         initialTalukaId={targetBookingTalukaId || 'gondal'}
         initialVillage="ગોમટા"
+        uploadedDocs={uploadedDocsForBooking}
         lang={lang}
       />
 
@@ -2338,7 +2410,7 @@ export default function Home() {
             <DigitalTokenPass
               booking={activeBooking}
               scheme={activeScheme}
-              citizenName={currentUser?.name || getCitizenDisplayName(lang)}
+              citizenName={getCitizenDisplayName(lang, currentUser?.name)}
               onClose={() => setTokenPassModalOpen(false)}
               lang={lang}
             />

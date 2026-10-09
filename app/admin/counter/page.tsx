@@ -8,7 +8,7 @@ import {
   Coffee, ArrowRightLeft, RotateCcw, Check, X, ChevronDown, 
   ExternalLink, Eye, Printer, ArrowLeft, Sparkles, Star, Award, 
   AlertCircle, Phone, Lock, ChevronRight, RefreshCw, Layers, History, BadgeCheck,
-  Globe
+  Globe, IndianRupee, CreditCard, Receipt, Banknote, Landmark, FileCheck
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -22,6 +22,9 @@ import {
 import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { Language, GUJARAT_LANGUAGES } from '@/lib/translations';
+import { VerifiedDocumentItem, GovernmentPaymentRecord } from '@/lib/slot-engine';
+import { BookingDetails } from '@/components/SlotBookingModal';
+import { DEFAULT_CITIZEN_PROFILE } from '@/lib/citizen-profile';
 
 interface QueueCitizen {
   id: string;
@@ -50,8 +53,21 @@ interface QueueCitizen {
     nameGu: string; 
     nameHi: string; 
     nameEn: string; 
-    status: 'PRE_CHECK_PASSED' | 'PENDING' 
+    status: 'PRE_CHECK_PASSED' | 'PENDING';
+    uploadedAt?: string;
+    fileUrl?: string;
+    ocrExtractedData?: {
+      documentType?: string;
+      idNumber?: string;
+      holderName?: string;
+      confidence?: number;
+      dates?: string[];
+    };
   }[];
+  payment?: GovernmentPaymentRecord;
+  uploadedDocuments?: VerifiedDocumentItem[];
+  districtId?: string;
+  talukaId?: string;
 }
 
 export interface AuditLogEntry {
@@ -274,6 +290,52 @@ const getDefaultTransferRemarks = (l: Language): string => {
   return 'અરજદારને સોગંદનામા માટે મોકલવામાં આવ્યા છે.';
 };
 
+function bookingToQueueCitizen(b: BookingDetails): QueueCitizen {
+  const docsList = (b.uploadedDocuments && b.uploadedDocuments.length > 0)
+    ? b.uploadedDocuments.map(d => ({
+        nameGu: d.nameGu,
+        nameHi: d.nameEn || d.nameGu,
+        nameEn: d.nameEn || d.nameGu,
+        status: 'PRE_CHECK_PASSED' as const,
+        uploadedAt: d.uploadedAt,
+        fileUrl: d.fileUrl,
+        ocrExtractedData: d.ocrExtractedData
+      }))
+    : [
+        { nameGu: 'આધાર કાર્ડ (માસ્ક્ડ આધાર XXXX-XXXX-8842)', nameHi: 'आधार कार्ड (मास्क्ड आधार XXXX-XXXX-8842)', nameEn: 'Aadhaar Card (Masked XXXX-XXXX-8842)', status: 'PRE_CHECK_PASSED' as const },
+        { nameGu: 'આવકનો દાખલો / રેશનકાર્ડ', nameHi: 'आय प्रमाण पत्र / राशन कार्ड', nameEn: 'Income / Ration Proof', status: 'PRE_CHECK_PASSED' as const }
+      ];
+
+  return {
+    id: `real-tok-${b.tokenNumber.replace('#', '').toLowerCase()}`,
+    tokenNumber: b.tokenNumber,
+    citizenNameGu: DEFAULT_CITIZEN_PROFILE.nameGu,
+    citizenNameHi: DEFAULT_CITIZEN_PROFILE.nameEn,
+    citizenNameEn: DEFAULT_CITIZEN_PROFILE.nameEn,
+    phone: '98765 43210',
+    schemeTitleGu: b.counterNameGu ? `${b.counterNameGu} સેવા` : 'જન સેવા પ્રમાણપત્ર',
+    schemeTitleHi: b.counterNameEn ? `${b.counterNameEn} Service` : 'जन सेवा प्रमाण पत्र',
+    schemeTitleEn: b.counterNameEn || 'Jan Seva Service',
+    counterNumber: b.counterNumber || 1,
+    isPriority: !!b.isPriority,
+    appliedTime: b.slot?.timeRange ? b.slot.timeRange.split(' - ')[0] : '10:30 AM',
+    waitingMinutes: 6,
+    status: 'WAITING',
+    aadhaarLast4: '8842',
+    incomeDeclaredGu: '₹ ૧,૨૦,૦૦૦ (વાર્ષિક)',
+    incomeDeclaredHi: '₹ १,२०,००० (वार्षिक)',
+    incomeDeclaredEn: '₹ 1,20,000 (Annual)',
+    aiOcrVerdictGu: '✓ ઓટોમેટેડ AI ચકાસણી સફળ: ૧૦૦% સરકારી દસ્તાવેજ પ્રમાણિત',
+    aiOcrVerdictHi: '✓ स्वचालित AI सत्यापन सफल: १००% सरकारी दस्तावेज़ प्रमाणित',
+    aiOcrVerdictEn: '✓ Automated AI Pre-check Passed: 100% Compliant',
+    documents: docsList,
+    payment: b.payment,
+    uploadedDocuments: b.uploadedDocuments,
+    districtId: b.district?.id,
+    talukaId: b.taluka?.id
+  };
+}
+
 export default function CounterOperatorDesk() {
   // Multi-Language State
   const [lang, setLang] = useState<Language>('gu');
@@ -291,6 +353,8 @@ export default function CounterOperatorDesk() {
   const [currentServing, setCurrentServing] = useState<QueueCitizen | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [docModalOpen, setDocModalOpen] = useState<boolean>(false);
+  const [selectedCitizenForDocs, setSelectedCitizenForDocs] = useState<QueueCitizen | null>(null);
+  const [selectedCitizenForReceipt, setSelectedCitizenForReceipt] = useState<QueueCitizen | null>(null);
   const [transferModalOpen, setTransferModalOpen] = useState<boolean>(false);
   const [targetCounter, setTargetCounter] = useState<number>(2);
   const [transferRemarks, setTransferRemarks] = useState<string>(getDefaultTransferRemarks('gu'));
@@ -308,6 +372,132 @@ export default function CounterOperatorDesk() {
     priorityServed: 7,
     skippedCount: 2
   });
+
+  // Sync real booked tokens from LocalStorage on mount and jurisdiction changes
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('qless_real_queue_tokens');
+      if (stored) {
+        const list: BookingDetails[] = JSON.parse(stored);
+        if (list && list.length > 0) {
+          const matching = list
+            .filter(b => (!b.district || b.district.id === selectedDistrictId) && (!b.taluka || b.taluka.id === selectedTalukaId))
+            .map(b => bookingToQueueCitizen(b));
+          
+          setQueue(prev => {
+            const combined = [...matching, ...INITIAL_QUEUE];
+            const uniqueMap = new Map<string, QueueCitizen>();
+            combined.forEach(item => {
+              if (!uniqueMap.has(item.tokenNumber)) {
+                uniqueMap.set(item.tokenNumber, item);
+              }
+            });
+            return Array.from(uniqueMap.values());
+          });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [selectedDistrictId, selectedTalukaId]);
+
+  // Subscribe to Realtime Queue Events (New Booking, Cash Payment, Late Shift)
+  useEffect(() => {
+    const unsubscribe = subscribeToQueueEvents((event) => {
+      if (event.type === 'TOKEN_BOOKED_REALTIME' && event.payload?.booking) {
+        const booking = event.payload.booking as BookingDetails;
+        const newCitizen = bookingToQueueCitizen(booking);
+        setQueue(prev => {
+          if (prev.some(c => c.tokenNumber === newCitizen.tokenNumber)) return prev;
+          return [newCitizen, ...prev];
+        });
+        triggerHaptic('success');
+        playNotificationChime();
+        setCounterToast({
+          title: lang === 'gu' ? '🔔 નવો ટોકન બુક થયો!' : lang === 'hi' ? '🔔 नया टोकन बुक हुआ!' : '🔔 New Token Booked!',
+          message: `${newCitizen.tokenNumber} - ${newCitizen.citizenNameGu} (${newCitizen.schemeTitleGu})`,
+          type: 'info'
+        });
+      } else if (event.type === 'TOKEN_PAYMENT_COLLECTED') {
+        setQueue(prev => prev.map(c => {
+          if (c.tokenNumber === event.tokenNumber) {
+            return {
+              ...c,
+              payment: {
+                ...c.payment,
+                status: 'PAID',
+                mode: c.payment?.mode || 'CASH_AT_COUNTER',
+                amount: c.payment?.amount || 20,
+                cashierReceiptNo: event.payload?.cashierReceiptNo || `CASH-REC-GND-2026-${Math.floor(1000 + Math.random()*9000)}`,
+                paidAt: new Date().toISOString()
+              }
+            };
+          }
+          return c;
+        }));
+      }
+    });
+
+    return () => unsubscribe();
+  }, [lang]);
+
+  // Cash Collection Action on Desk
+  const handleCollectCounterCash = (citizen: QueueCitizen) => {
+    triggerHaptic('success');
+    const cashierReceiptNo = `CASH-REC-GND-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const feeAmount = citizen.payment?.amount || 20;
+    const updatedPayment: GovernmentPaymentRecord = {
+      status: 'PAID',
+      mode: 'CASH_AT_COUNTER',
+      amount: feeAmount,
+      cashierReceiptNo,
+      kacheriChallanNo: citizen.payment?.kacheriChallanNo || `KACHERI-CASH-GJ-2026-X${Math.floor(100000 + Math.random() * 900000)}`,
+      paidAt: new Date().toISOString(),
+      gatewayName: 'કચેરી કાઉન્ટર રોકડ પહોંચ (Desk Officer Cash Receipt)'
+    };
+
+    setQueue(prev => prev.map(c => c.tokenNumber === citizen.tokenNumber ? { ...c, payment: updatedPayment } : c));
+    if (currentServing?.tokenNumber === citizen.tokenNumber) {
+      setCurrentServing(prev => prev ? { ...prev, payment: updatedPayment } : null);
+    }
+
+    try {
+      const stored = localStorage.getItem('qless_real_queue_tokens');
+      if (stored) {
+        const list: BookingDetails[] = JSON.parse(stored);
+        const updatedList = list.map(b => b.tokenNumber === citizen.tokenNumber ? { ...b, payment: updatedPayment } : b);
+        localStorage.setItem('qless_real_queue_tokens', JSON.stringify(updatedList));
+      }
+    } catch {}
+
+    broadcastQueueEvent({
+      type: 'TOKEN_PAYMENT_COLLECTED',
+      tokenNumber: citizen.tokenNumber,
+      counterNumber: selectedCounter,
+      talukaId: selectedTalukaId,
+      timestamp: Date.now(),
+      payload: { cashierReceiptNo, citizenName: citizen.citizenNameGu, amount: feeAmount }
+    });
+
+    addAuditLog(
+      'COMPLETED',
+      citizen.tokenNumber,
+      `રોકડ ફી ₹${feeAmount} સ્વીકારી. રસીદ નં: ${cashierReceiptNo}`,
+      `नकद शुल्क ₹${feeAmount} स्वीकृत. रसीद नं: ${cashierReceiptNo}`,
+      `Collected ₹${feeAmount} cash fee. Receipt: ${cashierReceiptNo}`
+    );
+
+    speakGuidance(
+      lang === 'hi' ? `नकद राशि स्वीकृत! आधिकारिक रसीद जारी कर दी गई है।` : `રોકડ રકમ સ્વીકારી સત્તાવાર રસીદ જારી કરવામાં આવી છે.`,
+      lang
+    );
+
+    setCounterToast({
+      title: lang === 'gu' ? "💵 રોકડ સ્વીકૃતિ સફળ" : lang === 'hi' ? "💵 नकद भुगतान सफल" : "💵 Cash Collected Successfully",
+      message: `${citizen.tokenNumber} - ₹${feeAmount} • રસીદ નં: ${cashierReceiptNo}`,
+      type: 'success'
+    });
+  };
 
   // Load language preference from LocalStorage on mount
   useEffect(() => {
@@ -1119,11 +1309,105 @@ export default function CounterOperatorDesk() {
                         <strong>{isGu ? currentServing.incomeDeclaredGu : isHi ? currentServing.incomeDeclaredHi : currentServing.incomeDeclaredEn}</strong>
                       </span>
                       <button
-                        onClick={() => setDocModalOpen(true)}
+                        onClick={() => setSelectedCitizenForDocs(currentServing)}
                         className="underline font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         {isGu ? "અપલોડ કરેલ કાગળો જુઓ" : isHi ? "अपलोड किए गए दस्तावेज़ देखें" : "View Uploaded Documents"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 💳 OFFICIAL PAYMENT & CYBER TREASURY VERIFICATION HUD */}
+                  <div className="bg-gradient-to-r from-blue-50/70 via-indigo-50/50 to-slate-50 border border-blue-200 rounded-2xl p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-[#003366] text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                          <IndianRupee className="w-4 h-4 text-[#FF9933]" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black text-[#003366] uppercase tracking-wide">
+                            {isGu ? "સરકારી સાયબર ટ્રેઝરી ચુકવણી સ્થિતિ" : isHi ? "सरकारी साइबर ट्रेजरी भुगतान स्थिति" : "Cyber Treasury Payment Status"}
+                          </h4>
+                          <p className="text-[10px] text-slate-500 font-mono">
+                            {currentServing.payment?.grasChallanNo || currentServing.payment?.kacheriChallanNo || 'GRAS/2026/04/991823'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Payment Status Pill */}
+                      {currentServing.payment?.status === 'PAID' ? (
+                        <span className="bg-emerald-100 border border-emerald-300 text-emerald-900 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>{isGu ? "✓ ચૂકતે (Paid)" : isHi ? "✓ भुगतान पूर्ण" : "✓ Paid"}</span>
+                        </span>
+                      ) : currentServing.payment?.status === 'PAY_AT_COUNTER' ? (
+                        <span className="bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 animate-pulse">
+                          <Banknote className="w-3.5 h-3.5 text-amber-700" />
+                          <span>{isGu ? "⏳ કાઉન્ટર રોકડ બાકી" : isHi ? "⏳ काउंटर नकद बकाया" : "⏳ Cash Pending"}</span>
+                        </span>
+                      ) : (
+                        <span className="bg-blue-100 border border-blue-300 text-blue-900 text-[10px] font-black px-2.5 py-1 rounded-full">
+                          {isGu ? "મફત સેવા (₹૦)" : isHi ? "मुफ्त सेवा (₹०)" : "Govt Free (₹0)"}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Payment Mode & Amount Strip */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                      <div className="bg-white p-2 rounded-xl border border-slate-200">
+                        <span className="text-[9.5px] text-slate-500 font-bold block">{isGu ? "સરકારી નિયત ફી:" : isHi ? "सरकारी शुल्क:" : "Govt Fee:"}</span>
+                        <p className="font-black text-emerald-700 text-xs">
+                          {currentServing.payment?.amount === 0 ? (isGu ? '₹૦ (મફત)' : '₹0 Free') : `₹${currentServing.payment?.amount ?? 20}.00`}
+                        </p>
+                      </div>
+
+                      <div className="bg-white p-2 rounded-xl border border-slate-200">
+                        <span className="text-[9.5px] text-slate-500 font-bold block">{isGu ? "ચુકવણી પદ્ધતિ:" : isHi ? "भुगतान विधि:" : "Payment Mode:"}</span>
+                        <p className="font-bold text-slate-800 text-[11px] truncate">
+                          {currentServing.payment?.gatewayName || (currentServing.payment?.mode === 'CASH_AT_COUNTER' ? (isGu ? 'કચેરી કાઉન્ટર રોકડ' : 'Cash at Counter') : 'Cyber Treasury UPI / QR')}
+                        </p>
+                      </div>
+
+                      <div className="bg-white p-2 rounded-xl border border-slate-200 col-span-2 sm:col-span-1">
+                        <span className="text-[9.5px] text-slate-500 font-bold block">{isGu ? "રસીદ / રેફરન્સ:" : isHi ? "रसीद / संदर्भ:" : "Receipt Ref:"}</span>
+                        <p className="font-mono font-bold text-[#005A9C] text-[10px] truncate">
+                          {currentServing.payment?.cyberTreasuryTxnId || currentServing.payment?.cashierReceiptNo || currentServing.payment?.grasChallanNo || 'CYBER-GJ-2026-X88421'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Officer Action for Cash Collection or View Receipt */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-blue-200/60">
+                      {currentServing.payment?.status === 'PAY_AT_COUNTER' ? (
+                        <button
+                          type="button"
+                          onClick={() => handleCollectCounterCash(currentServing)}
+                          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white text-xs font-black flex items-center justify-center gap-1.5 shadow-md transition active:scale-95 cursor-pointer"
+                        >
+                          <Banknote className="w-4 h-4 text-emerald-200" />
+                          <span>
+                            {isGu 
+                              ? `💵 રોકડ સ્વીકારો ₹${currentServing.payment.amount || 20} & સત્તાવાર રસીદ આપો` 
+                              : isHi 
+                              ? `💵 नकद राशि ₹${currentServing.payment.amount || 20} स्वीकार करें एवं रसीद दें` 
+                              : `💵 Collect ₹${currentServing.payment.amount || 20} Cash & Issue Official Receipt`}
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="text-[10px] text-emerald-800 font-bold flex items-center gap-1">
+                          <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{isGu ? "ચુકવણી પ્રમાણિત થઈ ચૂકી છે." : isHi ? "भुगतान सत्यापित हो चुका है।" : "Payment verified & reconciled."}</span>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCitizenForReceipt(currentServing)}
+                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-[#003366] border border-[#003366]/30 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+                      >
+                        <Receipt className="w-3.5 h-3.5 text-[#FF9933]" />
+                        <span>{isGu ? "📄 સત્તાવાર e-Challan / રસીદ જુઓ" : isHi ? "📄 आधिकारिक ई-चालान / रसीद देखें" : "📄 View Official e-Challan"}</span>
                       </button>
                     </div>
                   </div>
@@ -1375,17 +1659,78 @@ export default function CounterOperatorDesk() {
                         <p className="text-[11px] text-slate-500 line-clamp-1">
                           {schemeTitle}
                         </p>
+
+                        {/* Payment & Documents Mini Pill Row */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                          {citizen.payment?.status === 'PAID' ? (
+                            <span className="bg-emerald-100 text-emerald-900 font-black text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-300">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-700" />
+                              <span>₹{citizen.payment.amount || 20} {isGu ? "ચૂકતે" : isHi ? "भुगतान पूर्ण" : "Paid"}</span>
+                            </span>
+                          ) : citizen.payment?.status === 'PAY_AT_COUNTER' ? (
+                            <span className="bg-amber-100 text-amber-900 font-black text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1 border border-amber-300">
+                              <Clock className="w-2.5 h-2.5 text-amber-700" />
+                              <span>₹{citizen.payment.amount || 20} {isGu ? "કાઉન્ટર રોકડ" : isHi ? "काउंटर नकद" : "Cash at Counter"}</span>
+                            </span>
+                          ) : (
+                            <span className="bg-blue-100 text-blue-900 font-bold text-[9px] px-2 py-0.5 rounded-full border border-blue-200">
+                              {isGu ? "મફત સેવા (₹૦)" : "Free (₹0)"}
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCitizenForDocs(citizen);
+                            }}
+                            className="bg-white hover:bg-slate-100 text-[#003366] font-bold text-[9.5px] px-2 py-0.5 rounded-lg border border-slate-300 flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                            title={isGu ? "અપલોડ કરેલ સરકારી કાગળો જુઓ" : "View Uploaded Docs"}
+                          >
+                            <FileText className="w-2.5 h-2.5 text-[#005A9C]" />
+                            <span>{isGu ? `દસ્તાવેજો (${citizen.uploadedDocuments?.length || citizen.documents.length})` : `Docs (${citizen.uploadedDocuments?.length || citizen.documents.length})`}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCitizenForReceipt(citizen);
+                            }}
+                            className="bg-white hover:bg-slate-100 text-emerald-800 font-bold text-[9.5px] px-2 py-0.5 rounded-lg border border-slate-300 flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                            title={isGu ? "સત્તાવાર e-Challan રસીદ જુઓ" : "View Official Receipt"}
+                          >
+                            <Receipt className="w-2.5 h-2.5 text-emerald-600" />
+                            <span>{isGu ? "રસીદ" : "Receipt"}</span>
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="text-right shrink-0">
+                      <div className="text-right shrink-0 flex flex-col items-end justify-between">
                         <span className="text-[10px] text-slate-400 font-mono block">
                           {isGu ? "પ્રતીક્ષા:" : isHi ? "प्रतीक्षा:" : "Waiting:"} {citizen.waitingMinutes}m
                         </span>
 
+                        {/* Quick Cash Acceptance if Pay at Counter */}
+                        {citizen.payment?.status === 'PAY_AT_COUNTER' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCollectCounterCash(citizen);
+                            }}
+                            className="mt-1 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white font-black text-[9.5px] px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer"
+                            title={isGu ? "રૂબરૂ રોકડ સ્વીકારી રસીદ આપો" : "Collect Cash"}
+                          >
+                            <Banknote className="w-3 h-3 text-emerald-200" />
+                            <span>{isGu ? "💵 રોકડ સ્વીકારો" : isHi ? "💵 नकद लें" : "💵 Collect Cash"}</span>
+                          </button>
+                        )}
+
                         {!isCurrentlyServing && citizen.status !== 'COMPLETED' && (
                           <button
                             onClick={() => citizen.status === 'SKIPPED' ? handleReCall(citizen) : handleCallNext(citizen)}
-                            className="mt-1.5 bg-[#003366] hover:bg-[#002244] text-white font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition active:scale-95 shadow-xs"
+                            className="mt-1.5 bg-[#003366] hover:bg-[#002244] text-white font-bold text-[10px] px-2.5 py-1 rounded-lg flex items-center gap-1 transition active:scale-95 shadow-xs cursor-pointer"
                           >
                             <span>
                               {citizen.status === 'SKIPPED' 
@@ -1407,72 +1752,403 @@ export default function CounterOperatorDesk() {
 
       </main>
 
-      {/* 📄 1. CITIZEN ORIGINAL DOCUMENTS INSPECTION MODAL */}
-      {docModalOpen && currentServing && (
-        <div 
-          onClick={() => setDocModalOpen(false)}
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 modal-backdrop animate-in fade-in"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full border border-slate-200 shadow-2xl space-y-4"
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#005A9C] flex items-center justify-center">
-                  <FileText className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black text-[#003366]">
-                    {isGu ? "અરજદાર દસ્તાવેજ નિરીક્ષણ (Officer Review)" : isHi ? "आवेदक दस्तावेज़ निरीक्षण (Officer Review)" : "Applicant Document Review & Inspection"}
-                  </h4>
-                  <p className="text-[10px] text-slate-400 font-mono">
-                    {isGu ? "ટોકન:" : isHi ? "टोकन:" : "Token:"} {currentServing.tokenNumber} • {isGu ? currentServing.citizenNameGu : isHi ? currentServing.citizenNameHi : currentServing.citizenNameEn}
-                  </p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setDocModalOpen(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs"
-              >
-                ✕
-              </button>
-            </div>
+      {/* 📄 1. CITIZEN ORIGINAL DOCUMENTS & AI-OCR INSPECTION MODAL */}
+      {(selectedCitizenForDocs || (docModalOpen && currentServing)) && (() => {
+        const activeCitizen = selectedCitizenForDocs || currentServing!;
+        const citizenDocs = (activeCitizen.uploadedDocuments && activeCitizen.uploadedDocuments.length > 0)
+          ? activeCitizen.uploadedDocuments.map(d => ({
+              nameGu: d.nameGu,
+              nameHi: d.nameEn || d.nameGu,
+              nameEn: d.nameEn || d.nameGu,
+              fileUrl: d.fileUrl,
+              uploadedAt: d.uploadedAt,
+              ocrExtractedData: d.ocrExtractedData,
+              status: 'PRE_CHECK_PASSED' as const
+            }))
+          : activeCitizen.documents;
 
-            <div className="space-y-3 text-xs">
-              {currentServing.documents.map((doc, idx) => (
-                <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span className="font-bold text-slate-800">
-                      {isGu ? doc.nameGu : isHi ? doc.nameHi : doc.nameEn}
+        return (
+          <div 
+            onClick={() => {
+              setSelectedCitizenForDocs(null);
+              setDocModalOpen(false);
+            }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto modal-backdrop animate-in fade-in"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95"
+            >
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-[#003366] to-[#005A9C] text-white p-4 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                    <FileText className="w-5 h-5 text-[#FF9933]" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black text-white">
+                      {isGu ? "અરજદાર દસ્તાવેજ & AI ચકાસણી નિરીક્ષણ (Officer Review)" : isHi ? "आवेदक दस्तावेज़ एवं AI सत्यापन समीक्षा" : "Applicant Document & AI OCR Review"}
+                    </h4>
+                    <p className="text-[10px] sm:text-xs text-blue-200 font-mono">
+                      {isGu ? "ટોકન:" : "Token:"} <strong>{activeCitizen.tokenNumber}</strong> • {isGu ? activeCitizen.citizenNameGu : isHi ? activeCitizen.citizenNameHi : activeCitizen.citizenNameEn}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    setSelectedCitizenForDocs(null);
+                    setDocModalOpen(false);
+                  }}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs cursor-pointer transition"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs">
+                
+                {/* AI Automated Pre-check Verdict Card */}
+                <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-emerald-950 flex items-center gap-1.5 text-xs">
+                      <Sparkles className="w-4 h-4 text-emerald-600" />
+                      {isGu ? "AI OCR સ્કેનિંગ & સરકારી નિયમ ચકાસણી પરિણામ" : isHi ? "AI OCR स्कैनिंग एवं सरकारी नियम सत्यापन परिणाम" : "AI OCR Scanning & Regulatory Verdict"}
+                    </span>
+                    <span className="bg-emerald-200 text-emerald-900 font-black text-[10px] px-2 py-0.5 rounded-full">
+                      ✓ {isGu ? "પ્રી-ચેક સફળ (૧૦૦%)" : isHi ? "पूर्व-जांच सफल (100%)" : "Pre-check 100% Passed"}
                     </span>
                   </div>
-                  <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                    {isGu ? "પ્રી-ચેક પાસ (Pre-check Passed)" : isHi ? "पूर्व-जांच सफल (Pre-check Passed)" : "Pre-check Passed"}
-                  </span>
+                  <p className="text-emerald-800 font-medium leading-relaxed text-[11.5px]">
+                    {isGu ? activeCitizen.aiOcrVerdictGu : isHi ? activeCitizen.aiOcrVerdictHi : activeCitizen.aiOcrVerdictEn}
+                  </p>
                 </div>
-              ))}
-            </div>
 
-            <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900">
-              <strong>{isGu ? "અધિકારી સમીક્ષા આવશ્યક:" : isHi ? "अधिकारी समीक्षा आवश्यक:" : "Officer Review Required:"}</strong>{' '}
-              {isGu 
-                ? "આ દસ્તાવેજોનું સિસ્ટમ પ્રી-ચેક (OCR + Rule Engine) પૂર્ણ થયેલ છે. આખરી વહીવટી ખરાઈ અને મંજૂરી સત્તાવાર સરકારી અધિકારી દ્વારા કરવામાં આવે છે."
-                : isHi
-                ? "इन दस्तावेज़ों की प्रणाली पूर्व-जांच (OCR + Rule Engine) पूर्ण हो चुकी है। अंतिम प्रशासनिक सत्यापन एवं स्वीकृति अधिकृत सरकारी अधिकारी द्वारा की जाती है।"
-                : "System pre-check (OCR + Rules) has passed. Final administrative validation and approval is executed by the designated public officer."}
-            </div>
+                {/* Uploaded Documents List with OCR Deep Inspection */}
+                <div className="space-y-3">
+                  <h5 className="font-black text-slate-800 uppercase tracking-wider text-[11px]">
+                    {isGu ? `અપલોડ કરેલ કાગળો અને ડિજિટલ પ્રૂફ (${citizenDocs.length})` : `Uploaded Proofs & AI Extraction (${citizenDocs.length})`}
+                  </h5>
 
-            <button
-              onClick={() => setDocModalOpen(false)}
-              className="w-full bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition"
-            >
-              {isGu ? "નિરીક્ષણ પૂર્ણ (Close Preview)" : isHi ? "निरीक्षण समाप्त (Close Preview)" : "Close Document Preview"}
-            </button>
+                  {citizenDocs.map((doc: any, idx: number) => {
+                    const docName = isGu ? doc.nameGu : isHi ? (doc.nameHi || doc.nameGu) : (doc.nameEn || doc.nameGu);
+                    const ocrData = doc.ocrExtractedData || {
+                      documentType: doc.nameGu.includes('આધાર') ? 'AADHAAR_CARD' : doc.nameGu.includes('આવક') ? 'INCOME_CERTIFICATE' : 'GOVT_CERTIFICATE',
+                      idNumber: doc.nameGu.includes('આધાર') ? `XXXX-XXXX-${activeCitizen.aadhaarLast4 || '8842'}` : `INC-GJ-2026-${Math.floor(100000 + Math.random()*900000)}`,
+                      holderName: isGu ? activeCitizen.citizenNameGu : activeCitizen.citizenNameEn,
+                      confidence: 0.992,
+                      dates: ['01/04/2026', '31/03/2027']
+                    };
+
+                    return (
+                      <div key={idx} className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
+                        <div className="flex items-start justify-between gap-2 border-b border-slate-200/70 pb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-blue-100 text-[#003366] flex items-center justify-center font-bold text-xs">
+                              {idx + 1}
+                            </div>
+                            <div>
+                              <p className="font-black text-slate-900 text-xs">{docName}</p>
+                              <span className="text-[10px] text-slate-500 font-mono">
+                                {doc.uploadedAt ? `અપલોડ: ${new Date(doc.uploadedAt).toLocaleTimeString()}` : 'સિસ્ટમ પ્રી-ચેક વેરિફાઈડ'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <span className="bg-emerald-100 border border-emerald-300 text-emerald-900 font-black text-[9.5px] px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-700" />
+                            <span>{isGu ? "પ્રમાણિત" : isHi ? "प्रमाणित" : "Verified"}</span>
+                          </span>
+                        </div>
+
+                        {/* File Thumbnail & Preview Box */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                          {/* Left: Thumbnail/Preview Container */}
+                          <div className="sm:col-span-1 bg-white border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
+                            {doc.fileUrl ? (
+                              <img 
+                                src={doc.fileUrl} 
+                                alt={docName} 
+                                className="w-full h-24 object-cover rounded-lg border border-slate-100 shadow-2xs" 
+                              />
+                            ) : (
+                              <div className="w-full h-24 bg-gradient-to-br from-blue-50 to-slate-100 rounded-lg border border-dashed border-blue-300 flex flex-col items-center justify-center p-2 text-center">
+                                <GovLogo className="w-8 h-8 drop-shadow-xs" />
+                                <span className="text-[8.5px] font-mono text-slate-600 mt-1 font-bold">DIGITAL RECORD</span>
+                              </div>
+                            )}
+                            <span className="text-[9.5px] text-[#005A9C] font-bold mt-1.5 flex items-center gap-1">
+                              <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                              <span>{isGu ? "સરકારી અધિકૃત" : "Govt Certified"}</span>
+                            </span>
+                          </div>
+
+                          {/* Right: AI OCR Extracted Fields */}
+                          <div className="sm:col-span-2 bg-white border border-slate-200 rounded-xl p-2.5 space-y-1.5">
+                            <span className="text-[9.5px] font-black text-slate-400 uppercase tracking-wider block">
+                              {isGu ? "AI OCR દ્વારા મેળવેલ વિગતો:" : "OCR Extracted Metadata:"}
+                            </span>
+                            
+                            <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+                              <div>
+                                <span className="text-slate-500 text-[10px] block">{isGu ? "દસ્તાવેજ પ્રકાર:" : "Type:"}</span>
+                                <span className="font-mono font-bold text-slate-800">{ocrData.documentType || 'OFFICIAL_PROOF'}</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-500 text-[10px] block">{isGu ? "દસ્તાવેજ ક્રમાંક:" : "ID Number:"}</span>
+                                <span className="font-mono font-black text-[#003366]">{ocrData.idNumber || `GJ-${activeCitizen.aadhaarLast4 || '8842'}`}</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-500 text-[10px] block">{isGu ? "ધારકનું નામ:" : "Holder Name:"}</span>
+                                <span className="font-bold text-slate-800 truncate block">{ocrData.holderName || activeCitizen.citizenNameGu}</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-500 text-[10px] block">{isGu ? "AI ચોકસાઈ (Confidence):" : "Confidence:"}</span>
+                                <span className="font-mono font-black text-emerald-700">
+                                  {ocrData.confidence ? `${(ocrData.confidence * 100).toFixed(1)}%` : '99.4%'} (High)
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Statutory Officer Instruction Note */}
+                <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                  <strong>{isGu ? "અધિકારી સૂચના:" : isHi ? "अधिकारी सूचना:" : "Officer Protocol:"}</strong>{' '}
+                  {isGu 
+                    ? "આ દસ્તાવેજોનું સિસ્ટમ પ્રી-ચેક (AI OCR + Rule Engine) પૂર્ણ થયેલ છે. અસલ કાગળો સાથે રૂબરૂ સરખામણી કરી કાયદેસર અરજી મંજૂર કરવી."
+                    : isHi 
+                    ? "इन दस्तावेज़ों की प्रणाली पूर्व-जांच (AI OCR + Rule Engine) पूर्ण हो चुकी है। मूल प्रतियों से सत्यापन कर आवेदन स्वीकृत करें।"
+                    : "System pre-check (AI OCR + Rule Engine) has passed. Perform physical verification with originals before granting formal approval."}
+                </div>
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-slate-50 p-3.5 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <span className="text-[10px] text-slate-500 font-mono">
+                  QueueLess Verified • {activeCitizen.tokenNumber}
+                </span>
+                <button
+                  onClick={() => {
+                    setSelectedCitizenForDocs(null);
+                    setDocModalOpen(false);
+                  }}
+                  className="bg-[#003366] hover:bg-[#002244] text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs"
+                >
+                  {isGu ? "નિરીક્ષણ પૂર્ણ (Close)" : isHi ? "निरीक्षण समाप्त (Close)" : "Close Review"}
+                </button>
+              </div>
+
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
+
+      {/* 📄 2. OFFICIAL CYBER TREASURY / JAN SEVA E-CHALLAN RECEIPT MODAL */}
+      {selectedCitizenForReceipt && (() => {
+        const citizen = selectedCitizenForReceipt;
+        const challanNo = citizen.payment?.grasChallanNo || citizen.payment?.kacheriChallanNo || 'GRAS/2026/04/991823';
+        const feeAmount = citizen.payment?.amount ?? 20;
+        const citizenName = isGu ? citizen.citizenNameGu : isHi ? citizen.citizenNameHi : citizen.citizenNameEn;
+        const schemeTitle = isGu ? citizen.schemeTitleGu : isHi ? citizen.schemeTitleHi : citizen.schemeTitleEn;
+
+        return (
+          <div 
+            onClick={() => setSelectedCitizenForReceipt(null)}
+            className="fixed inset-0 z-70 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto modal-backdrop animate-in fade-in"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95"
+            >
+              {/* Header */}
+              <div className="bg-[#003366] text-white p-4 flex items-center justify-between border-b border-blue-900 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <GovLogo className="w-8 h-8 drop-shadow-md" />
+                  <div>
+                    <h3 className="text-sm font-black">
+                      {isGu ? 'ગુજરાત સરકાર • સાયબર ટ્રેઝરી ઈ-ચલણ પહોંચ' : isHi ? 'गुजरात सरकार • साइबर ट्रेजरी ई-चालान' : 'Government of Gujarat • Cyber Treasury e-Challan'}
+                    </h3>
+                    <p className="text-[10px] text-blue-200">
+                      Finance Department, Govt of Gujarat • GRAS System
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedCitizenForReceipt(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Printable Receipt Body */}
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-slate-800 bg-white" id="admin-echallan-receipt">
+                
+                {/* Emblem & Treasury Header */}
+                <div className="border-b-2 border-slate-900 pb-3 text-center space-y-1">
+                  <div className="flex justify-center mb-1">
+                    <GovLogo className="w-12 h-12" />
+                  </div>
+                  <h2 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-wide">
+                    GUJARAT CYBER TREASURY & JAN SEVA RECEIPT
+                  </h2>
+                  <p className="text-xs font-bold text-slate-700">
+                    નાણાં વિભાગ, ગુજરાત સરકાર • સત્તાવાર સરકારી ફી પહોંચ
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-mono">
+                    GRAS Port Reference: GJ-GRAS-FIN-2026-TREASURY
+                  </p>
+                </div>
+
+                {/* Challan Meta Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                  <div>
+                    <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Challan / GRAS No.</span>
+                    <p className="font-mono font-black text-[#003366] text-[11px] truncate">
+                      {challanNo}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Token Number</span>
+                    <p className="font-black text-[#FF9933] text-sm">
+                      {citizen.tokenNumber}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Date & Time</span>
+                    <p className="font-mono font-bold text-slate-700 text-[10.5px]">
+                      {new Date().toLocaleDateString('gu-IN')} {citizen.appliedTime}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Payment Status</span>
+                    <span className={`inline-block text-[10px] font-black px-2 py-0.5 rounded-full ${
+                      citizen.payment?.status === 'PAID' 
+                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' 
+                        : citizen.payment?.status === 'PAY_AT_COUNTER'
+                        ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                        : 'bg-emerald-100 text-emerald-900'
+                    }`}>
+                      {citizen.payment?.status === 'PAID' ? 'PAID / SUCCESS' : citizen.payment?.status === 'PAY_AT_COUNTER' ? 'PAY AT COUNTER' : 'NIL (FREE)'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Detailed Receipt Table */}
+                <div className="border border-slate-300 rounded-xl overflow-hidden text-xs">
+                  <table className="w-full text-left border-collapse">
+                    <tbody>
+                      <tr className="border-b border-slate-200 bg-slate-100/70">
+                        <td className="p-2.5 font-bold text-slate-600 w-1/3">નાગરિકનું નામ (Remitter Name)</td>
+                        <td className="p-2.5 font-black text-slate-900">{citizenName}</td>
+                      </tr>
+                      <tr className="border-b border-slate-200">
+                        <td className="p-2.5 font-bold text-slate-600">આધાર કાર્ડ (Aadhaar Reference)</td>
+                        <td className="p-2.5 font-mono font-bold text-slate-800">XXXX-XXXX-{citizen.aadhaarLast4 || '8842'}</td>
+                      </tr>
+                      <tr className="border-b border-slate-200 bg-slate-100/70">
+                        <td className="p-2.5 font-bold text-slate-600">સેવા / યોજના (Service Title)</td>
+                        <td className="p-2.5 font-black text-[#003366]">{schemeTitle}</td>
+                      </tr>
+                      <tr className="border-b border-slate-200">
+                        <td className="p-2.5 font-bold text-slate-600">કચેરી / કેન્દ્ર (Office Location)</td>
+                        <td className="p-2.5 font-bold text-slate-800">
+                          {isGu ? currentTaluka.nameGu : currentTaluka.nameEn}, {isGu ? currentDistrict.nameGu : currentDistrict.nameEn}
+                        </td>
+                      </tr>
+                      <tr className="border-b border-slate-200 bg-slate-100/70">
+                        <td className="p-2.5 font-bold text-slate-600">ફાળવેલ કાઉન્ટર & અધિકારી</td>
+                        <td className="p-2.5 font-bold text-slate-800">
+                          કાઉન્ટર {citizen.counterNumber || selectedCounter} • અધિકારી: શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)
+                        </td>
+                      </tr>
+                      <tr className="border-b border-slate-200">
+                        <td className="p-2.5 font-bold text-slate-600">મહેસૂલ હેડ (Major Head)</td>
+                        <td className="p-2.5 font-mono text-[11px] text-slate-700">0070-60-800-01 (User Fee / Administrative Charges)</td>
+                      </tr>
+                      <tr className="border-b border-slate-200 bg-slate-100/70">
+                        <td className="p-2.5 font-bold text-slate-600">ચુકવણી મોડ (Payment Mode)</td>
+                        <td className="p-2.5 font-bold text-slate-800">
+                          {citizen.payment?.gatewayName || (citizen.payment?.mode === 'CASH_AT_COUNTER' ? 'કચેરી કાઉન્ટર રોકડ ચલણ (Cash at Desk)' : 'Cyber Treasury UPI / NetBanking')}
+                        </td>
+                      </tr>
+                      {citizen.payment?.cyberTreasuryTxnId && (
+                        <tr className="border-b border-slate-200">
+                          <td className="p-2.5 font-bold text-slate-600">ટ્રેઝરી ટ્રાન્ઝેક્શન ID</td>
+                          <td className="p-2.5 font-mono font-bold text-emerald-800">{citizen.payment.cyberTreasuryTxnId}</td>
+                        </tr>
+                      )}
+                      {citizen.payment?.cashierReceiptNo && (
+                        <tr className="border-b border-slate-200">
+                          <td className="p-2.5 font-bold text-slate-600">કાઉન્ટર કેશિયર રસીદ નં.</td>
+                          <td className="p-2.5 font-mono font-bold text-emerald-800">{citizen.payment.cashierReceiptNo}</td>
+                        </tr>
+                      )}
+                      <tr className="bg-emerald-50 text-slate-900 font-bold">
+                        <td className="p-3 text-sm font-black text-emerald-950">કુલ સ્વીકારેલ રકમ (Amount Received)</td>
+                        <td className="p-3 text-base font-black text-emerald-800">
+                          {feeAmount === 0 ? '₹૦ (મફત / Nil Fee)' : `₹${feeAmount}.00`}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Authentication Stamp & QR */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-dashed border-slate-300">
+                  <div className="flex items-center gap-2">
+                    <div className="w-14 h-14 border-2 border-dashed border-emerald-600 rounded-full flex flex-col items-center justify-center text-center p-1 bg-emerald-50 rotate-[-5deg]">
+                      <span className="text-[7.5px] font-black text-emerald-900 leading-none">CYBER TREASURY</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700 my-0.5" />
+                      <span className="text-[7px] font-bold text-emerald-800 leading-none">GOVT GUJARAT</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-700">Digital Treasury Signature Checksum</p>
+                      <p className="text-[9px] font-mono text-slate-500">QL-8F3A29-{citizen.tokenNumber.replace('#','')}</p>
+                      <p className="text-[8.5px] text-emerald-700 font-bold mt-0.5">✓ Tamper-proof Computer Generated e-Receipt</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <p className="text-[10px] font-black text-slate-700">સક્ષમ ટ્રેઝરી અધિકારી / તિજોરી કચેરી</p>
+                    <p className="text-[9px] text-slate-500">Government of Gujarat Cyber Treasury</p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Footer */}
+              <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <button
+                  onClick={() => setSelectedCitizenForReceipt(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+                >
+                  {isGu ? 'બંધ કરો' : 'Close'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    triggerHaptic('success');
+                    window.print();
+                  }}
+                  className="px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#003366] hover:bg-[#002244] text-white flex items-center gap-2 shadow-md transition cursor-pointer active:scale-95"
+                >
+                  <Printer className="w-4 h-4 text-[#FF9933]" />
+                  <span>{isGu ? 'સત્તાવાર e-Challan પ્રિન્ટ કરો' : isHi ? 'ई-चालान प्रिंट करें' : 'Print Official e-Challan'}</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 🔄 2. CROSS-COUNTER FORWARDING MODAL */}
       {transferModalOpen && currentServing && (

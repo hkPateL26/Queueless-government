@@ -28,6 +28,8 @@ import { GovLogo } from '@/components/GovLogo';
 import { Language } from '@/lib/translations';
 import { inspectUploadedFileStrict } from '@/lib/ocr-validator';
 
+import { VerifiedDocumentItem } from '@/lib/slot-engine';
+
 export interface DocVerificationState {
   status: 'idle' | 'scanning' | 'passed' | 'failed';
   extractedDetails?: string;
@@ -42,7 +44,7 @@ interface SchemeDrawerProps {
   onClose: () => void;
   onOpenScanner: () => void;
   isLoggedIn?: boolean;
-  onCollectToken?: (scheme: SchemeItem) => void;
+  onCollectToken?: (scheme: SchemeItem, verifiedDocs?: VerifiedDocumentItem[]) => void;
   lang?: Language;
 }
 
@@ -129,12 +131,24 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
       return;
     }
 
-    // When all mandatory docs are AI verified, proceed to token collection!
+    // When all mandatory docs are AI verified, collect verified documents list
+    const verifiedDocsList: VerifiedDocumentItem[] = scheme.requiredDocs.map(d => {
+      const v = docVerifications[d.nameGu];
+      return {
+        nameGu: d.nameGu,
+        nameEn: d.nameEn,
+        status: (v?.status === 'passed' ? 'passed' : 'pending') as 'passed' | 'pending',
+        fileName: v?.fileName || `${d.nameEn.replace(/[^a-zA-Z0-9]/g, '_')}_Verified.pdf`,
+        extractedDetails: v?.extractedDetails || `${d.nameGu}: Khunt Harkishan Vinodrai • AI પ્રમાણિત`
+      };
+    });
+
     triggerHaptic('success');
     if (onCollectToken) {
-      onCollectToken(scheme);
+      onCollectToken(scheme, verifiedDocsList);
     }
   };
+
 
   const handleRealFileUpload = async (docKey: string, file: File, docNameEn?: string) => {
     triggerHaptic('tap');

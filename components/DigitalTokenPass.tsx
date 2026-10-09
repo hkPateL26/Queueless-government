@@ -6,7 +6,8 @@ import {
   Download, Share2, CheckCircle2, ShieldCheck, Printer,
   Volume2, ArrowRight, RefreshCw, Smartphone, Layers, X,
   Calendar, Navigation, FileCheck2, Star, CheckCircle, Shield,
-  ExternalLink, Bell, Sparkles, MessageSquare, Radio, CalendarX2
+  ExternalLink, Bell, Sparkles, MessageSquare, Radio, CalendarX2,
+  IndianRupee, CreditCard, Receipt, Banknote, Landmark, Check
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -18,6 +19,7 @@ import { GovLogo } from '@/components/GovLogo';
 import { Language } from '@/lib/translations';
 import { getLocalizedSchemeTitle } from '@/lib/scheme-translations';
 import { AuthenticQrCode } from '@/components/AuthenticQrCode';
+import { DEFAULT_CITIZEN_PROFILE } from '@/lib/citizen-profile';
 
 interface DigitalTokenPassProps {
   booking: BookingDetails;
@@ -64,10 +66,11 @@ export function DigitalTokenPass({
   const [smsModalOpen, setSmsModalOpen] = useState<boolean>(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState<boolean>(false);
   const [channelsModalOpen, setChannelsModalOpen] = useState<boolean>(false);
+  const [paymentReceiptModalOpen, setPaymentReceiptModalOpen] = useState<boolean>(false);
   const [smsCopied, setSmsCopied] = useState<boolean>(false);
   const [showDocReminder, setShowDocReminder] = useState<boolean>(false);
 
-  const isAnySubModalOpen = lateModalOpen || rescheduleModalOpen || cancelModalOpen || verifierOpen || smsModalOpen || whatsAppModalOpen || channelsModalOpen;
+  const isAnySubModalOpen = lateModalOpen || rescheduleModalOpen || cancelModalOpen || verifierOpen || smsModalOpen || whatsAppModalOpen || channelsModalOpen || paymentReceiptModalOpen;
 
   // Body scroll lock when any dialog is open
   useEffect(() => {
@@ -630,6 +633,97 @@ export function DigitalTokenPass({
               <span className="block text-[8.5px] text-slate-500 mt-0.5">
                 {isEn ? 'Live Transit Est' : isHi ? 'यात्रा समय अनुमान' : isMr ? 'प्रवास वेळ अंदाज' : 'અંદાજિત મુસાફરી સમય'}
               </span>
+            </div>
+          </div>
+
+          {/* OFFICIAL PAYMENT & E-CHALLAN STATUS SECTION */}
+          <div className="p-3.5 bg-gradient-to-br from-slate-50 to-emerald-50/50 rounded-2xl border-2 border-emerald-300 shadow-xs space-y-2.5">
+            <div className="flex items-center justify-between border-b border-emerald-200/80 pb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                  ₹
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wide">
+                    {isEn ? 'Official Cyber Treasury e-Challan / Payment Status' : isHi ? 'सरकारी ई-चालान / शुल्क भुगतान स्थिति' : 'સરકારી સાયબર ટ્રેઝરી ઈ-ચલણ / ફી ચુકવણી સ્થિતિ'}
+                  </h4>
+                  <p className="text-[10px] text-emerald-800 font-semibold">
+                    {booking.payment?.mode === 'CASH_AT_COUNTER'
+                      ? (isEn ? 'Kacheri Counter Cash Challan' : 'કચેરી કાઉન્ટર રોકડ ચલણ')
+                      : booking.payment?.mode === 'GOVT_EXEMPT_FREE'
+                      ? (isEn ? '100% Free Government Welfare Exemption' : '૧૦૦% સરકારી સબસિડી / મફત સેવા')
+                      : (isEn ? 'Gujarat Cyber Treasury (GRAS Authorized)' : 'ગુજરાત સાયબર ટ્રેઝરી (GRAS અધિકૃત)')}
+                  </p>
+                </div>
+              </div>
+
+              {booking.payment?.status === 'PAID' ? (
+                <span className="bg-emerald-100 border border-emerald-300 text-emerald-900 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>{isEn ? 'PAID ONLINE' : isHi ? 'सत्यापित (PAID)' : 'ચૂકતે (PAID)'}</span>
+                </span>
+              ) : booking.payment?.status === 'PAY_AT_COUNTER' ? (
+                <span className="bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-amber-700" />
+                  <span>{isEn ? 'PAY AT COUNTER' : isHi ? 'काउंटर पर भुगतान' : 'કાઉન્ટર પર ચુકવણી'}</span>
+                </span>
+              ) : (
+                <span className="bg-emerald-100 border border-emerald-300 text-emerald-900 text-[10px] font-black px-2.5 py-1 rounded-full">
+                  {isEn ? 'NIL FEE (FREE)' : 'મફત (₹૦)'}
+                </span>
+              )}
+            </div>
+
+            {/* Challan details */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <div className="bg-white p-2 rounded-xl border border-emerald-200">
+                <span className="text-[9.5px] text-slate-500 font-bold block">{isEn ? 'Challan / Ref No:' : 'ચલણ / રેફરન્સ નંબર:'}</span>
+                <p className="font-mono font-black text-[#003366] text-[11px] truncate">
+                  {booking.payment?.grasChallanNo || booking.payment?.kacheriChallanNo || `GRAS/2026/04/991823`}
+                </p>
+              </div>
+
+              <div className="bg-white p-2 rounded-xl border border-emerald-200">
+                <span className="text-[9.5px] text-slate-500 font-bold block">{isEn ? 'Govt Statutory Fee:' : 'સરકારી નિયત ફી:'}</span>
+                <p className="font-black text-emerald-700 text-xs">
+                  {booking.payment?.amount === 0 ? (isEn ? '₹0 (Free)' : '₹૦ (મફત)') : `₹${booking.payment?.amount ?? (scheme?.fee ?? 20)}`}
+                </p>
+              </div>
+
+              <div className="bg-white p-2 rounded-xl border border-emerald-200">
+                <span className="text-[9.5px] text-slate-500 font-bold block">{isEn ? 'Payment Method:' : 'ચુકવણી પદ્ધતિ:'}</span>
+                <p className="font-bold text-slate-800 text-[11px] truncate">
+                  {booking.payment?.gatewayName || (booking.payment?.mode === 'CASH_AT_COUNTER' ? 'કચેરી કાઉન્ટર રોકડ' : 'Cyber Treasury UPI / QR')}
+                </p>
+              </div>
+            </div>
+
+            {/* Pay at counter instructions if applicable */}
+            {booking.payment?.status === 'PAY_AT_COUNTER' && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-2 text-[10.5px] text-amber-900 font-bold flex items-center gap-2">
+                <Banknote className="w-4 h-4 text-amber-700 shrink-0" />
+                <span>
+                  {booking.payment.instructionsGu || `કાઉન્ટર પર ટોકન વારો આવે ત્યારે અધિકારીને રૂબરૂ ₹${booking.payment.amount} રોકડ જમા કરાવો અને સત્તાવાર રસીદ મેળવો.`}
+                </span>
+              </div>
+            )}
+
+            {/* View Official Payment Receipt Button */}
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <span className="text-[9.5px] text-slate-500 font-medium">
+                {isEn ? 'Official GRAS receipt with Treasury seal' : 'સાયબર ટ્રેઝરી અધિકૃત સરકારી ડિજિટલ રસીદ'}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setPaymentReceiptModalOpen(true);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-[#003366] hover:bg-[#002244] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer"
+              >
+                <Receipt className="w-3.5 h-3.5 text-[#FF9933]" />
+                <span>{isEn ? 'View / Print e-Challan Receipt' : isHi ? 'ई-चालान रसीद देखें' : 'સત્તાવાર e-Challan રસીદ જુઓ'}</span>
+              </button>
             </div>
           </div>
 
@@ -1311,6 +1405,196 @@ export function DigitalTokenPass({
                 {isEn ? 'Close Assistant' : isHi ? 'सहायक बंद करें' : isMr ? 'सहाय्यक बंद करा' : 'બંધ કરો (Close Assistant)'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* OFFICIAL GOVERNMENT CYBER TREASURY / JAN SEVA E-CHALLAN RECEIPT MODAL */}
+      {paymentReceiptModalOpen && (
+        <div 
+          onClick={() => setPaymentReceiptModalOpen(false)}
+          className="fixed inset-0 z-70 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto modal-backdrop animate-in fade-in duration-200"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95"
+          >
+            {/* MODAL HEADER */}
+            <div className="bg-[#003366] text-white p-4 flex items-center justify-between border-b border-blue-900 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <GovLogo className="w-8 h-8 drop-shadow-md" />
+                <div>
+                  <h3 className="text-sm font-black">
+                    {isEn ? 'Government of Gujarat • Cyber Treasury e-Challan' : isHi ? 'गुजरात सरकार • साइबर ट्रेजरी ई-चालान' : 'ગુજરાત સરકાર • સાયબર ટ્રેઝરી ઈ-ચલણ રસીદ'}
+                  </h3>
+                  <p className="text-[10px] text-blue-200">
+                    Finance Department, Govt of Gujarat • GRAS System
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPaymentReceiptModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* PRINTABLE RECEIPT CONTENT */}
+            <div className="p-4 sm:p-6 overflow-y-auto modal-scroll-area space-y-4 text-slate-800 bg-white" id="official-echallan-receipt">
+              
+              {/* EMBLEM & TREASURY HEADER */}
+              <div className="border-b-2 border-slate-900 pb-3 text-center space-y-1">
+                <div className="flex justify-center mb-1">
+                  <GovLogo className="w-12 h-12" />
+                </div>
+                <h2 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-wide">
+                  GUJARAT CYBER TREASURY & JAN SEVA RECEIPT
+                </h2>
+                <p className="text-xs font-bold text-slate-700">
+                  નાણાં વિભાગ, ગુજરાત સરકાર • સત્તાવાર સરકારી ફી પહોંચ
+                </p>
+                <p className="text-[10px] text-slate-500 font-mono">
+                  GRAS Port Reference: GJ-GRAS-FIN-2026-TREASURY
+                </p>
+              </div>
+
+              {/* CHALLAN META GRID */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                <div>
+                  <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Challan / GRAS No.</span>
+                  <p className="font-mono font-black text-[#003366] text-[11px] truncate">
+                    {booking.payment?.grasChallanNo || booking.payment?.kacheriChallanNo || 'GRAS/2026/04/991823'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Token Number</span>
+                  <p className="font-black text-[#FF9933] text-sm">
+                    {booking.tokenNumber}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Date & Time</span>
+                  <p className="font-mono font-bold text-slate-700 text-[10.5px]">
+                    {booking.date}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[9.5px] font-bold text-slate-500 block uppercase">Payment Status</span>
+                  <span className={`inline-block text-[10px] font-black px-2 py-0.5 rounded-full ${
+                    booking.payment?.status === 'PAID' 
+                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' 
+                      : booking.payment?.status === 'PAY_AT_COUNTER'
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                      : 'bg-emerald-100 text-emerald-900'
+                  }`}>
+                    {booking.payment?.status === 'PAID' ? 'PAID / SUCCESS' : booking.payment?.status === 'PAY_AT_COUNTER' ? 'PAY AT COUNTER' : 'NIL (FREE)'}
+                  </span>
+                </div>
+              </div>
+
+              {/* DETAILED RECEIPT TABLE */}
+              <div className="border border-slate-300 rounded-xl overflow-hidden text-xs">
+                <table className="w-full text-left border-collapse">
+                  <tbody>
+                    <tr className="border-b border-slate-200 bg-slate-100/70">
+                      <td className="p-2.5 font-bold text-slate-600 w-1/3">નાગરિકનું નામ (Remitter Name)</td>
+                      <td className="p-2.5 font-black text-slate-900">{citizenName}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2.5 font-bold text-slate-600">આધાર કાર્ડ (Aadhaar Reference)</td>
+                      <td className="p-2.5 font-mono font-bold text-slate-800">{DEFAULT_CITIZEN_PROFILE.aadhaarMasked}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200 bg-slate-100/70">
+                      <td className="p-2.5 font-bold text-slate-600">સેવા / યોજના (Service Title)</td>
+                      <td className="p-2.5 font-black text-[#003366]">{scheme ? scheme.titleGu : 'સરકારી જન સેવા'}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2.5 font-bold text-slate-600">કચેરી / કેન્દ્ર (Office Location)</td>
+                      <td className="p-2.5 font-bold text-slate-800">{centerName} ({booking.district.nameGu})</td>
+                    </tr>
+                    <tr className="border-b border-slate-200 bg-slate-100/70">
+                      <td className="p-2.5 font-bold text-slate-600">ફાળવેલ કાઉન્ટર & અધિકારી</td>
+                      <td className="p-2.5 font-bold text-slate-800">
+                        કાઉન્ટર {booking.counterNumber} ({booking.counterNameGu || booking.counterNameEn}) • અધિકારી: {booking.officerName}
+                      </td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2.5 font-bold text-slate-600">મહેસૂલ હેડ (Major Head)</td>
+                      <td className="p-2.5 font-mono text-[11px] text-slate-700">0070-60-800-01 (User Fee / Administrative Charges)</td>
+                    </tr>
+                    <tr className="border-b border-slate-200 bg-slate-100/70">
+                      <td className="p-2.5 font-bold text-slate-600">ચુકવણી મોડ (Payment Mode)</td>
+                      <td className="p-2.5 font-bold text-slate-800">
+                        {booking.payment?.gatewayName || (booking.payment?.mode === 'CASH_AT_COUNTER' ? 'કચેરી કાઉન્ટર રોકડ ચલણ (Cash at Desk)' : 'Cyber Treasury UPI / NetBanking')}
+                      </td>
+                    </tr>
+                    {booking.payment?.cyberTreasuryTxnId && (
+                      <tr className="border-b border-slate-200">
+                        <td className="p-2.5 font-bold text-slate-600">ટ્રેઝરી ટ્રાન્ઝેક્શન ID</td>
+                        <td className="p-2.5 font-mono font-bold text-emerald-800">{booking.payment.cyberTreasuryTxnId}</td>
+                      </tr>
+                    )}
+                    {booking.payment?.cashierReceiptNo && (
+                      <tr className="border-b border-slate-200">
+                        <td className="p-2.5 font-bold text-slate-600">કાઉન્ટર કેશિયર રસીદ નં.</td>
+                        <td className="p-2.5 font-mono font-bold text-emerald-800">{booking.payment.cashierReceiptNo}</td>
+                      </tr>
+                    )}
+                    <tr className="bg-emerald-50 text-slate-900 font-bold">
+                      <td className="p-3 text-sm font-black text-emerald-950">કુલ સ્વીકારેલ રકમ (Amount Received)</td>
+                      <td className="p-3 text-base font-black text-emerald-800">
+                        {booking.payment?.amount === 0 ? '₹૦ (મફત / Nil Fee)' : `₹${booking.payment?.amount ?? (scheme?.fee ?? 20)}.00`}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* AUTHENTICATION STAMP & QR */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-dashed border-slate-300">
+                <div className="flex items-center gap-2">
+                  <div className="w-14 h-14 border-2 border-dashed border-emerald-600 rounded-full flex flex-col items-center justify-center text-center p-1 bg-emerald-50 rotate-[-5deg]">
+                    <span className="text-[7.5px] font-black text-emerald-900 leading-none">CYBER TREASURY</span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700 my-0.5" />
+                    <span className="text-[7px] font-bold text-emerald-800 leading-none">GOVT GUJARAT</span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-700">Digital Treasury Signature Checksum</p>
+                    <p className="text-[9px] font-mono text-slate-500">{signatureChecksum}</p>
+                    <p className="text-[8.5px] text-emerald-700 font-bold mt-0.5">✓ Tamper-proof Computer Generated e-Receipt</p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <p className="text-[10px] font-black text-slate-700">સક્ષમ ટ્રેઝરી અધિકારી / તિજોરી કચેરી</p>
+                  <p className="text-[9px] text-slate-500">Government of Gujarat Cyber Treasury</p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* MODAL FOOTER BUTTONS */}
+            <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+              <button
+                onClick={() => setPaymentReceiptModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+              >
+                {isEn ? 'Close' : 'બંધ કરો'}
+              </button>
+
+              <button
+                onClick={() => {
+                  triggerHaptic('success');
+                  window.print();
+                }}
+                className="px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#003366] hover:bg-[#002244] text-white flex items-center gap-2 shadow-md transition cursor-pointer active:scale-95"
+              >
+                <Printer className="w-4 h-4 text-[#FF9933]" />
+                <span>{isEn ? 'Print Official e-Challan' : isHi ? 'ई-चालान प्रिंट करें' : 'સત્તાવાર e-Challan પ્રિન્ટ કરો'}</span>
+              </button>
+            </div>
+
           </div>
         </div>
       )}

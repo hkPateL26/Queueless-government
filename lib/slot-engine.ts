@@ -12,6 +12,49 @@ export type BookingStatus =
 
 export type QueueEstimate = 'Low' | 'Moderate' | 'High' | 'Closed';
 
+export interface VerifiedDocumentItem {
+  nameGu: string;
+  nameEn: string;
+  nameHi?: string;
+  status: 'passed' | 'failed' | 'pending' | 'PRE_CHECK_PASSED';
+  fileName?: string;
+  fileUrl?: string;
+  extractedDetails?: string;
+  qualityScore?: number;
+  aiVerdict?: string;
+  uploadedAt?: string;
+  ocrExtractedData?: {
+    documentType?: string;
+    idNumber?: string;
+    holderName?: string;
+    confidence?: number;
+    dates?: string[];
+  };
+}
+
+export interface GovernmentPaymentRecord {
+  mode: 'ONLINE_CYBER_TREASURY' | 'CASH_AT_COUNTER' | 'GOVT_EXEMPT_FREE' | 'PAY_AT_COUNTER';
+  amount: number;
+  status: 'PAID' | 'PAY_AT_COUNTER' | 'PENDING_AT_COUNTER' | 'FREE' | 'GOVT_EXEMPT_FREE';
+  transactionId?: string;
+  cyberTreasuryTxnId?: string;
+  grasChallanNo?: string;
+  kacheriChallanNo?: string;
+  cashierReceiptNo?: string;
+  challanNumber?: string;
+  paidAt?: string;
+  paymentMethod?: 'UPI' | 'DEBIT_CARD' | 'NET_BANKING' | 'CASH' | 'EXEMPT' | string;
+  payerName?: string;
+  receiptNumber?: string;
+  cashierOfficerName?: string;
+  cashCollectedAt?: string;
+  qrPayload?: string;
+  gatewayName?: string;
+  instructionsGu?: string;
+  instructionsEn?: string;
+  instructionsHi?: string;
+}
+
 export interface TimeSlot {
   id: string;
   timeRange: string;
@@ -27,6 +70,7 @@ export interface TimeSlot {
   statusGu: string;
   statusEn: string;
 }
+
 
 export interface GazetteHoliday {
   date: string; // 'YYYY-MM-DD'
