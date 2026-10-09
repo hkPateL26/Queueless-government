@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  X, Search, Volume2, Clock, Building, Users, CheckCircle2, 
+  X, Search, Volume2, VolumeX, Clock, Building, Users, CheckCircle2, 
   ArrowRight, Ticket, AlertCircle, ShieldCheck, QrCode
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
-import { speakGuidance } from '@/lib/voice';
+import { speakGuidance, stopVoice, isVoiceSpeaking } from '@/lib/voice';
 import { Language, t } from '@/lib/translations';
 import { BookingDetails } from '@/components/SlotBookingModal';
 import { CardSkeleton } from '@/components/ui/Skeleton';
@@ -31,34 +31,61 @@ interface MockTokenInfo {
   status: 'called' | 'waiting' | 'in_service' | 'completed';
 }
 
-const PRESET_TOKENS: Record<string, MockTokenInfo> = {
-  'A-42': {
-    token: 'A-42',
-    name: 'હરિ પટેલ (Hari Patel)',
-    center: 'ગોંડલ જન સેવા કેન્દ્ર — રાજકોટ',
-    counter: 'કાઉન્ટર ૧ (આવક/જાતિ સેવા)',
-    ahead: 2,
-    estMinutes: 8,
-    status: 'waiting'
-  },
-  'B-1247': {
-    token: 'B-1247',
-    name: 'પ્રવીણભાઈ શાહ (Pravinbhai Shah)',
-    center: 'મામલતદાર કચેરી — ગાંધીનગર પશ્ચિમ',
-    counter: 'કાઉન્ટર ૩ (રેવન્યુ દસ્તાવેજ)',
-    ahead: 0,
-    estMinutes: 3,
-    status: 'called'
-  },
-  'C-809': {
-    token: 'C-809',
-    name: 'ગીતાબેન વાઘેલા (Geetaben Vaghela)',
-    center: 'તાલુકા પંચાયત — સુરત સચિન',
-    counter: 'કાઉન્ટર ૨ (આધાર/રેશનકાર્ડ)',
-    ahead: 5,
-    estMinutes: 18,
-    status: 'waiting'
+const getLocalizedTokenData = (cleanQuery: string, l: Language, activeBooking: BookingDetails | null): MockTokenInfo => {
+  const isEn = l === 'en';
+  const isHi = l === 'hi';
+  const isMr = l === 'mr';
+  const isGu = l === 'gu' || l === 'khi';
+
+  if (cleanQuery === 'A-42') {
+    return {
+      token: 'A-42',
+      name: isEn ? 'Hari Patel' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'હરિ પટેલ',
+      center: isEn ? 'Gondal Jan Seva Kendra — Rajkot' : isHi ? 'गोंडल जन सेवा केंद्र — राजकोट' : isMr ? 'गोंडल जन सेवा केंद्र — राजकोट' : 'ગોંડલ જન સેવા કેન્દ્ર — રાજકોટ',
+      counter: isEn ? 'Counter 1 (Income/Caste Service)' : isHi ? 'काउंटर १ (आय/जाति सेवा)' : isMr ? 'काउंटर १ (उत्पन्न/जात दाखले)' : 'કાઉન્ટર ૧ (આવક/જાતિ સેવા)',
+      ahead: 2,
+      estMinutes: 8,
+      status: 'waiting'
+    };
   }
+
+  if (cleanQuery === 'B-1247') {
+    return {
+      token: 'B-1247',
+      name: isEn ? 'Pravinbhai Shah' : isHi ? 'प्रवीणभाई शाह' : isMr ? 'प्रवीणभाई शाह' : 'પ્રવીણભાઈ શાહ',
+      center: isEn ? 'Mamlatdar Office — Gandhinagar West' : isHi ? 'मामलतदार कार्यालय — गांधीनगर पश्चिम' : isMr ? 'मामलतदार कार्यालय — गांधीनगर पश्चिम' : 'મામલતદાર કચેરી — ગાંધીનગર પશ્ચિમ',
+      counter: isEn ? 'Counter 3 (Revenue Documents)' : isHi ? 'काउंटर ३ (राजस्व दस्तावेज़)' : isMr ? 'काउंटर ३ (महसूल कागदपत्रे)' : 'કાઉન્ટર ૩ (રેવન્યુ દસ્તાવેજ)',
+      ahead: 0,
+      estMinutes: 3,
+      status: 'called'
+    };
+  }
+
+  if (cleanQuery === 'C-809') {
+    return {
+      token: 'C-809',
+      name: isEn ? 'Geetaben Vaghela' : isHi ? 'गीताबेन वाघेला' : isMr ? 'गीताबेन वाघेला' : 'ગીતાબેન વાઘેલા',
+      center: isEn ? 'Taluka Panchayat — Surat Sachin' : isHi ? 'तहसील पंचायत — सूरत सचिन' : isMr ? 'तालुका पंचायत — सुरत सचिन' : 'તાલુકા પંચાયત — સુરત સચિન',
+      counter: isEn ? 'Counter 2 (Aadhaar/Ration Card)' : isHi ? 'काउंटर २ (आधार/राशन कार्ड)' : isMr ? 'काउंटर २ (आधार/रेशन कार्ड)' : 'કાઉન્ટર ૨ (આધાર/રેશનકાર્ડ)',
+      ahead: 5,
+      estMinutes: 18,
+      status: 'waiting'
+    };
+  }
+
+  return {
+    token: cleanQuery || 'A-42',
+    name: activeBooking ? (isEn ? 'Citizen' : isHi ? 'नागरिक' : isMr ? 'नागरिक' : 'નાગરિક') : (isEn ? 'Verified Citizen' : isHi ? 'सत्यापित नागरिक' : isMr ? 'सत्यापित नागरिक' : 'પ્રમાણિત નાગરિક'),
+    center: activeBooking 
+      ? (isEn ? `${activeBooking.taluka.officeNameEn || activeBooking.taluka.officeNameGu}` : `${activeBooking.taluka.officeNameGu}`) 
+      : (isEn ? 'Gondal Jan Seva Kendra — Rajkot' : isHi ? 'गोंडल जन सेवा केंद्र — राजकोट' : isMr ? 'गोंडल जन सेवा केंद्र — राजकोट' : 'ગોંડલ જન સેવા કેન્દ્ર — રાજકોટ'),
+    counter: activeBooking 
+      ? `${isEn ? 'Counter' : isHi ? 'काउंटर' : isMr ? 'काउंटर' : 'કાઉન્ટર'} ${activeBooking.counterNumber}` 
+      : (isEn ? 'Counter 1 (General Desk)' : isHi ? 'काउंटर १ (सामान्य सेवा)' : isMr ? 'काउंटर १ (सामान्य सेवा)' : 'કાઉન્ટર ૧ (સામાન્ય સેવા)'),
+    ahead: 3,
+    estMinutes: 11,
+    status: 'waiting'
+  };
 };
 
 export function TokenTrackerModal({
@@ -76,6 +103,7 @@ export function TokenTrackerModal({
   const [tokenInput, setTokenInput] = useState(initialToken);
   const [searchToken, setSearchToken] = useState(initialToken);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
   const isKhi = lang === 'khi';
   const isGu = lang === 'gu' || lang === 'khi';
@@ -84,28 +112,19 @@ export function TokenTrackerModal({
   const isEn = lang === 'en';
 
   // Body scroll lock on modal open
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       const orig = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
         document.body.style.overflow = orig;
+        stopVoice();
       };
     }
   }, [isOpen]);
 
   const cleanQuery = searchToken.trim().toUpperCase().replace('#', '');
-  
-  // Lookup from presets or generate dynamic result
-  const tokenData: MockTokenInfo = PRESET_TOKENS[cleanQuery] || {
-    token: cleanQuery || 'A-42',
-    name: activeBooking ? (isMr ? 'नागरिक (Citizen)' : 'નાગરિક (Citizen)') : (isMr ? 'नोंदणीकृत नागरिक (Verified Citizen)' : 'નોંધાયેલ નાગરિક (Verified Citizen)'),
-    center: activeBooking ? `${activeBooking.taluka.nameGu} કચેરી` : 'ગોંડલ જન સેવા કેન્દ્ર — રાજકોટ',
-    counter: activeBooking ? `કાઉન્ટર ${activeBooking.counterNumber}` : 'કાઉન્ટર ૧ (સામાન્ય સેવા)',
-    ahead: 3,
-    estMinutes: 11,
-    status: 'waiting'
-  };
+  const tokenData = getLocalizedTokenData(cleanQuery, lang, activeBooking);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,21 +150,31 @@ export function TokenTrackerModal({
 
   const handleVoiceCall = () => {
     triggerHaptic('tap');
-    const msg = isKhi
-      ? `ટોકન નંબર ${tokenData.token}, કૃપા કરી ${tokenData.counter} તે વેણ્યો.`
-      : isGu
-      ? `ટોકન નંબર ${tokenData.token}, કૃપા કરીને ${tokenData.counter} પર પધારો.`
-      : isMr
-      ? `टोकन क्रमांक ${tokenData.token}, कृपया ${tokenData.counter} वर यावे.`
-      : isHi
-      ? `टोकन संख्या ${tokenData.token}, कृपया ${tokenData.counter} पर पधारें।`
-      : `Token number ${tokenData.token}, please proceed to ${tokenData.counter}.`;
-    speakGuidance(msg, lang);
+    if (isVoiceSpeaking()) {
+      stopVoice();
+      setIsSpeaking(false);
+    } else {
+      const msg = isKhi
+        ? `ટોકન નંબર ${tokenData.token}, કૃપા કરી ${tokenData.counter} તે વેણ્યો.`
+        : isGu
+        ? `ટોકન નંબર ${tokenData.token}, કૃપા કરીને ${tokenData.counter} પર પધારો.`
+        : isMr
+        ? `टोकन क्रमांक ${tokenData.token}, कृपया ${tokenData.counter} वर यावे.`
+        : isHi
+        ? `टोकन संख्या ${tokenData.token}, कृपया ${tokenData.counter} पर पधारें।`
+        : `Token number ${tokenData.token}, please proceed to ${tokenData.counter}.`;
+      
+      setIsSpeaking(true);
+      speakGuidance(msg, lang, () => setIsSpeaking(false));
+    }
   };
 
   return (
     <div 
-      onClick={onClose}
+      onClick={() => {
+        stopVoice();
+        onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden modal-backdrop animate-in fade-in duration-200"
     >
       <div 
@@ -175,6 +204,7 @@ export function TokenTrackerModal({
           <button
             onClick={() => {
               triggerHaptic('tap');
+              stopVoice();
               onClose();
             }}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
@@ -258,9 +288,9 @@ export function TokenTrackerModal({
                 #{tokenData.token}
               </h3>
               <p className="text-xs font-bold text-slate-700 mt-1">
-                {tokenData.token === 'A-42' ? (isGu ? 'હરિ પટેલ' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'Hari Patel') : tokenData.name}
+                {tokenData.name}
               </p>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 font-medium">
                 {tokenData.center}
               </p>
             </div>
@@ -283,10 +313,10 @@ export function TokenTrackerModal({
               </div>
             </div>
 
-            <div className="bg-blue-50/80 border border-blue-200 rounded-xl p-3 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-[#005A9C]" />
-                <span className="text-slate-700 font-medium">
+            <div className="bg-blue-50/80 border border-blue-200 rounded-xl p-3 flex items-center justify-between text-xs gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <Users className="w-4 h-4 text-[#005A9C] shrink-0" />
+                <span className="text-slate-700 font-medium truncate">
                   {tokenData.ahead === 0 
                     ? (isGu ? 'તમારો વારો આવી ગયો છે!' : isMr ? 'तुमचा नंबर आला आहे!' : isHi ? 'आपकी बारी आ चुकी है!' : 'Your turn is now!') 
                     : (isGu ? `તમારા આગળ માત્ર ${tokenData.ahead} નાગરિકો છે.` : isMr ? `तुमच्या पुढे फक्त ${tokenData.ahead} नागरिक आहेत.` : isHi ? `आपके आगे केवल ${tokenData.ahead} नागरिक हैं।` : `${tokenData.ahead} citizens ahead of you.`)}
@@ -294,11 +324,19 @@ export function TokenTrackerModal({
               </div>
               <button
                 onClick={handleVoiceCall}
-                className="px-2.5 py-1 rounded-lg bg-white border border-blue-300 text-[#003366] font-bold hover:bg-blue-100 flex items-center gap-1 transition active:scale-95 cursor-pointer text-[11px]"
+                className={`px-2.5 py-1 rounded-lg border font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer text-[11px] shrink-0 ${
+                  isSpeaking
+                    ? 'bg-rose-500 text-white border-rose-600 animate-pulse'
+                    : 'bg-white border-blue-300 text-[#003366] hover:bg-blue-100'
+                }`}
                 title="ઓડિયો સાંભળો / Audio Announcement"
               >
-                <Volume2 className="w-3.5 h-3.5 text-[#FF9933]" />
-                <span>{isGu ? 'જાહેરાત' : isMr ? 'घोषणा' : isHi ? 'घोषणा' : 'Audio'}</span>
+                {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-[#FF9933]" />}
+                <span>
+                  {isSpeaking
+                    ? (isEn ? 'Stop' : isHi ? 'रोकें' : isMr ? 'थांबवा' : 'બંધ કરો')
+                    : (isGu ? 'જાહેરાત' : isMr ? 'घोषणा' : isHi ? 'घोषणा' : 'Audio')}
+                </span>
               </button>
             </div>
           </div>
@@ -310,6 +348,7 @@ export function TokenTrackerModal({
           <button
             onClick={() => {
               triggerHaptic('tap');
+              stopVoice();
               onClose();
               onViewRadar();
             }}
@@ -324,6 +363,7 @@ export function TokenTrackerModal({
           <button
             onClick={() => {
               triggerHaptic('tap');
+              stopVoice();
               onClose();
               onBookSlot();
             }}

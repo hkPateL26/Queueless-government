@@ -120,7 +120,14 @@ export function DigitalTokenPass({
         triggerHaptic('success');
         triggerHapticNotification();
         playNotificationChime();
-        speakGuidance(`ધ્યાન આપો, કાઉન્ટર ${booking.counterNumber} પર ટોકન નંબર ${booking.tokenNumber} નો વારો આવી ગયો છે.`);
+        speakGuidance(
+          lang === 'hi' ? `कृपया ध्यान दें, काउंटर ${booking.counterNumber} पर टोकन नंबर ${booking.tokenNumber} की बारी आ गई है।` :
+          lang === 'mr' ? `कृपया लक्ष द्या, काउंटर ${booking.counterNumber} वर टोकन क्रमांक ${booking.tokenNumber} ची पाळी आली आहे.` :
+          lang === 'en' ? `Attention please, Token number ${booking.tokenNumber} is now being served at Counter ${booking.counterNumber}.` :
+          lang === 'khi' ? `ધ્યાન ડિયો, કાઉન્ટર ${booking.counterNumber} તે ટોકન નંબર ${booking.tokenNumber} જો વારો અચી વ્યો આય.` :
+          `ધ્યાન આપો, કાઉન્ટર ${booking.counterNumber} પર ટોકન નંબર ${booking.tokenNumber} નો વારો આવી ગયો છે.`,
+          lang
+        );
       }
     });
 
@@ -128,7 +135,7 @@ export function DigitalTokenPass({
       clearInterval(interval);
       unsubscribe();
     };
-  }, [booking, scheme, citizenName, selectedDate, currentStatus, currentSlotTime]);
+  }, [booking, scheme, citizenName, selectedDate, currentStatus, currentSlotTime, lang]);
 
   // Handle Running Late with chosen delay (Requirement 13)
   const handleApplyRunningLate = (minutes: number) => {
@@ -162,7 +169,14 @@ export function DigitalTokenPass({
     });
 
     setLateModalOpen(false);
-    speakGuidance(`તમારો સમય ${minutes} મિનિટ આગળ ખસેડવામાં આવ્યો છે. કાઉન્ટર અધિકારીને જાણ થઈ ગઈ છે.`);
+    speakGuidance(
+      lang === 'hi' ? `आपका समय ${minutes} मिनट आगे बढ़ाया गया है। काउंटर अधिकारी को सूचित कर दिया गया है।` :
+      lang === 'mr' ? `आपली वेळ ${minutes} मिनिटे पुढे ढकलण्यात आली आहे. काउंटर अधिकाऱ्याला सूचित केले गेले आहे.` :
+      lang === 'en' ? `Your time slot has been extended by ${minutes} minutes. The desk officer has been notified.` :
+      lang === 'khi' ? `તમોજો વગત ${minutes} મિનિટ અગતે ખસેડ્યો આય. કાઉન્ટર અધિકારી કે જાણ થી વી આય.` :
+      `તમારો સમય ${minutes} મિનિટ આગળ ખસેડવામાં આવ્યો છે. કાઉન્ટર અધિકારીને જાણ થઈ ગઈ છે.`,
+      lang
+    );
   };
 
   // Handle Reschedule (Requirement 14)
@@ -171,7 +185,14 @@ export function DigitalTokenPass({
     setCurrentSlotTime(rescheduleSlotTime);
     setCurrentStatus('RESCHEDULED');
     setRescheduleModalOpen(false);
-    speakGuidance("તમારી અપોઇન્ટમેન્ટ સફળતાપૂર્વક રિશિડ્યુલ થઈ ગઈ છે.");
+    speakGuidance(
+      lang === 'hi' ? "आपकी अपॉइंटमेंट सफलतापूर्वक पुनर्निर्धारित हो गई है।" :
+      lang === 'mr' ? "आपली अपॉइंटमेंट यशस्वीरीत्या पुन्हा नियोजित झाली आहे." :
+      lang === 'en' ? "Your appointment has been successfully rescheduled." :
+      lang === 'khi' ? "તમોજી અપોઇન્ટમેન્ટ સફળતાપૂર્વક રિશિડ્યુલ થી વી આય." :
+      "તમારી અપોઇન્ટમેન્ટ સફળતાપૂર્વક રિશિડ્યુલ થઈ ગઈ છે.",
+      lang
+    );
   };
 
   // Handle Cancellation (Requirement 14)
@@ -179,26 +200,75 @@ export function DigitalTokenPass({
     triggerHaptic('warning');
     setCurrentStatus('CANCELLED');
     setCancelModalOpen(false);
-    speakGuidance("તમારી અપોઇન્ટમેન્ટ રદ કરવામાં આવી છે. સ્લોટ મુક્ત થયો છે.");
+    speakGuidance(
+      lang === 'hi' ? "आपकी अपॉइंटमेंट रद्द कर दी गई है। स्लॉट मुक्त हो गया है।" :
+      lang === 'mr' ? "आपली अपॉइंटमेंट रद्द करण्यात आली आहे. स्लॉट आता मोकळा झाला आहे." :
+      lang === 'en' ? "Your appointment has been cancelled. The slot has been released." :
+      lang === 'khi' ? "તમોજી અપોઇન્ટમેન્ટ રદ થી વી આય." :
+      "તમારી અપોઇન્ટમેન્ટ રદ કરવામાં આવી છે. સ્લોટ મુક્ત થયો છે.",
+      lang
+    );
   };
 
   const handleDownload = () => {
     triggerHaptic('success');
-    speakGuidance("ટોકન પાસ પ્રિન્ટ થઈ રહ્યો છે.");
+    speakGuidance(
+      lang === 'hi' ? "टोकन पास प्रिंट हो रहा है।" :
+      lang === 'mr' ? "टोकन पास प्रिंट होत आहे." :
+      lang === 'en' ? "Printing digital token pass." :
+      lang === 'khi' ? "ટોકન પાસ પ્રિન્ટ થિયે તો." :
+      "ટોકન પાસ પ્રિન્ટ થઈ રહ્યો છે.",
+      lang
+    );
     window.print();
   };
+
+  const centerName = isEn 
+    ? (booking.serviceCenter?.nameEn || booking.taluka.officeNameEn || booking.serviceCenter?.nameGu) 
+    : (booking.serviceCenter?.nameGu || booking.taluka.officeNameGu);
+  const centerDistance = booking.serviceCenter?.distanceKm || 8.4;
+  const signatureChecksum = booking.qrSignatureHash || `QL-8F3A29-${booking.tokenNumber.replace('#','')}`;
 
   const handleWhatsAppShare = () => {
     triggerHaptic('tap');
     const msg = encodeURIComponent(
-      `🏛️ ગુજરાત ઈ-જન સેવા ટોકન પાસ\n` +
-      `ટોકન નંબર: ${booking.tokenNumber}\n` +
-      `યોજના/સેવા: ${scheme ? scheme.titleGu : 'જન સેવા'}\n` +
-      `કચેરી: ${booking.serviceCenter?.nameGu || booking.taluka.officeNameGu}\n` +
-      `કાઉન્ટર: કાઉન્ટર ${booking.counterNumber} (${booking.counterNameGu})\n` +
-      `સમય સ્લોટ: ${currentSlotTime}\n` +
-      `તારીખ: ${selectedDate}\n` +
-      `સ્થિતિ: ${currentStatus}`
+      isEn ? (
+        `🏛️ Gujarat E-Jan Seva Token Pass\n` +
+        `Token No: ${booking.tokenNumber}\n` +
+        `Service: ${scheme ? scheme.titleEn : 'Jan Seva Service'}\n` +
+        `Office: ${centerName}\n` +
+        `Counter: Counter ${booking.counterNumber} (${booking.counterNameEn || booking.counterNameGu})\n` +
+        `Slot: ${currentSlotTime}\n` +
+        `Date: ${selectedDate}\n` +
+        `Status: ${currentStatus}`
+      ) : isHi ? (
+        `🏛️ गुजरात ई-जन सेवा टोकन पास\n` +
+        `टोकन संख्या: ${booking.tokenNumber}\n` +
+        `सेवा: ${scheme ? scheme.titleEn : 'जन सेवा प्रमाण पत्र'}\n` +
+        `कार्यालय: ${centerName}\n` +
+        `काउंटर: काउंटर ${booking.counterNumber} (${booking.counterNameGu})\n` +
+        `समय स्लॉट: ${currentSlotTime}\n` +
+        `दिनांक: ${selectedDate}\n` +
+        `स्थिति: ${currentStatus}`
+      ) : isMr ? (
+        `🏛️ गुजरात ई-जन सेवा टोकन पास\n` +
+        `टोकन क्रमांक: ${booking.tokenNumber}\n` +
+        `सेवा: ${scheme ? scheme.titleEn : 'जन सेवा प्रमाणपत्र'}\n` +
+        `कार्यालय: ${centerName}\n` +
+        `काउंटर: काउंटर ${booking.counterNumber} (${booking.counterNameGu})\n` +
+        `वेळ स्लॉट: ${currentSlotTime}\n` +
+        `दिनांक: ${selectedDate}\n` +
+        `स्थिती: ${currentStatus}`
+      ) : (
+        `🏛️ ગુજરાત ઈ-જન સેવા ટોકન પાસ\n` +
+        `ટોકન નંબર: ${booking.tokenNumber}\n` +
+        `યોજના/સેવા: ${scheme ? scheme.titleGu : 'જન સેવા'}\n` +
+        `કચેરી: ${centerName}\n` +
+        `કાઉન્ટર: કાઉન્ટર ${booking.counterNumber} (${booking.counterNameGu})\n` +
+        `સમય સ્લોટ: ${currentSlotTime}\n` +
+        `તારીખ: ${selectedDate}\n` +
+        `સ્થિતિ: ${currentStatus}`
+      )
     );
     window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
   };
@@ -206,15 +276,31 @@ export function DigitalTokenPass({
   // Requirement 20: Add to Google Calendar (clear link action)
   const handleAddToCalendar = () => {
     triggerHaptic('success');
-    speakGuidance("ગૂગલ કેલેન્ડર ઇવેન્ટ લિંક ખુલી રહી છે.");
+    speakGuidance(
+      lang === 'hi' ? "गूगल कैलेंडर इवेंट खोला जा रहा है।" :
+      lang === 'mr' ? "गुगल कॅलेंडर इव्हेंट उघडला जात आहे." :
+      lang === 'en' ? "Opening Google Calendar event link." :
+      lang === 'khi' ? "ગૂગલ કેલેન્ડર લિંક ખુલે થી." :
+      "ગૂગલ કેલેન્ડર ઇવેન્ટ લિંક ખુલી રહી છે.",
+      lang
+    );
     const ymd = selectedDate.replace(/-/g, '');
     const startTimeParts = booking.slot.startTime.split(':');
     const startH = (startTimeParts[0] || '10').padStart(2, '0');
     const startM = (startTimeParts[1] || '30').padStart(2, '0');
     
-    const title = encodeURIComponent(`🏛️ સરકારી કચેરી એપોઇન્ટમેન્ટ: ${scheme ? scheme.titleGu : 'જન સેવા'} (${booking.tokenNumber})`);
-    const details = encodeURIComponent(`ટોકન નંબર: ${booking.tokenNumber}\nકચેરી: ${booking.serviceCenter?.nameGu || booking.taluka.officeNameGu}\nકાઉન્ટર: કાઉન્ટર ${booking.counterNumber}\nઅધિકારી: ${booking.officerName}\n\nQueueLess Kacheri ડિજિટલ પાસ.`);
-    const location = encodeURIComponent(`${booking.serviceCenter?.nameGu || booking.taluka.officeNameGu}, ${booking.district.nameGu}`);
+    const title = encodeURIComponent(
+      isEn ? `🏛️ Govt Office Appointment: ${scheme ? scheme.titleEn : 'Jan Seva'} (${booking.tokenNumber})` :
+      isHi ? `🏛️ सरकारी कार्यालय अपॉइंटमेंट: ${scheme ? scheme.titleEn : 'जन सेवा'} (${booking.tokenNumber})` :
+      isMr ? `🏛️ शासकीय कार्यालय अपॉइंटमेंट: ${scheme ? scheme.titleEn : 'जन सेवा'} (${booking.tokenNumber})` :
+      `🏛️ સરકારી કચેરી એપોઇન્ટમેન્ટ: ${scheme ? scheme.titleGu : 'જન સેવા'} (${booking.tokenNumber})`
+    );
+    const details = encodeURIComponent(
+      isEn ? `Token: ${booking.tokenNumber}\nOffice: ${centerName}\nCounter: Counter ${booking.counterNumber}\nOfficer: ${booking.officerName}\n\nQueueLess Digital Pass.` :
+      isHi ? `टोकन संख्या: ${booking.tokenNumber}\nकार्यालय: ${centerName}\nकाउंटर: काउंटर ${booking.counterNumber}\nअधिकारी: ${booking.officerName}\n\nQueueLess डिजिटल पास.` :
+      `ટોકન નંબર: ${booking.tokenNumber}\nકચેરી: ${centerName}\nકાઉન્ટર: કાઉન્ટર ${booking.counterNumber}\nઅધિકારી: ${booking.officerName}\n\nQueueLess Kacheri ડિજિટલ પાસ.`
+    );
+    const location = encodeURIComponent(`${centerName}, ${isEn ? booking.district.nameEn : booking.district.nameGu}`);
     
     const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${ymd}T${startH}${startM}00/${ymd}T${startH}${startM}00`;
     window.open(gCalUrl, '_blank');
@@ -222,20 +308,15 @@ export function DigitalTokenPass({
 
   const docsList = useMemo(() => {
     if (scheme && scheme.requiredDocs && scheme.requiredDocs.length > 0) {
-      return scheme.requiredDocs.map(d => d.nameGu);
+      return scheme.requiredDocs.map(d => isEn ? d.nameEn : d.nameGu);
     }
     return [
-      'અસલ આધાર કાર્ડ (Original Aadhaar Card)',
-      'ચાલુ વર્ષનો આવકનો દાખલો (Original Certificate)',
-      '૨ પાસપોર્ટ સાઇઝ કલર ફોટા',
-      'રેશનકાર્ડ નકલ / સરનામા પુરાવો'
+      isEn ? 'Original Aadhaar Card' : 'અસલ આધાર કાર્ડ (Original Aadhaar Card)',
+      isEn ? 'Current Year Income Certificate' : 'ચાલુ વર્ષનો આવકનો દાખલો (Original Certificate)',
+      isEn ? '2 Passport Size Color Photos' : '૨ પાસપોર્ટ સાઇઝ કલર ફોટા',
+      isEn ? 'Ration Card Copy / Address Proof' : 'રેશનકાર્ડ નકલ / સરનામા પુરાવો'
     ];
-  }, [scheme]);
-
-  // Center display name
-  const centerName = booking.serviceCenter?.nameGu || booking.taluka.officeNameGu;
-  const centerDistance = booking.serviceCenter?.distanceKm || 8.4;
-  const signatureChecksum = booking.qrSignatureHash || `QL-8F3A29-${booking.tokenNumber.replace('#','')}`;
+  }, [scheme, isEn]);
 
   return (
     <>
@@ -417,27 +498,27 @@ export function DigitalTokenPass({
                 payload={`https://queueless.gujarat.gov.in/verify?token=${encodeURIComponent(booking.tokenNumber)}&citizen=${encodeURIComponent(citizenName)}&counter=${encodeURIComponent(booking.counterNumber)}&sig=${encodeURIComponent(signatureChecksum)}`}
                 tokenId={booking.tokenNumber}
                 size={160}
-                label="સત્તાવાર સહી કરેલ QR ટોકન"
-                subLabel="કચેરી ગેટ / કાઉન્ટર પર સ્કેન કરો"
+                label={isEn ? "Official Signed QR Token" : isHi ? "आधिकारिक हस्ताक्षरित क्यूआर टोकन" : isMr ? "अधिकृत स्वाक्षरीकृत क्यूआर टोकन" : isKhi ? "સત્તાવાર સહી વારો QR ટોકન" : "સત્તાવાર સહી કરેલ QR ટોકન"}
+                subLabel={isEn ? "Scan at Office Gate / Counter" : isHi ? "कार्यालय गेट / काउंटर पर स्कैन करें" : isMr ? "कार्यालय गेट / काउंटरवर स्कॅन करा" : isKhi ? "કચેરી ગેટ / કાઉન્ટર તે સ્કેન કરિયો" : "કચેરી ગેટ / કાઉન્ટર પર સ્કેન કરો"}
               />
 
               {/* Requirement 11: Live Token Validity Indicator */}
               <div className="flex items-center gap-1.5 mt-2.5 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] text-emerald-800 font-mono font-bold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
-                <span>{liveTime || 'LIVE'} • માન્ય ટોકન સ્થિતિ</span>
+                <span>{liveTime || 'LIVE'} • {isEn ? 'Valid Token Status' : isHi ? 'सत्यापित टोकन स्थिति' : isMr ? 'प्रमाणित टोकन स्थिती' : isKhi ? 'માન્ય ટોકન સ્થિતિ' : 'માન્ય ટોકન સ્થિતિ'}</span>
               </div>
 
               <span className="text-[10px] font-mono text-gray-500 mt-1">
-                સહી ચેકસમ: {signatureChecksum}
+                {isEn ? 'Checksum:' : isHi ? 'हस्ताक्षर चेकसम:' : isMr ? 'स्वाक्षरी चेकसम:' : 'સહી ચેકસમ:'} {signatureChecksum}
               </span>
               <span className="text-[9px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full mt-1">
-                ✓ સહી કરેલ ટેમ્પર-એવિડન્ટ QR (Tamper-Evident QR Token)
+                {isEn ? '✓ Signed Tamper-Evident QR Token' : isHi ? '✓ हस्ताक्षरित डिजिटल क्यूआर टोकन' : isMr ? '✓ स्वाक्षरीकृत डिजिटल क्यूआर टोकन' : '✓ સહી કરેલ ટેમ્પર-એવિડન્ટ QR (Tamper-Evident QR Token)'}
               </span>
 
               {/* Requirement 12: Offline Pass Availability Clarification */}
               {isOfflineCached && (
                 <div className="text-[9px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-1 rounded-lg mt-1.5 text-center leading-tight">
-                  <span>💾 ઑફલાઇન પાસ ઉપલબ્ધ: લોકલ સ્ટોરેજમાં સેવ થયેલ છે.</span>
+                  <span>{isEn ? '💾 Offline Pass Available: Saved in local device storage.' : isHi ? '💾 ऑफलाइन पास उपलब्ध: स्थानीय डिवाइस में सहेजा गया।' : isMr ? '💾 ऑफलाइन पास उपलब्ध: स्थानिक मेमरीमध्ये सेव्ह केला आहे.' : '💾 ઑફલાઇન પાસ ઉપલબ્ધ: લોકલ સ્ટોરેજમાં સેવ થયેલ છે.'}</span>
                 </div>
               )}
             </div>
@@ -454,15 +535,21 @@ export function DigitalTokenPass({
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-blue-950">
-                        કાઉન્ટર {booking.counterNumber}: {booking.counterNameGu}
+                        {isEn 
+                          ? `Counter ${booking.counterNumber}: ${booking.counterNameEn || booking.counterNameGu}`
+                          : isHi 
+                          ? `काउंटर ${booking.counterNumber}: ${booking.counterNameEn || booking.counterNameGu}`
+                          : isMr 
+                          ? `काउंटर ${booking.counterNumber}: ${booking.counterNameEn || booking.counterNameGu}`
+                          : `કાઉન્ટર ${booking.counterNumber}: ${booking.counterNameGu}`}
                       </h4>
                       <span className="text-[11px] text-gray-600 block">
-                        અધિકારી: <strong>{booking.officerName}</strong>
+                        {isEn ? 'Officer: ' : isHi ? 'अधिकारी: ' : isMr ? 'अधिकारी: ' : 'અધિકારી: '}<strong>{booking.officerName}</strong>
                       </span>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-                    નિયત કાઉન્ટર
+                    {isEn ? 'Assigned Counter' : isHi ? 'आवंटित काउंटर' : isMr ? 'नियुक्त काउंटर' : 'નિયત કાઉન્ટર'}
                   </span>
                 </div>
               </div>
@@ -472,26 +559,32 @@ export function DigitalTokenPass({
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
                   <span className="text-[10px] font-semibold text-gray-500 flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-[#005A9C]" />
-                    {isEn ? 'Time Slot (1-Hr Window)' : 'સમય સ્લોટ (૧ કલાક વિન્ડો)'}
+                    {isEn ? 'Time Slot (1-Hr Window)' : isHi ? 'समय स्लॉट (१ घंटा)' : isMr ? 'वेळ स्लॉट (१ तास)' : 'સમય સ્લોટ (૧ કલાક વિન્ડો)'}
                   </span>
                   <span className="text-xs font-bold text-gray-900 mt-1 block">
                     {currentSlotTime}
                   </span>
                   <span className="text-[10px] text-gray-500 font-mono">
-                    {isEn ? `Date: ${selectedDate}` : `તારીખ: ${selectedDate}`}
+                    {isEn ? `Date: ${selectedDate}` : isHi ? `दिनांक: ${selectedDate}` : isMr ? `दिनांक: ${selectedDate}` : `તારીખ: ${selectedDate}`}
                   </span>
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
                   <span className="text-[10px] font-semibold text-gray-500 flex items-center gap-1">
                     <UserCheck className="w-3.5 h-3.5 text-[#138808]" />
-                    {isEn ? 'Queue Turn' : 'કતારમાં સ્થિતિ'}
+                    {isEn ? 'Queue Turn' : isHi ? 'कतार में स्थिति' : isMr ? 'रांगेतील स्थिती' : 'કતારમાં સ્થિતિ'}
                   </span>
                   <span className="text-xs font-bold text-[#138808] mt-1 block">
-                    {isEn ? `${aheadInQueue} citizens ahead` : `આગળ ${aheadInQueue} નાગરિકો બાકી`}
+                    {isEn ? `${aheadInQueue} citizens ahead` : isHi ? `आगे ${aheadInQueue} नागरिक शेष` : isMr ? `पुढे ${aheadInQueue} नागरिक शिल्लक` : `આગળ ${aheadInQueue} નાગરિકો બાકી`}
                   </span>
                   <span className="text-[10px] text-gray-500">
-                    {isEn ? `Est wait: ~${estimatedMinutes}m (~10-12m/desk)` : `અંદાજિત રાહ: ~${estimatedMinutes} મિ. (~૧૦-૧૨ મિ./કાઉન્ટર)`}
+                    {isEn 
+                      ? `Est wait: ~${estimatedMinutes}m (~10-12m/desk)` 
+                      : isHi 
+                      ? `अनुमानित प्रतीक्षा: ~${estimatedMinutes} मि.` 
+                      : isMr 
+                      ? `अंदाजित वेळ: ~${estimatedMinutes} मि.` 
+                      : `અંદાજિત રાહ: ~${estimatedMinutes} મિ. (~૧૦-૧૨ મિ./કાઉન્ટર)`}
                   </span>
                 </div>
               </div>
@@ -500,7 +593,7 @@ export function DigitalTokenPass({
               <div className="p-2.5 bg-gray-50 rounded-xl border border-gray-200 flex items-center gap-2 text-xs text-gray-700">
                 <MapPin className="w-4 h-4 text-[#005A9C] shrink-0" />
                 <span className="truncate">
-                  {centerName}, જિલ્લો: {booking.district.nameGu}
+                  {centerName}, {isEn ? 'District:' : isHi ? 'जिला:' : isMr ? 'जिल्हा:' : 'જિલ્લો:'} {isEn ? booking.district.nameEn : booking.district.nameGu}
                 </span>
               </div>
 
@@ -514,9 +607,17 @@ export function DigitalTokenPass({
                 <Navigation className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs font-bold text-[#003366]">ઘરેથી નીકળવાનો ભલામણ કરેલ સમય (અંદાજિત)</p>
+                <p className="text-xs font-bold text-[#003366]">
+                  {isEn ? 'Recommended Departure Time (Dynamic Transit)' : isHi ? 'घर से प्रस्थान का अनुशंसित समय' : isMr ? 'घरातून निघण्याची शिफारस केलेली वेळ' : 'ઘરેથી નીકળવાનો ભલામણ કરેલ સમય (અંદાજિત)'}
+                </p>
                 <p className="text-[10.5px] text-slate-600">
-                  અપોઇન્ટમેન્ટ: {currentSlotTime.split(' - ')[0]} | અંદાજિત મુસાફરી: ~{booking.estimatedTravelMinutes || 24} મિનિટ | સેફ્ટી બફર: ૧૦ મિ.
+                  {isEn 
+                    ? `Appointment: ${currentSlotTime.split(' - ')[0]} | Est Transit: ~${booking.estimatedTravelMinutes || 24} mins | Buffer: 10m` 
+                    : isHi 
+                    ? `अपॉइंटमेंट: ${currentSlotTime.split(' - ')[0]} | यात्रा: ~${booking.estimatedTravelMinutes || 24} मिनट | बफर: १० मि.` 
+                    : isMr 
+                    ? `अपॉइंटमेंट: ${currentSlotTime.split(' - ')[0]} | प्रवास: ~${booking.estimatedTravelMinutes || 24} मिनिटे | बफर: १० मि.` 
+                    : `અપોઇન્ટમેન્ટ: ${currentSlotTime.split(' - ')[0]} | અંદાજિત મુસાફરી: ~${booking.estimatedTravelMinutes || 24} મિનિટ | સેફ્ટી બફર: ૧૦ મિ.`}
                 </p>
               </div>
             </div>
@@ -524,7 +625,9 @@ export function DigitalTokenPass({
               <span className="text-xs sm:text-sm font-black text-blue-900 bg-white border border-blue-300 px-2 sm:px-2.5 py-1 rounded-lg">
                 {booking.leaveHomeBy || '10:55 AM'}
               </span>
-              <span className="block text-[8.5px] text-slate-500 mt-0.5">અંદાજિત મુસાફરી સમય</span>
+              <span className="block text-[8.5px] text-slate-500 mt-0.5">
+                {isEn ? 'Live Transit Est' : isHi ? 'यात्रा समय अनुमान' : isMr ? 'प्रवास वेळ अंदाज' : 'અંદાજિત મુસાફરી સમય'}
+              </span>
             </div>
           </div>
 
@@ -533,10 +636,12 @@ export function DigitalTokenPass({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#003366] flex items-center gap-1.5">
                 <FileCheck2 className="w-4 h-4 text-[#005A9C]" />
-                <span>કચેરીએ સાથે લઈ જવાના અસલ કાગળો (Original Documents Checklist)</span>
+                <span>
+                  {isEn ? 'Original Documents Checklist to Carry' : isHi ? 'साथ लाने हेतु मूल आवश्यक दस्तावेज़ चेकलिस्ट' : isMr ? 'सोबत आणायची मूळ कागदपत्रे यादी' : 'કચેરીએ સાથે લઈ જવાના અસલ કાગળો (Original Documents Checklist)'}
+                </span>
               </span>
               <span className="text-[9.5px] text-emerald-700 font-extrabold bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">
-                અસલ ફરજિયાત
+                {isEn ? 'Original Mandatory' : isHi ? 'मूल अनिवार्य' : isMr ? 'मूळ आवश्यक' : 'અસલ ફરજિયાત'}
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
@@ -548,7 +653,7 @@ export function DigitalTokenPass({
               ))}
             </div>
             <p className="text-[9.5px] text-slate-500">
-              * નોંધ: કાઉન્ટર પર અધિકારી સમક્ષ અસલ કાગળો રજૂ કરવાના રહેશે.
+              {isEn ? '* Note: Please present original documents at the counter for on-spot verification.' : isHi ? '* नोट: कृपया सत्यापन हेतु काउंटर पर मूल दस्तावेज प्रस्तुत करें।' : isMr ? '* नोंद: काउंटरवर पडताळणीसाठी मूळ कागदपत्रे सादर करा.' : '* નોંધ: કાઉન્ટર પર અધિકારી સમક્ષ અસલ કાગળો રજૂ કરવાના રહેશે.'}
             </p>
           </div>
 
@@ -561,18 +666,18 @@ export function DigitalTokenPass({
               <div>
                 <div className="flex items-center gap-2">
                   <h4 className="text-xs font-bold text-amber-950">
-                    કચેરી પહોંચવામાં મોડું થાય છે? (Running Late?)
+                    {isEn ? 'Running Late to Office?' : isHi ? 'कार्यालय पहुँचने में देरी हो रही है?' : isMr ? 'कार्यालयात पोहोचण्यास उशीर होत आहे?' : 'કચેરી પહોંચવામાં મોડું થાય છે? (Running Late?)'}
                   </h4>
                   {lateDelayMinutes > 0 && (
                     <span className="bg-amber-200 text-amber-900 text-[10px] font-bold px-2 py-0.2 rounded-full">
-                      +{lateDelayMinutes} મિ. વિલંબ
+                      +{lateDelayMinutes} {isEn ? 'min delay' : 'મિ. વિલંબ'}
                     </span>
                   )}
                 </div>
                 <p className="text-[11px] text-amber-800 mt-0.5">
                   {lateDelayMinutes > 0 
-                    ? `નવી સંભવિત ETA: ${updatedEta || '12:00 PM'} • કાઉન્ટર અધિકારીને વિલંબની જાણ થઈ ચૂકી છે.`
-                    : 'જો મુસાફરીમાં મોડું થાય, તો અગાઉથી જાણ કરો જેથી કાઉન્ટર પર વારો સ્કીપ ન થાય.'}
+                    ? (isEn ? `New Estimated ETA: ${updatedEta || '12:00 PM'} • Counter officer notified.` : isHi ? `नई अनुमानित ETA: ${updatedEta || '12:00 PM'} • काउंटर अधिकारी को सूचित किया गया।` : isMr ? `नवीन अंदाजित ETA: ${updatedEta || '12:00 PM'} • काउंटर अधिकाऱ्याला सूचित केले.` : `નવી સંભવિત ETA: ${updatedEta || '12:00 PM'} • કાઉન્ટર અધિકારીને વિલંબની જાણ થઈ ચૂકી છે.`)
+                    : (isEn ? 'If delayed in transit, inform in advance so your turn is seamlessly preserved.' : isHi ? 'यात्रा में देरी होने पर पूर्व सूचना दें ताकि आपका स्लॉट सुरक्षित रहे।' : isMr ? 'प्रवासात उशीर झाल्यास आधी सूचना द्या जेणेकरून स्लॉट सुरक्षित राहील.' : 'જો મુસાફરીમાં મોડું થાય, તો અગાઉથી જાણ કરો જેથી કાઉન્ટર પર વારો સ્કીપ ન થાય.')}
                 </p>
               </div>
             </div>
@@ -586,7 +691,7 @@ export function DigitalTokenPass({
               className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-95 shrink-0"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span>વિલંબ નોંધાવો (+10/+20/+30m)</span>
+              <span>{isEn ? 'Report Delay (+10/+20/+30m)' : isHi ? 'देरी दर्ज करें (+10/+20/+30m)' : isMr ? 'उशीर नोंदवा (+10/+20/+30m)' : 'વિલંબ નોંધાવો (+10/+20/+30m)'}</span>
             </button>
           </div>
 
@@ -598,7 +703,7 @@ export function DigitalTokenPass({
                 className="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>પ્રિન્ટ / PDF</span>
+                <span>{isEn ? 'Print / PDF' : isHi ? 'प्रिंट / PDF' : isMr ? 'प्रिंट / PDF' : 'પ્રિન્ટ / PDF'}</span>
               </button>
 
               <button
@@ -606,7 +711,7 @@ export function DigitalTokenPass({
                 className="px-3 py-2 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
               >
                 <Share2 className="w-3.5 h-3.5" />
-                <span>વોટ્સએપ શેર</span>
+                <span>{isEn ? 'WhatsApp Share' : isHi ? 'व्हाट्सएप साझा करें' : isMr ? 'व्हॉट्सॲप शेअर' : 'વોટ્સએપ શેર'}</span>
               </button>
 
               {/* Requirement 20: Add to Google Calendar */}
@@ -615,7 +720,7 @@ export function DigitalTokenPass({
                 className="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005A9C] border border-blue-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
               >
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Add to Google Calendar</span>
+                <span>{isEn ? 'Add to Google Calendar' : isHi ? 'गूगल कैलेंडर जोड़ें' : isMr ? 'गुगल कॅलेंडर जोडा' : 'ગૂગલ કેલેન્ડર'}</span>
               </button>
 
               {/* Requirement 14: Reschedule Action */}
@@ -627,7 +732,7 @@ export function DigitalTokenPass({
                 className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-indigo-600" />
-                <span>રિશિડ્યુલ કરો</span>
+                <span>{isEn ? 'Reschedule Slot' : isHi ? 'स्लॉट बदलें' : isMr ? 'स्लॉट बदला' : 'રિશિડ્યુલ કરો'}</span>
               </button>
 
               {/* Requirement 14: Cancel Action */}
@@ -639,7 +744,7 @@ export function DigitalTokenPass({
                 className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
               >
                 <CalendarX2 className="w-3.5 h-3.5 text-red-600" />
-                <span>અપોઇન્ટમેન્ટ રદ કરો</span>
+                <span>{isEn ? 'Cancel Appointment' : isHi ? 'अपॉइंटमेंट रद्द करें' : isMr ? 'अपॉइंटमेंट रद्द करा' : 'અપોઇન્ટમેન્ટ રદ કરો'}</span>
               </button>
 
               {/* Requirement 19: Multi-Channel Touchpoints Drawer */}
@@ -651,7 +756,7 @@ export function DigitalTokenPass({
                 className="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
               >
                 <Layers className="w-3.5 h-3.5 text-purple-600" />
-                <span>મલ્ટી-ચેનલ ડેમો</span>
+                <span>{isEn ? 'Multi-Channel Demo' : isHi ? 'मल्टी-चैनल डेमो' : isMr ? 'मल्टी-चॅनल डेमो' : 'મલ્ટી-ચેનલ ડેમો'}</span>
               </button>
             </div>
 
@@ -660,7 +765,7 @@ export function DigitalTokenPass({
                 onClick={onClose}
                 className="px-4 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-xs font-bold transition ml-auto"
               >
-                ડેશબોર્ડ પર જાઓ
+                {isEn ? 'Go to Dashboard' : isHi ? 'डैशबोर्ड पर जाएँ' : isMr ? 'डॅशबोर्डवर जा' : 'ડેશબોર્ડ પર જાઓ'}
               </button>
             )}
           </div>
@@ -680,7 +785,9 @@ export function DigitalTokenPass({
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-500" />
-                <h4 className="text-sm font-black text-[#003366]">વિલંબ સમય પસંદ કરો</h4>
+                <h4 className="text-sm font-black text-[#003366]">
+                  {isEn ? 'Select Delay Time' : isHi ? 'विलंब समय चुनें' : isMr ? 'उशीर वेळ निवडा' : 'વિલંબ સમય પસંદ કરો'}
+                </h4>
               </div>
               <button 
                 onClick={() => setLateModalOpen(false)}
@@ -691,7 +798,7 @@ export function DigitalTokenPass({
             </div>
 
             <p className="text-xs text-slate-600 mb-4">
-              કચેરી પહોંચવામાં કેટલો વિલંબ થશે? સિસ્ટમ કાઉન્ટર પર તમારી સ્થિતિ અપડેટ કરશે:
+              {isEn ? 'How much delay is expected? The system will update your status on the counter:' : isHi ? 'कितना विलंब अपेक्षित है? सिस्टम काउंटर पर आपकी स्थिति अपडेट करेगा:' : isMr ? 'किती उशीर अपेक्षित आहे? सिस्टम काउंटरवर तुमची स्थिती अपडेट करेल:' : 'કચેરી પહોંચવામાં કેટલો વિલંબ થશે? સિસ્ટમ કાઉન્ટર પર તમારી સ્થિતિ અપડેટ કરશે:'}
             </p>
 
             <div className="space-y-2.5">
@@ -703,9 +810,9 @@ export function DigitalTokenPass({
                 >
                   <span className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-amber-600" />
-                    <span>+{mins} મિનિટ વિલંબ</span>
+                    <span>+{mins} {isEn ? 'Minutes Delay' : isHi ? 'मिनट विलंब' : isMr ? 'मिनिटे उशीर' : 'મિનિટ વિલંબ'}</span>
                   </span>
-                  <span className="text-[10px] text-amber-800">અધિકારીને નોટિફાય થશે ➔</span>
+                  <span className="text-[10px] text-amber-800">{isEn ? 'Officer Notified ➔' : isHi ? 'अधिकारी को सूचित ➔' : isMr ? 'अधिकाऱ्याला सूचित ➔' : 'અધિકારીને નોટિફાય થશે ➔'}</span>
                 </button>
               ))}
             </div>
@@ -726,7 +833,9 @@ export function DigitalTokenPass({
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-5 h-5 text-indigo-600" />
-                <h4 className="text-sm font-black text-[#003366]">અપોઇન્ટમેન્ટ રિશિડ્યુલ કરો</h4>
+                <h4 className="text-sm font-black text-[#003366]">
+                  {isEn ? 'Reschedule Appointment' : isHi ? 'अपॉइंटमेंट पुनर्निर्धारित करें' : isMr ? 'अपॉइंटमेंट पुन्हा नियोजित करा' : 'અપોઇન્ટમેન્ટ રિશિડ્યુલ કરો'}
+                </h4>
               </div>
               <button 
                 onClick={() => setRescheduleModalOpen(false)}
@@ -737,7 +846,8 @@ export function DigitalTokenPass({
             </div>
 
             <p className="text-xs text-slate-600 mb-3">
-              હાલનો સ્લોટ: <strong>{currentSlotTime} ({selectedDate})</strong>. નવો ઉપલબ્ધ સમય પસંદ કરો:
+              {isEn ? `Current Slot: ` : isHi ? `वर्तमान स्लॉट: ` : isMr ? `सध्याचा स्लॉट: ` : `હાલનો સ્લોટ: `}
+              <strong>{currentSlotTime} ({selectedDate})</strong>. {isEn ? 'Select a new available time slot:' : isHi ? 'नया उपलब्ध समय चुनें:' : isMr ? 'नवीन उपलब्ध वेळ निवडा:' : 'નવો ઉપલબ્ધ સમય પસંદ કરો:'}
             </p>
 
             <div className="space-y-2 mb-4">
@@ -752,7 +862,7 @@ export function DigitalTokenPass({
                   }`}
                 >
                   <span>{st}</span>
-                  <span className="text-[10px] text-emerald-700 font-semibold">🟢 ઉપલબ્ધ</span>
+                  <span className="text-[10px] text-emerald-700 font-semibold">🟢 {isEn ? 'Available' : isHi ? 'उपलब्ध' : isMr ? 'उपलब्ध' : 'ઉપલબ્ધ'}</span>
                 </button>
               ))}
             </div>
@@ -762,13 +872,13 @@ export function DigitalTokenPass({
                 onClick={() => setRescheduleModalOpen(false)}
                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition"
               >
-                રદ કરો
+                {isEn ? 'Cancel' : isHi ? 'रद्द करें' : isMr ? 'रद्द करा' : 'રદ કરો'}
               </button>
               <button
                 onClick={handleConfirmReschedule}
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition"
               >
-                રિશિડ્યુલ કન્ફર્મ કરો
+                {isEn ? 'Confirm Reschedule' : isHi ? 'पुष्टि करें' : isMr ? 'निश्चित करा' : 'રિશિડ્યુલ કન્ફર્મ કરો'}
               </button>
             </div>
           </div>
@@ -788,9 +898,17 @@ export function DigitalTokenPass({
             <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-3">
               <CalendarX2 className="w-6 h-6" />
             </div>
-            <h4 className="text-base font-black text-slate-900 mb-1">અપોઇન્ટમેન્ટ રદ કરવી છે?</h4>
+            <h4 className="text-base font-black text-slate-900 mb-1">
+              {isEn ? 'Cancel Appointment?' : isHi ? 'अपॉइंटमेंट रद्द करें?' : isMr ? 'अपॉइंटमेंट रद्द करायची का?' : 'અપોઇન્ટમેન્ટ રદ કરવી છે?'}
+            </h4>
             <p className="text-xs text-slate-500 leading-relaxed mb-4">
-              શું તમે ખરેખર ટોકન <strong>{booking.tokenNumber}</strong> ની અપોઇન્ટમેન્ટ રદ કરવા માંગો છો? આ સ્લોટ અન્ય નાગરિક માટે મુક્ત થશે.
+              {isEn 
+                ? `Are you sure you want to cancel appointment for token ${booking.tokenNumber}? The slot will be made available to other citizens.`
+                : isHi 
+                ? `क्या आप वास्तव में टोकन ${booking.tokenNumber} की अपॉइंटमेंट रद्द करना चाहते हैं? यह स्लॉट अन्य नागरिकों हेतु उपलब्ध हो जाएगा।`
+                : isMr 
+                ? `आपण नक्की टोकन ${booking.tokenNumber} ची अपॉइंटमेंट रद्द करू इच्छिता? हा स्लॉट इतर नागरिकांसाठी मोकळा केला जाईल.`
+                : `શું તમે ખરેખર ટોકન ${booking.tokenNumber} ની અપોઇન્ટમેન્ટ રદ કરવા માંગો છો? આ સ્લોટ અન્ય નાગરિક માટે મુક્ત થશે.`}
             </p>
 
             <div className="flex items-center gap-2">
@@ -798,13 +916,13 @@ export function DigitalTokenPass({
                 onClick={() => setCancelModalOpen(false)}
                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition"
               >
-                ના, પાછા જાઓ
+                {isEn ? 'No, Go Back' : isHi ? 'नहीं, वापस जाएं' : isMr ? 'नाही, मागे जा' : 'ના, પાછા જાઓ'}
               </button>
               <button
                 onClick={handleConfirmCancellation}
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition"
               >
-                હા, રદ કરો
+                {isEn ? 'Yes, Cancel' : isHi ? 'हाँ, रद्द करें' : isMr ? 'होय, रद्द करा' : 'હા, રદ કરો'}
               </button>
             </div>
           </div>
@@ -824,7 +942,9 @@ export function DigitalTokenPass({
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
                 <Layers className="w-5 h-5 text-purple-600" />
-                <h4 className="text-sm font-black text-[#003366]">મલ્ટી-ચેનલ કોમ્યુનિકેશન આર્કિટેક્ચર</h4>
+                <h4 className="text-sm font-black text-[#003366]">
+                  {isEn ? 'Multi-Channel Architecture' : isHi ? 'मल्टी-चैनल संचार आर्किटेक्चर' : isMr ? 'मल्टी-चॅनल संवादाची रचना' : 'મલ્ટી-ચેનલ કોમ્યુનિકેશન આર્કિટેક્ચર'}
+                </h4>
               </div>
               <button 
                 onClick={() => setChannelsModalOpen(false)}
@@ -835,16 +955,16 @@ export function DigitalTokenPass({
             </div>
 
             <p className="text-xs text-slate-600 mb-3">
-              QueueLess Kacheri નીચે મુજબના ચેનલ્સ દ્વારા નાગરિકોને અપડેટ્સ પૂરા પાડે છે:
+              {isEn ? 'QueueLess delivers multi-channel live updates across the following:' : isHi ? 'QueueLess नागरिकों को निम्न चैनलों के माध्यम से लाइव अपडेट प्रदान करता है:' : isMr ? 'QueueLess नागरिकांना खालील चॅनेल्सद्वारे थेट अपडेट्स पुरवतो:' : 'QueueLess Kacheri નીચે મુજબના ચેનલ્સ દ્વારા નાગરિકોને અપડેટ્સ પૂરા પાડે છે:'}
             </p>
 
             <div className="space-y-2 mb-4">
               <div className="p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 flex items-center justify-between text-xs">
                 <span className="font-bold text-emerald-950 flex items-center gap-2">
-                  <span>📱</span> વેબ ઓડિયો & વોઇસ ઘોષણા
+                  <span>📱</span> {isEn ? 'Web Audio & Voice Announcements' : isHi ? 'वेब ऑडियो एवं वॉइस घोषणा' : isMr ? 'वेब ऑडिओ आणि व्हॉइस घोषणा' : 'વેબ ઓડિયો & વોઇસ ઘોષણા'}
                 </span>
                 <span className="text-[10px] font-extrabold bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">
-                  સક્રિય (Live)
+                  {isEn ? 'Active (Live)' : isHi ? 'सक्रिय' : isMr ? 'सक्रिय' : 'સક્રિય (Live)'}
                 </span>
               </div>
 
@@ -856,9 +976,9 @@ export function DigitalTokenPass({
                 className="w-full p-2.5 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100 flex items-center justify-between text-xs font-bold text-amber-950 text-left transition"
               >
                 <span className="flex items-center gap-2">
-                  <span>✉️</span> SMS નોટિફિકેશન — ડેમો સિમ્યુલેશન
+                  <span>✉️</span> {isEn ? 'SMS Notification — Demo Simulation' : isHi ? 'SMS सूचना — डेमो' : isMr ? 'SMS सूचना — डेमो' : 'SMS નોટિફિકેશન — ડેમો સિમ્યુલેશન'}
                 </span>
-                <span className="text-[10px] font-bold text-amber-800">ખોલો ➔</span>
+                <span className="text-[10px] font-bold text-amber-800">{isEn ? 'Open ➔' : isHi ? 'खोलें ➔' : isMr ? 'उघडा ➔' : 'ખોલો ➔'}</span>
               </button>
 
               <button
@@ -869,9 +989,9 @@ export function DigitalTokenPass({
                 className="w-full p-2.5 rounded-xl border border-green-200 bg-green-50/60 hover:bg-green-100 flex items-center justify-between text-xs font-bold text-green-950 text-left transition"
               >
                 <span className="flex items-center gap-2">
-                  <span>💬</span> WhatsApp સર્વિસ આસિસ્ટન્ટ — ડેમો
+                  <span>💬</span> {isEn ? 'WhatsApp Service Assistant — Demo' : isHi ? 'व्हाट्सएप सर्विस असिस्टेंट — डेमो' : isMr ? 'व्हॉट्सॲप सर्विस असिस्टंट — डेमो' : 'WhatsApp સર્વિસ આસિસ્ટન્ટ — ડેમો'}
                 </span>
-                <span className="text-[10px] font-bold text-green-800">ખોલો ➔</span>
+                <span className="text-[10px] font-bold text-green-800">{isEn ? 'Open ➔' : isHi ? 'खोलें ➔' : isMr ? 'उघडा ➔' : 'ખોલો ➔'}</span>
               </button>
 
               <button
@@ -882,9 +1002,9 @@ export function DigitalTokenPass({
                 className="w-full p-2.5 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100 flex items-center justify-between text-xs font-bold text-blue-950 text-left transition"
               >
                 <span className="flex items-center gap-2">
-                  <span>🛡️</span> કચેરી ગેટ સિક્યોરિટી સ્કેનર — સિમ્યુલેશન
+                  <span>🛡️</span> {isEn ? 'Gate Kiosk Scanner — Simulation' : isHi ? 'गेट सुरक्षा स्कैनर — सिमुलेशन' : isMr ? 'गेट सुरक्षा स्कॅनर — सिम्युलेशन' : 'કચેરી ગેટ સિક્યોરિટી સ્કેનર — સિમ્યુલેશન'}
                 </span>
-                <span className="text-[10px] font-bold text-blue-800">ખોલો ➔</span>
+                <span className="text-[10px] font-bold text-blue-800">{isEn ? 'Open ➔' : isHi ? 'खोलें ➔' : isMr ? 'उघडा ➔' : 'ખોલો ➔'}</span>
               </button>
             </div>
 
@@ -892,7 +1012,7 @@ export function DigitalTokenPass({
               onClick={() => setChannelsModalOpen(false)}
               className="w-full bg-[#003366] text-white font-bold py-2.5 rounded-xl text-xs"
             >
-              સમજાઈ ગયું (Close)
+              {isEn ? 'Understood (Close)' : isHi ? 'समझ गया (बंद करें)' : isMr ? 'समजले (बंद करा)' : 'સમજાઈ ગયું (Close)'}
             </button>
           </div>
         </div>
@@ -930,7 +1050,7 @@ export function DigitalTokenPass({
 
               <div>
                 <span className="text-[10px] font-black tracking-widest text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-0.5 rounded-full uppercase">
-                  ✓ પ્રવેશ મંજૂર (ENTRY AUTHORIZED)
+                  {isEn ? '✓ ENTRY AUTHORIZED' : isHi ? '✓ प्रवेश स्वीकृत (ENTRY AUTHORIZED)' : isMr ? '✓ प्रवेश मंजूर (ENTRY AUTHORIZED)' : '✓ પ્રવેશ મંજૂર (ENTRY AUTHORIZED)'}
                 </span>
                 <h3 className="text-lg font-black text-white mt-1.5">{citizenName}</h3>
                 <p className="text-xs text-slate-400 font-mono">{signatureChecksum}</p>
@@ -938,32 +1058,32 @@ export function DigitalTokenPass({
 
               <div className="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700/80 text-left space-y-2 text-xs">
                 <div className="flex justify-between border-b border-slate-700 pb-1.5">
-                  <span className="text-slate-400">ટોકન ક્રમાંક:</span>
+                  <span className="text-slate-400">{isEn ? 'Token No:' : isHi ? 'टोकन संख्या:' : isMr ? 'टोकन क्रमांक:' : 'ટોકન ક્રમાંક:'}</span>
                   <span className="font-mono font-black text-[#FF9933]">{booking.tokenNumber}</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-700 pb-1.5">
-                  <span className="text-slate-400">ફાળવેલ કાઉન્ટર:</span>
-                  <span className="font-bold text-white">કાઉન્ટર {booking.counterNumber} ({booking.counterNameGu})</span>
+                  <span className="text-slate-400">{isEn ? 'Assigned Counter:' : isHi ? 'काउंटर:' : isMr ? 'काउंटर:' : 'ફાળવેલ કાઉન્ટર:'}</span>
+                  <span className="font-bold text-white">{isEn ? `Counter ${booking.counterNumber} (${booking.counterNameEn || booking.counterNameGu})` : `કાઉન્ટર ${booking.counterNumber} (${booking.counterNameGu})`}</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-700 pb-1.5">
-                  <span className="text-slate-400">અધિકારી:</span>
+                  <span className="text-slate-400">{isEn ? 'Officer:' : isHi ? 'अधिकारी:' : isMr ? 'अधिकारी:' : 'અધિકારી:'}</span>
                   <span className="font-bold text-white">{booking.officerName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">સ્લોટ સમય:</span>
+                  <span className="text-slate-400">{isEn ? 'Slot Time:' : isHi ? 'स्लॉट समय:' : isMr ? 'वेळ:' : 'સ્લોટ સમય:'}</span>
                   <span className="font-bold text-emerald-400">{currentSlotTime}</span>
                 </div>
               </div>
 
               <p className="text-[10px] text-slate-400 leading-relaxed">
-                કચેરી ગેટ સિક્યોરિટી સિમ્યુલેશન: QR કોડની સહી ચકાસીને નાગરિકને સીધા કાઉન્ટર પર જવાની મંજૂરી આપેલ છે.
+                {isEn ? 'Gate security kiosk verified signed tamper-evident QR. Citizen routed directly to assigned desk.' : isHi ? 'गेट सुरक्षा कियोस्क द्वारा डिजिटल हस्ताक्षर सत्यापित। नागरिक को सीधे संबंधित काउंटर पर जाने की अनुमति है।' : isMr ? 'गेट सुरक्षा स्कॅनरद्वारे डिजिटल स्वाक्षरी पडताळली. नागरिकाला थेट काउंटरवर जाण्याची परवानगी दिली आहे.' : 'કચેરી ગેટ સિક્યોરિટી સિમ્યુલેશન: QR કોડની સહી ચકાસીને નાગરિકને સીધા કાઉન્ટર પર જવાની મંજૂરી આપેલ છે.'}
               </p>
 
               <button
                 onClick={() => setVerifierOpen(false)}
                 className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 rounded-xl text-xs transition active:scale-95"
               >
-                વેરિફિકેશન પૂર્ણ કરો (Done)
+                {isEn ? 'Verification Complete (Done)' : isHi ? 'सत्यापन पूर्ण (Done)' : isMr ? 'पडताळणी पूर्ण (Done)' : 'વેરિફિકેશન પૂર્ણ કરો (Done)'}
               </button>
             </div>
           </div>
@@ -1002,39 +1122,45 @@ export function DigitalTokenPass({
             <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between text-[10px] text-slate-500">
                 <span className="font-bold text-[#005A9C]">🏛️ GSDC-GUJGOV (Demo)</span>
-                <span>હમણાં જ • SMS</span>
+                <span>{isEn ? 'Just now • SMS' : isHi ? 'अभी • SMS' : isMr ? 'आत्ताच • SMS' : 'હમણાં જ • SMS'}</span>
               </div>
               <p className="text-xs font-medium text-slate-800 leading-relaxed">
-                નમસ્તે <strong>{citizenName}</strong>, આપનો ઈ-જન સેવા ટોકન ક્રમાંક <strong>{booking.tokenNumber}</strong> તારીખ {selectedDate}, સમય <strong>{currentSlotTime}</strong> માટે {centerName} (કાઉન્ટર {booking.counterNumber}) ખાતે સફળતાપૂર્વક કન્ફર્મ થયેલ છે.
+                {isEn 
+                  ? `Namaste ${citizenName}, your E-Jan Seva token #${booking.tokenNumber.replace('#','')} on ${selectedDate} at ${currentSlotTime} for ${centerName} (Counter ${booking.counterNumber}) is confirmed.`
+                  : isHi 
+                  ? `नमस्ते ${citizenName}, आपका ई-जन सेवा टोकन #${booking.tokenNumber.replace('#','')} दिनांक ${selectedDate}, समय ${currentSlotTime} हेतु ${centerName} (काउंटर ${booking.counterNumber}) पर सफलतापूर्वक कन्फर्म हुआ है।`
+                  : isMr 
+                  ? `नमस्ते ${citizenName}, आपला ई-जन सेवा टोकन #${booking.tokenNumber.replace('#','')} दिनांक ${selectedDate}, वेळ ${currentSlotTime} साठी ${centerName} (काउंटर ${booking.counterNumber}) येथे निश्चित झाला आहे.`
+                  : `નમસ્તે ${citizenName}, આપનો ઈ-જન સેવા ટોકન ક્રમાંક ${booking.tokenNumber} તારીખ ${selectedDate}, સમય ${currentSlotTime} માટે ${centerName} (કાઉન્ટર ${booking.counterNumber}) ખાતે સફળતાપૂર્વક કન્ફર્મ થયેલ છે.`}
               </p>
               <p className="text-[11px] text-slate-600">
-                કૃપા કરીને અસલ કાગળો સાથે નિયત સમયે હાજર રહેવું.
+                {isEn ? 'Please carry original documents at the scheduled time.' : isHi ? 'कृपया मूल दस्तावेजों सहित नियत समय पर उपस्थित हों।' : isMr ? 'कृपया मूळ कागदपत्रांसह ठरलेल्या वेळेवर उपस्थित राहा.' : 'કૃપા કરીને અસલ કાગળો સાથે નિયત સમયે હાજર રહેવું.'}
               </p>
               <div className="pt-1 text-[11px] font-mono text-[#005A9C] font-bold">
-                ડિજિટલ પાસ લિંક: <span className="underline">qless.guj.gov.in/t/{booking.tokenNumber.replace('#','')}</span>
+                {isEn ? 'Digital Pass URL:' : isHi ? 'डिजिटल पास लिंक:' : isMr ? 'डिजिटल पास लिंक:' : 'ડિજિટલ પાસ લિંક:'} <span className="underline">qless.guj.gov.in/t/{booking.tokenNumber.replace('#','')}</span>
               </div>
             </div>
 
             <p className="text-[10px] text-slate-400 mt-2">
-              * નોંધ: આ એક ડેમો સિમ્યુલેશન છે. પ્રોડક્શનમાં અધિકૃત ગવર્નમેન્ટ SMS ગેટવે સાથે જોડાય છે.
+              {isEn ? '* Note: This is an authentic interactive demo simulation.' : '* નોંધ: આ એક ડેમો સિમ્યુલેશન છે. પ્રોડક્શનમાં અધિકૃત ગવર્નમેન્ટ SMS ગેટવે સાથે જોડાય છે.'}
             </p>
 
             <div className="mt-4 flex items-center justify-between gap-2">
               <button
                 onClick={() => {
                   triggerHaptic('success');
-                  navigator.clipboard?.writeText(`🏛️ GSDC-GUJGOV: આપનો ટોકન ${booking.tokenNumber} (${centerName}) કન્ફર્મ થયેલ છે.`);
-                  alert("SMS લખાણ ક્લિપબોર્ડ પર કોપી થયું!");
+                  navigator.clipboard?.writeText(`🏛️ GSDC-GUJGOV: Token ${booking.tokenNumber} (${centerName}) confirmed.`);
+                  alert(isEn ? "SMS text copied to clipboard!" : isHi ? "SMS टेक्स्ट क्लिपबोर्ड पर कॉपी हुआ!" : isMr ? "SMS मजकूर कॉपी झाला!" : "SMS લખાણ ક્લિપબોર્ડ પર કોપી થયું!");
                 }}
                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition"
               >
-                ટેક્સ્ટ કોપી કરો
+                {isEn ? 'Copy Text' : isHi ? 'टेक्स्ट कॉपी करें' : isMr ? 'मजकूर कॉपी करा' : 'ટેક્સ્ટ કોપી કરો'}
               </button>
               <button
                 onClick={() => setSmsModalOpen(false)}
                 className="flex-1 bg-[#003366] hover:bg-[#002244] text-white font-bold py-2.5 rounded-xl text-xs transition"
               >
-                સમજાઈ ગયું (Close)
+                {isEn ? 'Understood (Close)' : isHi ? 'समझ गया (बंद करें)' : isMr ? 'समजले (बंद करा)' : 'સમજાઈ ગયું (Close)'}
               </button>
             </div>
           </div>
@@ -1059,7 +1185,7 @@ export function DigitalTokenPass({
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold leading-none">જન સેવા આસિસ્ટન્ટ (Demo)</span>
+                    <span className="text-xs font-bold leading-none">{isEn ? 'Jan Seva Assistant (Demo)' : isHi ? 'जन सेवा सहायक (Demo)' : isMr ? 'जन सेवा सहाय्यक (Demo)' : 'જન સેવા આસિસ્ટન્ટ (Demo)'}</span>
                     <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 text-white flex items-center justify-center text-[9px] font-black">✓</span>
                   </div>
                   <p className="text-[10px] text-emerald-200">WhatsApp Service Assistant • Demo</p>
@@ -1078,7 +1204,7 @@ export function DigitalTokenPass({
               {/* Outgoing Message */}
               <div className="flex justify-end">
                 <div className="bg-[#DCF8C6] rounded-xl rounded-tr-none p-2.5 shadow-sm max-w-[80%] text-[11px]">
-                  <p>નમસ્તે, મારો ટોકન સ્ટેટસ જણાવો.</p>
+                  <p>{isEn ? 'Hello, please share my token status.' : isHi ? 'नमस्ते, मेरा टोकन स्टेटस बताएं।' : isMr ? 'नमस्ते, माझा टोकन स्टेटस सांगा.' : 'નમસ્તે, મારો ટોકન સ્ટેટસ જણાવો.'}</p>
                   <span className="text-[9px] text-slate-400 block text-right mt-0.5">10:32 AM ✓✓</span>
                 </div>
               </div>
@@ -1088,28 +1214,28 @@ export function DigitalTokenPass({
                 <div className="bg-white rounded-xl rounded-tl-none p-3 shadow-sm max-w-[92%] space-y-2 border border-slate-200">
                   <div className="border-b border-slate-100 pb-1.5">
                     <span className="text-[10px] font-black text-[#075E54] uppercase tracking-wider">
-                      🏛️ ઈ-જન સેવા બુકિંગ કન્ફર્મેશન
+                      {isEn ? '🏛️ E-Jan Seva Booking Confirmation' : isHi ? '🏛️ ई-जन सेवा बुकिंग पुष्टि' : isMr ? '🏛️ ई-जन सेवा बुकिंग पुष्टी' : '🏛️ ઈ-જન સેવા બુકિંગ કન્ફર્મેશન'}
                     </span>
                   </div>
                   <p className="text-[11px] leading-relaxed">
-                    નમસ્તે <strong>{citizenName}</strong>, આપની અપોઇન્ટમેન્ટ સક્રિય છે.
+                    {isEn ? `Namaste ${citizenName}, your appointment is active.` : isHi ? `नमस्ते ${citizenName}, आपकी अपॉइंटमेंट सक्रिय है।` : isMr ? `नमस्ते ${citizenName}, आपली अपॉइंटमेंट सक्रिय आहे.` : `નમસ્તે ${citizenName}, આપની અપોઇન્ટમેન્ટ સક્રિય છે.`}
                   </p>
                   
                   <div className="bg-emerald-50 rounded-lg p-2 border border-emerald-200 space-y-1 text-[11px]">
                     <div className="flex justify-between">
-                      <span className="text-slate-500">ટોકન ક્રમાંક:</span>
+                      <span className="text-slate-500">{isEn ? 'Token No:' : isHi ? 'टोकन संख्या:' : isMr ? 'टोकन क्रमांक:' : 'ટોકન ક્રમાંક:'}</span>
                       <span className="font-bold text-[#075E54] font-mono">{booking.tokenNumber}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">કેન્દ્ર:</span>
+                      <span className="text-slate-500">{isEn ? 'Center:' : isHi ? 'केंद्र:' : isMr ? 'केंद्र:' : 'કેન્દ્ર:'}</span>
                       <span className="font-semibold text-slate-800">{centerName}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">કાઉન્ટર:</span>
-                      <span className="font-bold text-[#075E54]">કાઉન્ટર {booking.counterNumber}</span>
+                      <span className="text-slate-500">{isEn ? 'Counter:' : isHi ? 'काउंटर:' : isMr ? 'काउंटर:' : 'કાઉન્ટર:'}</span>
+                      <span className="font-bold text-[#075E54]">Counter {booking.counterNumber}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">સમય સ્લોટ:</span>
+                      <span className="text-slate-500">{isEn ? 'Slot Time:' : isHi ? 'समय स्लॉट:' : isMr ? 'वेळ:' : 'સમય સ્લોટ:'}</span>
                       <span className="font-bold text-slate-800">{currentSlotTime}</span>
                     </div>
                   </div>
@@ -1117,13 +1243,13 @@ export function DigitalTokenPass({
                   {/* Interactive WhatsApp Buttons */}
                   <div className="pt-2 space-y-1.5">
                     <a 
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(centerName + ' ' + booking.district.nameGu)}`}
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(centerName + ' ' + (isEn ? booking.district.nameEn : booking.district.nameGu))}`}
                       target="_blank"
                       rel="noreferrer"
                       className="w-full bg-slate-50 hover:bg-slate-100 text-[#005A9C] font-bold py-1.5 px-3 rounded-lg border border-slate-200 flex items-center justify-center gap-1.5 text-[11px] transition"
                     >
                       <Navigation className="w-3.5 h-3.5" />
-                      <span>📍 કચેરી જીપીએસ નકશો ખોલો</span>
+                      <span>{isEn ? '📍 Open GPS Map' : isHi ? '📍 कार्यालय जीपीएस नक्शा खोलें' : isMr ? '📍 कार्यालय जीपीएस नकाशा उघडा' : '📍 કચેરી જીપીએસ નકશો ખોલો'}</span>
                     </a>
 
                     <button
@@ -1134,18 +1260,18 @@ export function DigitalTokenPass({
                       className="w-full bg-slate-50 hover:bg-slate-100 text-amber-800 font-bold py-1.5 px-3 rounded-lg border border-slate-200 flex items-center justify-center gap-1.5 text-[11px] transition"
                     >
                       <Clock className="w-3.5 h-3.5 text-amber-600" />
-                      <span>⏱️ મોડું થશે? વિલંબ નોંધાવો</span>
+                      <span>{isEn ? '⏱️ Running Late? Report Delay' : isHi ? '⏱️ देरी होगी? विलंब दर्ज करें' : isMr ? '⏱️ उशीर होणार? उशीर नोंदवा' : '⏱️ મોડું થશે? વિલંબ નોંધાવો'}</span>
                     </button>
 
                     <button
                       onClick={() => {
                         triggerHaptic('tap');
-                        alert("આધાર કાર્ડ, આવકનો દાખલો અને ૨ ફોટા અસલ સાથે લાવવા.");
+                        alert(isEn ? "Carry original Aadhaar card, income certificate and 2 photos." : isHi ? "आधार कार्ड, आय प्रमाण पत्र और 2 फोटो मूल साथ लाएं।" : isMr ? "आधार कार्ड, उत्पन्न दाखला आणि २ फोटो सोबत आणा." : "આધાર કાર્ડ, આવકનો દાખલો અને ૨ ફોટા અસલ સાથે લાવવા.");
                       }}
                       className="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-1.5 px-3 rounded-lg border border-slate-200 flex items-center justify-center gap-1.5 text-[11px] transition"
                     >
                       <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>📋 જરૂરી અસલ કાગળોનું લિસ્ટ</span>
+                      <span>{isEn ? '📋 Required Documents List' : isHi ? '📋 आवश्यक मूल दस्तावेज सूची' : isMr ? '📋 आवश्यक कागदपत्रे यादी' : '📋 જરૂરી અસલ કાગળોનું લિસ્ટ'}</span>
                     </button>
                   </div>
 
@@ -1159,7 +1285,7 @@ export function DigitalTokenPass({
                 onClick={() => setWhatsAppModalOpen(false)}
                 className="w-full bg-[#075E54] hover:bg-[#054c44] text-white font-bold py-2 rounded-xl text-xs transition"
               >
-                બંધ કરો (Close Assistant)
+                {isEn ? 'Close Assistant' : isHi ? 'सहायक बंद करें' : isMr ? 'सहाय्यक बंद करा' : 'બંધ કરો (Close Assistant)'}
               </button>
             </div>
           </div>

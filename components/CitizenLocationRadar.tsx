@@ -38,12 +38,20 @@ export function CitizenLocationRadar({
   const [selectedKacheriId, setSelectedKacheriId] = useState<string>(NEARBY_KACHERIS_DATA[0]?.id || 'kacheri-gondal');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const isEn = lang === 'en';
+  const isHi = lang === 'hi';
+  const isMr = lang === 'mr';
+  const isKhi = lang === 'khi';
+  const isGu = lang === 'gu' || lang === 'khi';
+
   // Live Location State with Dynamic Reverse Geocoding
   const [gpsState, setGpsState] = useState<{
     latitude: number;
     longitude: number;
     displayGu: string;
     displayEn: string;
+    displayHi: string;
+    displayMr: string;
     accuracyMeters: number;
     isLive: boolean;
   }>({
@@ -51,6 +59,8 @@ export function CitizenLocationRadar({
     longitude: 70.7923,
     displayGu: 'ગોંડલ ટાઉન / સ્ટેશન રોડ, જિલ્લો: રાજકોટ',
     displayEn: 'Gondal Town / Station Rd, District: Rajkot',
+    displayHi: 'गोंडल टाउन / स्टेशन रोड, जिला: राजकोट',
+    displayMr: 'गोंडल शहर / स्टेशन रोड, जिल्हा: राजकोट',
     accuracyMeters: 6,
     isLive: false
   });
@@ -93,6 +103,8 @@ export function CitizenLocationRadar({
               longitude: lon,
               displayGu: locDetails.displayGu,
               displayEn: locDetails.displayEn,
+              displayHi: locDetails.displayGu.replace('જિલ્લો', 'जिला').replace('તાલુકો', 'तहसील'),
+              displayMr: locDetails.displayGu.replace('જિલ્લો', 'जिल्हा').replace('તાલુકો', 'तालुका'),
               accuracyMeters: accuracy,
               isLive: true
             });
@@ -102,6 +114,8 @@ export function CitizenLocationRadar({
               longitude: lon,
               displayGu: `અક્ષાંશ: ${lat.toFixed(4)}, રેખાંશ: ${lon.toFixed(4)} (ગુજરાત)`,
               displayEn: `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)} (Gujarat)`,
+              displayHi: `अक्षांश: ${lat.toFixed(4)}, देशांतर: ${lon.toFixed(4)} (गुजरात)`,
+              displayMr: `अक्षांश: ${lat.toFixed(4)}, रेखांश: ${lon.toFixed(4)} (गुजरात)`,
               accuracyMeters: accuracy,
               isLive: true
             });
@@ -123,6 +137,8 @@ export function CitizenLocationRadar({
             longitude: 70.7923,
             displayGu: locDetails.displayGu,
             displayEn: locDetails.displayEn,
+            displayHi: 'गोंडल टाउन / स्टेशन रोड, जिला: राजकोट (गुजरात)',
+            displayMr: 'गोंडल शहर / स्टेशन रोड, जिल्हा: राजकोट (गुजरात)',
             accuracyMeters: 10,
             isLive: false
           });
@@ -141,18 +157,63 @@ export function CitizenLocationRadar({
 
   const activeKacheri = kacheris.find(k => k.id === selectedKacheriId) || kacheris[0] || NEARBY_KACHERIS_DATA[0];
 
+  const getLocalizedKacheriName = (k: NearbyKacheriInfo) => {
+    if (isEn) return k.nameEn;
+    if (isHi) {
+      if (k.nameGu.includes('ગોંડલ')) return 'जन सेवा केंद्र — गोंडल';
+      if (k.nameGu.includes('રાજકોટ')) return 'मामलतदार कार्यालय — राजकोट दक्षिण';
+      if (k.nameGu.includes('કોટડા')) return 'तहसील सेवा सदन — कोटडा सांगाणी';
+      return k.nameEn;
+    }
+    if (isMr) {
+      if (k.nameGu.includes('ગોંડલ')) return 'जन सेवा केंद्र — गोंडल';
+      if (k.nameGu.includes('રાજકોટ')) return 'मामलतदार कार्यालय — राजकोट दक्षिण';
+      if (k.nameGu.includes('કોટડા')) return 'तालुका सेवा सदन — कोटडा सांगाणी';
+      return k.nameEn;
+    }
+    return k.nameGu;
+  };
+
+  const getLocalizedTalukaName = (k: NearbyKacheriInfo) => {
+    if (isEn) return k.talukaNameEn;
+    if (isHi || isMr) {
+      if (k.talukaNameGu.includes('ગોંડલ')) return 'गोंडल';
+      if (k.talukaNameGu.includes('રાજકોટ')) return 'राजकोट दक्षिण';
+      if (k.talukaNameGu.includes('કોટડા')) return 'कोटडा सांगाणी';
+      return k.talukaNameEn;
+    }
+    return k.talukaNameGu;
+  };
+
+  const getLocalizedServiceName = (srv: typeof activeKacheri.servicesAvailable[0]) => {
+    if (isEn) return srv.nameEn;
+    if (isHi) {
+      if (srv.nameGu.includes('આવક')) return 'आय / जाति प्रमाण पत्र';
+      if (srv.nameGu.includes('રેશન')) return 'राशन कार्ड / आधार';
+      if (srv.nameGu.includes('રેવન્યુ')) return 'राजस्व दस्तावेज़ / 7-12';
+      return srv.nameEn;
+    }
+    if (isMr) {
+      if (srv.nameGu.includes('આવક')) return 'उत्पन्न / जात दाखले';
+      if (srv.nameGu.includes('રેશન')) return 'शिधापत्रिका / आधार';
+      if (srv.nameGu.includes('રેવન્યુ')) return 'महसूल कागदपत्रे / 7-12';
+      return srv.nameEn;
+    }
+    return srv.nameGu;
+  };
+
   const content = (
     <div className="space-y-4 sm:space-y-5 w-full max-w-full overflow-hidden">
       
-      {/* SECTION 1: TWO-PILL ADDRESS VS GPS COMPARISON (OR LIVE GPS ONLY WHEN NOT LOGGED IN) */}
+      {/* SECTION 1: TWO-PILL ADDRESS VS GPS COMPARISON */}
       <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl sm:rounded-3xl p-3 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
             <h3 className="text-xs sm:text-sm font-black text-[#003366] uppercase tracking-wide">
               {isLoggedIn 
-                ? (lang === 'gu' ? 'તમારું આધાર સરનામું વિરુદ્ધ હાલનું લાઈવ લોકેશન' : 'Aadhaar Address vs Current Live Location')
-                : (lang === 'gu' ? 'તમારું હાલનું લાઈવ GPS લોકેશન' : 'Your Current Live GPS Location')}
+                ? (isEn ? 'Aadhaar Address vs Current Live Location' : isHi ? 'आधार पंजीकृत पता बनाम वर्तमान लाइव स्थान' : isMr ? 'आधार नोंदणीकृत पत्ता विरुद्ध थेट स्थान' : 'તમારું આધાર સરનામું વિરુદ્ધ હાલનું લાઈવ લોકેશન')
+                : (isEn ? 'Your Current Live GPS Location' : isHi ? 'आपका वर्तमान लाइव GPS स्थान' : isMr ? 'आपले सध्याचे थेट GPS स्थान' : 'તમારું હાલનું લાઈવ GPS લોકેશન')}
             </h3>
           </div>
           <button
@@ -161,7 +222,7 @@ export function CitizenLocationRadar({
             className="text-[11px] font-bold text-[#005A9C] hover:text-[#003366] flex items-center gap-1 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#FF9933]' : 'text-[#005A9C]'}`} />
-            <span>{lang === 'gu' ? 'લાઈવ GPS રીફ્રેશ' : 'Refresh Live GPS'}</span>
+            <span>{isEn ? 'Refresh Live GPS' : isHi ? 'लाइव GPS रिफ्रेश' : isMr ? 'थेट GPS रिफ्रेश' : 'લાઈવ GPS રીફ્રેશ'}</span>
           </button>
         </div>
 
@@ -172,17 +233,17 @@ export function CitizenLocationRadar({
               <div className="flex items-center justify-between pb-1.5 border-b border-blue-50">
                 <span className="text-[11px] font-black text-[#003366] flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
-                  <span className="truncate">{lang === 'gu' ? 'આધાર નોંધાયેલ સરનામું (કાયમી)' : 'Aadhaar Registered (Native)'}</span>
+                  <span className="truncate">{isEn ? 'Aadhaar Registered (Native)' : isHi ? 'आधार पंजीकृत (मूल)' : isMr ? 'आधार नोंदणीकृत (मूळ)' : 'આધાર નોંધાયેલ સરનામું (કાયમી)'}</span>
                 </span>
                 <span className="text-[9px] bg-blue-50 text-[#003366] font-bold px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
-                  {DEFAULT_CITIZEN_PROFILE.talukaGu}
+                  {isEn ? DEFAULT_CITIZEN_PROFILE.talukaEn : isHi || isMr ? 'गोंडल' : DEFAULT_CITIZEN_PROFILE.talukaGu}
                 </span>
               </div>
               <p className="text-xs text-slate-800 font-bold mt-2 leading-relaxed">
-                {lang === 'gu' ? DEFAULT_CITIZEN_PROFILE.fullAddressGu : DEFAULT_CITIZEN_PROFILE.fullAddressEn}
+                {isEn ? DEFAULT_CITIZEN_PROFILE.fullAddressEn : isHi ? 'मकान नं. ४४, रामजी मंदिर चौक, गांव: गोमटा, तहसील: गोंडल, जिला: राजकोट - ३६०३૧૧' : isMr ? 'घर क्र. ४४, रामजी मंदिर चौक, गाव: गोमटा, तालुका: गोंडल, जिल्हा: राजकोट - ३६०३૧૧' : DEFAULT_CITIZEN_PROFILE.fullAddressGu}
               </p>
               <p className="text-[10px] text-slate-500 font-medium mt-1">
-                {lang === 'gu' ? 'મહેસૂલી દાખલા (આવક/જાતિ/૭-૧૨) આ કચેરી ક્ષેત્રમાંથી જ માન્ય રહેશે.' : 'Revenue certificates bound to this taluka.'}
+                {isEn ? 'Revenue certificates bound to this taluka.' : isHi ? 'राजस्व प्रमाण पत्र (आय/जाति/७-१२) इसी तहसील से मान्य होंगे।' : isMr ? 'महसूल दाखले (उत्पन्न/जात/७-१२) या तालुक्यातूनच वैध राहतील.' : 'મહેસૂલી દાખલા (આવક/જાતિ/૭-૧૨) આ કચેરી ક્ષેત્રમાંથી જ માન્ય રહેશે.'}
               </p>
             </div>
           )}
@@ -192,19 +253,19 @@ export function CitizenLocationRadar({
             <div className="flex items-center justify-between pb-1.5 border-b border-emerald-50">
               <span className="text-[11px] font-black text-emerald-800 flex items-center gap-1.5">
                 <Compass className={`w-3.5 h-3.5 text-emerald-600 shrink-0 ${gpsState.isLive ? 'animate-spin' : ''}`} />
-                <span className="truncate">{lang === 'gu' ? 'હાલનું લાઈવ GPS લોકેશન (ચોક્કસ)' : 'Current Live GPS Location (Exact)'}</span>
+                <span className="truncate">{isEn ? 'Current Live GPS Location (Exact)' : isHi ? 'वर्तमान लाइव GPS स्थान (सटीक)' : isMr ? 'सध्याचे थेट GPS स्थान (अचूक)' : 'હાલનું લાઈવ GPS લોકેશન (ચોક્કસ)'}</span>
               </span>
               <span className="text-[9px] bg-emerald-100 text-emerald-800 font-black px-1.5 py-0.2 rounded shrink-0 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                <span>{gpsState.isLive ? `GPS સક્રિય (±${gpsState.accuracyMeters}m)` : 'લાઈવ ડિટેક્શન'}</span>
+                <span>{gpsState.isLive ? (isEn ? `GPS Active (±${gpsState.accuracyMeters}m)` : isHi ? `GPS सक्रिय (±${gpsState.accuracyMeters}m)` : isMr ? `GPS सक्रिय (±${gpsState.accuracyMeters}m)` : `GPS સક્રિય (±${gpsState.accuracyMeters}m)`) : (isEn ? 'Live Detection' : isHi ? 'लाइव खोज' : isMr ? 'थेट शोध' : 'લાઈવ ડિટેક્શન')}</span>
               </span>
             </div>
             <p className="text-xs text-slate-900 font-black mt-2 leading-relaxed">
-              📍 {lang === 'gu' ? gpsState.displayGu : gpsState.displayEn}
+              📍 {isEn ? gpsState.displayEn : isHi ? gpsState.displayHi : isMr ? gpsState.displayMr : gpsState.displayGu}
             </p>
             <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-              <span>અક્ષાંશ/રેખાંશ: {gpsState.latitude.toFixed(4)}, {gpsState.longitude.toFixed(4)}</span>
-              <span className="text-emerald-700 font-bold">{lang === 'gu' ? 'રીઅલ-ટાઇમ કનેક્ટેડ' : 'Real-time Linked'}</span>
+              <span>{isEn ? 'Lat/Lon: ' : isHi ? 'अक्षांश/देशांतर: ' : isMr ? 'अक्षांश/रेखांश: ' : 'અક્ષાંશ/રેખાંશ: '}{gpsState.latitude.toFixed(4)}, {gpsState.longitude.toFixed(4)}</span>
+              <span className="text-emerald-700 font-bold">{isEn ? 'Real-time Linked' : isHi ? 'रीयल-टाइम कनेक्टेड' : isMr ? 'रिअल-टाइम जोडलेले' : 'રીઅલ-ટાઇમ કનેક્ટેડ'}</span>
             </div>
           </div>
         </div>
@@ -215,14 +276,14 @@ export function CitizenLocationRadar({
         <div className="flex flex-wrap items-center justify-between gap-1">
           <div>
             <h4 className="text-xs sm:text-sm font-black text-[#003366]">
-              {lang === 'gu' ? 'નજીકની સરકારી કચેરીઓ (લાઈવ ભીડ & પ્રતીક્ષા સરખામણી)' : 'Nearby Kacheris (Live Wait & Crowd Comparison)'}
+              {isEn ? 'Nearby Kacheris (Live Wait & Crowd Comparison)' : isHi ? 'निकटतम कार्यालय (लाइव भीड़ एवं प्रतीक्षा तुलना)' : isMr ? 'जवळचे कार्यालय (थेट गर्दी व प्रतीक्षा तुलना)' : 'નજીકની સરકારી કચેરીઓ (લાઈવ ભીડ & પ્રતીક્ષા સરખામણી)'}
             </h4>
             <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium">
-              {lang === 'gu' ? 'તમારા હાલના લાઈવ લોકેશનથી કઈ કચેરી સૌથી નજીક છે તે વાસ્તવિક અંતર સાથે જુઓ' : 'Calculated in real-time from your exact coordinates'}
+              {isEn ? 'Calculated in real-time from your exact coordinates' : isHi ? 'आपके सटीक स्थान से वास्तविक दूरी व समय की गणना' : isMr ? 'आपल्या अचूक स्थानावरून वास्तविक अंतर व वेळेची गणना' : 'તમારા હાલના લાઈવ લોકેશનથી કઈ કચેરી સૌથી નજીક છે તે વાસ્તવિક અંતર સાથે જુઓ'}
             </p>
           </div>
           <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-            {lang === 'gu' ? `${kacheris.length} કચેરીઓ સરખાવી` : `${kacheris.length} centers compared`}
+            {isEn ? `${kacheris.length} centers compared` : isHi ? `${kacheris.length} कार्यालयों की तुलना` : isMr ? `${kacheris.length} कार्यालयांची तुलना` : `${kacheris.length} કચેરીઓ સરખાવી`}
           </span>
         </div>
 
@@ -247,7 +308,7 @@ export function CitizenLocationRadar({
                 <div>
                   <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
                     <span className="text-xs font-black text-[#003366] truncate">
-                      {lang === 'gu' ? k.talukaNameGu : k.talukaNameEn}
+                      {getLocalizedTalukaName(k)}
                     </span>
                     <span className={`text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ${
                       k.crowdPercentage < 40 
@@ -256,21 +317,21 @@ export function CitizenLocationRadar({
                           ? 'bg-blue-100 text-[#003366]' 
                           : 'bg-amber-100 text-amber-900'
                     }`}>
-                      {k.crowdPercentage}% {lang === 'gu' ? 'ભીડ' : 'Crowd'}
+                      {k.crowdPercentage}% {isEn ? 'Crowd' : isHi ? 'भीड़' : isMr ? 'गर्दी' : 'ભીડ'}
                     </span>
                   </div>
 
                   <h5 className="text-xs font-extrabold text-slate-900 mt-2 leading-tight">
-                    {lang === 'gu' ? k.nameGu : k.nameEn}
+                    {getLocalizedKacheriName(k)}
                   </h5>
 
                   <div className="mt-2.5 grid grid-cols-2 gap-1.5 text-center">
                     <div className="bg-white border border-slate-200 rounded-xl p-1.5">
-                      <span className="text-[9px] font-bold text-slate-400 block">{lang === 'gu' ? 'વાસ્તવિક અંતર' : 'Distance'}</span>
+                      <span className="text-[9px] font-bold text-slate-400 block">{isEn ? 'Distance' : isHi ? 'दूरी' : isMr ? 'अंतर' : 'વાસ્તવિક અંતર'}</span>
                       <span className="text-xs sm:text-sm font-black text-[#003366]">{k.distanceKm} km</span>
                     </div>
                     <div className="bg-white border border-slate-200 rounded-xl p-1.5">
-                      <span className="text-[9px] font-bold text-slate-400 block">{lang === 'gu' ? 'પ્રતીક્ષા' : 'Wait'}</span>
+                      <span className="text-[9px] font-bold text-slate-400 block">{isEn ? 'Wait' : isHi ? 'प्रतीक्षा' : isMr ? 'प्रतीक्षा' : 'પ્રતીક્ષા'}</span>
                       <span className="text-xs sm:text-sm font-black text-[#138808]">{k.avgWaitMinutes} min</span>
                     </div>
                   </div>
@@ -278,15 +339,15 @@ export function CitizenLocationRadar({
                   {k.isRecommendedFastest && (
                     <div className="mt-2 bg-emerald-100/80 border border-emerald-300 text-emerald-900 p-1.5 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                      <span className="truncate">{lang === 'gu' ? 'મુક્ત કાઉન્ટર! ઝડપી કામગીરી' : 'Free Counters! Fast Service'}</span>
+                      <span className="truncate">{isEn ? '⚡ Free Counters! Fast Service' : isHi ? '⚡ मुक्त काउंटर! त्वरित सेवा' : isMr ? '⚡ मोफत काउंटर! जलद सेवा' : '⚡ મુક્ત કાઉન્ટર! ઝડપી કામગીરી'}</span>
                     </div>
                   )}
                 </div>
 
                 <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-bold">
-                  <span className="text-slate-500">{k.activeCountersCount} {lang === 'gu' ? 'કાઉન્ટર સક્રિય' : 'Counters'}</span>
+                  <span className="text-slate-500">{k.activeCountersCount} {isEn ? 'Counters' : isHi ? 'सक्रिय काउंटर' : isMr ? 'सक्रिय काउंटर' : 'કાઉન્ટર સક્રિય'}</span>
                   <span className={`flex items-center gap-0.5 ${isSelected ? 'text-[#003366] font-black' : 'text-slate-600'}`}>
-                    <span>{isSelected ? (lang === 'gu' ? 'પસંદ કરેલ ✓' : 'Selected ✓') : (lang === 'gu' ? 'વિગતો જુઓ' : 'View Desk')}</span>
+                    <span>{isSelected ? (isEn ? 'Selected ✓' : isHi ? 'चयनित ✓' : isMr ? 'निवडले ✓' : 'પસંદ કરેલ ✓') : (isEn ? 'View Desk' : isHi ? 'विवरण देखें' : isMr ? 'तपशील पहा' : 'વિગતો જુઓ')}</span>
                   </span>
                 </div>
               </div>
@@ -295,23 +356,23 @@ export function CitizenLocationRadar({
         </div>
       </div>
 
-      {/* SECTION 3: SELECTED CENTER DETAILS & COUNTER MODIFICATIONS */}
+      {/* SECTION 3: SELECTED CENTER DETAILS */}
       <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Building className="w-4 h-4 text-[#FF9933] shrink-0" />
               <h4 className="text-xs sm:text-sm font-black text-[#003366]">
-                {lang === 'gu' ? activeKacheri.nameGu : activeKacheri.nameEn}
+                {getLocalizedKacheriName(activeKacheri)}
               </h4>
-              <span className="text-[10px] bg-blue-50 text-[#005A9C] font-bold px-2 py-0.5 rounded border border-blue-200">
-                {activeKacheri.distanceKm} km ({activeKacheri.travelMinutes} {lang === 'gu' ? 'મિનિટ મુસાફરી' : 'mins travel'})
+              <span className="text-[10px] bg-blue-50 text-[#003366] font-bold px-2 py-0.5 rounded border border-blue-200">
+                {activeKacheri.distanceKm} km ({activeKacheri.travelMinutes} {isEn ? 'mins travel' : isHi ? 'मिनट यात्रा' : isMr ? 'मिनिटे प्रवास' : 'મિનિટ મુસાફરી'})
               </span>
             </div>
             <p className="text-[10.5px] sm:text-[11px] text-slate-500 font-medium mt-0.5">
               {activeKacheri.isRecommendedFastest 
-                ? (lang === 'gu' ? activeKacheri.recommendationReasonGu : activeKacheri.recommendationReasonEn)
-                : (lang === 'gu' ? `આ કચેરી તમારા હાલના સ્થાનથી ${activeKacheri.distanceKm} કિમી દૂર છે.` : `This center is ${activeKacheri.distanceKm} km away.`)}
+                ? (isEn ? activeKacheri.recommendationReasonEn : isHi ? 'यह कार्यालय आपके स्थान से सबसे निकटतम है एवं न्यूनतम प्रतीक्षा समय उपलब्ध है।' : isMr ? 'हे कार्यालय आपल्या स्थानावरून सर्वात जवळचे असून कमीत कमी वेळ लागतो.' : activeKacheri.recommendationReasonGu)
+                : (isEn ? `This center is ${activeKacheri.distanceKm} km away.` : isHi ? `यह कार्यालय आपके वर्तमान स्थान से ${activeKacheri.distanceKm} किमी दूर है।` : isMr ? `हे कार्यालय आपल्या स्थानापासून ${activeKacheri.distanceKm} किमी अंतरावर आहे.` : `આ કચેરી તમારા હાલના સ્થાનથી ${activeKacheri.distanceKm} કિમી દૂર છે.`)}
             </p>
           </div>
 
@@ -324,7 +385,7 @@ export function CitizenLocationRadar({
               className="bg-[#003366] hover:bg-[#002244] text-white text-xs font-black px-4 py-2.5 rounded-xl transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-xs shrink-0"
             >
               <Calendar className="w-4 h-4 text-[#FF9933]" />
-              <span>{lang === 'gu' ? 'આ કચેરી માટે ટોકન સ્લોટ બુક કરો' : 'Book Token at this Center'}</span>
+              <span>{isEn ? 'Book Token at this Center' : isHi ? 'इस कार्यालय के लिए स्लॉट बुक करें' : isMr ? 'या कार्यालयासाठी स्लॉट बुक करा' : 'આ કચેરી માટે ટોકન સ્લોટ બુક કરો'}</span>
               <ArrowRight className="w-3.5 h-3.5 text-white" />
             </button>
           )}
@@ -334,10 +395,10 @@ export function CitizenLocationRadar({
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-black text-[#003366] uppercase tracking-wide">
-              {lang === 'gu' ? 'લાઈવ કાઉન્ટર સ્થિતિ & અંદાજિત સમય:' : 'Live Counters & Estimated Wait Times:'}
+              {isEn ? 'Live Counters & Estimated Wait Times:' : isHi ? 'लाइव काउंटर स्थिति एवं अनुमानित समय:' : isMr ? 'थेट काउंटर स्थिती व अंदाजित वेळ:' : 'લાઈવ કાઉન્ટર સ્થિતિ & અંદાજિત સમય:'}
             </span>
             <span className="text-[10px] text-slate-500 font-bold">
-              {activeKacheri.servicesAvailable.length} {lang === 'gu' ? 'કાઉન્ટર ઓપન' : 'Counters Open'}
+              {activeKacheri.servicesAvailable.length} {isEn ? 'Counters Open' : isHi ? 'काउंटर खुले' : isMr ? 'काउंटर सुरू' : 'કાઉન્ટર ઓપન'}
             </span>
           </div>
 
@@ -350,7 +411,7 @@ export function CitizenLocationRadar({
                 <div>
                   <div className="flex items-center justify-between pb-1 border-b border-slate-200/60">
                     <span className="text-[10px] font-black text-[#003366]">
-                      કાઉન્ટર નં. {srv.counterNumber}
+                      {isEn ? `Counter ${srv.counterNumber}` : isHi ? `काउंटर ${srv.counterNumber}` : isMr ? `काउंटर ${srv.counterNumber}` : `કાઉન્ટર નં. ${srv.counterNumber}`}
                     </span>
                     <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded ${
                       srv.status === 'open' 
@@ -359,21 +420,25 @@ export function CitizenLocationRadar({
                           ? 'bg-amber-100 text-amber-900' 
                           : 'bg-red-100 text-red-800'
                     }`}>
-                      {srv.status === 'open' ? 'મુક્ત (Open)' : srv.status === 'busy' ? 'ચાલુ (Busy)' : 'રીસેસ (Break)'}
+                      {srv.status === 'open' 
+                        ? (isEn ? 'Open' : isHi ? 'खुला (Open)' : isMr ? 'सुरू (Open)' : 'મુક્ત (Open)') 
+                        : srv.status === 'busy' 
+                        ? (isEn ? 'Busy' : isHi ? 'व्यस्त (Busy)' : isMr ? 'व्यस्त (Busy)' : 'ચાલુ (Busy)') 
+                        : (isEn ? 'Break' : isHi ? 'विराम (Break)' : isMr ? 'सुट्टी (Break)' : 'રીસેસ (Break)')}
                     </span>
                   </div>
 
                   <h6 className="text-[11px] font-bold text-slate-900 mt-1 leading-tight">
-                    {lang === 'gu' ? srv.nameGu : srv.nameEn}
+                    {getLocalizedServiceName(srv)}
                   </h6>
                   <p className="text-[9.5px] text-slate-500 mt-0.5">
-                    અધિકારી: {srv.officerNameGu}
+                    {isEn ? `Officer: ${srv.officerNameGu}` : isHi ? `अधिकारी: ${srv.officerNameGu}` : isMr ? `अधिकारी: ${srv.officerNameGu}` : `અધિકારી: ${srv.officerNameGu}`}
                   </p>
                 </div>
 
                 <div className="mt-2 pt-1.5 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-mono font-bold">
-                  <span className="text-slate-600">ટોકન: <strong className="text-[#003366]">{srv.currentToken}</strong></span>
-                  <span className="text-emerald-700">~{srv.estimatedMinutes} મિનિટ</span>
+                  <span className="text-slate-600">{isEn ? 'Token: ' : isHi ? 'टोकन: ' : isMr ? 'टोकन: ' : 'ટોકન: '}<strong className="text-[#003366]">{srv.currentToken}</strong></span>
+                  <span className="text-emerald-700">~{srv.estimatedMinutes} {isEn ? 'min' : isHi ? 'मिनट' : isMr ? 'मिनिटे' : 'મિનિટ'}</span>
                 </div>
               </div>
             ))}
@@ -383,10 +448,20 @@ export function CitizenLocationRadar({
         {/* Modifications & services you can do here */}
         <div className="pt-2 border-t border-slate-100">
           <h5 className="text-xs font-black text-[#003366] uppercase tracking-wide mb-2">
-            {lang === 'gu' ? 'કચેરીએ જઈને થઈ શકતા સુધારાઓ અને સેવાઓ:' : 'Modification Services Available at this Center:'}
+            {isEn ? 'Modification Services Available at this Center:' : isHi ? 'कार्यालय में उपलब्ध सेवाएं एवं सुधार:' : isMr ? 'कार्यालयात उपलब्ध सेवा व बदल:' : 'કચેરીએ જઈને થઈ શકતા સુધારાઓ અને સેવાઓ:'}
           </h5>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {(lang === 'gu' ? activeKacheri.modifiableServicesGu : activeKacheri.modifiableServicesEn).map((mod, idx) => (
+            {(isEn ? activeKacheri.modifiableServicesEn : isHi ? [
+              'आय प्रमाण पत्र सुधार एवं सत्यापन',
+              'राशन कार्ड नाम जोड़ना एवं अलग करना',
+              'जाति प्रमाण पत्र एवं शपथ पत्र',
+              '7-12 एवं 8-A भूमि नकल प्रमाणीकरण'
+            ] : isMr ? [
+              'उत्पन्न दाखला बदल व पडताळणी',
+              'शिधापत्रिका नाव समाविष्ट करणे व वेगळे करणे',
+              'जात प्रमाणपत्र व प्रतिज्ञापत्र',
+              '७/१२ व ८-अ जमीन उतारा प्रमाणीकरण'
+            ] : activeKacheri.modifiableServicesGu).map((mod, idx) => (
               <div key={idx} className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span>{mod}</span>
@@ -428,14 +503,14 @@ export function CitizenLocationRadar({
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-[#FF9933] border border-amber-400/30 px-1.5 sm:px-2 py-0.5 rounded">
-                  {lang === 'gu' ? 'લાઈવ GPS કચેરી રડાર' : 'Live GPS Kacheri Radar'}
+                  {isEn ? 'Live GPS Kacheri Radar' : isHi ? 'लाइव GPS कचहरी रडार' : isMr ? 'थेट GPS कचेरी रडार' : 'લાઈવ GPS કચેરી રડાર'}
                 </span>
                 <span className="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1.5 sm:px-2 py-0.5 rounded font-bold font-mono">
-                  {lang === 'gu' ? 'ચોક્કસ સ્થાન ટ્રેકિંગ' : 'Precise Geolocation'}
+                  {isEn ? 'Precise Geolocation' : isHi ? 'सटीक भू-स्थान' : isMr ? 'अचूक स्थान ट्रॅकिंग' : 'ચોક્કસ સ્થાન ટ્રેકિંગ'}
                 </span>
               </div>
               <h2 className="text-sm sm:text-lg font-black text-white mt-0.5 line-clamp-1">
-                {lang === 'gu' ? 'તમારું લોકેશન, નજીકની કચેરીઓ અને મુક્ત કાઉન્ટર' : 'Your Location, Nearby Kacheris & Free Desks'}
+                {isEn ? 'Your Location, Nearby Kacheris & Free Desks' : isHi ? 'आपका स्थान, निकटतम कार्यालय एवं मुक्त काउंटर' : isMr ? 'आपले स्थान, जवळचे कार्यालय आणि मोफत काउंटर' : 'તમારું લોકેશન, નજીકની કચેરીઓ અને મુક્ત કાઉન્ટર'}
               </h2>
             </div>
           </div>
@@ -462,7 +537,7 @@ export function CitizenLocationRadar({
               onClick={onClose}
               className="bg-[#003366] hover:bg-[#002244] active:scale-95 text-white px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition cursor-pointer shrink-0"
             >
-              {lang === 'gu' ? 'બંધ કરો' : 'Close'}
+              {isEn ? 'Close' : isHi ? 'बंद करें' : isMr ? 'बंद करा' : 'બંધ કરો'}
             </button>
           )}
         </div>

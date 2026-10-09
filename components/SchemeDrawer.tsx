@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, CheckSquare, Square, Share2, Camera, ShieldCheck, 
-  Clock, IndianRupee, Volume2, ArrowRight, FileCheck2, Lock, 
+  Clock, IndianRupee, Volume2, VolumeX, ArrowRight, FileCheck2, Lock, 
   CheckCircle2, HelpCircle, ExternalLink, AlertCircle, Info, Building2,
   Upload, Loader2, AlertTriangle, RefreshCw, Sparkles, FileText
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
-import { speakGuidance } from '@/lib/voice';
+import { speakGuidance, stopVoice, toggleVoice, isVoiceSpeaking, subscribeSpeechState } from '@/lib/voice';
 import { 
   SchemeItem, 
   getSchemeEligibility, 
@@ -57,14 +57,21 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 }) => {
   const [checkedDocs, setCheckedDocs] = useState<Record<string, boolean>>({});
   const [docVerifications, setDocVerifications] = useState<Record<string, DocVerificationState>>({});
+  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
 
-  // Body scroll lock on drawer open
+  // Subscribe to speech synthesis state
+  useEffect(() => {
+    return subscribeSpeechState(setIsPlayingVoice);
+  }, []);
+
+  // Body scroll lock and voice stop on drawer open/close
   useEffect(() => {
     if (isOpen && scheme) {
       const orig = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
         document.body.style.overflow = orig;
+        stopVoice();
       };
     }
   }, [isOpen, scheme]);
@@ -480,10 +487,33 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                 </span>
               </span>
               <button
-                onClick={() => speakGuidance(displayBenefit, lang)}
-                className="text-[#003366] hover:text-[#005A9C] text-xs font-bold flex items-center gap-1 cursor-pointer"
+                onClick={() => {
+                  triggerHaptic('tap');
+                  if (isPlayingVoice || isVoiceSpeaking()) {
+                    stopVoice();
+                    setIsPlayingVoice(false);
+                  } else {
+                    setIsPlayingVoice(true);
+                    toggleVoice(displayBenefit, lang);
+                  }
+                }}
+                className={`text-xs font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition active:scale-95 cursor-pointer ${
+                  isPlayingVoice 
+                    ? 'bg-red-100 text-red-700 border border-red-300' 
+                    : 'bg-emerald-100/80 text-[#003366] hover:bg-emerald-200/80'
+                }`}
               >
-                <Volume2 className="w-3.5 h-3.5" /> {isEn ? 'Listen' : isHi ? 'सुनें' : isMr ? 'ऐका' : 'સાંભળો'}
+                {isPlayingVoice ? (
+                  <>
+                    <VolumeX className="w-3.5 h-3.5 text-red-600 animate-pulse" />
+                    <span>{isEn ? 'Stop' : isHi ? 'रोकें' : isMr ? 'थांबवा' : 'બંધ કરો'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-3.5 h-3.5 text-[#005A9C]" />
+                    <span>{isEn ? 'Listen' : isHi ? 'सुनें' : isMr ? 'ऐका' : 'સાંભળો'}</span>
+                  </>
+                )}
               </button>
             </div>
             <p className="text-xs font-bold text-slate-800 leading-relaxed">{displayBenefit}</p>
@@ -585,20 +615,20 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                         {vState.status === 'passed' ? (
                           <span className="text-[9.5px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                             <CheckCircle2 className="w-3 h-3 text-white shrink-0" />
-                            <span>{isEn ? 'AI Verified' : isHi ? 'सत्यापित' : 'AI પ્રમાણિત'}</span>
+                            <span>{isEn ? 'AI Verified' : isHi ? 'सत्यापित' : isMr ? 'प्रमाणित' : 'AI પ્રમાણિત'}</span>
                           </span>
                         ) : vState.status === 'failed' ? (
                           <span className="text-[9.5px] font-black bg-red-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                             <AlertTriangle className="w-3 h-3 text-white shrink-0" />
-                            <span>{isEn ? 'Action Required' : isHi ? 'अमान्य' : 'ધ્યાન જરૂરી'}</span>
+                            <span>{isEn ? 'Action Required' : isHi ? 'अमान्य' : isMr ? 'दुरुस्ती आवश्यक' : 'ધ્યાન જરૂરી'}</span>
                           </span>
                         ) : doc.required ? (
                           <span className="text-[9px] font-bold bg-blue-100 text-[#005A9C] border border-blue-200 px-1.5 py-0.5 rounded">
-                            {isEn ? 'Mandatory' : isHi ? 'अनिवार्य' : 'ફરજિયાત'}
+                            {isEn ? 'Mandatory' : isHi ? 'अनिवार्य' : isMr ? 'अनिवार्य' : 'ફરજિયાત'}
                           </span>
                         ) : (
                           <span className="text-[9px] font-bold bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded">
-                            {isEn ? 'Optional' : 'વૈકલ્પિક'}
+                            {isEn ? 'Optional' : isHi ? 'वैकल्पिक' : isMr ? 'ऐच्छिक' : 'વૈકલ્પિક'}
                           </span>
                         )}
                       </div>
@@ -608,7 +638,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                     {vState.status === 'scanning' && (
                       <div className="mt-2.5 p-2 bg-blue-100/70 border border-blue-200 rounded-xl flex items-center gap-2 text-[11px] text-[#003366] font-bold">
                         <Loader2 className="w-3.5 h-3.5 text-[#005A9C] animate-spin shrink-0" />
-                        <span>{isEn ? 'AI Document Analysis in progress (Validating seals, OCR & QR)...' : 'AI દસ્તાવેજ ચકાસણી ચાલુ છે (મોહર, OCR અને QR કોડ સ્કેનિંગ)...'}</span>
+                        <span>{isEn ? 'AI Document Analysis in progress (Validating seals, OCR & QR)...' : isHi ? 'AI दस्तावेज़ सत्यापन जारी है (मुहर, OCR एवं QR स्कैनिंग)...' : isMr ? 'AI कागदपत्र तपासणी सुरू आहे (शिक्का, OCR व QR स्कॅनिंग)...' : 'AI દસ્તાવેજ ચકાસણી ચાલુ છે (મોહર, OCR અને QR કોડ સ્કેનિંગ)...'}</span>
                       </div>
                     )}
 
@@ -618,7 +648,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                         <div className="flex items-center justify-between text-emerald-950 font-black">
                           <span className="flex items-center gap-1">
                             <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                            <span>{isEn ? 'Authenticity & Validity Verified' : 'સત્તાવાર દસ્તાવેજ પ્રમાણિત'}</span>
+                            <span>{isEn ? 'Authenticity & Validity Verified' : isHi ? 'सत्यापित एवं वैध दस्तावेज़' : isMr ? 'अधिकृत व वैध कागदपत्र' : 'સત્તાવાર દસ્તાવેજ પ્રમાણિત'}</span>
                           </span>
                           <span className="text-[10px] text-emerald-800 font-mono">100% Match</span>
                         </div>
@@ -634,7 +664,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                         <div className="flex items-center justify-between text-red-950 font-black">
                           <span className="flex items-center gap-1 text-red-700">
                             <AlertCircle className="w-3.5 h-3.5 text-red-600" />
-                            <span>{isEn ? 'Validation Failed' : 'ચકાસણી નિષ્ફળ / અમાન્ય'}</span>
+                            <span>{isEn ? 'Validation Failed' : isHi ? 'सत्यापन विफल / अमान्य' : isMr ? 'पडताळणी अयशस्वी / अमान्य' : 'ચકાસણી નિષ્ફળ / અમાન્ય'}</span>
                           </span>
                         </div>
                         <p className="text-red-900 text-[10.5px] leading-relaxed font-medium">
@@ -654,10 +684,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                         )}
                         <span>
                           {vState.status === 'failed'
-                            ? (isEn ? 'Re-upload Document' : 'સાચો દસ્તાવેજ ફરી અપલોડ કરો')
+                            ? (isEn ? 'Re-upload Document' : isHi ? 'दस्तावेज़ पुनः अपलोड करें' : isMr ? 'कागदपत्र पुन्हा अपलोड करा' : 'સાચો દસ્તાવેજ ફરી અપલોડ કરો')
                             : vState.status === 'passed'
-                            ? (isEn ? 'Change / Re-upload' : 'ફાઇલ બદલો / ફરી અપલોડ')
-                            : (isEn ? 'Upload Original Document' : 'અસલ દસ્તાવેજ અપલોડ કરો')}
+                            ? (isEn ? 'Change / Re-upload' : isHi ? 'दस्तावेज़ बदलें' : isMr ? 'कागदपत्र बदला' : 'ફાઇલ બદલો / ફરી અપલોડ')
+                            : (isEn ? 'Upload Original Document' : isHi ? 'मूल दस्तावेज़ अपलोड करें' : isMr ? 'मूळ कागदपत्र अपलोड करा' : 'અસલ દસ્તાવેજ અપલોડ કરો')}
                         </span>
                         <input
                           type="file"
@@ -675,11 +705,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 
                       <div className="flex items-center gap-1 text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">
                         <Sparkles className="w-3 h-3 text-indigo-600" />
-                        <span>{isEn ? 'Google Gemini AI Verified' : 'Gemini AI વિઝન સ્કેનિંગ'}</span>
+                        <span>{isEn ? 'Google Gemini AI Verified' : isHi ? 'जेमिनी AI विज़न सत्यापित' : isMr ? 'जेमिनी AI व्हिजन तपासणी' : 'Gemini AI વિઝન સ્કેનિંગ'}</span>
                       </div>
                     </div>
                   </div>
-                );
               })}
             </div>
           </div>

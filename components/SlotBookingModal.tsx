@@ -1268,21 +1268,21 @@ export function SlotBookingModal({
                       : `ફાળવેલ કાઉન્ટર: કાઉન્ટર ${routing.counterNumber} - ${counterDetails.nameGu}`}
                   </h4>
                   <span className="bg-blue-200 text-blue-900 text-[9.5px] px-2 py-0.5 rounded font-extrabold uppercase">
-                    {isEn ? 'Direct Window' : 'સીધી બારી ફાળવણી'}
+                    {isEn ? 'Direct Window' : isHi ? 'सीधी खिड़की' : isMr ? 'थेट खिडकी' : 'સીધી બારી ફાળવણી'}
                   </span>
                 </div>
                 
                 <p className="text-xs text-blue-800 mt-1 font-medium">
-                  {isEn ? routing.reasonEn : routing.reasonGu}
+                  {isEn ? routing.reasonEn : isHi ? routing.reasonEn : isMr ? routing.reasonEn : routing.reasonGu}
                 </p>
 
                 <div className="mt-2 pt-2 border-t border-blue-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-700">
                   <div className="flex items-center gap-1.5 font-bold">
                     <UserCheck className="w-3.5 h-3.5 text-[#005A9C]" />
-                    <span>{isEn ? 'Desk Officer: ' : 'ડેસ્ક અધિકારી: '}<strong>{counterDetails.officerName}</strong></span>
+                    <span>{isEn ? 'Desk Officer: ' : isHi ? 'डेस्क अधिकारी: ' : isMr ? 'डेस्क अधिकारी: ' : 'ડેસ્ક અધિકારી: '}<strong>{counterDetails.officerName}</strong></span>
                   </div>
                   <span className="text-[10px] text-emerald-800 bg-emerald-100/90 font-bold px-2 py-0.5 rounded border border-emerald-300">
-                    {isEn ? '✓ Zero-Confusion Walk-In' : '✓ કચેરીએ સીધા આ કાઉન્ટર પર જવું'}
+                    {isEn ? '✓ Zero-Confusion Walk-In' : isHi ? '✓ सीधे इसी काउंटर पर जाएँ' : isMr ? '✓ थेट याच काउंटरवर जावे' : '✓ કચેરીએ સીધા આ કાઉન્ટર પર જવું'}
                   </span>
                 </div>
               </div>
@@ -1301,19 +1301,25 @@ export function SlotBookingModal({
                     {isEn ? 'Recommended Departure Time (Dynamic Transit)' : isHi ? 'घर से प्रस्थान का अनुशंसित समय (गतिशील)' : isMr ? 'घरातून निघण्याची शिफारस केलेली वेळ' : 'ઘરેથી નીકળવાનો ભલામણ કરેલ સમય (ડાયનેમિક મુસાફરી)'}
                   </p>
                   <span className="text-[9px] bg-blue-100 text-[#005A9C] font-extrabold px-1.5 py-0.2 rounded border border-blue-200">
-                    {isEn ? 'Live Transit' : 'લાઈવ ગણતરી'}
+                    {isEn ? 'Live Transit' : isHi ? 'लाइव गणना' : isMr ? 'थेट गणना' : 'લાઈવ ગણતરી'}
                   </span>
                 </div>
 
                 <p className="text-[11px] text-slate-700 font-bold mt-1">
                   {isEn 
                     ? `📍 Route: ${transitEstimate.originNameEn} ➔ ${transitEstimate.destinationNameEn}`
+                    : isHi || isMr
+                    ? `📍 मार्ग: ${transitEstimate.originNameEn} ➔ ${transitEstimate.destinationNameEn}`
                     : `📍 રૂટ: ${transitEstimate.originNameGu} ➔ ${transitEstimate.destinationNameGu}`}
                 </p>
 
                 <p className="text-[10px] text-slate-500 mt-0.5">
                   {isEn 
                     ? `Est Transit: ~${transitEstimate.travelMins} mins (${transitEstimate.distanceKm} km) + ${transitEstimate.bufferMins} min traffic buffer` 
+                    : isHi 
+                    ? `अनुमानित यात्रा: ~${transitEstimate.travelMins} मिनट (${transitEstimate.distanceKm} किमी) + ${transitEstimate.bufferMins} मि. बफर`
+                    : isMr
+                    ? `अंदाजित प्रवास: ~${transitEstimate.travelMins} मिनिटे (${transitEstimate.distanceKm} किमी) + ${transitEstimate.bufferMins} मि. बफर`
                     : `અંદાજિત મુસાફરી: ~${transitEstimate.travelMins} મિનિટ (${transitEstimate.distanceKm} કિ.મી.) + ${transitEstimate.bufferMins} મિ. ટ્રાફિક બફર`}
                 </p>
               </div>
@@ -1324,7 +1330,7 @@ export function SlotBookingModal({
                 {transitEstimate.leaveHomeBy}
               </span>
               <span className="block text-[8.5px] text-slate-500 mt-0.5 font-semibold">
-                {isEn ? 'Plan according to traffic' : 'ટ્રાફિક મુજબ પ્લાન કરો'}
+                {isEn ? 'Plan according to traffic' : isHi ? 'ट्रैफिक अनुसार योजना बनाएं' : isMr ? 'वाहतुकीनुसार नियोजन करा' : 'ટ્રાફિક મુજબ પ્લાન કરો'}
               </span>
             </div>
           </section>
@@ -1341,21 +1347,32 @@ export function SlotBookingModal({
                   const checked = e.target.checked;
                   setIsPriority(checked);
                   if (checked) {
-                    speakGuidance("પ્રાથમિકતા અગ્રતા સ્લોટ પસંદ થયો છે. સરકારી નિયમ મુજબ વરિષ્ઠ નાગરિક અથવા દિવ્યાંગજન દસ્તાવેજ ચકાસણી જરૂરી છે.");
+                    speakGuidance(
+                      lang === 'hi' ? "प्राथमिकता स्लॉट चुना गया है। नियमानुसार वरिष्ठ नागरिक या दिव्यांगजन दस्तावेज़ सत्यापन आवश्यक है।" :
+                      lang === 'mr' ? "प्राधान्य स्लॉट निवडला आहे. नियमानुसार ज्येष्ठ नागरिक किंवा दिव्यांग प्रमाणपत्र पडताळणी आवश्यक आहे." :
+                      lang === 'en' ? "Priority slot selected. Verification of Senior Citizen or Divyangjan document is required." :
+                      lang === 'khi' ? "અગ્રતા સ્લોટ પસંદ થયો આય. સરકારી નિયમ મુજબ વરિષ્ઠ નાગરિક અથવા દિવ્યાંગજન કાગળ ચકાસણી જરૂરી આય." :
+                      "પ્રાથમિકતા અગ્રતા સ્લોટ પસંદ થયો છે. સરકારી નિયમ મુજબ વરિષ્ઠ નાગરિક અથવા દિવ્યાંગજન દસ્તાવેજ ચકાસણી જરૂરી છે.",
+                      lang
+                    );
                   }
                 }}
                 className="mt-0.5 w-4 h-4 rounded text-amber-600 accent-[#FF9933] cursor-pointer"
               />
               <div className="text-xs text-amber-950 font-bold cursor-pointer select-none flex-1">
                 <label htmlFor="priority-check" className="flex flex-wrap items-center gap-1.5 text-[#003366] font-black cursor-pointer">
-                  <span>{isEn ? '♿ Priority Appointment Support (Senior / Divyang)' : '♿ પ્રાથમિકતા અપોઇન્ટમેન્ટ સપોર્ટ (Priority Appointment)'}</span>
+                  <span>{isEn ? '♿ Priority Appointment Support (Senior / Divyang)' : isHi ? '♿ प्राथमिकता अपॉइंटमेंट सहायता (वरिष्ठ नागरिक / दिव्यांग)' : isMr ? '♿ प्राधान्य अपॉइंटमेंट सहाय्य (ज्येष्ठ नागरिक / दिव्यांग)' : '♿ પ્રાથમિકતા અપોઇન્ટમેન્ટ સપોર્ટ (Priority Appointment)'}</span>
                   <span className="bg-[#FF9933] text-slate-900 text-[9px] px-2 py-0.5 rounded-full font-black uppercase">
-                    {isEn ? 'Statutory Policy' : 'વહીવટી અગ્રતા નીતિ'}
+                    {isEn ? 'Statutory Policy' : isHi ? 'प्रशासनिक नीति' : isMr ? 'प्रशासकीय धोरण' : 'વહીવટી અગ્રતા નીતિ'}
                   </span>
                 </label>
                 <p className="text-[11px] text-amber-900/80 font-medium mt-0.5">
                   {isEn 
                     ? 'Senior citizens (60+) or Divyangjan are issued a priority token (#P-) subject to verified government document match.'
+                    : isHi 
+                    ? 'वरिष्ठ नागरिकों (६०+) अथवा दिव्यांगजनों हेतु प्राथमिकता टोकन (#P-) जारी होता है। सरकारी अभिलेख से सत्यापन आवश्यक है।'
+                    : isMr 
+                    ? 'ज्येष्ठ नागरिक (६०+) किंवा दिव्यांग व्यक्तींसाठी प्राधान्य टोकन (#P-) दिला जातो. शासकीय पडताळणी अनिवार्य आहे.'
                     : 'વરિષ્ઠ નાગરિકો (૬૦+) અથવા દિવ્યાંગજનો માટે અગ્રતા ફ્લેગ (#P-) ફાળવાય છે. દુરુપયોગ રોકવા સરકારી ડેટા સાથે AI ચકાસણી અનિવાર્ય છે.'}
                 </p>
               </div>
@@ -1367,7 +1384,7 @@ export function SlotBookingModal({
                 {/* 1. Select Family Member */}
                 <div>
                   <label className="text-[11px] font-black text-[#003366] block mb-1">
-                    {isEn ? 'Select Family Member for Priority Appointment *' : 'કોના માટે અગ્રતા ટોકન લેવું છે? (પરિવાર સભ્ય પસંદ કરો) *'}
+                    {isEn ? 'Select Family Member for Priority Appointment *' : isHi ? 'किसके लिए प्राथमिकता टोकन चाहिए? (परिवार सदस्य चुनें) *' : isMr ? 'कोणासाठी प्राधान्य टोकन हवे आहे? (कुटुंब सदस्य निवडा) *' : 'કોના માટે અગ્રતા ટોકન લેવું છે? (પરિવાર સભ્ય પસંદ કરો) *'}
                   </label>
                   <select
                     value={selectedPriorityMemberId}
@@ -1387,10 +1404,12 @@ export function SlotBookingModal({
                   >
                     {DEFAULT_CITIZEN_PROFILE.familyMembers.map((member) => (
                       <option key={member.id} value={member.id}>
-                        {member.nameGu} ({member.relationGu}) {member.id === 'mem-4' ? '• વરિષ્ઠ નાગરિક (૬૮ વર્ષ) - પ્રમાણિત' : '• વય < ૬૦ (UDID જરૂરી)'}
+                        {isEn ? `${member.nameEn} (${member.relationEn})` : isHi ? `${member.nameEn} (${member.relationEn})` : isMr ? `${member.nameEn} (${member.relationEn})` : `${member.nameGu} (${member.relationGu})`} {member.id === 'mem-4' ? (isEn ? '• Senior Citizen (68 yrs) - Verified' : isHi ? '• वरिष्ठ नागरिक (६८ वर्ष) - सत्यापित' : isMr ? '• ज्येष्ठ नागरिक (६८ वर्षे) - प्रमाणित' : '• વરિષ્ઠ નાગરિક (૬૮ વર્ષ) - પ્રમાણિત') : (isEn ? '• Age < 60 (UDID Required)' : isHi ? '• आयु < ६० (UDID आवश्यक)' : isMr ? '• वय < ६० (UDID आवश्यक)' : '• વય < ૬૦ (UDID જરૂરી)')}
                       </option>
                     ))}
-                    <option value="custom">અન્ય સભ્ય / વિશેષ અગ્રતા (નવા દસ્તાવેજ અપલોડ કરો)</option>
+                    <option value="custom">
+                      {isEn ? 'Other Member / Special Priority (Upload New Documents)' : isHi ? 'अन्य सदस्य / विशेष प्राथमिकता (दस्तावेज़ अपलोड करें)' : isMr ? 'इतर सदस्य / विशेष प्राधान्य (कागदपत्रे अपलोड करा)' : 'અન્ય સભ્ય / વિશેષ અગ્રતા (નવા દસ્તાવેજ અપલોડ કરો)'}
+                    </option>
                   </select>
                 </div>
 
@@ -1401,14 +1420,20 @@ export function SlotBookingModal({
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-black text-emerald-900">
-                          {isEn ? 'AI Government Data Match: VERIFIED' : '✅ AI સરકારી ચકાસણી સફળ (Verified Senior Citizen)'}
+                          {isEn ? 'AI Government Data Match: VERIFIED' : isHi ? '✅ AI सरकारी सत्यापन सफल (Senior Citizen Verified)' : isMr ? '✅ AI शासकीय पडताळणी यशस्वी (Senior Citizen Verified)' : '✅ AI સરકારી ચકાસણી સફળ (Verified Senior Citizen)'}
                         </span>
                         <span className="text-[9px] bg-emerald-200 text-emerald-900 font-extrabold px-1.5 py-0.2 rounded">
                           UIDAI & NFSA Match
                         </span>
                       </div>
                       <p className="text-[10.5px] text-emerald-800 mt-1 leading-relaxed">
-                        <strong>પરસોત્તમભાઈ પટેલ (ઉંમર: ૬૮ વર્ષ)</strong> - આધાર કાર્ડ (XXXX 4410) અને રેશનકાર્ડ રેકોર્ડ્સ મુજબ વરિષ્ઠ નાગરિક પાત્રતા ૧૦૦% માન્ય છે. <strong>અગ્રતા ટોકન (#P-)</strong> જારી કરવા મંજૂરી આપેલ છે.
+                        {isEn 
+                          ? <strong>Parsottambhai Patel (Age: 68 years) - Aadhaar (XXXX 4410) & Ration Card records verified 100%. Priority Token (#P-) issued.</strong>
+                          : isHi 
+                          ? <strong>परसोत्तमभाई पटेल (आयु: ६८ वर्ष) - आधार कार्ड (XXXX 4410) एवं राशन कार्ड रिकॉर्ड १००% सत्यापित। प्राथमिकता टोकन (#P-) स्वीकृत।</strong>
+                          : isMr 
+                          ? <strong>परसोत्तमभाई पटेल (वय: ६८ वर्षे) - आधार कार्ड (XXXX 4410) आणि शिधापत्रिका नोंदणी १००% प्रमाणित. प्राधान्य टोकन (#P-) मंजूर.</strong>
+                          : <><strong>પરસોત્તમભાઈ પટેલ (ઉંમર: ૬૮ વર્ષ)</strong> - આધાર કાર્ડ (XXXX 4410) અને રેશનકાર્ડ રેકોર્ડ્સ મુજબ વરિષ્ઠ નાગરિક પાત્રતા ૧૦૦% માન્ય છે. <strong>અગ્રતા ટોકન (#P-)</strong> જારી કરવા મંજૂરી આપેલ છે.</>}
                       </p>
                     </div>
                   </div>
@@ -1419,10 +1444,16 @@ export function SlotBookingModal({
                       <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-xs font-bold text-amber-900">
-                          ⚠️ પસંદ કરેલ સભ્યની વય ૬૦ વર્ષથી ઓછી છે
+                          {isEn ? '⚠️ Selected member age is below 60 years' : isHi ? '⚠️ चयनित सदस्य की आयु ६० वर्ष से कम है' : isMr ? '⚠️ निवडलेल्या सदस्याचे वय ६० वर्षांपेक्षा कमी आहे' : '⚠️ પસંદ કરેલ સભ્યની વય ૬૦ વર્ષથી ઓછી છે'}
                         </p>
                         <p className="text-[10.5px] text-slate-600 mt-0.5">
-                          વરિષ્ઠ નાગરિક કેટેગરી લાગુ પડશે નહીં. અગ્રતા ટોકન (#P-) મેળવવા માટે સ્વાવલંબન દિવ્યાંગ UDID કાર્ડ અથવા તબીબી પ્રમાણપત્ર જરૂરી છે.
+                          {isEn 
+                            ? 'Senior citizen category not applicable. Swavalamban Divyang UDID Card or Medical Certificate is required for Priority (#P-).' 
+                            : isHi 
+                            ? 'वरिष्ठ नागरिक श्रेणी लागू नहीं होगी। प्राथमिकता टोकन (#P-) हेतु स्वावलंबन दिव्यांग UDID कार्ड अथवा चिकित्सा प्रमाण पत्र आवश्यक है।' 
+                            : isMr 
+                            ? 'ज्येष्ठ नागरिक श्रेणी लागू होणार नाही. प्राधान्य टोकन (#P-) मिळवण्यासाठी दिव्यांग UDID कार्ड किंवा वैद्यकीय प्रमाणपत्र आवश्यक आहे.' 
+                            : 'વરિષ્ઠ નાગરિક કેટેગરી લાગુ પડશે નહીં. અગ્રતા ટોકન (#P-) મેળવવા માટે સ્વાવલંબન દિવ્યાંગ UDID કાર્ડ અથવા તબીબી પ્રમાણપત્ર જરૂરી છે.'}
                         </p>
                       </div>
                     </div>
@@ -1430,21 +1461,21 @@ export function SlotBookingModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-100">
                       <div>
                         <label className="text-[10px] font-bold text-slate-700 block mb-1">
-                          અગ્રતા શ્રેણી *
+                          {isEn ? 'Priority Category *' : isHi ? 'प्राथमिकता श्रेणी *' : isMr ? 'प्राधान्य श्रेणी *' : 'અગ્રતા શ્રેણી *'}
                         </label>
                         <select
                           value={priorityCategory}
                           onChange={(e) => setPriorityCategory(e.target.value as PriorityCategory)}
                           className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800"
                         >
-                          <option value="divyangjan">દિવ્યાંગજન અગ્રતા (UDID Card)</option>
-                          <option value="medical_priority">તાત્કાલિક તબીબી અગ્રતા (Medical Emergency)</option>
+                          <option value="divyangjan">{isEn ? 'Divyangjan Priority (UDID Card)' : isHi ? 'दिव्यांगजन प्राथमिकता (UDID Card)' : isMr ? 'दिव्यांग व्यक्ती प्राधान्य (UDID Card)' : 'દિવ્યાંગજન અગ્રતા (UDID Card)'}</option>
+                          <option value="medical_priority">{isEn ? 'Medical Emergency' : isHi ? 'चिकित्सा आपात स्थिति (Medical Emergency)' : isMr ? 'वैद्यकीय आणीबाणी (Medical Emergency)' : 'તાત્કાલિક તબીબી અગ્રતા (Medical Emergency)'}</option>
                         </select>
                       </div>
 
                       <div>
                         <label className="text-[10px] font-bold text-slate-700 block mb-1">
-                          UDID / હોસ્પિટલ રેફરન્સ નંબર *
+                          {isEn ? 'UDID / Medical Reference No. *' : isHi ? 'UDID / अस्पताल संदर्भ संख्या *' : isMr ? 'UDID / रुग्णालय संदर्भ क्रमांक *' : 'UDID / હોસ્પિટલ રેફરન્સ નંબર *'}
                         </label>
                         <input
                           type="text"
@@ -1453,7 +1484,7 @@ export function SlotBookingModal({
                             setCustomProofNumber(e.target.value);
                             setAiVerificationPassed(false);
                           }}
-                          placeholder="દા.ત. GJ-03-UDID-8842"
+                          placeholder={isEn ? 'e.g. GJ-03-UDID-8842' : 'GJ-03-UDID-8842'}
                           className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#003366]"
                         />
                       </div>
@@ -1470,7 +1501,14 @@ export function SlotBookingModal({
                             setIsAiVerifying(false);
                             setAiVerificationPassed(true);
                             triggerHaptic('success');
-                            speakGuidance("AI દસ્તાવેજ ચકાસણી સફળ થઈ છે. અગ્રતા ટોકન મંજૂર થયું.");
+                            speakGuidance(
+                              lang === 'hi' ? "दस्तावेज़ सत्यापन सफल! प्राथमिकता टोकन स्वीकृत।" :
+                              lang === 'mr' ? "कागदपत्र पडताळणी यशस्वी! प्राधान्य टोकन मंजूर." :
+                              lang === 'en' ? "Document verified successfully! Priority token approved." :
+                              lang === 'khi' ? "કાગળ ચકાસણી સફળ થી! અગ્રતા ટોકન મંજૂર." :
+                              "AI દસ્તાવેજ ચકાસણી સફળ થઈ છે. અગ્રતા ટોકન મંજૂર થયું.",
+                              lang
+                            );
                           }, 700);
                         }}
                         className="bg-[#003366] hover:bg-[#002244] disabled:bg-slate-300 text-white font-black text-xs px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
@@ -1478,12 +1516,12 @@ export function SlotBookingModal({
                         {isAiVerifying ? (
                           <>
                             <span className="animate-spin text-xs">⏳</span>
-                            <span>AI ચકાસણી ચાલુ...</span>
+                            <span>{isEn ? 'AI Verifying...' : isHi ? 'सत्यापन जारी...' : isMr ? 'पडताळणी सुरू...' : 'AI ચકાસણી ચાલુ...'}</span>
                           </>
                         ) : (
                           <>
                             <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
-                            <span>AI સરકારી ચકાસણી કરો</span>
+                            <span>{isEn ? 'Run AI Govt Verification' : isHi ? 'AI सत्यापन करें' : isMr ? 'AI पडताळणी करा' : 'AI સરકારી ચકાસણી કરો'}</span>
                           </>
                         )}
                       </button>
@@ -1491,11 +1529,11 @@ export function SlotBookingModal({
                       {aiVerificationPassed ? (
                         <span className="text-[10.5px] font-black text-emerald-700 bg-emerald-50 border border-emerald-300 px-2 py-1 rounded-md flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>ચકાસણી સફળ (#P- માન્ય)</span>
+                          <span>{isEn ? 'Verification Passed (#P- Valid)' : isHi ? 'सत्यापन सफल (#P- मान्य)' : isMr ? 'पडताळणी यशस्वी (#P- मान्य)' : 'ચકાસણી સફળ (#P- માન્ય)'}</span>
                         </span>
                       ) : (
                         <span className="text-[10px] text-amber-800 font-bold">
-                          ચકાસણી બાકી (નંબર દાખલ કરી બટન દબાવો)
+                          {isEn ? 'Verification Pending (Enter number)' : isHi ? 'सत्यापन शेष (नंबर दर्ज करें)' : isMr ? 'पडताळणी प्रलंबित' : 'ચકાસણી બાકી (નંબર દાખલ કરી બટન દબાવો)'}
                         </span>
                       )}
                     </div>
@@ -1507,7 +1545,7 @@ export function SlotBookingModal({
 
         </div>
 
-        {/* FOOTER ACTIONS - STICKY WHATSAPP BOTTOM BAR */}
+        {/* FOOTER ACTIONS - STICKY BOTTOM BAR */}
         <div className="bg-white/95 backdrop-blur-md p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0 sticky bottom-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-lg">
           <button
             onClick={() => {

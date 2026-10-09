@@ -3,15 +3,70 @@ import { Language } from './translations';
 /**
  * Universal Multi-Language Text-to-Speech (TTS) Utility (lib/voice.ts)
  * Automatically speaks in the user's selected language:
- * - Hindi (hi) -> hi-IN voice
+ * - Hindi (hi) -> hi-IN voice (or Hindi engine)
  * - English (en) -> en-IN / en-US voice
- * - Marathi (mr) -> mr-IN voice
+ * - Marathi (mr) -> mr-IN voice (or Hindi engine fallback)
  * - Gujarati (gu) -> gu-IN voice
  * - Kutchi (khi) -> gu-IN voice (Kutchi phonetics in Gujarati script)
+ * 
+ * Supports:
+ * - speakGuidance(text, lang)
+ * - stopVoice()
+ * - isVoiceSpeaking()
+ * - toggleVoice(text, lang)
  */
-export const speakGuidance = (text: string, langInput?: Language | string) => {
+
+let isCurrentlySpeaking = false;
+const speechListeners: Set<(speaking: boolean) => void> = new Set();
+
+export const subscribeSpeechState = (listener: (speaking: boolean) => void) => {
+  speechListeners.add(listener);
+  return () => {
+    speechListeners.delete(listener);
+  };
+};
+
+const notifySpeechState = (speaking: boolean) => {
+  isCurrentlySpeaking = speaking;
+  speechListeners.forEach(listener => {
+    try {
+      listener(speaking);
+    } catch {}
+  });
+};
+
+/**
+ * Immediately stop and cancel any ongoing speech output
+ */
+export const stopVoice = () => {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   try {
+    window.speechSynthesis.cancel();
+    notifySpeechState(false);
+  } catch (err) {
+    console.warn('Speech cancellation error:', err);
+  }
+};
+
+/**
+ * Check if the browser is currently speaking
+ */
+export const isVoiceSpeaking = (): boolean => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
+  return window.speechSynthesis.speaking || isCurrentlySpeaking;
+};
+
+/**
+ * Speak text in the exact selected language voice
+ */
+export const speakGuidance = (
+  text: string, 
+  langInput?: Language | string,
+  onEnd?: () => void
+) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  try {
+    // Stop any current voice first
     window.speechSynthesis.cancel();
 
     // 1. Determine active language: explicit parameter -> localStorage -> default 'gu'
@@ -41,27 +96,65 @@ export const speakGuidance = (text: string, langInput?: Language | string) => {
     const voices = window.speechSynthesis.getVoices();
     if (voices && voices.length > 0) {
       const langPrefix = bcp47.split('-')[0].toLowerCase();
-      // Exact match first
-      let matchedVoice = voices.find(v => v.lang.toLowerCase() === bcp47.toLowerCase());
-      // Prefix match second (e.g. 'hi', 'mr', 'gu', 'en')
+      // Exact match first (e.g., 'hi-IN', 'gu-IN', 'mr-IN', 'en-IN')
+      let matchedVoice = voices.find(v => v.lang.toLowerCase().replace('_', '-') === bcp47.toLowerCase());
+      
+      // Prefix match second
       if (!matchedVoice) {
         matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
       }
-      // Fallback for Marathi -> Hindi voice if Marathi not installed
+      
+      // Name-based match (for voices labeled 'Hindi', 'Gujarati', 'Marathi', etc.)
+      if (!matchedVoice) {
+        if (activeLang === 'hi') matchedVoice = voices.find(v => v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('india'));
+        else if (activeLang === 'gu' || activeLang === 'khi') matchedVoice = voices.find(v => v.name.toLowerCase().includes('gujarati'));
+        else if (activeLang === 'mr') matchedVoice = voices.find(v => v.name.toLowerCase().includes('marathi'));
+        else if (activeLang === 'en') matchedVoice = voices.find(v => v.name.toLowerCase().includes('india') || v.lang.startsWith('en'));
+      }
+
+      // Fallbacks
       if (!matchedVoice && langPrefix === 'mr') {
-        matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith('hi'));
+        matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith('hi') || v.name.toLowerCase().includes('hindi'));
       }
-      // Fallback for Kutchi -> Gujarati voice
       if (!matchedVoice && (activeLang === 'khi' || langPrefix === 'gu')) {
-        matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith('gu') || v.lang.toLowerCase().startsWith('hi'));
+        matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith('gu') || v.lang.toLowerCase().startsWith('hi') || v.name.toLowerCase().includes('hindi'));
       }
+
       if (matchedVoice) {
         utterance.voice = matchedVoice;
       }
     }
 
+    utterance.onstart = () => {
+      notifySpeechState(true);
+    };
+
+    utterance.onend = () => {
+      notifySpeechState(false);
+      if (onEnd) onEnd();
+    };
+
+    utterance.onerror = () => {
+      notifySpeechState(false);
+    };
+
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn('Speech synthesis non-blocking error:', err);
+    notifySpeechState(false);
+  }
+};
+
+/**
+ * Toggle speech: If already speaking, stops audio. If stopped, speaks the given text in chosen language.
+ * Returns true if speech started, false if speech stopped.
+ */
+export const toggleVoice = (text: string, langInput?: Language | string): boolean => {
+  if (isVoiceSpeaking()) {
+    stopVoice();
+    return false;
+  } else {
+    speakGuidance(text, langInput);
+    return true;
   }
 };
