@@ -1764,6 +1764,51 @@ export function SlotBookingModal({
 
         </div>
 
+        {/* FOOTER ACTIONS - STICKY BOTTOM BAR */}
+        <div className="bg-white/95 backdrop-blur-md p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0 sticky bottom-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-lg">
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              onClose();
+            }}
+            className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
+          >
+            {isEn ? 'Cancel' : isHi ? 'रद्द करें' : isMr ? 'रद्द करा' : 'રદ કરો'}
+          </button>
+
+          <div className="flex items-center gap-3">
+            {scheme && (
+              <div className="hidden sm:flex flex-col text-right">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  {isEn ? 'Statutory Fee' : isHi ? 'सरकारी शुल्क' : 'સરકારી સેવા ફી'}
+                </span>
+                <span className="text-xs font-black text-[#003366]">
+                  {scheme.fee === 0 
+                    ? (isEn ? '₹0 (Free)' : isHi ? '₹० (मुफ्त)' : '₹૦ (મફત)') 
+                    : `₹${scheme.fee}`}
+                </span>
+              </div>
+            )}
+
+            <button
+              disabled={holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'}
+              onClick={handleFinalConfirm}
+              className={`px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl font-black text-xs sm:text-sm flex items-center gap-2 shadow-md transition cursor-pointer ${
+                holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                  : 'bg-[#003366] hover:bg-[#002244] active:scale-[0.98] text-white hover:shadow-lg'
+              }`}
+            >
+              <span>
+                {scheme && scheme.fee > 0
+                  ? (isEn ? `Confirm & Pay ₹${scheme.fee}` : isHi ? `पुष्टि करें एवं ₹${scheme.fee} भुगतान करें` : `સ્લોટ કન્ફર્મ કરો & ₹${scheme.fee} ફી ચૂકવો`)
+                  : (isEn ? 'Confirm & Get Free Token' : isHi ? 'स्लॉट पुष्टि करें व टोकन लें' : 'સ્લોટ કન્ફર્મ કરો & ટોકન મેળવો')}
+              </span>
+              <ArrowRight className="w-4 h-4 text-[#FF9933] shrink-0" />
+            </button>
+          </div>
+        </div>
+
         {/* CYBER TREASURY GUJARAT PAYMENT GATEWAY OVERLAY MODAL */}
         {paymentModalOpen && (
           <div 
