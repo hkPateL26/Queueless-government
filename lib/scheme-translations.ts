@@ -671,16 +671,76 @@ export function getLocalizedSchemeBenefit(scheme: SchemeItem, lang: Language): s
   return scheme.benefitGu;
 }
 
+export const DEPARTMENT_TRANSLATIONS_EN: Record<string, string> = {
+  'GGRC & કૃષિ વિભાગ': 'GGRC & Agriculture Dept, Govt of Gujarat',
+  'નાણાં મંત્રાલય / બેંકિંગ ડિવિઝન': 'Ministry of Finance & Banking Division, Govt of India',
+  'મહિલા અને બાળ વિકાસ વિભાગ': 'Women & Child Development Dept, Govt of Gujarat',
+  'મહેસૂલ વિભાગ (મામલતદાર કચેરી)': 'Revenue Department (Mamlatdar Office)',
+  'મહેસૂલ અને કૃષિ વિભાગ': 'Revenue & Agriculture Dept, Govt of Gujarat',
+  'સામાજિક ન્યાય / મામલતદાર કચેરી': 'Social Justice & Empowerment (Mamlatdar Office)',
+  'સામાજિક ન્યાય / આદિજાતિ વિકાસ': 'Social Justice & Tribal Development Dept',
+  'સામાજિક ન્યાય અને સામાજિક સુરક્ષા': 'Social Justice & Social Security Dept',
+  'સામાજિક ન્યાય અને સામાજિક કલ્યાણ': 'Social Justice & Social Welfare Dept',
+  'સામાજિક ન્યાય અને અધિકારિતા વિભાગ': 'Social Justice & Empowerment Dept, Govt of Gujarat',
+  'સામાજિક ન્યાય અને અધિકારીતા વિભાગ': 'Social Justice & Empowerment Dept, Govt of Gujarat',
+  'શિક્ષણ વિભાગ, ગુજરાત': 'Education Department, Govt of Gujarat',
+  'શિક્ષણ વિભાગ, ગુજરાત સરકાર': 'Education Department, Govt of Gujarat',
+  'શહેરી વિકાસ અને ગૃહ નિર્માણ': 'Urban Development & Urban Housing Dept',
+  'બિનઅનામત શૈક્ષણિક અને આર્થિક વિકાસ નિગમ (GUEEDC)': 'Non-Reserved Educational & Economic Development Corp (GUEEDC)',
+  'આરોગ્ય મંત્રાલય (NHM)': 'Ministry of Health & Family Welfare (NHM)',
+  'આરોગ્ય અને પરિવાર કલ્યાણ વિભાગ': 'Health & Family Welfare Dept, Govt of Gujarat',
+  'આરોગ્ય કમિશનરેટ, ગુજરાત': 'Health Commissionerate, Govt of Gujarat',
+  'આદિજાતિ વિકાસ વિભાગ': 'Tribal Development Department, Govt of Gujarat',
+  'ઉચ્ચ શિક્ષણ કમિશનરેટ': 'Commissionerate of Higher Education, Govt of Gujarat',
+  'કૃષિ મંત્રાલય (ભારત સરકાર)': 'Ministry of Agriculture & Farmers Welfare, Govt of India',
+  'કૃષિ અને સહકાર વિભાગ': 'Agriculture & Cooperation Dept, Govt of Gujarat',
+  'કૃષિ અને પ્રાકૃતિક કૃષિ બોર્ડ': 'Agriculture & Natural Farming Board, Gujarat',
+  'કૃષિ અને ખેડૂત કલ્યાણ વિભાગ': 'Dept. of Agriculture & Farmers Welfare, Govt of Gujarat',
+  'કુટીર અને ગ્રામોદ્યોગ વિભાગ': 'Cottage & Rural Industries Dept, Govt of Gujarat',
+  'ગ્રામ વિકાસ મંત્રાલય': 'Ministry of Rural Development, Govt of India',
+};
+
+export const DEPARTMENT_TRANSLATIONS_HI: Record<string, string> = {
+  'GGRC & કૃષિ વિભાગ': 'GGRC एवं कृषि विभाग, गुजरात सरकार',
+  'નાણાં મંત્રાલય / બેંકિંગ ડિવિઝન': 'वित्त मंत्रालय / बैंकिंग प्रभाग, भारत सरकार',
+  'મહિલા અને બાળ વિકાસ વિભાગ': 'महिला एवं बाल विकास विभाग, गुजरात सरकार',
+  'મહેસૂલ વિભાગ (મામલતદાર કચેરી)': 'राजस्व विभाग (मामलतदार कार्यालय)',
+  'મહેસૂલ અને કૃષિ વિભાગ': 'राजस्व एवं कृषि विभाग, गुजरात सरकार',
+  'સામાજિક ન્યાય / મામલતદાર કચેરી': 'सामाजिक न्याय (मामलतदार कार्यालय)',
+  'સામાજિક ન્યાય / આદિજાતિ વિકાસ': 'सामाजिक न्याय एवं आदिवासी विकास विभाग',
+  'સામાજિક ન્યાય અને સામાજિક સુરક્ષા': 'सामाजिक न्याय एवं सामाजिक सुरक्षा विभाग',
+  'સામાજિક ન્યાય અને સામાજિક કલ્યાણ': 'सामाजिक न्याय एवं सामाजिक कल्याण विभाग',
+  'સામાજિક ન્યાય અને અધિકારિતા વિભાગ': 'सामाजिक न्याय एवं अधिकारिता विभाग, गुजरात सरकार',
+  'સામાજિક ન્યાય અને અધિકારીતા વિભાગ': 'सामाजिक न्याय एवं अधिकारिता विभाग, गुजरात सरकार',
+  'શિક્ષણ વિભાગ, ગુજરાત': 'शिक्षा विभाग, गुजरात सरकार',
+  'શિક્ષણ વિભાગ, ગુજરાત સરકાર': 'शिक्षा विभाग, गुजरात सरकार',
+  'શહેરી વિકાસ અને ગૃહ નિર્માણ': 'शहरी विकास एवं आवास विभाग',
+  'બિનઅનામત શૈક્ષણિક અને આર્થિક વિકાસ નિગમ (GUEEDC)': 'गैर-आरक्षित शैक्षिक एवं आर्थिक विकास निगम (GUEEDC)',
+  'આરોગ્ય મંત્રાલય (NHM)': 'स्वास्थ्य एवं परिवार कल्याण मंत्रालय (NHM)',
+  'આરોગ્ય અને પરિવાર કલ્યાણ વિભાગ': 'स्वास्थ्य एवं परिवार कल्याण विभाग, गुजरात सरकार',
+  'આરોગ્ય કમિશનરેટ, ગુજરાત': 'स्वास्थ्य आयुक्तालय, गुजरात',
+  'આદિજાતિ વિકાસ વિભાગ': 'आदिवासी विकास विभाग, गुजरात सरकार',
+  'ઉચ્ચ શિક્ષણ કમિશનરેટ': 'उच्च शिक्षा आयुक्तालय, गुजरात',
+  'કૃષિ મંત્રાલય (ભારત સરકાર)': 'कृषि एवं किसान कल्याण मंत्रालय, भारत सरकार',
+  'કૃષિ અને સહકાર વિભાગ': 'कृषि एवं सहकारिता विभाग, गुजरात सरकार',
+  'કૃષિ અને પ્રાકૃતિક કૃષિ બોર્ડ': 'कृषि एवं प्राकृतिक कृषि बोर्ड, गुजरात',
+  'કૃષિ અને ખેડૂત કલ્યાણ વિભાગ': 'कृषि एवं किसान कल्याण विभाग, गुजरात सरकार',
+  'કુટીર અને ગ્રામોદ્યોગ વિભાગ': 'कुटीर एवं ग्रामोद्योग विभाग, गुजरात સરકાર',
+  'ગ્રામ વિકાસ મંત્રાલય': 'ग्रामीण विकास मंत्रालय, भारत सरकार',
+};
+
 /**
  * Returns localized department name.
  */
 export function getLocalizedSchemeDepartment(scheme: SchemeItem, lang: Language): string {
-  if (lang === 'en') return `${scheme.department} (Govt of Gujarat)`;
-  if (lang === 'mr') {
-    return SCHEME_TRANSLATIONS_MR[scheme.id]?.department || 'गुजरात शासन';
+  if (lang === 'en') {
+    return DEPARTMENT_TRANSLATIONS_EN[scheme.department] || 'Government of Gujarat';
   }
   if (lang === 'hi') {
-    return SCHEME_TRANSLATIONS_HI[scheme.id]?.department || 'गुजरात सरकार';
+    return DEPARTMENT_TRANSLATIONS_HI[scheme.department] || SCHEME_TRANSLATIONS_HI[scheme.id]?.department || 'गुजरात सरकार';
+  }
+  if (lang === 'mr') {
+    return DEPARTMENT_TRANSLATIONS_HI[scheme.department] || SCHEME_TRANSLATIONS_MR[scheme.id]?.department || 'गुजरात शासन';
   }
   if (lang === 'khi') {
     return `${scheme.department} (ગુજરાત સરકાર)`;

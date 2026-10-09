@@ -219,17 +219,16 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
           const timelineInfo = getProcessingTimelineInfo(scheme);
 
           const displayTitle = getLocalizedSchemeTitle(scheme, lang);
-          const displaySecondaryTitle = isEn ? scheme.titleGu : scheme.titleEn;
           const displayCategory = getLocalizedSchemeCategory(scheme, lang);
           const displayBenefitHeadline = isEn 
-            ? benefit.headlineEn 
+            ? 'Key Scheme Benefit' 
             : isMr 
             ? 'शासकीय योजना लाभ' 
             : isHi 
             ? 'सरकारी योजना लाभ' 
             : isKhi 
             ? 'યોજના જો લાભ' 
-            : benefit.headlineGu;
+            : 'મુખ્ય યોજનાકીય લાભ';
           const displayBenefit = getLocalizedSchemeBenefit(scheme, lang);
           const displayEligibility = getLocalizedSchemeEligibility(scheme, lang);
           const displayDepartment = getLocalizedSchemeDepartment(scheme, lang);
@@ -264,8 +263,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-[10px] font-bold text-[#138808] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                       {scheme.fee === 0 
-                        ? (isEn ? 'Govt Fee: ₹0 (Free)' : isHi ? 'सरकारी शुल्क: ₹० (मुफ्त)' : isMr ? 'शासकीय शुल्क: ₹० (मोफत)' : isKhi ? 'સરકારી ફી: ₹૦ (મફત)' : 'સરકારી ફી: ₹૦ (મફત)') 
-                        : (isEn ? `Govt Fee: ₹${scheme.fee}` : isHi ? `सरकारी शुल्क: ₹${scheme.fee}` : isMr ? `शासकीय शुल्क: ₹${scheme.fee}` : `સરકારી ફી: ₹${scheme.fee}`)}
+      ? (isEn ? 'Govt Fee: ₹0 (Free)' : isHi ? 'सरकारी शुल्क: ₹० (मुफ्त)' : isMr ? 'शासकीय शुल्क: ₹० (मोफत)' : 'સરકારી ફી: ₹૦ (મફત)') 
+      : (isEn ? `Govt Fee: ₹${scheme.fee}` : isHi ? `सरकारी शुल्क: ₹${scheme.fee}` : isMr ? `शासकीय शुल्क: ₹${scheme.fee}` : `સરકારી ફી: ₹${scheme.fee}`)}
                     </span>
                   </div>
                 </div>
@@ -275,11 +274,8 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   <h3 className="font-extrabold text-[#003366] text-sm sm:text-base leading-snug group-hover:text-[#005A9C] transition">
                     {displayTitle}
                   </h3>
-                  <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
-                    {displaySecondaryTitle}
-                  </p>
                   <p className="text-[10px] text-slate-500 font-semibold mt-1">
-                    {isEn ? `Department: ${displayDepartment}` : isHi ? `विभाग: ${displayDepartment}` : isMr ? `विभाग: ${displayDepartment}` : `વિભાગ: ${scheme.department}`}
+                    {isEn ? `Department: ${displayDepartment}` : isHi ? `विभाग: ${displayDepartment}` : isMr ? `विभाग: ${displayDepartment}` : `વિભાગ: ${displayDepartment}`}
                   </p>
                 </div>
 
@@ -317,7 +313,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                         ? 'मी अर्ज करू शकतो का? (पात्रता निकष):'
                         : isKhi
                         ? 'અરજી કેર કરી સગે? (પાત્રતા):'
-                        : 'હું અરજી કરી શકું? (Can I Apply?):'}
+                        : 'હું અરજી કરી શકું? (પાત્રતા શરતો):'}
                     </p>
                     <p className="text-[10.5px] text-slate-600 line-clamp-2 leading-tight mt-0.5">
                       {displayEligibility}

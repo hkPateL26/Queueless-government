@@ -193,6 +193,25 @@ export default function Home() {
     token: string;
   } | null>(null);
 
+  // Check if running inside installed standalone PWA app (vs regular web browser)
+  const [isStandaloneApp, setIsStandaloneApp] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkStandalone = () => {
+        const isStandalone = 
+          window.matchMedia('(display-mode: standalone)').matches ||
+          (window.navigator as any).standalone === true ||
+          document.referrer.includes('android-app://');
+        setIsStandaloneApp(isStandalone);
+      };
+      checkStandalone();
+      const mql = window.matchMedia('(display-mode: standalone)');
+      mql.addEventListener?.('change', checkStandalone);
+      return () => mql.removeEventListener?.('change', checkStandalone);
+    }
+  }, []);
+
   // SESSION & VIEW PERSISTENCE (Survives Page Refresh / F5)
   useEffect(() => {
     try {
@@ -603,7 +622,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] pb-20 md:pb-0 w-full">
+    <div className={`flex-1 flex flex-col min-h-screen bg-[#F5F7FA] text-[#1F2937] ${isStandaloneApp ? "pb-20 md:pb-0" : "pb-0"} w-full`}>
       {/* 🚀 LIVE GUJARAT GOVERNMENT TELEMETRY & SYSTEM HEALTH MARQUEE (CPU, RAM, UPTIME, SERVER HEALTH) */}
       <GovTelemetryMarquee lang={lang} />
 
@@ -661,7 +680,7 @@ export default function Home() {
                   {/* MOBILE BOTTOM SHEET DRAWER (Slides up from the bottom on mobile screens) */}
                   <div 
                     onClick={() => setLangMenuOpen(false)}
-                    className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end justify-center animate-in fade-in duration-200"
+                    className="md:hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-end justify-center animate-in fade-in duration-200"
                   >
                     <div 
                       onClick={(e) => e.stopPropagation()}
@@ -696,7 +715,7 @@ export default function Home() {
                       </div>
 
                       {/* Language list inside mobile bottom sheet */}
-                      <div className="p-3 overflow-y-auto max-h-[62vh] space-y-1.5 overscroll-contain">
+                      <div className="p-4 pb-8 overflow-y-auto max-h-[75vh] space-y-2 overscroll-contain">
                         {GUJARAT_LANGUAGES.map((opt) => {
                           const isSelected = lang === opt.code;
                           return (
@@ -2454,81 +2473,83 @@ export default function Home() {
         {activeBooking ? `ટોકન નંબર ${activeBooking.tokenNumber} સક્રિય છે. કાઉન્ટર ${activeBooking.counterNumber} પર પ્રતીક્ષારત.` : ''}
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <nav 
-        aria-label="Mobile Bottom Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3 flex items-center justify-around shadow-lg"
-      >
-        <button
-          onClick={() => {
-            triggerHaptic('tap');
-            setView('landing');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-            view === 'landing' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
-          }`}
-          aria-label={t('mobNavHome', lang)}
+      {/* MOBILE BOTTOM NAVIGATION BAR: ONLY DISPLAYED IN INSTALLED PWA APP MODE, NOT IN REGULAR MOBILE BROWSER */}
+      {isStandaloneApp && (
+        <nav 
+          aria-label="Mobile Bottom Navigation"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3 flex items-center justify-around shadow-lg"
         >
-          <HomeIcon className="w-4 h-4" />
-          <span>{t('mobNavHome', lang)}</span>
-        </button>
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setView('landing');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+              view === 'landing' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={t('mobNavHome', lang)}
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span>{t('mobNavHome', lang)}</span>
+          </button>
 
-        <button
-          onClick={() => {
-            triggerHaptic('tap');
-            setView('services');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-            view === 'services' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
-          }`}
-          aria-label={t('mobNavServices', lang)}
-        >
-          <Layers className="w-4 h-4" />
-          <span>{t('mobNavServices', lang)}</span>
-        </button>
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setView('services');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+              view === 'services' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={t('mobNavServices', lang)}
+          >
+            <Layers className="w-4 h-4" />
+            <span>{t('mobNavServices', lang)}</span>
+          </button>
 
-        <button
-          onClick={() => {
-            triggerHaptic('tap');
-            if (activeBooking) {
-              setTokenPassModalOpen(true);
-            } else if (currentUser) {
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              if (activeBooking) {
+                setTokenPassModalOpen(true);
+              } else if (currentUser) {
+                setView('dashboard');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                setTokenTrackerModalOpen(true);
+              }
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+              activeBooking ? 'text-[#FF9933]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={activeBooking ? `${t('mobNavTokenPass', lang)} ${activeBooking.tokenNumber}` : t('mobNavTokenPass', lang)}
+          >
+            <div className={`w-8 h-8 -mt-3.5 rounded-full flex items-center justify-center border-2 border-white shadow-md transition ${
+              activeBooking ? 'bg-[#003366] text-[#FF9933]' : 'bg-[#005A9C] text-white'
+            }`}>
+              <Ticket className="w-4 h-4" />
+            </div>
+            <span>{activeBooking ? activeBooking.tokenNumber : t('mobNavTokenPass', lang)}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
               setView('dashboard');
               window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-              setTokenTrackerModalOpen(true);
-            }
-          }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-            activeBooking ? 'text-[#FF9933]' : 'text-slate-500 hover:text-slate-700'
-          }`}
-          aria-label={activeBooking ? `${t('mobNavTokenPass', lang)} ${activeBooking.tokenNumber}` : t('mobNavTokenPass', lang)}
-        >
-          <div className={`w-8 h-8 -mt-3.5 rounded-full flex items-center justify-center border-2 border-white shadow-md transition ${
-            activeBooking ? 'bg-[#003366] text-[#FF9933]' : 'bg-[#005A9C] text-white'
-          }`}>
-            <Ticket className="w-4 h-4" />
-          </div>
-          <span>{activeBooking ? activeBooking.tokenNumber : t('mobNavTokenPass', lang)}</span>
-        </button>
-
-        <button
-          onClick={() => {
-            triggerHaptic('tap');
-            setView('dashboard');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-            view === 'dashboard' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
-          }`}
-          aria-label={t('mobNavRadar', lang)}
-        >
-          <Radio className="w-4 h-4" />
-          <span>{t('mobNavRadar', lang)}</span>
-        </button>
-      </nav>
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
+              view === 'dashboard' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={t('mobNavRadar', lang)}
+          >
+            <Radio className="w-4 h-4" />
+            <span>{t('mobNavRadar', lang)}</span>
+          </button>
+        </nav>
+      )}
 
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 text-center">

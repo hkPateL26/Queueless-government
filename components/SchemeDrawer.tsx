@@ -357,7 +357,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
               <h2 className="text-xl font-black text-white mt-1 leading-tight">
                 {displayTitle}
               </h2>
-              <p className="text-xs text-blue-200">{displaySecondaryTitle}</p>
+              
             </div>
           </div>
           <button
