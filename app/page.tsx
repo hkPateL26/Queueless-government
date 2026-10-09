@@ -77,7 +77,8 @@ export default function Home() {
   // Localized Citizen Identity Helpers (Dynamic for all 4 languages)
   const getCitizenDisplayName = (l: Language) => {
     switch (l) {
-      case 'gu': return 'હરિ પટેલ';
+      case 'gu':
+      case 'khi': return 'હરિ પટેલ';
       case 'hi': return 'हरि पटेल';
       case 'mr': return 'हरी पटेल';
       case 'en': default: return 'Hari Patel';
@@ -87,6 +88,7 @@ export default function Home() {
   const getCitizenRoleArea = (l: Language) => {
     switch (l) {
       case 'gu': return 'નાગરિક • રાજકોટ ગ્રામ્ય';
+      case 'khi': return 'નાગરિક • કચ્છ / રાજકોટ ગ્રામ્ય';
       case 'hi': return 'नागरिक • राजकोट ग्रामीण';
       case 'mr': return 'नागरिक • राजकोट ग्रामीण';
       case 'en': default: return 'Citizen • Rajkot Rural';
@@ -453,7 +455,8 @@ export default function Home() {
           ? "आधिकारिक टोकन जारी करने के लिए कृपया मोबाइल ओटीपी सत्यापित करें।"
           : lang === 'mr'
           ? "अधिकृत टोकन मिळवण्यासाठी कृपया मोबाइल ओटीपी पडताळणी करा."
-          : "સ્લોટ પસંદગી પૂર્ણ! અધિકૃત ટોકન જારી કરવા માટે કૃપા કરીને મોબાઈલ ઓટીપી ચકાસણી કરો."
+          : "સ્લોટ પસંદગી પૂર્ણ! અધિકૃત ટોકન જારી કરવા માટે કૃપા કરીને મોબાઈલ ઓટીપી ચકાસણી કરો.",
+        lang
       );
       setAuthModalOpen(true);
       return;
@@ -2146,7 +2149,7 @@ export default function Home() {
                   <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                     <span>{t('phoneLabel', lang)}</span>
                     <button
-                      onClick={() => speakGuidance(lang === 'gu' ? "કૃપા કરીને તમારો દસ આંકડાનો મોબાઈલ નંબર દાખલ કરો." : lang === 'hi' ? "कृपया अपना दस अंकों का मोबाइल नंबर दर्ज करें।" : lang === 'mr' ? "कृपया तुमचा १० अंकी मोबाइल क्रमांक प्रविष्ट करा." : "Please enter your 10-digit mobile number.")}
+                      onClick={() => speakGuidance(lang === 'khi' ? "કૃપા કરી તમોજો દસ આંકડા જો મોબાઈલ નંબર દાખલ કરિયો." : lang === 'gu' ? "કૃપા કરીને તમારો દસ આંકડાનો મોબાઈલ નંબર દાખલ કરો." : lang === 'hi' ? "कृपया अपना दस अंकों का मोबाइल नंबर दर्ज करें।" : lang === 'mr' ? "कृपया तुमचा १० अंकी मोबाइल क्रमांक प्रविष्ट करा." : "Please enter your 10-digit mobile number.", lang)}
                       className="text-[#005A9C] text-[11px] hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <Volume2 className="w-3.5 h-3.5" /> {t('listenBtnLabel', lang)}

@@ -37,7 +37,8 @@ export function DigitalTokenPass({
   const isEn = lang === 'en';
   const isHi = lang === 'hi';
   const isMr = lang === 'mr';
-  const isGu = lang === 'gu';
+  const isKhi = lang === 'khi';
+  const isGu = lang === 'gu' || lang === 'khi';
 
   // Booking state (Requirement 22: Booking States)
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status || 'CONFIRMED');

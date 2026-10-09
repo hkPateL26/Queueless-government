@@ -1075,6 +1075,48 @@ export const TRANSLATIONS = {
 
 export type TranslationKey = keyof typeof TRANSLATIONS;
 
+export const KUTCHI_TRANSLATIONS: Partial<Record<TranslationKey, string>> = {
+  topBarStatusLive: 'નાગરિક સેવા નેટવર્ક • લાઈવ સ્થિતિ (કચ્છ ને ગુજરાત)',
+  topBarFramework: 'GRTSA જાહેર સેવા માળખું',
+  langDropdownTitle: 'ગુજરાત ને કચ્છ મેં બોલાતી બોલીયું (ભાષા પસંદ કર્યો)',
+  langDropdownSub: 'આખા પોર્ટલ વાસ્તે તમારી પસંદગીજી ભાષા પસંદ કર્યો',
+  navHome: 'હોમ (ઘર)',
+  navServices: 'સેવાયું (૩૯ યોજનાયું)',
+  navRadar: 'કચેરી રડાર',
+  navTrackToken: 'ટોકન સ્થિતિ ડીસો',
+  navHelp: 'મદદ ને સહાય',
+  navOfficerDesk: 'અધિકારી ડેસ્ક',
+  btnLogin: 'લૉગિન',
+  btnGetStarted: 'ચાલુ કર્યો',
+  heroBadge: 'ગુજરાત સરકાર • સામાન્ય વહીવટ વિભાગ (GAD)',
+  heroTitleLine1: 'ડિજિટલ જન સેવા પોર્ટલ —',
+  heroTitleLine2: 'સાફ, સોરી ને વગતસર નાગરિક સેવાયું',
+  heroSubtitle: 'ગુજરાત લોક સેવા હક્ક કાયદા (GRTSA ૨૦૧૩) હેઠળ સત્તાવાર સ્લોટ બુકિંગ ને લાઈવ કતાર વ્યવસ્થા. કચ્છ ને આખા ગુજરાત જે તમામ ૩૩ જિલા ને ૨૫૦+ તાલુકા જે જન સેવા કેન્દ્ર, મામલતદાર ને પંચાયત સેવાયું ઘરબેઠા મેળવ્યો.',
+  guestDeskTitle: 'નાગરિક જાહેર સેવા ડેસ્ક',
+  guestDeskSubtitle: 'લાઈવ ટોકન ટ્રેકિંગ ને ત્વરિત સ્લોટ બુકિંગ',
+  tabTrackToken: 'ટોકન સ્થિતિ ડીસો',
+  tabBookSlot: 'સ્લોટ બુક કર્યો',
+  enterTokenPlaceholder: 'ટોકન નંબર લખો (દા.ત. A-42)',
+  btnTrackNow: 'લાઈવ સ્થિતિ ડીસો',
+  heroSearchPlaceholder: 'યોજના અથવા સેવા ગોતો: ટ્રેક્ટર, MYSY, આવક દાખલો...',
+  heroExploreBtn: '૩૯ યોજનાયું ડીસો',
+  heroTagDistricts: '૩૩ જિલા ને ૨૫૦+ તાલુકા',
+  heroTagPrivacy: 'નાગરિક ઓળખ સુરક્ષિત',
+  heroTagLive: '૨૪/૭ લાઈવ અપડેટ',
+  backToHome: 'પાછા વળો (હોમ)',
+  statLiveTokens: 'આજ જે લાઈવ ટોકન',
+  todayGrowth: 'રાજ્યવ્યાપી સેવાયું',
+  statAvgWait: 'સરેરાશ વારો',
+  vsWalkin: 'કતાર વગર ત્વરિત',
+  statActiveKacheris: 'સક્રિય કચેરીયું',
+  statAllDistricts: 'કચ્છ સહિત તમામ જિલ્લા',
+  statGrtsaSla: 'GRTSA સેવા ગેરેંટી',
+  statTimeBound: 'સમયસર સેવા નિયમ',
+  defaultOfficeName: 'જન સેવા કેન્દ્ર (કચ્છ/ગુજરાત)',
+  footerDisclaimer: 'QueueLess / નાગરિકસેવા © ૨૦૨૬ • ગુજરાત સરકાર પ્રેરિત નાગરિક સેવા વ્યવસ્થાપન માળખું',
+  footerGrtsaCompliance: 'GRTSA સેવા ધોરણો અનુસાર • ૩૩ જિલ્લાઓ, ૨૫૦+ તાલુકાઓ અને ૧૮,૦૦૦+ ગામો માટે સુલભ'
+};
+
 export function t(key: TranslationKey, lang: Language): string {
   const item = TRANSLATIONS[key];
   if (!item) return key;
@@ -1083,14 +1125,18 @@ export function t(key: TranslationKey, lang: Language): string {
   const direct = (item as any)[lang];
   if (direct) return direct;
 
+  // Kutchi specific translations
+  if (lang === 'khi') {
+    if (KUTCHI_TRANSLATIONS[key]) return KUTCHI_TRANSLATIONS[key]!;
+    return (item as any)['gu'] || (item as any)['hi'] || key;
+  }
+
   // Region-aware fallbacks for Gujarat's multilingual demographics:
   // 1. Marathi (Surat, Navsari, Vadodara) -> Marathi or Hindi or Gujarati
   if (lang === 'mr') return (item as any)['mr'] || (item as any)['hi'] || (item as any)['gu'] || key;
-  // 2. Kutchi -> Gujarati primary
-  if (lang === 'khi') return (item as any)['gu'] || (item as any)['hi'] || key;
-  // 3. Marwari & Sindhi -> Hindi or Gujarati
+  // 2. Marwari & Sindhi -> Hindi or Gujarati
   if (lang === 'mwr' || lang === 'sd') return (item as any)['hi'] || (item as any)['gu'] || key;
-  // 4. Bengali, Odia, Urdu -> Hindi or English
+  // 3. Bengali, Odia, Urdu -> Hindi or English
   if (lang === 'bn' || lang === 'or' || lang === 'ur') return (item as any)['hi'] || (item as any)['en'] || (item as any)['gu'] || key;
 
   return (item as any)['gu'] || (item as any)['en'] || key;

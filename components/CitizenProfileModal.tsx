@@ -242,9 +242,16 @@ export function CitizenProfileModal({
 
       if (isDifferentMobile) {
         setIsOtpStep(true);
-        speakGuidance(lang === 'gu' 
-          ? `દસ્તાવેજ કાયદેસર પ્રમાણિત થયો! સુરક્ષા માટે ${newMemberMobile} પર મોકલેલ ૬ અંકનો OTP દાખલ કરો.` 
-          : 'Document verified! Enter 6-digit OTP sent to member mobile.');
+        speakGuidance(
+          lang === 'hi'
+            ? `दस्तावेज़ प्रमाणित हुआ! सुरक्षा के लिए ${newMemberMobile} पर भेजा गया ६ अंकों का OTP दर्ज करें।`
+            : lang === 'mr'
+            ? `कागदपत्र प्रमाणित झाले! सुरक्षेसाठी ${newMemberMobile} वर पाठवलेला ६ अंकी OTP प्रविष्ट करा.`
+            : lang === 'en'
+            ? 'Document verified! Enter 6-digit OTP sent to member mobile.'
+            : `દસ્તાવેજ કાયદેસર પ્રમાણિત થયો! સુરક્ષા માટે ${newMemberMobile} પર મોકલેલ ૬ અંકનો OTP દાખલ કરો.`,
+          lang
+        );
       } else {
         // Same mobile - auto-verified under primary Aadhaar
         finalizeAddMember();
@@ -292,9 +299,16 @@ export function CitizenProfileModal({
       familyMembers: [...prev.familyMembers, newMem]
     }));
 
-    speakGuidance(lang === 'gu' 
-      ? `સભ્ય ${newMemberName} સરકારી નિયમ મુજબ સફળતાપૂર્વક પરિવારમાં લિંક થયા!` 
-      : `Member ${newMemberName} successfully linked with verified proof!`);
+    speakGuidance(
+      lang === 'hi'
+        ? `सदस्य ${newMemberName} सरकारी नियमानुसार सफलतापूर्वक परिवार से लिंक हुए!`
+        : lang === 'mr'
+        ? `सदस्य ${newMemberName} शासकीय नियमांनुसार यशस्वीरित्या कुटुंबाशी जोडले गेले!`
+        : lang === 'en'
+        ? `Member ${newMemberName} successfully linked with verified proof!`
+        : `સભ્ય ${newMemberName} સરકારી નિયમ મુજબ સફળતાપૂર્વક પરિવારમાં લિંક થયા!`,
+      lang
+    );
 
     // Reset Form
     setIsAddingMember(false);

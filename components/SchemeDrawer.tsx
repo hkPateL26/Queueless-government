@@ -480,7 +480,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                 </span>
               </span>
               <button
-                onClick={() => speakGuidance(displayBenefit)}
+                onClick={() => speakGuidance(displayBenefit, lang)}
                 className="text-[#003366] hover:text-[#005A9C] text-xs font-bold flex items-center gap-1 cursor-pointer"
               >
                 <Volume2 className="w-3.5 h-3.5" /> {isEn ? 'Listen' : isHi ? 'सुनें' : isMr ? 'ऐका' : 'સાંભળો'}

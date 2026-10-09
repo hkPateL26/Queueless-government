@@ -627,6 +627,9 @@ export function getLocalizedSchemeTitle(scheme: SchemeItem, lang: Language): str
   if (lang === 'hi') {
     return SCHEME_TRANSLATIONS_HI[scheme.id]?.title || scheme.titleEn;
   }
+  if (lang === 'khi') {
+    return scheme.titleGu.replace('યોજનાઓ', 'યોજનાયું').replace('અને', 'ને').replace('સહાય', 'સહાય યોજના');
+  }
   return scheme.titleGu;
 }
 
@@ -640,6 +643,13 @@ export function getLocalizedSchemeCategory(scheme: SchemeItem, lang: Language): 
   }
   if (lang === 'hi') {
     return SCHEME_TRANSLATIONS_HI[scheme.id]?.category || 'लोक सेवा';
+  }
+  if (lang === 'khi') {
+    if (scheme.category === 'agriculture') return 'ખેતીવાડી ને ખેડૂત';
+    if (scheme.category === 'healthcare') return 'આરોગ્ય ને કલ્યાણ';
+    if (scheme.category === 'education') return 'ભણતર ને શિષ્યવૃત્તિ';
+    if (scheme.category === 'welfare') return 'દાખલા ને મહેસૂલી સેવાયું';
+    return 'જાહેર સેવાયું';
   }
   return scheme.categoryGu;
 }
@@ -655,6 +665,9 @@ export function getLocalizedSchemeBenefit(scheme: SchemeItem, lang: Language): s
   if (lang === 'hi') {
     return SCHEME_TRANSLATIONS_HI[scheme.id]?.benefit || scheme.benefit;
   }
+  if (lang === 'khi') {
+    return (scheme.benefitGu || scheme.benefit).replace('અને', 'ને').replace('માટે', 'વાસ્તે').replace('યોજનાઓ', 'યોજનાયું');
+  }
   return scheme.benefitGu;
 }
 
@@ -668,6 +681,9 @@ export function getLocalizedSchemeDepartment(scheme: SchemeItem, lang: Language)
   }
   if (lang === 'hi') {
     return SCHEME_TRANSLATIONS_HI[scheme.id]?.department || 'गुजरात सरकार';
+  }
+  if (lang === 'khi') {
+    return `${scheme.department} (ગુજરાત સરકાર)`;
   }
   return scheme.department;
 }
@@ -683,6 +699,9 @@ export function getLocalizedSchemeEligibility(scheme: SchemeItem, lang: Language
   if (lang === 'hi') {
     return SCHEME_TRANSLATIONS_HI[scheme.id]?.eligibility || 'गुजरात राज्य के निवासी';
   }
+  if (lang === 'khi') {
+    return (scheme.eligibilityGu || 'ગુજરાતના પાત્ર નાગરિકો').replace('ગુજરાતના', 'કચ્છ ને ગુજરાત જે').replace('નાગરિકો', 'નાગરિક');
+  }
   return scheme.eligibilityGu || 'ગુજરાતના પાત્ર નાગરિકો';
 }
 
@@ -696,6 +715,9 @@ export function getLocalizedDocName(doc: { nameGu: string; nameEn: string }, lan
   }
   if (lang === 'hi') {
     return COMMON_DOC_TRANSLATIONS[doc.nameGu]?.hi || doc.nameEn;
+  }
+  if (lang === 'khi') {
+    return doc.nameGu.replace('અને', 'ને').replace('દાખલો', 'દાખલો').replace('નકલ', 'નકલ');
   }
   return doc.nameGu;
 }

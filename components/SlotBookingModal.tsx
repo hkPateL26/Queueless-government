@@ -327,13 +327,27 @@ export function SlotBookingModal({
 
     if (holidayCheck.isClosed) {
       triggerHaptic('warning');
-      speakGuidance("પસંદ કરેલ તારીખે કચેરી બંધ છે. કૃપા કરીને અન્ય કામકાજનો દિવસ પસંદ કરો.");
+      speakGuidance(
+        lang === 'hi' ? "चयनित तिथि पर कार्यालय बंद है। कृपया कोई अन्य कार्य दिवस चुनें।" :
+        lang === 'mr' ? "निवडलेल्या तारखेला कार्यालय बंद आहे. कृपया दुसरा कामकाजाचा दिवस निवडा." :
+        lang === 'en' ? "Office is closed on selected date. Please choose another working day." :
+        lang === 'khi' ? "પસંદ કરેલ તારીખે કચેરી બંધ આય. કૃપા કરી બીજો કમ જો ડીં પસંદ કરિયો." :
+        "પસંદ કરેલ તારીખે કચેરી બંધ છે. કૃપા કરીને અન્ય કામકાજનો દિવસ પસંદ કરો.",
+        lang
+      );
       return;
     }
 
     if (selectedSlot.isLunchBreak) {
       triggerHaptic('warning');
-      speakGuidance("રિસેસના સમયમાં ટોકન બુકિંગ થઈ શકતું નથી.");
+      speakGuidance(
+        lang === 'hi' ? "भोजन अवकाश के दौरान टोकन बुकिंग संभव नहीं है।" :
+        lang === 'mr' ? "दुपारच्या सुट्टीच्या वेळेत टोकन बुकिंग करता येत नाही." :
+        lang === 'en' ? "Token booking is unavailable during lunch break." :
+        lang === 'khi' ? "રિસેસ જે વગતમેં ટોકન બુકિંગ ન થિયે." :
+        "રિસેસના સમયમાં ટોકન બુકિંગ થઈ શકતું નથી.",
+        lang
+      );
       return;
     }
 
@@ -342,7 +356,14 @@ export function SlotBookingModal({
     if (!availabilityCheck.available) {
       triggerHaptic('error');
       setConflictError(availabilityCheck.reasonGu || 'આ સ્લોટ હમણાં જ પૂર્ણ થઈ ગયો છે. કૃપા કરીને અન્ય સ્લોટ પસંદ કરો.');
-      speakGuidance("આ સ્લોટ હમણાં જ પૂર્ણ થઈ ગયો છે. કૃપા કરીને અન્ય સમય પસંદ કરો.");
+      speakGuidance(
+        lang === 'hi' ? "यह स्लॉट अभी भर चुका है। कृपया दूसरा समय चुनें।" :
+        lang === 'mr' ? "हा स्लॉट नुकताच भरला आहे. कृपया दुसरी वेळ निवडा." :
+        lang === 'en' ? "This slot was just filled. Please choose another time." :
+        lang === 'khi' ? "હી સ્લોટ હમણાં જ પુરો થી વ્યો. કૃપા કરી બીજો વગત પસંદ કરિયો." :
+        "આ સ્લોટ હમણાં જ પૂર્ણ થઈ ગયો છે. કૃપા કરીને અન્ય સમય પસંદ કરો.",
+        lang
+      );
       return;
     }
 
@@ -350,7 +371,14 @@ export function SlotBookingModal({
     const isPriorityVerified = isPriority && (selectedPriorityMemberId === 'mem-4' || aiVerificationPassed);
     if (isPriority && !isPriorityVerified) {
       triggerHaptic('warning');
-      speakGuidance("અગ્રતા ટોકન માટે સરકારી દસ્તાવેજ ચકાસણી અનિવાર્ય છે.");
+      speakGuidance(
+        lang === 'hi' ? "प्राथमिकता टोकन के लिए सरकारी दस्तावेज़ सत्यापन अनिवार्य है।" :
+        lang === 'mr' ? "प्राधान्य टोकनसाठी शासकीय कागदपत्र पडताळणी आवश्यक आहे." :
+        lang === 'en' ? "Document verification is required for Priority Token." :
+        lang === 'khi' ? "અગ્રતા ટોકન લાય સરકારી કાગળ ચકાસણી જરૂરી આય." :
+        "અગ્રતા ટોકન માટે સરકારી દસ્તાવેજ ચકાસણી અનિવાર્ય છે.",
+        lang
+      );
       alert(lang === 'en'
         ? "⚠️ Proof verification required for Priority Appointment (#P-). Please verify UDID/Medical certificate or select a verified senior citizen family member."
         : "⚠️ અગ્રતા ટોકન (#P-) મેળવવા માટે સરકારી દસ્તાવેજ ચકાસણી અનિવાર્ય છે. કૃપા કરીને દસ્તાવેજ નંબર દાખલ કરી 'AI ચકાસણી' બટન દબાવો અથવા પરિવારના વરિષ્ઠ સભ્ય પસંદ કરો.");
@@ -358,7 +386,14 @@ export function SlotBookingModal({
     }
 
     triggerHaptic('success');
-    speakGuidance("સ્લોટ બુકિંગ સફળ! તમારો કચેરી ટોકન જારી થયો છે.");
+    speakGuidance(
+      lang === 'hi' ? "स्लॉट बुकिंग सफल! आपका आधिकारिक कार्यालय टोकन जारी हो गया है।" :
+      lang === 'mr' ? "स्लॉट बुकिंग यशस्वी! आपला अधिकृत कार्यालयीन टोकन जारी झाला आहे." :
+      lang === 'en' ? "Slot booking successful! Your official office token has been issued." :
+      lang === 'khi' ? "સ્લોટ બુકિંગ સફળ! તમોજો કચેરી ટોકન જારી થી વ્યો આય." :
+      "સ્લોટ બુકિંગ સફળ! તમારો કચેરી ટોકન જારી થયો છે.",
+      lang
+    );
 
     // Generate token number: #P-07 for Priority ONLY IF verified, otherwise #A-42
     let tokenNumber = '';

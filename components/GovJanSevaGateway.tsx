@@ -36,6 +36,7 @@ export function GovJanSevaGateway({
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('rajkot');
   const [selectedTalukaId, setSelectedTalukaId] = useState<string>('gondal');
 
+  const isKhi = lang === 'khi';
   const isGu = lang === 'gu';
   const isHi = lang === 'hi';
   const isMr = lang === 'mr';
@@ -83,7 +84,7 @@ export function GovJanSevaGateway({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-[#FF9933] border border-amber-400/30 px-2 py-0.5 rounded">
-                  {isGu 
+                  {isKhi || isGu 
                     ? 'ગુજરાત સરકાર • મહેસૂલ વિભાગ' 
                     : isHi 
                     ? 'गुजरात सरकार • राजस्व विभाग' 
@@ -93,7 +94,7 @@ export function GovJanSevaGateway({
                 </span>
               </div>
               <h3 className="text-base sm:text-lg font-black text-white tracking-tight mt-1">
-                {isGu 
+                {isKhi || isGu 
                   ? 'જન સેવા કેન્દ્ર • અધિકૃત ડેસ્ક' 
                   : isHi 
                   ? 'जन सेवा केंद्र • आधिकारिक डेस्क' 
@@ -109,7 +110,7 @@ export function GovJanSevaGateway({
             <span className="inline-flex items-center gap-1.5 bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 text-[10px] font-black px-2.5 py-1 rounded-full shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>
-                {isGu ? 'કચેરી ખુલ્લી છે' : isHi ? 'कार्यालय खुला है' : isMr ? 'कार्यालय सुरू आहे' : 'Kacheri Open'}
+                {isKhi ? 'કચેરી ખુલી આય' : isGu ? 'કચેરી ખુલ્લી છે' : isHi ? 'कार्यालय खुला है' : isMr ? 'कार्यालय सुरू आहे' : 'Kacheri Open'}
               </span>
             </span>
             <p className="text-[9px] text-blue-200 mt-1 font-mono">10:30 AM – 6:10 PM</p>
@@ -126,11 +127,11 @@ export function GovJanSevaGateway({
             <span className="flex items-center gap-1 text-[#003366] font-extrabold">
               <MapPin className="w-3.5 h-3.5 text-[#FF9933]" />
               <span>
-                {isGu ? 'કચેરી અધિકારક્ષેત્ર પસંદ કરો' : isHi ? 'कार्यालय अधिकार क्षेत्र चुनें' : isMr ? 'कार्यालय अधिकार क्षेत्र निवडा' : 'Select Office Jurisdiction'}
+                {isKhi ? 'કચેરી જો વિસ્તાર પસંદ કરિયો' : isGu ? 'કચેરી અધિકારક્ષેત્ર પસંદ કરો' : isHi ? 'कार्यालय अधिकार क्षेत्र चुनें' : isMr ? 'कार्यालय अधिकार क्षेत्र निवडा' : 'Select Office Jurisdiction'}
               </span>
             </span>
             <span className="text-[10px] text-slate-400">
-              {isGu ? '૩૩ જિલ્લાઓ • ૨૫૦+ તાલુકાઓ' : isHi ? '३३ जिले • २५०+ तहसील' : isMr ? '३३ जिल्हे • २५०+ तालुके' : '33 Districts • 250+ Talukas'}
+              {isKhi ? '૩૩ જિલ્લા • ૨૫૦+ તાલુકા' : isGu ? '૩૩ જિલ્લાઓ • ૨૫૦+ તાલુકાઓ' : isHi ? '३३ जिले • २५०+ तहसील' : isMr ? '३३ जिल्हे • २५०+ तालुके' : '33 Districts • 250+ Talukas'}
             </span>
           </div>
 
@@ -179,19 +180,19 @@ export function GovJanSevaGateway({
           <div className="pt-2 border-t border-slate-200/80 grid grid-cols-3 gap-2 text-center">
             <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
               <p className="text-[9px] font-bold text-slate-400 uppercase">
-                {isGu ? 'વર્તમાન ટોકન' : isHi ? 'वर्तमान टोकन' : isMr ? 'सध्याचा टोकन' : 'Current'}
+                {isKhi ? 'હાણે જો ટોકન' : isGu ? 'વર્તમાન ટોકન' : isHi ? 'वर्तमान टोकन' : isMr ? 'सध्याचा टोकन' : 'Current'}
               </p>
               <p className="text-sm font-black text-[#003366] font-mono mt-0.5">#A-42</p>
             </div>
             <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
               <p className="text-[9px] font-bold text-slate-400 uppercase">
-                {isGu ? 'સરેરાશ સમય' : isHi ? 'औसत प्रतीक्षा' : isMr ? 'सरासरी वेळ' : 'Avg Wait'}
+                {isKhi ? 'સરેરાશ વગત' : isGu ? 'સરેરાશ સમય' : isHi ? 'औसत प्रतीक्षा' : isMr ? 'सरासरी वेळ' : 'Avg Wait'}
               </p>
               <p className="text-sm font-black text-[#138808] font-mono mt-0.5">~14 min</p>
             </div>
             <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
               <p className="text-[9px] font-bold text-slate-400 uppercase">
-                {isGu ? 'કાઉન્ટર' : isHi ? 'सक्रिय काउंटर' : isMr ? 'सक्रिय काउंटर' : 'Counters'}
+                {isKhi ? 'ચાલુ કાઉન્ટર' : isGu ? 'કાઉન્ટર' : isHi ? 'सक्रिय काउंटर' : isMr ? 'सक्रिय काउंटर' : 'Counters'}
               </p>
               <p className="text-sm font-black text-[#FF9933] font-mono mt-0.5">4 Open</p>
             </div>
@@ -209,14 +210,14 @@ export function GovJanSevaGateway({
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded border border-emerald-300">
-                    {isGu ? 'સક્રિય પાસ' : isHi ? 'सक्रिय पास' : isMr ? 'सक्रिय पास' : 'ACTIVE PASS'}
+                    {isKhi ? 'ચાલુ પાસ' : isGu ? 'સક્રિય પાસ' : isHi ? 'सक्रिय पास' : isMr ? 'सक्रिय पास' : 'ACTIVE PASS'}
                   </span>
-                  <p className="text-xs font-black text-[#003366] truncate">{isGu ? 'હરિ પટેલ' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'Hari Patel'}</p>
+                  <p className="text-xs font-black text-[#003366] truncate">{isEn ? 'Hari Patel' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'હરિ પટેલ'}</p>
                 </div>
                 <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
                   {activeBooking 
                     ? `${activeBooking.slot.timeRange} • ${activeBooking.taluka.nameGu || activeBooking.taluka.nameEn}` 
-                    : (isGu ? '૧૧:૩૦ AM સ્લોટ • કાઉન્ટર ૧' : isHi ? '११:३० AM स्लॉट • काउंटर १' : isMr ? '११:३० AM स्लॉट • काउंटर १' : '11:30 AM Slot • Counter 1')}
+                    : (isKhi ? '૧૧:૩૦ AM સ્લોટ • કાઉન્ટર ૧' : isGu ? '૧૧:૩૦ AM સ્લોટ • કાઉન્ટર ૧' : isHi ? '११:३० AM स्लॉट • काउंटर १' : isMr ? '११:३० AM स्लॉट • काउंटर १' : '11:30 AM Slot • Counter 1')}
                 </p>
               </div>
             </div>
@@ -229,7 +230,7 @@ export function GovJanSevaGateway({
               }}
               className="px-3 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-[11px] font-extrabold shadow-sm active:scale-95 transition shrink-0 cursor-pointer"
             >
-              {isGu ? 'પાસ જુઓ' : isHi ? 'पास देखें' : isMr ? 'पास पहा' : 'View Pass'}
+              {isKhi ? 'પાસ જોવો' : isGu ? 'પાસ જુઓ' : isHi ? 'पास देखें' : isMr ? 'पास पहा' : 'View Pass'}
             </button>
           </div>
         )}
@@ -239,25 +240,25 @@ export function GovJanSevaGateway({
           <div className="flex items-center justify-between gap-1 flex-wrap">
             <span className="font-extrabold text-[#003366] text-[11px] flex items-center gap-1">
               <span>🏛️</span>
-              <span>{isGu ? 'સત્તાવાર સરકારી ધારાધોરણો' : isHi ? 'आधिकारिक सरकारी मानक' : isMr ? 'अधिकृत शासकीय मानके' : 'Official Government Norms'}</span>
+              <span>{isKhi ? 'સરકારી ધારાધોરણ' : isGu ? 'સત્તાવાર સરકારી ધારાધોરણો' : isHi ? 'आधिकारिक सरकारी मानक' : isMr ? 'अधिकृत शासकीय मानके' : 'Official Government Norms'}</span>
             </span>
             <span className="bg-emerald-100 text-emerald-800 text-[9.5px] font-black px-2 py-0.5 rounded border border-emerald-300">
-              {isGu ? 'ટોકન પાસ: ₹૦ મફત' : isHi ? 'टोकन शुल्क: ₹० मुफ्त' : isMr ? 'टोकन शुल्क: ₹० मोफत' : 'Token: ₹0 Free'}
+              {isKhi ? 'ટોકન ફી: ₹૦ મફત' : isGu ? 'ટોકન પાસ: ₹૦ મફત' : isHi ? 'टोकन शुल्क: ₹० मुफ्त' : isMr ? 'टोकन शुल्क: ₹० मोफत' : 'Token: ₹0 Free'}
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] text-slate-600">
             <div className="bg-white p-1.5 rounded-lg border border-slate-200">
-              <span className="font-bold text-slate-800 block">⏱️ {isGu ? 'કાઉન્ટર સરેરાશ:' : 'Desk Time:'}</span>
-              <span className="text-emerald-700 font-bold">{isGu ? '~૧૦-૧૨ મિનિટ' : '~10-12 mins'}</span>
+              <span className="font-bold text-slate-800 block">⏱️ {isEn ? 'Desk Time:' : isHi ? 'काउंटर समय:' : isMr ? 'काउंटर वेळ:' : isKhi ? 'કાઉન્ટર વગત:' : 'કાઉન્ટર સરેરાશ:'}</span>
+              <span className="text-emerald-700 font-bold">{isEn ? '~10-12 mins' : isHi ? '~१०-१२ मिनट' : isMr ? '~१०-१२ मिनिटे' : '~૧૦-૧૨ મિનિટ'}</span>
             </div>
             <div className="bg-white p-1.5 rounded-lg border border-slate-200">
-              <span className="font-bold text-slate-800 block">🚌 {isGu ? 'આગમન સ્લોટ:' : 'Arrival Slot:'}</span>
-              <span className="text-blue-700 font-bold">{isGu ? '૧ કલાક વિન્ડો' : '1-Hr Window'}</span>
+              <span className="font-bold text-slate-800 block">🚌 {isEn ? 'Arrival Slot:' : isHi ? 'आगमन स्लॉट:' : isMr ? 'आगमन स्लॉट:' : isKhi ? 'આવણ જો સ્લોટ:' : 'આગમન સ્લોટ:'}</span>
+              <span className="text-blue-700 font-bold">{isEn ? '1-Hr Window' : isHi ? '१ घंटा विंडो' : isMr ? '१ तास विंडो' : '૧ કલાક વિન્ડો'}</span>
             </div>
             <div className="bg-white p-1.5 rounded-lg border border-slate-200 col-span-2 sm:col-span-1">
-              <span className="font-bold text-slate-800 block">📜 {isGu ? 'ફ્લેગશિપ સેવાઓ:' : 'Services:'}</span>
-              <span className="text-amber-700 font-bold">{isGu ? 'ટોચની ૩૯ સેવાઓ' : 'Top 39 Services'}</span>
+              <span className="font-bold text-slate-800 block">📜 {isEn ? 'Services:' : isHi ? 'सेवाएं:' : isMr ? 'सेवा:' : isKhi ? 'મુખ્ય સેવાઉં:' : 'ફ્લેગશિપ સેવાઓ:'}</span>
+              <span className="text-amber-700 font-bold">{isEn ? 'Top 39 Services' : isHi ? 'शीर्ष ३९ सेवाएं' : isMr ? 'प्रमुख ३९ सेवा' : 'ટોચની ૩૯ સેવાઓ'}</span>
             </div>
           </div>
         </div>
@@ -279,7 +280,9 @@ export function GovJanSevaGateway({
               </div>
               <div className="min-w-0">
                 <h4 className="font-extrabold text-sm sm:text-base leading-tight">
-                  {isGu 
+                  {isKhi
+                    ? 'ઓનલાઇન સ્લોટ / ટોકન બુક કરિયો'
+                    : isGu 
                     ? 'ઓનલાઇન સ્લોટ / ટોકન બુક કરો' 
                     : isHi 
                     ? 'ऑनलाइन स्लॉट / टोकन बुक करें' 
@@ -288,7 +291,9 @@ export function GovJanSevaGateway({
                     : 'Book Appointment Slot / Token'}
                 </h4>
                 <p className="text-[10.5px] text-blue-100 font-medium truncate mt-0.5">
-                  {isGu 
+                  {isKhi
+                    ? 'લાઇન વગર સીધો પ્રવેશ • ૨ મિનિટમેં સ્લોટ કન્ફર્મ'
+                    : isGu 
                     ? 'કતાર વગર સીધો પ્રવેશ • ૨ મિનિટમાં સ્લોટ પુષ્ટિ' 
                     : isHi 
                     ? 'बिना कतार सीधा प्रवेश • २ मिनट में पुष्टि' 
@@ -315,7 +320,9 @@ export function GovJanSevaGateway({
               </div>
               <div className="min-w-0">
                 <h4 className="font-bold text-xs sm:text-sm text-[#003366] leading-tight">
-                  {isGu 
+                  {isKhi
+                    ? 'લાઈવ ટોકન સ્થિતિ જોવો (Track Token)'
+                    : isGu 
                     ? 'લાઈવ ટોકન સ્થિતિ ચકાસો (Track Token)' 
                     : isHi 
                     ? 'लाइव टोकन स्थिति जांचें (Track Token)' 
@@ -324,7 +331,9 @@ export function GovJanSevaGateway({
                     : 'Check Live Token Status'}
                 </h4>
                 <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
-                  {isGu 
+                  {isKhi
+                    ? 'તમોજો નંબર અને અંદાજિત વગત જોવો'
+                    : isGu 
                     ? 'તમારો વર્તમાન નંબર અને અંદાજિત સમય જુઓ' 
                     : isHi 
                     ? 'कतार में अपना नंबर व समय जांचें' 
@@ -346,7 +355,9 @@ export function GovJanSevaGateway({
         <div className="flex items-center justify-center gap-1.5 text-[10.5px] font-black text-[#003366]">
           <ShieldCheck className="w-3.5 h-3.5 text-[#138808] shrink-0" />
           <span>
-            {isGu 
+            {isKhi
+              ? 'ગુજરાત જાહેર સેવા હક અધિનિયમ ૨૦૧૩ (GRTSA) હેઠળ ૧૦૦% સેવા બાંહેધરી'
+              : isGu 
               ? 'ગુજરાત જાહેર સેવા હક અધિનિયમ ૨૦૧૩ (GRTSA) હેઠળ ૧૦૦% સમયબદ્ધ સેવા બાંહેધરી' 
               : isHi 
               ? 'गुजरात लोक सेवा अधिकार अधिनियम २०१३ (GRTSA) के तहत १००% समयबद्ध सेवा गारंटी' 
@@ -356,7 +367,9 @@ export function GovJanSevaGateway({
           </span>
         </div>
         <p className="text-[9.5px] text-slate-400 mt-0.5">
-          {isGu 
+          {isKhi
+            ? 'સમય મર્યાદા: ૨૪ કલાક થી ૭ દિવસ • ૧૦૦% પારદર્શક ટ્રેકિંગ'
+            : isGu 
             ? 'સમયમર્યાદા: ૨૪ કલાકથી ૭ દિવસ • ૧૦૦% પારદર્શક ટ્રેકિંગ' 
             : isHi 
             ? 'समय-सीमा: २४ घंटे से ७ दिन • १००% पारदर्शी ट्रैकिंग' 

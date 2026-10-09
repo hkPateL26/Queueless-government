@@ -77,7 +77,8 @@ export function TokenTrackerModal({
   const [searchToken, setSearchToken] = useState(initialToken);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-  const isGu = lang === 'gu';
+  const isKhi = lang === 'khi';
+  const isGu = lang === 'gu' || lang === 'khi';
   const isHi = lang === 'hi';
   const isMr = lang === 'mr';
   const isEn = lang === 'en';
@@ -130,14 +131,16 @@ export function TokenTrackerModal({
 
   const handleVoiceCall = () => {
     triggerHaptic('tap');
-    const msg = isGu
+    const msg = isKhi
+      ? `ટોકન નંબર ${tokenData.token}, કૃપા કરી ${tokenData.counter} તે વેણ્યો.`
+      : isGu
       ? `ટોકન નંબર ${tokenData.token}, કૃપા કરીને ${tokenData.counter} પર પધારો.`
       : isMr
       ? `टोकन क्रमांक ${tokenData.token}, कृपया ${tokenData.counter} वर यावे.`
       : isHi
       ? `टोकन संख्या ${tokenData.token}, कृपया ${tokenData.counter} पर पधारें।`
       : `Token number ${tokenData.token}, please proceed to ${tokenData.counter}.`;
-    speakGuidance(msg);
+    speakGuidance(msg, lang);
   };
 
   return (
