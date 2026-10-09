@@ -1126,8 +1126,8 @@ export default function Home() {
                   <span>{activeBooking ? (lang === 'en' ? `${activeBooking.taluka.officeNameEn || activeBooking.taluka.officeNameGu}` : `${activeBooking.taluka.officeNameGu}`) : t('defaultOfficeName', lang)}</span>
                 </div>
                 
-                {/* Citizen Profile Pill or Guest Login Button */}
-                {currentUser ? (
+                {/* Citizen Profile Pill */}
+                {currentUser && (
                   <button
                     onClick={() => {
                       triggerHaptic('tap');
@@ -1143,17 +1143,6 @@ export default function Home() {
                       </p>
                       <p className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{currentUser.role || 'નાગરિક'} • {currentUser.area || 'ગુજરાત'}</p>
                     </div>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setAuthModalOpen(true);
-                    }}
-                    className="flex items-center gap-1.5 bg-[#003366] hover:bg-[#002244] text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
-                  >
-                    <Lock className="w-3.5 h-3.5 text-[#FF9933]" />
-                    <span>{t('loginPromptBtn', lang)}</span>
                   </button>
                 )}
               </div>
@@ -1233,36 +1222,16 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-2.5 shrink-0">
                   <button
                     onClick={() => {
                       triggerHaptic('tap');
                       setLocationRadarModalOpen(true);
                     }}
-                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                    className="w-full sm:w-auto bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                   >
-                    <Compass className="w-3.5 h-3.5 text-amber-300" />
+                    <Compass className="w-4 h-4 text-amber-300" />
                     <span>{lang === 'gu' ? '📍 નજીકની કચેરીઓ (GPS રડાર)' : '📍 Nearby Kacheris (Radar)'}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setSlotModalOpen(true);
-                    }}
-                    className="bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-extrabold px-3.5 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Calendar className="w-4 h-4 text-slate-900" />
-                    <span>{t('btnBookSlotCTA', lang)}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setTokenTrackerModalOpen(true);
-                    }}
-                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Search className="w-3.5 h-3.5 text-blue-200" />
-                    <span>{t('btnTrackTokenCTA', lang)}</span>
                   </button>
                 </div>
               </div>
@@ -1291,46 +1260,16 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-2.5 shrink-0">
                   <button
                     onClick={() => {
                       triggerHaptic('tap');
                       setLocationRadarModalOpen(true);
                     }}
-                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                    className="w-full sm:w-auto bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                   >
-                    <Compass className="w-3.5 h-3.5 text-amber-300" />
+                    <Compass className="w-4 h-4 text-amber-300" />
                     <span>{lang === 'gu' ? '📍 લાઈવ કચેરી રડાર' : '📍 Live Radar'}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setSlotModalOpen(true);
-                    }}
-                    className="bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-extrabold px-3.5 py-2.5 rounded-xl text-xs shadow-sm transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Calendar className="w-4 h-4 text-slate-900" />
-                    <span>{t('btnBookSlotCTA', lang)}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setTokenTrackerModalOpen(true);
-                    }}
-                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Search className="w-3.5 h-3.5 text-blue-200" />
-                    <span>{t('btnTrackTokenCTA', lang)}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setAuthModalOpen(true);
-                    }}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2.5 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <Lock className="w-3.5 h-3.5 text-white" />
-                    <span>{t('loginPromptBtn', lang)}</span>
                   </button>
                 </div>
               </div>
@@ -1460,13 +1399,13 @@ export default function Home() {
                         </p>
                       </div>
 
-                      <div className="pt-2 flex flex-col gap-2">
+                      <div className="pt-2 flex flex-col sm:flex-row lg:flex-col gap-2.5">
                         <button
                           onClick={() => {
                             triggerHaptic('tap');
                             setSlotModalOpen(true);
                           }}
-                          className="w-full bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-extrabold py-3 px-4 rounded-xl text-xs shadow-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                          className="flex-1 w-full bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-black py-3 px-4 rounded-xl text-xs sm:text-sm shadow-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Calendar className="w-4 h-4 text-slate-900" />
                           <span>{t('btnBookSlotCTA', lang)}</span>
@@ -1476,7 +1415,7 @@ export default function Home() {
                             triggerHaptic('tap');
                             setTokenTrackerModalOpen(true);
                           }}
-                          className="w-full bg-slate-50 hover:bg-slate-100 text-[#003366] border border-slate-200 font-bold py-2.5 px-4 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                          className="flex-1 w-full bg-slate-50 hover:bg-slate-100 text-[#003366] border border-slate-200 font-bold py-2.5 sm:py-3 px-4 rounded-xl text-xs sm:text-sm transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                         >
                           <Search className="w-3.5 h-3.5 text-[#005A9C]" />
                           <span>{t('btnTrackTokenCTA', lang)}</span>
@@ -1522,13 +1461,13 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="pt-1 flex flex-col gap-2">
+                      <div className="pt-2 flex flex-col sm:flex-row lg:flex-col gap-2.5">
                         <button
                           onClick={() => {
                             triggerHaptic('tap');
                             setSlotModalOpen(true);
                           }}
-                          className="w-full bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-extrabold py-3 px-4 rounded-xl text-xs shadow-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                          className="flex-1 w-full bg-[#FF9933] hover:bg-[#ff8800] text-slate-900 font-black py-3 px-4 rounded-xl text-xs sm:text-sm shadow-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Calendar className="w-4 h-4 text-slate-900" />
                           <span>{t('btnBookSlotCTA', lang)}</span>
@@ -1538,7 +1477,7 @@ export default function Home() {
                             triggerHaptic('tap');
                             setTokenTrackerModalOpen(true);
                           }}
-                          className="w-full bg-slate-50 hover:bg-slate-100 text-[#003366] border border-slate-200 font-bold py-2.5 px-4 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                          className="flex-1 w-full bg-slate-50 hover:bg-slate-100 text-[#003366] border border-slate-200 font-bold py-2.5 sm:py-3 px-4 rounded-xl text-xs sm:text-sm transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                         >
                           <Search className="w-3.5 h-3.5 text-[#005A9C]" />
                           <span>{t('btnTrackTokenCTA', lang)}</span>
