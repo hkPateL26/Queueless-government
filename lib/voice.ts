@@ -83,9 +83,7 @@ export const speakGuidance = (
     let bcp47 = 'gu-IN';
     if (activeLang === 'hi') bcp47 = 'hi-IN';
     else if (activeLang === 'en') bcp47 = 'en-IN';
-    else if (activeLang === 'mr') bcp47 = 'mr-IN';
-    else if (activeLang === 'khi' || activeLang === 'gu') bcp47 = 'gu-IN';
-    else if (typeof activeLang === 'string' && activeLang.includes('-')) bcp47 = activeLang;
+    else bcp47 = 'gu-IN';
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = bcp47;
@@ -96,7 +94,7 @@ export const speakGuidance = (
     const voices = window.speechSynthesis.getVoices();
     if (voices && voices.length > 0) {
       const langPrefix = bcp47.split('-')[0].toLowerCase();
-      // Exact match first (e.g., 'hi-IN', 'gu-IN', 'mr-IN', 'en-IN')
+      // Exact match first (e.g., 'hi-IN', 'gu-IN', 'en-IN')
       let matchedVoice = voices.find(v => v.lang.toLowerCase().replace('_', '-') === bcp47.toLowerCase());
       
       // Prefix match second
@@ -104,20 +102,19 @@ export const speakGuidance = (
         matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
       }
       
-      // Name-based match (for voices labeled 'Hindi', 'Gujarati', 'Marathi', etc.)
+      // Name-based match (for voices labeled 'Hindi', 'Gujarati', 'English', etc.)
       if (!matchedVoice) {
         if (activeLang === 'hi') matchedVoice = voices.find(v => v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('india'));
-        else if (activeLang === 'gu' || activeLang === 'khi') matchedVoice = voices.find(v => v.name.toLowerCase().includes('gujarati'));
-        else if (activeLang === 'mr') matchedVoice = voices.find(v => v.name.toLowerCase().includes('marathi'));
+        else if (activeLang === 'gu') matchedVoice = voices.find(v => v.name.toLowerCase().includes('gujarati'));
         else if (activeLang === 'en') matchedVoice = voices.find(v => v.name.toLowerCase().includes('india') || v.lang.startsWith('en'));
       }
 
       // Fallbacks
-      if (!matchedVoice && langPrefix === 'mr') {
-        matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith('hi') || v.name.toLowerCase().includes('hindi'));
-      }
-      if (!matchedVoice && (activeLang === 'khi' || langPrefix === 'gu')) {
+      if (!matchedVoice && langPrefix === 'gu') {
         matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith('gu') || v.lang.toLowerCase().startsWith('hi') || v.name.toLowerCase().includes('hindi'));
+      }
+      if (!matchedVoice && langPrefix === 'hi') {
+        matchedVoice = voices.find(v => v.lang.toLowerCase().startsWith('hi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('india'));
       }
 
       if (matchedVoice) {

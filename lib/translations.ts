@@ -1,4 +1,4 @@
-export type Language = 'en' | 'gu' | 'hi' | 'mr' | 'sd' | 'khi' | 'mwr' | 'bn' | 'ur' | 'or';
+export type Language = 'gu' | 'hi' | 'en';
 
 export interface LanguageOption {
   code: Language;
@@ -23,7 +23,7 @@ export const GUJARAT_LANGUAGES: LanguageOption[] = [
     nativeLabel: 'हिन्दी',
     englishLabel: 'Hindi',
     multiLabel: 'हिन्दी (Hindi)',
-    regionalDescription: 'ગુજરાતમાં વ્યાપક સંપર્ક ભાષા (National / Widely Spoken)',
+    regionalDescription: 'રાષ્ટ્રભાષા • વ્યાપક સંપર્ક ભાષા (National Language)',
     badge: 'રાષ્ટ્રભાષા'
   },
   {
@@ -33,62 +33,6 @@ export const GUJARAT_LANGUAGES: LanguageOption[] = [
     multiLabel: 'English (અંગ્રેજી)',
     regionalDescription: 'સત્તાવાર વહીવટી અને જાહેર સેવાઓ (Administrative Access)',
     badge: 'Official'
-  },
-  {
-    code: 'mr',
-    nativeLabel: 'मराठी',
-    englishLabel: 'Marathi',
-    multiLabel: 'मराठी (Marathi)',
-    regionalDescription: 'સુરત, વડોદરા અને દક્ષિણ ગુજરાત સમુદાય (Surat & Vadodara)',
-    badge: 'દક્ષિણ-મધ્ય ગુજરાત'
-  },
-  {
-    code: 'sd',
-    nativeLabel: 'سنڌي / સિંધી',
-    englishLabel: 'Sindhi',
-    multiLabel: 'સિંધી • سنڌي (Sindhi)',
-    regionalDescription: 'કચ્છ, ગાંધીધામ, અમદાવાદ અને ગોધરા પરિવારો માટે (Kutch & Ahmedabad)',
-    badge: 'સિંધી સમાજ'
-  },
-  {
-    code: 'khi',
-    nativeLabel: 'કચ્છી',
-    englishLabel: 'Kutchi',
-    multiLabel: 'કચ્છી (Kutchi)',
-    regionalDescription: 'કચ્છ પ્રદેશની સ્થાનિક પ્રાદેશિક ભાષા (Kutch Region)',
-    badge: 'કચ્છ જિલ્લો'
-  },
-  {
-    code: 'mwr',
-    nativeLabel: 'मारवाड़ी',
-    englishLabel: 'Marwari',
-    multiLabel: 'मारवाड़ी (Marwari / Rajasthani)',
-    regionalDescription: 'અમદાવાદ, સુરત અને રાજકોટ વેપારી વર્ગ (Business Community)',
-    badge: 'વેપારી સમુદાય'
-  },
-  {
-    code: 'bn',
-    nativeLabel: 'বাংলা',
-    englishLabel: 'Bengali',
-    multiLabel: 'বাংলা (Bengali)',
-    regionalDescription: 'સુરત-અમદાવાદ ડાયમંડ અને ટેક્સટાઇલ કારીગરો માટે (Textile & Gems)',
-    badge: 'સુરત-અમદાવાદ'
-  },
-  {
-    code: 'ur',
-    nativeLabel: 'اردو',
-    englishLabel: 'Urdu',
-    multiLabel: 'اردو (Urdu)',
-    regionalDescription: 'અમદાવાદ, ભરૂચ અને સુરત વિસ્તારો માટે (Urban Communities)',
-    badge: 'શહેરી ગુજરાત'
-  },
-  {
-    code: 'or',
-    nativeLabel: 'ଓଡ଼ିଆ',
-    englishLabel: 'Odia',
-    multiLabel: 'ଓଡ଼ିଆ (Odia)',
-    regionalDescription: 'સુરત GIDC, હજીરા ઔદ્યોગિક કામદારો માટે (Industrial Workforce)',
-    badge: 'સુરત GIDC'
   }
 ];
 
