@@ -74,13 +74,11 @@ export default function Home() {
     }
   }, []);
 
-  // Localized Citizen Identity Helpers (Dynamic for all 4 languages)
+  // Localized Citizen Identity Helpers (Dynamic for gu, hi, en)
   const getCitizenDisplayName = (l: Language) => {
     switch (l) {
-      case 'gu':
-      case 'khi': return 'હરિ પટેલ';
+      case 'gu': return 'હરિ પટેલ';
       case 'hi': return 'हरि पटेल';
-      case 'mr': return 'हरी पटेल';
       case 'en': default: return 'Hari Patel';
     }
   };
@@ -88,9 +86,7 @@ export default function Home() {
   const getCitizenRoleArea = (l: Language) => {
     switch (l) {
       case 'gu': return 'નાગરિક • રાજકોટ ગ્રામ્ય';
-      case 'khi': return 'નાગરિક • કચ્છ / રાજકોટ ગ્રામ્ય';
       case 'hi': return 'नागरिक • राजकोट ग्रामीण';
-      case 'mr': return 'नागरिक • राजकोट ग्रामीण';
       case 'en': default: return 'Citizen • Rajkot Rural';
     }
   };
