@@ -1655,7 +1655,12 @@ export default function Home() {
                   <button
                     onClick={() => {
                       triggerHaptic('tap');
-                      setCitizenProfileModalOpen(true);
+                      if (!currentUser) {
+                        setLoginPromptReason(lang === 'gu' ? 'આધાર પ્રોફાઇલ & પરિવાર વૉલ્ટ ઍક્સેસ કરવા માટે કૃપા કરીને લૉગિન કરો.' : 'Please login to access your Aadhaar Profile & Family Vault.');
+                        setAuthModalOpen(true);
+                      } else {
+                        setCitizenProfileModalOpen(true);
+                      }
                     }}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-[#003366] rounded-xl text-xs font-bold border border-blue-200 transition cursor-pointer"
                     title={lang === 'gu' ? 'આધાર પ્રોફાઇલ & પરિવાર વૉલ્ટ' : 'Aadhaar Profile & Family Vault'}
@@ -1670,6 +1675,7 @@ export default function Home() {
                     <CitizenLocationRadar
                       isStandaloneCard={true}
                       lang={lang}
+                      isLoggedIn={!!currentUser}
                       onSelectKacheriForBooking={handleBookKacheriSlot}
                     />
                   </div>
@@ -2384,6 +2390,7 @@ export default function Home() {
         isOpen={locationRadarModalOpen}
         onClose={() => setLocationRadarModalOpen(false)}
         lang={lang}
+        isLoggedIn={!!currentUser}
         onSelectKacheriForBooking={(kacheriId, talukaId) => {
           setLocationRadarModalOpen(false);
           handleBookKacheriSlot(kacheriId, talukaId);

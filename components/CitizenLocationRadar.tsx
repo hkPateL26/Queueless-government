@@ -23,6 +23,7 @@ interface CitizenLocationRadarProps {
   lang?: Language;
   onSelectKacheriForBooking?: (kacheriId: string, talukaId: string) => void;
   isStandaloneCard?: boolean;
+  isLoggedIn?: boolean;
 }
 
 export function CitizenLocationRadar({
@@ -30,7 +31,8 @@ export function CitizenLocationRadar({
   onClose,
   lang = 'gu',
   onSelectKacheriForBooking,
-  isStandaloneCard = false
+  isStandaloneCard = false,
+  isLoggedIn = false
 }: CitizenLocationRadarProps) {
   const [kacheris, setKacheris] = useState<NearbyKacheriInfo[]>(NEARBY_KACHERIS_DATA);
   const [selectedKacheriId, setSelectedKacheriId] = useState<string>(NEARBY_KACHERIS_DATA[0]?.id || 'kacheri-gondal');
@@ -142,13 +144,15 @@ export function CitizenLocationRadar({
   const content = (
     <div className="space-y-4 sm:space-y-5 w-full max-w-full overflow-hidden">
       
-      {/* SECTION 1: TWO-PILL ADDRESS VS GPS COMPARISON */}
+      {/* SECTION 1: TWO-PILL ADDRESS VS GPS COMPARISON (OR LIVE GPS ONLY WHEN NOT LOGGED IN) */}
       <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl sm:rounded-3xl p-3 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
             <h3 className="text-xs sm:text-sm font-black text-[#003366] uppercase tracking-wide">
-              {lang === 'gu' ? 'તમારું સરનામું વિરુદ્ધ હાલનું લાઈવ લોકેશન' : 'Aadhaar Address vs Current Live Location'}
+              {isLoggedIn 
+                ? (lang === 'gu' ? 'તમારું આધાર સરનામું વિરુદ્ધ હાલનું લાઈવ લોકેશન' : 'Aadhaar Address vs Current Live Location')
+                : (lang === 'gu' ? 'તમારું હાલનું લાઈવ GPS લોકેશન' : 'Your Current Live GPS Location')}
             </h3>
           </div>
           <button
@@ -161,25 +165,27 @@ export function CitizenLocationRadar({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3.5 mt-3">
-          {/* Card A: Aadhaar Registered */}
-          <div className="bg-white border-2 border-blue-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs">
-            <div className="flex items-center justify-between pb-1.5 border-b border-blue-50">
-              <span className="text-[11px] font-black text-[#003366] flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
-                <span className="truncate">{lang === 'gu' ? 'આધાર નોંધાયેલ સરનામું (કાયમી)' : 'Aadhaar Registered (Native)'}</span>
-              </span>
-              <span className="text-[9px] bg-blue-50 text-[#003366] font-bold px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
-                {DEFAULT_CITIZEN_PROFILE.talukaGu}
-              </span>
+        <div className={`mt-3 ${isLoggedIn ? 'grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3.5' : 'w-full'}`}>
+          {/* Card A: Aadhaar Registered (ONLY SHOWN FOR LOGGED IN USERS) */}
+          {isLoggedIn && (
+            <div className="bg-white border-2 border-blue-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs">
+              <div className="flex items-center justify-between pb-1.5 border-b border-blue-50">
+                <span className="text-[11px] font-black text-[#003366] flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
+                  <span className="truncate">{lang === 'gu' ? 'આધાર નોંધાયેલ સરનામું (કાયમી)' : 'Aadhaar Registered (Native)'}</span>
+                </span>
+                <span className="text-[9px] bg-blue-50 text-[#003366] font-bold px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
+                  {DEFAULT_CITIZEN_PROFILE.talukaGu}
+                </span>
+              </div>
+              <p className="text-xs text-slate-800 font-bold mt-2 leading-relaxed">
+                {lang === 'gu' ? DEFAULT_CITIZEN_PROFILE.fullAddressGu : DEFAULT_CITIZEN_PROFILE.fullAddressEn}
+              </p>
+              <p className="text-[10px] text-slate-500 font-medium mt-1">
+                {lang === 'gu' ? 'મહેસૂલી દાખલા (આવક/જાતિ/૭-૧૨) આ કચેરી ક્ષેત્રમાંથી જ માન્ય રહેશે.' : 'Revenue certificates bound to this taluka.'}
+              </p>
             </div>
-            <p className="text-xs text-slate-800 font-bold mt-2 leading-relaxed">
-              {lang === 'gu' ? DEFAULT_CITIZEN_PROFILE.fullAddressGu : DEFAULT_CITIZEN_PROFILE.fullAddressEn}
-            </p>
-            <p className="text-[10px] text-slate-500 font-medium mt-1">
-              {lang === 'gu' ? 'મહેસૂલી દાખલા (આવક/જાતિ/૭-૧૨) આ કચેરી ક્ષેત્રમાંથી જ માન્ય રહેશે.' : 'Revenue certificates bound to this taluka.'}
-            </p>
-          </div>
+          )}
 
           {/* Card B: Live GPS */}
           <div className="bg-white border-2 border-emerald-300 rounded-2xl p-3 sm:p-3.5 shadow-2xs">
