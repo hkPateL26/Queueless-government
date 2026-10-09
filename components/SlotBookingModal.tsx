@@ -56,6 +56,97 @@ export interface BookingDetails {
   validUntil?: string;
 }
 
+const DISTRICT_NAMES_HI: Record<string, string> = {
+  rajkot: 'राजकोट',
+  ahmedabad: 'अहमदाबाद',
+  surat: 'सूरत',
+  vadodara: 'वडोदरा',
+  gandhinagar: 'गांधीनगर',
+  bhavnagar: 'भावनगर',
+  jamnagar: 'जामनगर',
+  junagadh: 'जूनागढ़',
+  kutch: 'कच्छ',
+  anand: 'आणंद',
+  kheda: 'खेड़ा',
+  mehsana: 'मेहसाणा',
+  banaskantha: 'बनासकांठा',
+  sabarkantha: 'साबरकांठा',
+  patan: 'पाटन',
+  morbi: 'मोरबी',
+  surendranagar: 'सुरेंद्रनगर',
+  amreli: 'अमरेली',
+  porbandar: 'पोरबंदर',
+  devbhumi_dwarka: 'देवभूमि द्वारका',
+  gir_somnath: 'गीर सोमनाथ',
+  botad: 'बोटाद',
+  bharuch: 'भरूच',
+  narmada: 'नर्मदा',
+  navsari: 'नवसारी',
+  valsad: 'वलसाड',
+  dang: 'डांग',
+  tapi: 'तापी',
+  panchmahal: 'पंचमहाल',
+  dahod: 'दाहोद',
+  mahisagar: 'महिसागर',
+  chhota_udepur: 'छोटा उदेपुर',
+  aravalli: 'अरवल्ली'
+};
+
+const TALUKA_NAMES_HI: Record<string, string> = {
+  gondal: 'गोंडल',
+  rajkot_city_west: 'राजकोट शहर पश्चिम (नाना मवा)',
+  rajkot_city_east: 'राजकोट शहर पूर्व (आजी)',
+  rajkot_city_central: 'राजकोट मध्य (कलेक्टर कार्यालय)',
+  rajkot_rural: 'राजकोट ग्रामीण',
+  kotda_sangani: 'कोटड़ा सांगाणी',
+  jetpur: 'जेतपुर',
+  dhoraji: 'धोराजी',
+  upleta: 'उपलेटा',
+  lodhika: 'लोधिका (जीआईडीसी)',
+  jasdan: 'जसदण',
+  vinchhiya: 'विंछिया',
+  paddhari: 'पढधरी',
+  jamkandorna: 'जामकंडोरणा'
+};
+
+function getLocalizedCenterName(center: ServiceCenter, isHi: boolean, isEn: boolean): string {
+  if (isEn) return center.nameEn;
+  if (isHi) {
+    return center.nameGu
+      .replace('જન સેવા કેન્દ્ર', 'जन सेवा केंद्र')
+      .replace('મામલતદાર કચેરી / સેવા સદન', 'मामलतदार कार्यालय / सेवा सदन')
+      .replace('ગોંડલ', 'गोंडल')
+      .replace('રાજકોટ', 'राजकोट');
+  }
+  return center.nameGu;
+}
+
+function getLocalizedCenterAddress(center: ServiceCenter, isHi: boolean, isEn: boolean): string {
+  if (isEn) return center.addressEn;
+  if (isHi) {
+    return center.addressGu
+      .replace('તાલુકા પંચાયત કમ્પાઉન્ડ', 'तालुका पंचायत परिसर')
+      .replace('કોર્ટ રોડ, સરકારી સેવા સદન', 'कोर्ट रोड, सरकारी सेवा सदन')
+      .replace('ગોંડલ', 'गोंडल')
+      .replace('રાજકોટ', 'राजकोट');
+  }
+  return center.addressGu;
+}
+
+function getLocalizedAvailability(center: ServiceCenter, isHi: boolean, isEn: boolean): string {
+  if (isEn) return center.availabilityNoteEn || 'Service Available';
+  if (isHi) {
+    const raw = center.availabilityNoteGu || 'सेवाएं उपलब्ध';
+    return raw
+      .replace('સંપૂર્ણ ૩૯ સરકારી સેવાઓ ઉપલબ્ધ', 'सभी ३९ सरकारी सेवाएं उपलब्ध')
+      .replace('મહેસૂલ & પ્રમાણપત્ર સેવાઓ ઉપલબ્ધ', 'राजस्व एवं प्रमाण पत्र सेवाएं उपलब्ध')
+      .replace('સ્લોટ ખાલી', 'स्लॉट रिक्त')
+      .replace('પ્રતીક્ષા સમય', 'प्रतीक्षा समय')
+      .replace('સેવા ઉપલબ્ધ', 'सेवाएं उपलब्ध');
+  }
+  return center.availabilityNoteGu || 'સેવા ઉપલબ્ધ';
+}
+
 import { Language } from '@/lib/translations';
 import { DEFAULT_CITIZEN_PROFILE } from '@/lib/citizen-profile';
 
@@ -647,12 +738,12 @@ export function SlotBookingModal({
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#005A9C]" />
                 <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                  {isEn ? 'Step 1: Jurisdiction & Native Office (Aadhaar Linked)' : isHi ? 'चरण १: कार्यक्षेत्र एवं मूल कार्यालय (आधार लिंक्ड)' : isMr ? 'पायरी १: कार्यक्षेत्र व मूळ कार्यालय' : 'પગલું ૧: આધાર પ્રમાણિત કાર્યક્ષેત્ર અને કચેરી (District, Taluka & Village)'}
+                  {isEn ? 'Step 1: Jurisdiction & Native Office (Aadhaar Linked)' : isHi ? 'चरण १: कार्यक्षेत्र एवं मूल कार्यालय (आधार लिंक्ड)' : 'પગલું ૧: આધાર પ્રમાણિત કાર્યક્ષેત્ર અને કચેરી (District, Taluka & Village)'}
                 </h4>
               </div>
               <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded border border-emerald-300 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-emerald-700" />
-                <span>{isEn ? 'Aadhaar Auto-Selected' : 'આધાર મુજબ આપોઆપ પસંદ'}</span>
+                <span>{isEn ? 'Aadhaar Auto-Selected' : isHi ? 'आधार अनुसार स्वतः चयनित' : 'આધાર મુજબ આપોઆપ પસંદ'}</span>
               </span>
             </div>
 
@@ -665,7 +756,7 @@ export function SlotBookingModal({
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-black uppercase text-[#003366]">
-                      {isEn ? 'Aadhaar Verified Native Residence' : isHi ? 'आधार सत्यापित निवास' : 'આધાર કાર્ડ પ્રમાણિત રહેઠાણ'}
+                      {isEn ? 'Aadhaar Verified Native Residence' : isHi ? 'आधार सत्यापित मूल निवास' : 'આધાર કાર્ડ પ્રમાણિત રહેઠાણ'}
                     </span>
                     <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">
                       {DEFAULT_CITIZEN_PROFILE.aadhaarMasked}
@@ -674,19 +765,21 @@ export function SlotBookingModal({
                   <p className="text-xs font-black text-slate-800 mt-0.5">
                     {isEn 
                       ? 'Village: Gomta • Taluka: Gondal • District: Rajkot (360311)' 
+                      : isHi
+                      ? 'ग्राम: गोमटा • तालुका: गोंडल • जिला: राजकोट (३६०३११)'
                       : 'ગામ: ગોમટા • તાલુકો: ગોંડલ • જિલ્લો: રાજકોટ (૩૬૦૩૧૧)'}
                   </p>
                 </div>
               </div>
               <span className="text-[10px] text-[#003366] font-bold bg-white px-2 py-1 rounded-md border border-slate-200 shrink-0">
-                {isEn ? 'Revenue Bound: Gondal Desk' : 'મહેસૂલી સત્તાક્ષેત્ર: ગોંડલ ડેસ્ક'}
+                {isEn ? 'Revenue Bound: Gondal Desk' : isHi ? 'राजस्व अधिकार क्षेत्र: गोंडल डेस्क' : 'મહેસૂલી સત્તાક્ષેત્ર: ગોંડલ ડેસ્ક'}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="min-w-0">
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                  {isEn ? 'District' : isHi ? 'जिला' : isMr ? 'जिल्हा (District)' : 'જિલ્લો (District)'}
+                  {isEn ? 'District' : isHi ? 'जिला' : 'જિલ્લો (District)'}
                 </label>
                 <select
                   value={selectedDistrictId}
@@ -695,7 +788,7 @@ export function SlotBookingModal({
                 >
                   {GUJARAT_33_DISTRICTS.map((dist) => (
                     <option key={dist.id} value={dist.id}>
-                      {isEn ? `${dist.nameEn} (${dist.nameGu})` : isMr ? `${dist.nameEn} (${dist.nameGu})` : `${dist.nameGu} (${dist.nameEn})`}
+                      {isEn ? `${dist.nameEn}` : isHi ? `${DISTRICT_NAMES_HI[dist.id] || dist.nameEn} (${dist.nameEn})` : `${dist.nameGu} (${dist.nameEn})`}
                     </option>
                   ))}
                 </select>
@@ -703,7 +796,7 @@ export function SlotBookingModal({
 
               <div className="min-w-0">
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                  {isEn ? 'Taluka' : isHi ? 'तालुका' : isMr ? 'तालुका (Taluka)' : 'તાલુકો (Taluka)'}
+                  {isEn ? 'Taluka' : isHi ? 'तालुका' : 'તાલુકો (Taluka)'}
                 </label>
                 <select
                   value={selectedTalukaId}
@@ -712,7 +805,7 @@ export function SlotBookingModal({
                 >
                   {selectedDistrict.talukas.map((tal) => (
                     <option key={tal.id} value={tal.id}>
-                      {isEn ? `${tal.nameEn} (${tal.nameGu})` : isMr ? `${tal.nameEn} (${tal.nameGu})` : `${tal.nameGu} (${tal.nameEn})`}
+                      {isEn ? `${tal.nameEn}` : isHi ? `${TALUKA_NAMES_HI[tal.id] || tal.nameEn} (${tal.nameEn})` : `${tal.nameGu} (${tal.nameEn})`}
                     </option>
                   ))}
                 </select>
@@ -720,12 +813,12 @@ export function SlotBookingModal({
 
               <div className="min-w-0">
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                  {isEn ? 'Aadhaar Village (Gam)' : isHi ? 'आधार गाँव' : isMr ? 'आधार गाव' : 'આધાર ગામ (Village)'}
+                  {isEn ? 'Aadhaar Village (Gam)' : isHi ? 'आधार गाँव' : 'આધાર ગામ (Village)'}
                 </label>
                 <div className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 flex items-center justify-between">
-                  <span className="truncate">{isEn ? (initialVillage || 'Gomta') : (initialVillage || 'ગોમટા')}</span>
+                  <span className="truncate">{isEn ? (initialVillage || 'Gomta') : isHi ? (initialVillage === 'Gomta' || initialVillage === 'ગોમટા' ? 'गोमटा' : initialVillage || 'गोमटा') : (initialVillage || 'ગોમટા')}</span>
                   <span className="text-[9px] bg-blue-50 text-[#005A9C] font-bold px-1.5 py-0.5 rounded border border-blue-200 shrink-0">
-                    {isEn ? 'Verified' : 'પ્રમાણિત'}
+                    {isEn ? 'Verified' : isHi ? 'प्रमाणित' : 'પ્રમાણિત'}
                   </span>
                 </div>
               </div>
@@ -735,9 +828,11 @@ export function SlotBookingModal({
             <div className="mt-3 bg-amber-50/90 border border-amber-300/80 rounded-xl p-2.5 text-[11px] text-amber-950 font-medium flex items-start gap-2">
               <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                <strong>{isEn ? 'Gujarat Government Jurisdiction Rule:' : 'ગુજરાત સરકાર સત્તાવાર મહેસૂલી નિયમ:'}</strong>{' '}
+                <strong>{isEn ? 'Gujarat Government Jurisdiction Rule:' : isHi ? 'गुजरात सरकार आधिकारिक राजस्व नियम:' : 'ગુજરાત સરકાર સત્તાવાર મહેસૂલી નિયમ:'}</strong>{' '}
                 {isEn 
                   ? 'Income, Caste, and 7/12 land certificates are legally issued only by your resident Taluka Mamlatdar (Gondal). Aadhaar updates and universal services can be scheduled at any center.' 
+                  : isHi
+                  ? 'आय, जाति एवं ७/१२ के प्रमाण पत्र आपके स्थायी निवास के अनुसार गोंडल मामलतदार कार्यालय से ही मान्य होंगे। आधार बायोमेट्रिक/मोबाइल अपडेट और आरटीओ सेवाएं राज्य के किसी भी केंद्र पर ली जा सकती हैं।'
                   : 'આવક, જાતિ અને ૭/૧૨ ના દાખલા તમારા કાયમી રહેઠાણ મુજબ ગોંડલ મામલતદાર કચેરીમાંથી જ માન્ય રહેશે. આધાર બાયોમેટ્રિક/મોબાઇલ અપડેટ અને RTO સેવાઓ રાજ્યના કોઈપણ કેન્દ્ર પર લઈ શકાય છે.'}
               </p>
             </div>
@@ -953,23 +1048,23 @@ export function SlotBookingModal({
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-xs font-bold text-[#003366] flex items-center gap-1.5">
                           <span>📍</span>
-                          <span>{isEn ? center.nameEn : center.nameGu}</span>
+                          <span>{getLocalizedCenterName(center, isHi, isEn)}</span>
                         </span>
                         {isSelected && (
                           <CheckCircle2 className="w-4 h-4 text-[#005A9C] shrink-0" />
                         )}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        {isEn ? center.addressEn : center.addressGu}
+                        {getLocalizedCenterAddress(center, isHi, isEn)}
                       </p>
                     </div>
 
                     <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
                       <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        {isEn ? `Est Distance: ~${center.distanceKm} km` : `અંદાજિત અંતર: ~${center.distanceKm} કિ.મી.`}
+                        {isEn ? `Est Distance: ~${center.distanceKm} km` : isHi ? `अनुमानित दूरी: ~${center.distanceKm} किमी` : `અંદાજિત અંતર: ~${center.distanceKm} કિ.મી.`}
                       </span>
                       <span className="text-slate-500 font-medium">
-                        {isEn ? (center.availabilityNoteEn || 'Service Available') : (center.availabilityNoteGu || 'સેવા ઉપલબ્ધ')}
+                        {getLocalizedAvailability(center, isHi, isEn)}
                       </span>
                     </div>
                   </button>
@@ -984,11 +1079,13 @@ export function SlotBookingModal({
                 <span>
                   {isEn 
                     ? <>Office Hours: <strong>{selectedCenter.config.serviceHours.displayEn}</strong></> 
+                    : isHi
+                    ? <>कार्यालय समय: <strong>{selectedCenter.config.serviceHours.displayGu.replace('સવારે', 'सुबह').replace('સાંજે', 'शाम')}</strong></>
                     : <>કચેરી કામકાજનો સમય: <strong>{selectedCenter.config.serviceHours.displayGu}</strong></>}
                 </span>
               </span>
               <span className="text-[11px] text-slate-600">
-                ({isEn ? `Lunch Break: ${selectedCenter.config.lunchBreak.displayEn}` : `ભોજન રિસેસ: ${selectedCenter.config.lunchBreak.displayGu}`})
+                ({isEn ? `Lunch Break: ${selectedCenter.config.lunchBreak.displayEn}` : isHi ? `भोजन अवकाश: ${selectedCenter.config.lunchBreak.displayGu.replace('બપોરે', 'दोपहर')}` : `ભોજન રિસેસ: ${selectedCenter.config.lunchBreak.displayGu}`})
               </span>
             </div>
           </section>
@@ -1404,11 +1501,11 @@ export function SlotBookingModal({
                   >
                     {DEFAULT_CITIZEN_PROFILE.familyMembers.map((member) => (
                       <option key={member.id} value={member.id}>
-                        {isEn ? `${member.nameEn} (${member.relationEn})` : isHi ? `${member.nameEn} (${member.relationEn})` : isMr ? `${member.nameEn} (${member.relationEn})` : `${member.nameGu} (${member.relationGu})`} {member.id === 'mem-4' ? (isEn ? '• Senior Citizen (68 yrs) - Verified' : isHi ? '• वरिष्ठ नागरिक (६८ वर्ष) - सत्यापित' : isMr ? '• ज्येष्ठ नागरिक (६८ वर्षे) - प्रमाणित' : '• વરિષ્ઠ નાગરિક (૬૮ વર્ષ) - પ્રમાણિત') : (isEn ? '• Age < 60 (UDID Required)' : isHi ? '• आयु < ६० (UDID आवश्यक)' : isMr ? '• वय < ६० (UDID आवश्यक)' : '• વય < ૬૦ (UDID જરૂરી)')}
+                        {isEn ? `${member.nameEn} (${member.relationEn})` : isHi ? (member.id === 'mem-1' ? `हरि पटेल (स्वयं)` : member.id === 'mem-2' ? `प्रिया पटेल (पत्नी)` : member.id === 'mem-3' ? `आरव पटेल (पुत्र)` : `परसोत्तमभाई पटेल (पिताजी)`) : `${member.nameGu} (${member.relationGu})`} {member.id === 'mem-4' ? (isEn ? '• Senior Citizen (68 yrs) - Verified' : isHi ? '• वरिष्ठ नागरिक (६८ वर्ष) - सत्यापित' : '• વરિષ્ઠ નાગરિક (૬૮ વર્ષ) - પ્રમાણિત') : (isEn ? '• Age < 60 (UDID Required)' : isHi ? '• आयु < ६० (UDID आवश्यक)' : '• વય < ૬૦ (UDID જરૂરી)')}
                       </option>
                     ))}
                     <option value="custom">
-                      {isEn ? 'Other Member / Special Priority (Upload New Documents)' : isHi ? 'अन्य सदस्य / विशेष प्राथमिकता (दस्तावेज़ अपलोड करें)' : isMr ? 'इतर सदस्य / विशेष प्राधान्य (कागदपत्रे अपलोड करा)' : 'અન્ય સભ્ય / વિશેષ અગ્રતા (નવા દસ્તાવેજ અપલોડ કરો)'}
+                      {isEn ? 'Other Member / Special Priority (Upload New Documents)' : isHi ? 'अन्य सदस्य / विशेष प्राथमिकता (दस्तावेज़ अपलोड करें)' : 'અન્ય સભ્ય / વિશેષ અગ્રતા (નવા દસ્તાવેજ અપલોડ કરો)'}
                     </option>
                   </select>
                 </div>
