@@ -151,8 +151,8 @@ EXPECTED DOCUMENT REQUIREMENT FOR THIS SLOT: "${expectedDocType}"
 ORIGINAL FILENAME UPLOADED BY USER: "${fileName}"
 ====================`;
 
-    // Try gemini-3.5-flash first, fallback to gemini-3.5-flash-lite, then gemini-3.8-flash
-    const candidateModels = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
+    // Try gemini-3.5-flash first, then flash-lite, then flash-latest
+    const candidateModels = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.8-flash'];
     let lastError: any = null;
 
     for (const model of candidateModels) {
