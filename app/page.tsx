@@ -7,7 +7,7 @@ import {
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
   Users, Building, Award, Bell, CheckCircle2, ChevronDown, Download,
   Layers, ArrowLeft, Calendar, Home as HomeIcon, Radio, Globe, Headphones,
-  Compass, Sparkles
+  Compass, Sparkles, ExternalLink
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -38,6 +38,7 @@ export default function Home() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [loginMenuOpen, setLoginMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'citizen' | 'kacheri'>('citizen');
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [tokenTrackerModalOpen, setTokenTrackerModalOpen] = useState(false);
   const [citizenProfileModalOpen, setCitizenProfileModalOpen] = useState(false);
@@ -731,30 +732,23 @@ export default function Home() {
               <Headphones className="w-3.5 h-3.5 text-[#FF9933]" />
               <span>{t('navHelp', lang)}</span>
             </button>
+            <Link
+              href="/admin/counter"
+              className="hover:text-[#005A9C] text-slate-700 flex items-center gap-1 transition cursor-pointer"
+              title={lang === 'gu' ? 'કચેરી કાઉન્ટર ઓપરેટર અને કલેક્ટર કન્સોલ' : 'Kacheri Counter & Collector Console'}
+            >
+              <Building className="w-3.5 h-3.5 text-[#005A9C]" />
+              <span>{t('navOfficerDesk', lang)}</span>
+            </Link>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
             {!currentUser ? (
               <div 
-                className="relative flex items-center shadow-xs rounded-xl overflow-hidden bg-[#005A9C]" 
+                className="relative" 
                 data-dropdown="login"
               >
-                {/* 1-Click Direct Citizen Login Button */}
-                <button
-                  onClick={() => {
-                    triggerHaptic('tap');
-                    setLoginPromptReason(null);
-                    setLoginMenuOpen(false);
-                    setAuthModalOpen(true);
-                  }}
-                  aria-label="Citizen Login"
-                  className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-black hover:bg-[#003366] text-white flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
-                >
-                  <Lock className="w-3.5 h-3.5 text-[#FF9933]" />
-                  <span>{t('btnLogin', lang)}</span>
-                </button>
-
-                {/* Dropdown Chevron for Kacheri / Officer console */}
+                {/* Unified Login Button: Click toggles portal menu with Citizen and Kacheri login */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -762,22 +756,28 @@ export default function Home() {
                     setLoginMenuOpen(prev => !prev);
                   }}
                   aria-expanded={loginMenuOpen}
-                  aria-label="More login options"
-                  className="px-1.5 sm:px-2 py-1.5 sm:py-2 bg-[#005A9C] hover:bg-[#003366] text-white border-l border-white/20 transition cursor-pointer"
-                  title="કચેરી / અધિકારી લૉગિન વિકલ્પ"
+                  aria-haspopup="true"
+                  aria-label="Portal Login Dropdown"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black bg-[#005A9C] hover:bg-[#003366] text-white shadow-xs flex items-center gap-1.5 active:scale-95 transition cursor-pointer"
+                  title={lang === 'gu' ? 'લૉગિન: નાગરિક અથવા કચેરી અધિકારી' : 'Login: Citizen or Kacheri Officer'}
                 >
+                  <Lock className="w-3.5 h-3.5 text-[#FF9933]" />
+                  <span>{t('btnLogin', lang)}</span>
                   <ChevronDown className={`w-3 h-3 text-blue-200 transition-transform duration-200 ${loginMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {loginMenuOpen && (
                   <div 
                     onClick={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-full mt-1.5 w-64 sm:w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 z-50 text-[#1F2937] text-left animate-in fade-in zoom-in-95"
+                    className="absolute right-0 top-full mt-1.5 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 z-50 text-[#1F2937] text-left animate-in fade-in zoom-in-95"
                   >
-                    <div className="px-3 py-1.5 border-b border-slate-100 mb-1">
+                    <div className="px-3 py-1.5 border-b border-slate-100 mb-1 flex items-center justify-between">
                       <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
                         {lang === 'en' ? 'Select Portal Access' : lang === 'hi' ? 'पोर्टल एक्सेस चुनें' : lang === 'mr' ? 'पोर्टल ऍक्सेस निवडा' : 'પોર્ટલ પ્રવેશ પસંદ કરો'}
                       </p>
+                      <span className="text-[9px] bg-blue-50 text-[#003366] font-extrabold px-1.5 py-0.5 rounded border border-blue-200">
+                        {lang === 'gu' ? '૨ પોર્ટલ' : '2 Portals'}
+                      </span>
                     </div>
 
                     {/* 1. નાગરિક લૉગિન (Citizen Login) */}
@@ -786,6 +786,7 @@ export default function Home() {
                         triggerHaptic('tap');
                         setLoginMenuOpen(false);
                         setLoginPromptReason(null);
+                        setAuthModalTab('citizen');
                         setAuthModalOpen(true);
                       }}
                       className="w-full p-2.5 rounded-xl hover:bg-blue-50 transition flex items-start gap-2.5 text-left group cursor-pointer border border-transparent hover:border-blue-200"
@@ -804,17 +805,17 @@ export default function Home() {
                         </div>
                         <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
                           {lang === 'en' 
-                            ? 'Book slots & access digital token passes' 
+                            ? 'Book slots, Aadhaar identity & digital token pass' 
                             : lang === 'hi' 
                             ? 'स्लॉट बुक करें व डिजिटल टोकन पास पाएं' 
                             : lang === 'mr' 
                             ? 'स्लॉट बुक करा आणि डिजिटल टोकन मिळवा' 
-                            : 'સ્લોટ બુકિંગ અને ડિજિટલ ટોકન પાસ'}
+                            : 'સ્લોટ બુકિંગ, આધાર ઓળખ & ડિજિટલ ટોકન પાસ'}
                         </p>
                       </div>
                     </button>
 
-                    {/* 2. કચેરી / અધિકારી લૉગિન (Kacheri / Officer Login) */}
+                    {/* 2. કચેરી / અધિકારી લૉગિન (Kacheri / Officer Portal - /admin/counter) */}
                     <Link
                       href="/admin/counter"
                       onClick={() => {
@@ -829,7 +830,7 @@ export default function Home() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
                           <p className="text-xs font-bold text-slate-900 group-hover:text-amber-950">
-                            {lang === 'en' ? 'Kacheri / Officer Login' : lang === 'hi' ? 'कचेरी / अधिकारी लॉगिन' : lang === 'mr' ? 'कचेरी / अधिकारी लॉगिन' : 'કચેરી / અધિકારી લૉગિન'}
+                            {lang === 'en' ? 'Kacheri / Officer Portal' : lang === 'hi' ? 'कचेरी / अधिकारी पोर्टल' : lang === 'mr' ? 'कचेरी / अधिकारी पोर्टल' : 'કચેરી લૉગિન (Officer Portal)'}
                           </p>
                           <span className="text-[9px] bg-amber-100 text-amber-900 font-extrabold px-1.5 py-0.2 rounded">
                             Gov
@@ -842,10 +843,37 @@ export default function Home() {
                             ? 'काउंटर ऑपरेटर व कलेक्टर डैशबोर्ड' 
                             : lang === 'mr' 
                             ? 'काउंटर ऑपरेटर आणि जिल्हाधिकारी डॅशबोर्ड' 
-                            : 'કાઉન્ટર ઓપરેટર અને કલેક્ટર ડેશબોર્ડ'}
+                            : 'કાઉન્ટર ૧ થી ૬ ઓપરેટર & કલેક્ટર કન્સોલ'}
                         </p>
                       </div>
                     </Link>
+
+                    {/* 3. ૧-ક્લિક ઝડપી કચેરી ડેસ્ક પ્રવેશ (1-Click Mamlatdar Officer Login) */}
+                    <div className="border-t border-slate-100 my-1 pt-1">
+                      <button
+                        onClick={() => {
+                          triggerHaptic('success');
+                          loginAsDemo('officer');
+                          setLoginMenuOpen(false);
+                        }}
+                        className="w-full p-2 rounded-xl hover:bg-emerald-50 transition flex items-center gap-2.5 text-left group cursor-pointer border border-slate-100 hover:border-emerald-200"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 text-xs">
+                          ⚡
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[11px] font-bold text-slate-900 group-hover:text-emerald-900 leading-tight">
+                            {lang === 'gu' ? 'ઝડપી કચેરી પ્રવેશ (K. M. Trivedi Mamlatdar)' : '1-Click Kacheri Login (Mamlatdar)'}
+                          </p>
+                          <p className="text-[9.5px] text-slate-400">
+                            Counter 1 • Gondal Mamlatdar
+                          </p>
+                        </div>
+                        <span className="text-[8.5px] bg-emerald-100 text-emerald-800 font-extrabold px-1 py-0.5 rounded">
+                          Fast
+                        </span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -856,18 +884,43 @@ export default function Home() {
                   setCitizenProfileModalOpen(true);
                 }}
                 className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 hover:bg-blue-50/80 border border-slate-200 hover:border-blue-300 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl cursor-pointer transition select-none group"
-                title={lang === 'gu' ? 'આધાર પ્રોફાઇલ અને પરિવાર વિગતો ખોલો' : 'Open Aadhaar Profile & Family Vault'}
+                title={currentUser?.role === 'Desk Officer' 
+                  ? (lang === 'gu' ? 'કચેરી અધિકારી પ્રોફાઇલ' : 'Officer Profile') 
+                  : (lang === 'gu' ? 'આધાર પ્રોફાઇલ અને પરિવાર વિગતો ખોલો' : 'Open Aadhaar Profile & Family Vault')}
               >
                 <div className="text-left text-xs leading-none">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                      {lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen'}
+                    <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded border flex items-center gap-1 ${
+                      currentUser?.role === 'Desk Officer' 
+                        ? 'bg-amber-100 text-amber-900 border-amber-300' 
+                        : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                        currentUser?.role === 'Desk Officer' ? 'bg-amber-600' : 'bg-emerald-600'
+                      }`} />
+                      {currentUser?.role === 'Desk Officer'
+                        ? (lang === 'gu' ? 'કચેરી અધિકારી' : lang === 'hi' ? 'कचहरी अधिकारी' : lang === 'mr' ? 'कचेरी अधिकारी' : 'Kacheri Officer')
+                        : (lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen')}
                     </span>
-                    <p className="font-extrabold text-[#003366] text-xs sm:text-sm whitespace-nowrap group-hover:text-[#005A9C]">{getCitizenDisplayName(lang)}</p>
+                    <p className="font-extrabold text-[#003366] text-xs sm:text-sm whitespace-nowrap group-hover:text-[#005A9C]">
+                      {currentUser?.role === 'Desk Officer' ? currentUser.name : getCitizenDisplayName(lang)}
+                    </p>
                   </div>
-                  <p className="text-[9px] text-[#005A9C] font-bold hidden sm:block mt-0.5 whitespace-nowrap">{getCitizenRoleArea(lang)}</p>
+                  <p className="text-[9px] text-[#005A9C] font-bold hidden sm:block mt-0.5 whitespace-nowrap">
+                    {currentUser?.role === 'Desk Officer' ? `${currentUser.role} • ${currentUser.area}` : getCitizenRoleArea(lang)}
+                  </p>
                 </div>
+                {currentUser?.role === 'Desk Officer' && (
+                  <Link
+                    href="/admin/counter"
+                    onClick={(e) => e.stopPropagation()}
+                    className="ml-1 bg-[#005A9C] hover:bg-[#003366] text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-xs transition"
+                    title="કાઉન્ટર કન્સોલ ખોલો"
+                  >
+                    <Building className="w-3 h-3 text-[#FF9933]" />
+                    <span className="hidden sm:inline">કન્સોલ</span>
+                  </Link>
+                )}
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -2089,15 +2142,57 @@ export default function Home() {
               ✕
             </button>
 
-            <div className="text-center mb-5">
+            <div className="text-center mb-4">
               <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#005A9C] flex items-center justify-center mx-auto text-xl mb-3">
-                <ShieldCheck className="w-6 h-6" />
+                {authModalTab === 'kacheri' ? <Building className="w-6 h-6 text-[#003366]" /> : <ShieldCheck className="w-6 h-6" />}
               </div>
-              <h3 className="text-xl font-black text-[#003366]">{t('authModalTitle', lang)}</h3>
-              <p className="text-xs text-slate-500 mt-1">{t('authModalSubtitle', lang)}</p>
+              <h3 className="text-xl font-black text-[#003366]">
+                {authModalTab === 'kacheri' 
+                  ? (lang === 'gu' ? 'કચેરી & સરકારી અધિકારી લૉગિન' : lang === 'hi' ? 'कचहरी व सरकारी अधिकारी लॉगिन' : lang === 'mr' ? 'कचेरी व शासकीय अधिकारी लॉगिन' : 'Kacheri & Government Officer Login')
+                  : t('authModalTitle', lang)}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                {authModalTab === 'kacheri'
+                  ? (lang === 'gu' ? 'મામલતદાર કચેરી, જન સેવા કેન્દ્ર ઓપરેટર & કલેક્ટર કન્સોલ' : lang === 'hi' ? 'मामलतदार कार्यालय व जन सेवा केंद्र ऑपरेटर' : lang === 'mr' ? 'तहसीलदार कार्यालय व जन सेवा केंद्र ऑपरेटर' : 'Mamlatdar Office, Jan Seva Kendra Operator & Collector Console')
+                  : t('authModalSubtitle', lang)}
+              </p>
             </div>
 
-            {loginPromptReason && (
+            {/* Login Mode Selector Tabs: Citizen vs Kacheri */}
+            <div className="flex items-center p-1 bg-slate-100 rounded-2xl mb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setAuthModalTab('citizen');
+                }}
+                className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  authModalTab === 'citizen'
+                    ? 'bg-white text-[#003366] shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>{lang === 'gu' ? 'નાગરિક લૉગિન' : lang === 'hi' ? 'नागरिक लॉगिन' : lang === 'mr' ? 'नागरिक लॉगिन' : 'Citizen Login'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setAuthModalTab('kacheri');
+                }}
+                className={`flex-1 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  authModalTab === 'kacheri'
+                    ? 'bg-[#003366] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Building className="w-3.5 h-3.5 text-[#FF9933]" />
+                <span>{lang === 'gu' ? '🏛️ કચેરી લૉગિન' : lang === 'hi' ? '🏛️ कचहरी लॉगिन' : lang === 'mr' ? '🏛️ कचेरी लॉगिन' : '🏛️ Kacheri Login'}</span>
+              </button>
+            </div>
+
+            {loginPromptReason && authModalTab === 'citizen' && (
               <div className="mb-4 p-3 bg-amber-50 border-2 border-[#FF9933] rounded-2xl text-amber-950 text-xs font-bold flex items-start gap-2.5">
                 <Lock className="w-4 h-4 text-[#FF9933] shrink-0 mt-0.5" />
                 <div className="text-left">
@@ -2107,59 +2202,125 @@ export default function Home() {
               </div>
             )}
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                  <span>{t('phoneLabel', lang)}</span>
-                  <button
-                    onClick={() => speakGuidance(lang === 'gu' ? "કૃપા કરીને તમારો દસ આંકડાનો મોબાઈલ નંબર દાખલ કરો." : lang === 'hi' ? "कृपया अपना दस अंकों का मोबाइल नंबर दर्ज करें।" : lang === 'mr' ? "कृपया तुमचा १० अंकी मोबाइल क्रमांक प्रविष्ट करा." : "Please enter your 10-digit mobile number.")}
-                    className="text-[#005A9C] text-[11px] hover:underline flex items-center gap-1"
-                  >
-                    <Volume2 className="w-3.5 h-3.5" /> {t('listenBtnLabel', lang)}
-                  </button>
-                </label>
-                <div className="flex items-stretch">
-                  <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-300 bg-[#F5F7FA] text-slate-700 text-xs font-black shrink-0 whitespace-nowrap select-none">
-                    +91
-                  </span>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    maxLength={10}
-                    className="w-full text-xs font-bold rounded-r-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C] tracking-wider"
-                  />
+            {authModalTab === 'kacheri' ? (
+              /* KACHERI / OFFICER LOGIN TAB CONTENT */
+              <div className="space-y-3.5 animate-in fade-in duration-150">
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0">
+                      <Building className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-amber-950">
+                        {lang === 'gu' ? 'કચેરી અધિકૃત પોર્ટલ' : 'Official Kacheri Desk'}
+                      </h4>
+                      <p className="text-[10px] text-amber-800 font-semibold">
+                        {lang === 'gu' ? 'કાઉન્ટર ૧ થી ૬ ઓપરેટર્સ & મામલતદાર' : 'Counters 1 to 6 Operators & Mamlatdar'}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-amber-900 leading-relaxed">
+                    {lang === 'gu' 
+                      ? 'લાઈવ કાઉન્ટર કન્સોલ દ્વારા ટોકન કોલિંગ, ઓટોમેટેડ દસ્તાવેજ ચકાસણી, અને અરજદારોના નિકાલ માટે પ્રવેશ કરો.' 
+                      : 'Access the live counter console for token calling, automated document inspection, and queue throughput management.'}
+                  </p>
                 </div>
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-xs font-bold text-slate-700 whitespace-nowrap">{t('aadhaarLast4Label', lang)}</span>
-                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0 whitespace-nowrap">
-                    {lang === 'gu' ? '🔒 સુરક્ષિત આધાર માસ્કિંગ' : lang === 'hi' ? '🔒 सुरक्षित आधार मास्किंग' : lang === 'mr' ? '🔒 सुरक्षित आधार मास्किंग' : '🔒 Secure Aadhaar Masking'}
-                  </span>
-                </div>
-                <input
-                  type="password"
-                  value={aadhaar4}
-                  onChange={(e) => setAadhaar4(e.target.value)}
-                  maxLength={4}
-                  placeholder="••••"
-                  className="w-full text-xs font-medium rounded-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C] tracking-widest text-center text-base"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">
-                  {t('aadhaarMaskingNote', lang)}
+                <Link
+                  href="/admin/counter"
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setAuthModalOpen(false);
+                  }}
+                  className="w-full bg-[#003366] hover:bg-[#002244] text-white font-black py-3 px-4 rounded-xl text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Building className="w-4 h-4 text-[#FF9933]" />
+                  <span>{lang === 'gu' ? '🏛️ કચેરી કાઉન્ટર કન્સોલ ખોલો' : 'Open Kacheri Counter Console'}</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-blue-200" />
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('success');
+                    loginAsDemo('officer');
+                  }}
+                  className="w-full bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-black py-2.5 px-4 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>⚡</span>
+                  <span>{lang === 'gu' ? '૧-ક્લિક મામલતદાર અધિકારી પ્રવેશ (K. M. Trivedi)' : '1-Click Mamlatdar Officer Login'}</span>
+                </button>
+
+                <p className="text-[10px] text-slate-500 text-center pt-1 font-medium">
+                  🔒 {lang === 'gu' ? 'GRTSA ૨૦૧૩: સરકારી કચેરી કાઉન્ટર ૧ થી ૬ ઓપરેટર્સ માટે સુરક્ષિત' : 'GRTSA 2013: Authorized for Kacheri Counter 1-6 Operators'}
                 </p>
               </div>
+            ) : (
+              /* CITIZEN LOGIN TAB CONTENT */
+              <div className="space-y-4 animate-in fade-in duration-150">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>{t('phoneLabel', lang)}</span>
+                    <button
+                      onClick={() => speakGuidance(lang === 'gu' ? "કૃપા કરીને તમારો દસ આંકડાનો મોબાઈલ નંબર દાખલ કરો." : lang === 'hi' ? "कृपया अपना दस अंकों का मोबाइल नंबर दर्ज करें।" : lang === 'mr' ? "कृपया तुमचा १० अंकी मोबाइल क्रमांक प्रविष्ट करा." : "Please enter your 10-digit mobile number.")}
+                      className="text-[#005A9C] text-[11px] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" /> {t('listenBtnLabel', lang)}
+                    </button>
+                  </label>
+                  <div className="flex items-stretch">
+                    <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-300 bg-[#F5F7FA] text-slate-700 text-xs font-black shrink-0 whitespace-nowrap select-none">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      maxLength={10}
+                      className="w-full text-xs font-bold rounded-r-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C] tracking-wider"
+                    />
+                  </div>
+                </div>
 
-              <button
-                onClick={handleOtpSubmit}
-                className="w-full bg-[#005A9C] hover:bg-[#003366] text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2 mt-2 cursor-pointer"
-              >
-                <span>{t('getOtpBtn', lang)}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-xs font-bold text-slate-700 whitespace-nowrap">{t('aadhaarLast4Label', lang)}</span>
+                    <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0 whitespace-nowrap">
+                      {lang === 'gu' ? '🔒 સુરક્ષિત આધાર માસ્કિંગ' : lang === 'hi' ? '🔒 सुरक्षित आधार मास्किंग' : lang === 'mr' ? '🔒 सुरक्षित आधार मास्किंग' : '🔒 Secure Aadhaar Masking'}
+                    </span>
+                  </div>
+                  <input
+                    type="password"
+                    value={aadhaar4}
+                    onChange={(e) => setAadhaar4(e.target.value)}
+                    maxLength={4}
+                    placeholder="••••"
+                    className="w-full text-xs font-medium rounded-xl border border-slate-300 p-2.5 outline-none focus:border-[#005A9C] tracking-widest text-center text-base"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    {t('aadhaarMaskingNote', lang)}
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleOtpSubmit}
+                  className="w-full bg-[#005A9C] hover:bg-[#003366] text-white font-bold py-3 rounded-xl text-xs shadow-md active:scale-95 transition flex items-center justify-center gap-2 mt-2 cursor-pointer"
+                >
+                  <span>{t('getOtpBtn', lang)}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+
+                {/* 1-Click Fast Citizen Demo Login */}
+                <button
+                  type="button"
+                  onClick={() => loginAsDemo('farmer')}
+                  className="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>⚡</span>
+                  <span>{t('demoLoginBtn', lang)}</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
