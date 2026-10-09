@@ -196,7 +196,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
               setIsFiltering(true);
               setTimeout(() => setIsFiltering(false), 200);
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 min-h-[42px] rounded-xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer flex items-center justify-center active:scale-95 ${
               selectedCategory === c.id
                 ? 'bg-[#003366] text-white shadow-sm ring-2 ring-[#003366]/20'
                 : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
@@ -250,7 +250,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                 triggerHaptic('tap');
                 onSelectScheme(scheme);
               }}
-              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#005A9C]/50 transition cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+              className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#005A9C]/50 transition cursor-pointer flex flex-col justify-between group relative overflow-hidden"
             >
               {/* Top Accent Strip */}
               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#005A9C] via-[#FF9933] to-[#138808]" />

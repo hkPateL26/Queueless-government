@@ -16,6 +16,9 @@
     overflow-wrap: break-word;
     -webkit-tap-highlight-color: transparent;
   }
+  button, a, input, select {
+    touch-action: manipulation;
+  }
   *:focus-visible {
     outline: 2px solid #005A9C;
     outline-offset: 2px;

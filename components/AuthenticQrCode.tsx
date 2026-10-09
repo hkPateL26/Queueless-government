@@ -55,7 +55,7 @@ export function AuthenticQrCode({
       {/* QR Code Container */}
       <div 
         className="relative bg-white p-2 rounded-xl border border-slate-200 shadow-inner flex items-center justify-center overflow-hidden"
-        style={{ width: size, height: size }}
+        style={{ width: size, height: size, maxWidth: '100%' }}
       >
         {dataUrl ? (
           <img

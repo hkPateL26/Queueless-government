@@ -177,39 +177,39 @@ export function GovJanSevaGateway({
           </div>
 
           {/* Live Center Telemetry Stats Strip */}
-          <div className="pt-2 border-t border-slate-200/80 grid grid-cols-3 gap-2 text-center">
+          <div className="pt-2 border-t border-slate-200/80 grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
             <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">
+              <p className="text-[8.5px] sm:text-[9px] font-bold text-slate-400 uppercase truncate">
                 {isKhi ? 'હાણે જો ટોકન' : isGu ? 'વર્તમાન ટોકન' : isHi ? 'वर्तमान टोकन' : isMr ? 'सध्याचा टोकन' : 'Current'}
               </p>
-              <p className="text-sm font-black text-[#003366] font-mono mt-0.5">#A-42</p>
+              <p className="text-xs sm:text-sm font-black text-[#003366] font-mono mt-0.5 truncate">#A-42</p>
             </div>
             <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">
+              <p className="text-[8.5px] sm:text-[9px] font-bold text-slate-400 uppercase truncate">
                 {isKhi ? 'સરેરાશ વગત' : isGu ? 'સરેરાશ સમય' : isHi ? 'औसत प्रतीक्षा' : isMr ? 'सरासरी वेळ' : 'Avg Wait'}
               </p>
-              <p className="text-sm font-black text-[#138808] font-mono mt-0.5">~14 min</p>
+              <p className="text-xs sm:text-sm font-black text-[#138808] font-mono mt-0.5 truncate">~14 min</p>
             </div>
             <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-xs">
-              <p className="text-[9px] font-bold text-slate-400 uppercase">
+              <p className="text-[8.5px] sm:text-[9px] font-bold text-slate-400 uppercase truncate">
                 {isKhi ? 'ચાલુ કાઉન્ટર' : isGu ? 'કાઉન્ટર' : isHi ? 'सक्रिय काउंटर' : isMr ? 'सक्रिय काउंटर' : 'Counters'}
               </p>
-              <p className="text-sm font-black text-[#FF9933] font-mono mt-0.5">4 Open</p>
+              <p className="text-xs sm:text-sm font-black text-[#FF9933] font-mono mt-0.5 truncate">4 Open</p>
             </div>
           </div>
         </div>
 
         {/* 🎫 CONDITIONAL: ACTIVE CITIZEN TOKEN PASS */}
         {(activeBooking || currentUser) && (
-          <div className="bg-gradient-to-r from-blue-50 to-amber-50 border-2 border-[#005A9C] rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-sm animate-in fade-in">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-11 h-11 rounded-xl bg-[#003366] text-[#FF9933] flex flex-col items-center justify-center font-black shrink-0 shadow-xs">
-                <span className="text-[9px] text-blue-200 leading-none">TOKEN</span>
-                <span className="text-sm leading-tight">{activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}</span>
+          <div className="bg-gradient-to-r from-blue-50 to-amber-50 border-2 border-[#005A9C] rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2.5 sm:gap-3 shadow-sm animate-in fade-in">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#003366] text-[#FF9933] flex flex-col items-center justify-center font-black shrink-0 shadow-xs">
+                <span className="text-[8.5px] sm:text-[9px] text-blue-200 leading-none">TOKEN</span>
+                <span className="text-xs sm:text-sm leading-tight">{activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}</span>
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded border border-emerald-300">
+                  <span className="text-[8.5px] sm:text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded border border-emerald-300 shrink-0">
                     {isKhi ? 'ચાલુ પાસ' : isGu ? 'સક્રિય પાસ' : isHi ? 'सक्रिय पास' : isMr ? 'सक्रिय पास' : 'ACTIVE PASS'}
                   </span>
                   <p className="text-xs font-black text-[#003366] truncate">{isEn ? 'Hari Patel' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'હરિ પટેલ'}</p>
@@ -228,7 +228,7 @@ export function GovJanSevaGateway({
                 if (activeBooking) onOpenTokenPassModal();
                 else onOpenTokenTracker();
               }}
-              className="px-3 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-[11px] font-extrabold shadow-sm active:scale-95 transition shrink-0 cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-[10.5px] sm:text-[11px] font-extrabold shadow-sm active:scale-95 transition shrink-0 cursor-pointer"
             >
               {isKhi ? 'પાસ જોવો' : isGu ? 'પાસ જુઓ' : isHi ? 'पास देखें' : isMr ? 'पास पहा' : 'View Pass'}
             </button>

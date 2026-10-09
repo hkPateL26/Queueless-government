@@ -543,7 +543,7 @@ export default function Home() {
             <span className="flex items-center gap-1.5 font-semibold text-white text-[10px] sm:text-xs truncate">
               <span className="w-2 h-2 rounded-full bg-[#138808] animate-pulse shrink-0" />
               <span className="hidden sm:inline">{t('topBarStatusLive', lang)}</span>
-              <span className="sm:hidden">{lang === 'gu' ? 'નેટવર્ક • લાઈવ' : lang === 'hi' ? 'नेटवर्क • लाइव' : lang === 'mr' ? 'नेटवर्क • लाइव्ह' : 'Network • Live'}</span>
+              <span className="sm:hidden text-[9.5px] font-bold">{lang === 'gu' ? 'લાઈવ' : lang === 'hi' ? 'लाइव' : lang === 'mr' ? 'लाईव्ह' : 'Live'}</span>
             </span>
             <span className="text-blue-300/40 hidden md:inline">|</span>
             <span className="text-blue-200 hidden md:inline font-mono text-[11px]">{t('topBarFramework', lang)}</span>
@@ -558,7 +558,7 @@ export default function Home() {
               title="નવા અપડેટ્સ & ચેન્જલોગ જુઓ"
             >
               <Sparkles className="w-3 h-3 text-slate-900" />
-              <span>{CURRENT_APP_VERSION} {lang === 'gu' ? 'નવું શું છે?' : "What's New?"}</span>
+              <span>{CURRENT_APP_VERSION} <span className="hidden xs:inline">{lang === 'gu' ? 'નવું શું છે?' : "What's New?"}</span></span>
             </button>
           </div>
 
@@ -578,8 +578,9 @@ export default function Home() {
                 title="ભાષા પસંદ કરો / Select Language"
               >
                 <Globe className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
-                <span className="truncate max-w-[125px] sm:max-w-none">
-                  {GUJARAT_LANGUAGES.find(l => l.code === lang)?.multiLabel || 'ગુજરાતી (Gujarati)'}
+                <span className="truncate max-w-[80px] xs:max-w-[125px] sm:max-w-none">
+                  <span className="xs:hidden">{GUJARAT_LANGUAGES.find(l => l.code === lang)?.nativeLabel || 'ગુજરાતી'}</span>
+                  <span className="hidden xs:inline">{GUJARAT_LANGUAGES.find(l => l.code === lang)?.multiLabel || 'ગુજરાતી (Gujarati)'}</span>
                 </span>
                 <ChevronDown className={`w-3 h-3 text-blue-200 transition-transform ${langMenuOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -723,12 +724,12 @@ export default function Home() {
       {/* MAIN NAV */}
       <nav className="bg-white border-b border-slate-200 sticky top-9 z-30 shadow-xs">
         <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 xl:px-12 h-14 sm:h-16 flex items-center justify-between">
-          <button onClick={() => setView('landing')} className="flex items-center gap-2 sm:gap-3 cursor-pointer">
-            <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
-            <div className="text-left">
+          <button onClick={() => setView('landing')} className="flex items-center gap-2 sm:gap-3 cursor-pointer min-w-0">
+            <GovLogo className="w-8 h-8 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
+            <div className="text-left min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base sm:text-xl tracking-tight text-[#003366] leading-none">{t('appTitle', lang)}</span>
-                <span className="text-[9px] sm:text-[10px] bg-amber-50 text-[#FF9933] border border-amber-200 px-1 py-0.5 rounded font-extrabold">{t('appTag', lang)}</span>
+                <span className="font-extrabold text-sm sm:text-xl tracking-tight text-[#003366] leading-none truncate">{t('appTitle', lang)}</span>
+                <span className="text-[9px] sm:text-[10px] bg-amber-50 text-[#FF9933] border border-amber-200 px-1 py-0.5 rounded font-extrabold shrink-0">{t('appTag', lang)}</span>
               </div>
               <p className="text-[10px] text-slate-500 font-medium hidden sm:block">{t('appSubtitle', lang)}</p>
             </div>
@@ -911,16 +912,16 @@ export default function Home() {
                   triggerHaptic('tap');
                   setCitizenProfileModalOpen(true);
                 }}
-                className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 hover:bg-blue-50/80 border border-slate-200 hover:border-blue-300 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl cursor-pointer transition select-none group"
+                className="flex items-center gap-1.5 sm:gap-2 bg-slate-100 hover:bg-blue-50/80 border border-slate-200 hover:border-blue-300 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl cursor-pointer transition select-none group min-w-0"
                 title={lang === 'gu' ? 'આધાર પ્રોફાઇલ અને પરિવાર વિગતો ખોલો' : 'Open Aadhaar Profile & Family Vault'}
               >
-                <div className="text-left text-xs leading-none">
+                <div className="text-left text-xs leading-none min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[9px] font-extrabold px-1.5 py-0.5 rounded flex items-center gap-1">
+                    <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[9px] font-extrabold px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                      {lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen'}
+                      <span className="hidden xs:inline">{lang === 'gu' ? 'પ્રમાણિત નાગરિક' : lang === 'hi' ? 'सत्यापित नागरिक' : lang === 'mr' ? 'सत्यापित नागरिक' : 'Verified Citizen'}</span>
                     </span>
-                    <p className="font-extrabold text-[#003366] text-xs sm:text-sm whitespace-nowrap group-hover:text-[#005A9C]">
+                    <p className="font-extrabold text-[#003366] text-xs sm:text-sm group-hover:text-[#005A9C] truncate max-w-[70px] xs:max-w-[120px] sm:max-w-none">
                       {currentUser?.name || getCitizenDisplayName(lang)}
                     </p>
                   </div>
@@ -934,7 +935,7 @@ export default function Home() {
                     resetSession();
                   }} 
                   title={lang === 'gu' ? 'લૉગઆઉટ / સેશન રીસેટ' : 'Logout / Reset Session'}
-                  className="ml-0.5 text-slate-400 hover:text-red-500 text-xs p-1 cursor-pointer"
+                  className="ml-0.5 text-slate-400 hover:text-red-500 text-xs p-1 cursor-pointer shrink-0"
                 >
                   <RotateCcw className="w-3 h-3" />
                 </button>
@@ -976,7 +977,7 @@ export default function Home() {
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#138808]" />
               </div>
 
-              <h1 className="text-3xl sm:text-5xl font-black text-[#003366] tracking-tight leading-tight sm:leading-[1.15] break-words">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#003366] tracking-tight leading-tight sm:leading-[1.15] break-words">
                 {t('heroTitleLine1', lang)} <br className="hidden sm:inline" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#005A9C] via-[#FF9933] to-[#003366]">
                   {t('heroTitleLine2', lang)}

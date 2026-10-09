@@ -699,7 +699,7 @@ export function DigitalTokenPass({
 
           {/* REQUIREMENT 14: APPOINTMENT ACTIONS (RESCHEDULE / CANCEL / CALENDAR) */}
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-200">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={handleDownload}
                 className="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
