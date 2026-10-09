@@ -1,4 +1,4 @@
-export type Language = 'gu' | 'hi' | 'en';
+export type Language = 'gu' | 'hi' | 'en' | (string & {});
 
 export interface LanguageOption {
   code: Language;
