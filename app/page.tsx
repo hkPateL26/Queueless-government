@@ -1390,7 +1390,7 @@ export default function Home() {
                     {/* 📷 AUTHENTIC HIGH-RES SCANNABLE QR CODE FOR ACTIVE BOOKING */}
                     <div className="py-2 flex justify-center">
                       <AuthenticQrCode
-                        payload={`https://queueless.gujarat.gov.in/verify?token=${encodeURIComponent(activeBooking.tokenNumber)}&citizen=${encodeURIComponent(currentUser?.name || getCitizenDisplayName(lang))}&office=RajkotGondal&sig=QL-GUJ-8F3A29`}
+                        payload={`https://queueless.gujarat.gov.in/verify?token=${encodeURIComponent(activeBooking.tokenNumber)}&citizen=${encodeURIComponent(getCitizenDisplayName(lang, currentUser?.name))}&office=RajkotGondal&sig=QL-GUJ-8F3A29`}
                         tokenId={activeBooking.tokenNumber}
                         size={180}
                         label={lang === 'gu' ? 'સત્તાવાર સુરક્ષિત QR ટોકન' : lang === 'hi' ? 'आधिकारिक सुरक्षित QR टोकन' : lang === 'mr' ? 'अधिकृत सुरक्षित QR टोकन' : 'Official Secure QR Token'}
