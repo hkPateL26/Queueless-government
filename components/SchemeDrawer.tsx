@@ -115,7 +115,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: true }));
         triggerHaptic('success');
-        speakGuidance(isEn ? 'Document verified successfully.' : 'દસ્તાવેજ સફળતાપૂર્વક પ્રમાણિત થયો છે.');
+        speakGuidance(
+          isEn ? 'Document verified successfully.' : isHi ? 'दस्तावेज़ सफलतापूर्वक सत्यापित हो गया है।' : 'દસ્તાવેજ સફળતાપૂર્વક પ્રમાણિત થયો છે.',
+          lang
+        );
       } else {
         setDocVerifications(prev => ({
           ...prev,
@@ -128,7 +131,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: false }));
         triggerHaptic('warning');
-        speakGuidance(isEn ? 'Document rejected. Please check requirements.' : (res.reasonGu || 'દસ્તાવેજ અમાન્ય છે.'));
+        speakGuidance(
+          isEn ? 'Document rejected. Please check requirements.' : isHi ? (res.reasonGu ? 'दस्तावेज़ अस्वीकृत हुआ। कृपया नियम जांचें।' : 'दस्तावेज़ अमान्य है।') : (res.reasonGu || 'દસ્તાવેજ અમાન્ય છે.'),
+          lang
+        );
       }
     } catch (err) {
       console.error('File inspection error:', err);
@@ -188,7 +194,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: true }));
         triggerHaptic('success');
-        speakGuidance(isEn ? 'Document verified successfully.' : 'દસ્તાવેજ સફળતાપૂર્વક પ્રમાણિત થયો છે.');
+        speakGuidance(
+          isEn ? 'Document verified successfully.' : isHi ? 'दस्तावेज़ सफलतापूर्वक सत्यापित हुआ।' : 'દસ્તાવેજ સફળતાપૂર્વક પ્રમાણિત થયો છે.',
+          lang
+        );
       } else if (scenario === 'expired') {
         setDocVerifications(prev => ({
           ...prev,
@@ -201,7 +210,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: false }));
         triggerHaptic('warning');
-        speakGuidance(isEn ? 'Document expired. Please update.' : 'દાખલાની મુદત પૂર્ણ થયેલ છે. નવો દાખલો કઢાવવો જરૂરી છે.');
+        speakGuidance(
+          isEn ? 'Document expired. Please update.' : isHi ? 'दस्तावेज़ की अवधि समाप्त हो चुकी है।' : 'દાખલાની મુદત પૂર્ણ થયેલ છે. નવો દાખલો કઢાવવો જરૂરી છે.',
+          lang
+        );
       } else if (scenario === 'mismatch') {
         setDocVerifications(prev => ({
           ...prev,
@@ -214,7 +226,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: false }));
         triggerHaptic('warning');
-        speakGuidance(isEn ? 'Applicant name mismatch detected.' : 'અરજદારનું નામ મેળ ખાતું નથી.');
+        speakGuidance(
+          isEn ? 'Applicant name mismatch detected.' : isHi ? 'आवेदक का नाम मेल नहीं खाता।' : 'અરજદારનું નામ મેળ ખાતું નથી.',
+          lang
+        );
       } else if (scenario === 'wrong_doc') {
         const isAadhaarSlot = docKey.includes('આધાર') || docKey.includes('Aadhaar');
         setDocVerifications(prev => ({
@@ -232,7 +247,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: false }));
         triggerHaptic('warning');
-        speakGuidance(isEn ? 'Invalid document type uploaded.' : 'અમાન્ય દસ્તાવેજ: સાચો સરકારી દસ્તાવેજ અપલોડ કરો.');
+        speakGuidance(
+          isEn ? 'Invalid document type uploaded.' : isHi ? 'अमान्य दस्तावेज़: कृपया सही सरकारी दस्तावेज़ अपलोड करें।' : 'અમાન્ય દસ્તાવેજ: સાચો સરકારી દસ્તાવેજ અપલોડ કરો.',
+          lang
+        );
       }
     }, 850);
   };

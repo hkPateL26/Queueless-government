@@ -106,24 +106,20 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
           ? "Document pre-check passed successfully. Details are verified for submission." 
           : isHi 
           ? "दस्तावेज़ पूर्व-सत्यापन सफल रहा। विवरण सबमिशन हेतु योग्य हैं।" 
-          : isMr 
-          ? "कागदपत्र पूर्व-तपासणी यशस्वी झाली. तपशील सादर करण्यासाठी योग्य आहेत." 
           : "દસ્તાવેજ પ્રી-ચેક સફળ રહ્યો છે. વિગતો સબમિશન માટે યોગ્ય જણાય છે.";
-        speakGuidance(passMsg);
+        speakGuidance(passMsg, lang);
       } else if (result.status === 'needs_review') {
         triggerHaptic('warning');
         const warnMsg = isEn
           ? "Improve clarity: Capture document straight under sufficient lighting."
           : isHi
           ? "स्पष्टता सुधारें: दस्तावेज़ का फोटो सीधा और पर्याप्त प्रकाश में लें।"
-          : isMr
-          ? "स्पष्टता सुधारा: कागदपत्राचा फोटो सरळ आणि पुरेशा प्रकाशात घ्या."
           : "સ્પષ્ટતા સુધારો: દસ્તાવેજનો ફોટો સીધો અને પર્યાપ્ત પ્રકાશમાં પાડો.";
         setQualityWarning(warnMsg);
-        speakGuidance(isEn ? result.messageEn : result.messageGu);
+        speakGuidance(isEn ? result.messageEn : result.messageGu, lang);
       } else {
         triggerHaptic('warning');
-        speakGuidance(isEn ? result.messageEn : result.messageGu);
+        speakGuidance(isEn ? result.messageEn : result.messageGu, lang);
       }
     }, 1100);
   };
@@ -531,7 +527,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
                       </span>
 
                       <button
-                        onClick={() => speakGuidance(isEn ? validationResult.messageEn : validationResult.messageGu)}
+                        onClick={() => speakGuidance(isEn ? validationResult.messageEn : validationResult.messageGu, lang)}
                         className="text-slate-600 hover:text-slate-900 text-xs flex items-center gap-1 font-bold cursor-pointer"
                       >
                         <Volume2 className="w-3.5 h-3.5" /> {isEn ? 'Listen' : isHi ? 'सुनें' : isMr ? 'ऐका' : 'સાંભળો'}

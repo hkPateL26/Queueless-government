@@ -287,7 +287,13 @@ export default function Home() {
       setLoginPromptReason(null);
       setTimeout(() => {
         triggerHaptic('success');
-        speakGuidance(`લૉગિન સફળ! હવે ${targetScheme.titleGu} માટે તમારો કચેરી સ્લોટ અને કાઉન્ટર પસંદ કરો.`);
+        const schemeTitle = lang === 'en' ? (targetScheme.titleEn || targetScheme.titleGu) : targetScheme.titleGu;
+        const msg = lang === 'en'
+          ? `Login successful! Please select your office slot and service counter for ${schemeTitle}.`
+          : lang === 'hi'
+          ? `लॉगिन सफल! अब ${schemeTitle} के लिए अपना कार्यालय स्लॉट और काउंटर चुनें।`
+          : `લૉગિન સફળ! હવે ${schemeTitle} માટે તમારો કચેરી સ્લોટ અને કાઉન્ટર પસંદ કરો.`;
+        speakGuidance(msg, lang);
         setSlotModalOpen(true);
       }, 200);
     } else {
@@ -320,9 +326,8 @@ export default function Home() {
             ? `Mobile verified successfully! Your official token ${confirmedDetails.tokenNumber} is issued.`
             : lang === 'hi'
             ? `ओटीपी सत्यापन सफल! आपका आधिकारिक टोकन ${confirmedDetails.tokenNumber} जारी किया गया है।`
-            : lang === 'mr'
-            ? `मोबाइल पडताळणी यशस्वी! तुमचा अधिकृत टोकन ${confirmedDetails.tokenNumber} जारी झाला आहे.`
-            : `મોબાઈલ ચકાસણી સફળ! તમારો અધિકૃત ટોકન ${confirmedDetails.tokenNumber} જારી થઈ ગયો છે.`
+            : `મોબાઈલ ચકાસણી સફળ! તમારો અધિકૃત ટોકન ${confirmedDetails.tokenNumber} જારી થઈ ગયો છે.`,
+          lang
         );
         setTokenPassModalOpen(true);
         setView('dashboard');
@@ -338,7 +343,13 @@ export default function Home() {
       setLoginPromptReason(null);
       setTimeout(() => {
         triggerHaptic('success');
-        speakGuidance(`લૉગિન સફળ! હવે ${targetScheme.titleGu} માટે તમારો કચેરી સ્લોટ અને કાઉન્ટર પસંદ કરો.`);
+        const schemeTitle = lang === 'en' ? (targetScheme.titleEn || targetScheme.titleGu) : targetScheme.titleGu;
+        const msg = lang === 'en'
+          ? `Login successful! Please select your office slot and service counter for ${schemeTitle}.`
+          : lang === 'hi'
+          ? `लॉगिन सफल! अब ${schemeTitle} के लिए अपना कार्यालय स्लॉट और काउंटर चुनें।`
+          : `લૉગિન સફળ! હવે ${schemeTitle} માટે તમારો કચેરી સ્લોટ અને કાઉન્ટર પસંદ કરો.`;
+        speakGuidance(msg, lang);
         setSlotModalOpen(true);
       }, 200);
     } else {
@@ -373,8 +384,13 @@ export default function Home() {
   const handleRunningLate = () => {
     triggerHaptic('warning');
     setLateShiftMinutes(prev => prev + 20);
-    speakGuidance("વિલંબ નોંધણી સફળ! કાઉન્ટર અધિકારીને તમારા નવા અંદાજિત સમયની જાણ કરવામાં આવી છે.");
-    alert("⚠️ વિલંબ નોંધણી મંજૂર!\n\nતમારી અપોઇન્ટમેન્ટનો સમય ૨૦ મિનિટ આગળ ખસેડવામાં આવ્યો છે. કાઉન્ટર અધિકારીને સિસ્ટમ દ્વારા જાણ થઈ ગઈ છે જેથી તમારો વારો સ્કીપ નહીં થાય.");
+    const msg = lang === 'en'
+      ? "Delay recorded successfully! The counter officer has been notified of your updated arrival time."
+      : lang === 'hi'
+      ? "विलंब दर्ज सफल! काउंटर अधिकारी को आपके नए आगमन समय की सूचना दे दी गई है।"
+      : "વિલંબ નોંધણી સફળ! કાઉન્ટર અધિકારીને તમારા નવા અંદાજિત સમયની જાણ કરવામાં આવી છે.";
+    speakGuidance(msg, lang);
+    alert(lang === 'en' ? "⚠️ Delay Reported!\n\nYour appointment slot has been shifted by 20 minutes." : lang === 'hi' ? "⚠️ विलंब दर्ज!\n\nआपका अपॉइंटमेंट समय २० मिनट आगे बढ़ा दिया गया है।" : "⚠️ વિલંબ નોંધણી મંજૂર!\n\nતમારી અપોઇન્ટમેન્ટનો સમય ૨૦ મિનિટ આગળ ખસેડવામાં આવ્યો છે. કાઉન્ટર અધિકારીને સિસ્ટમ દ્વારા જાણ થઈ ગઈ છે જેથી તમારો વારો સ્કીપ નહીં થાય.");
   };
 
   const handleSelectScheme = (scheme: SchemeItem) => {
@@ -392,9 +408,15 @@ export default function Home() {
     setActiveScheme(scheme);
     if (!currentUser) {
       triggerHaptic('warning');
-      speakGuidance("ટોકન મેળવવા માટે પહેલાં નાગરિક ઓળખ ચકાસણી કરવી જરૂરી છે.");
+      const schemeTitle = lang === 'en' ? (scheme.titleEn || scheme.titleGu) : scheme.titleGu;
+      const voiceMsg = lang === 'en'
+        ? "Citizen identity verification is required to collect your token pass."
+        : lang === 'hi'
+        ? "टोकन प्राप्त करने के लिए पहले नागरिक पहचान सत्यापन आवश्यक है।"
+        : "ટોકન મેળવવા માટે પહેલાં નાગરિક ઓળખ ચકાસણી કરવી જરૂરી છે.";
+      speakGuidance(voiceMsg, lang);
       setPendingTokenScheme(scheme);
-      setLoginPromptReason(`🔒 "${scheme.titleGu}" નો કચેરી ટોકન કલેક્ટ કરવા માટે નાગરિક ઓળખ ચકાસણી (Citizen Identity Check) જરૂરી છે.`);
+      setLoginPromptReason(lang === 'en' ? `🔒 Citizen identity check is required to collect token for "${schemeTitle}".` : lang === 'hi' ? `🔒 "${schemeTitle}" का टोकन प्राप्त करने के लिए नागरिक पहचान सत्यापन आवश्यक है।` : `🔒 "${schemeTitle}" નો કચેરી ટોકન કલેક્ટ કરવા માટે નાગરિક ઓળખ ચકાસણી જરૂરી છે.`);
       setDrawerOpen(false);
       setAuthModalOpen(true);
       return;
@@ -412,9 +434,15 @@ export default function Home() {
 
     if (!currentUser) {
       triggerHaptic('warning');
-      speakGuidance("દસ્તાવેજ પ્રી-ચેક સફળ! ટોકન ફાળવણી માટે નાગરિક ઓળખ ચકાસણી કરો.");
+      const voiceMsg = lang === 'en'
+        ? "Document pre-check passed! Please verify your citizen identity for token allocation."
+        : lang === 'hi'
+        ? "दस्तावेज़ पूर्व-जांच सफल! टोकन आवंटन के लिए नागरिक पहचान सत्यापन करें।"
+        : "દસ્તાવેજ પ્રી-ચેક સફળ! ટોકન ફાળવણી માટે નાગરિક ઓળખ ચકાસણી કરો.";
+      speakGuidance(voiceMsg, lang);
       setPendingTokenScheme(activeScheme);
-      setLoginPromptReason(`🔒 પ્રી-ચેક પૂર્ણ! "${activeScheme.titleGu}" નો ટોકન ફાળવવા માટે નાગરિક ઓળખ ચકાસણી (Citizen Identity Check) જરૂરી છે.`);
+      const schemeTitle = lang === 'en' ? (activeScheme.titleEn || activeScheme.titleGu) : activeScheme.titleGu;
+      setLoginPromptReason(lang === 'en' ? `🔒 Pre-check complete! Citizen verification needed for "${schemeTitle}".` : lang === 'hi' ? `🔒 पूर्व-जांच पूर्ण! "${schemeTitle}" के लिए नागरिक सत्यापन आवश्यक है।` : `🔒 પ્રી-ચેક પૂર્ણ! "${schemeTitle}" નો ટોકન ફાળવવા માટે નાગરિક ઓળખ ચકાસણી જરૂરી છે.`);
       setScannerOpen(false);
       setDrawerOpen(false);
       setAuthModalOpen(true);
@@ -1302,9 +1330,8 @@ export default function Home() {
                               ? `Hello ${citizenName}, your token number ${tokenStr} is active for Counter ${counterNum}. Please proceed to the counter on time.`
                               : lang === 'hi'
                               ? `नमस्ते ${citizenName}, आपका टोकन नंबर ${tokenStr} काउंटर ${counterNum} के लिए सक्रिय है। कृपया समय पर पहुंचें।`
-                              : lang === 'mr'
-                              ? `नमस्कार ${citizenName}, तुमचा टोकन क्रमांक ${tokenStr} काउंटर ${counterNum} साठी सक्रिय आहे. कृपया वेळेवर उपस्थित राहा.`
-                              : `નમસ્તે ${citizenName}, તમારો ટોકન નંબર ${tokenStr} કાઉન્ટર ${counterNum} માટે સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`
+                              : `નમસ્તે ${citizenName}, તમારો ટોકન નંબર ${tokenStr} કાઉન્ટર ${counterNum} માટે સક્રિય છે. કૃપા કરીને સમયસર કાઉન્ટર પર પહોંચો.`,
+                            lang
                           );
                         }}
                         className="bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 font-bold py-2.5 px-2 rounded-xl text-xs flex items-center justify-center gap-1.5 active:scale-95 transition min-h-[44px] cursor-pointer"

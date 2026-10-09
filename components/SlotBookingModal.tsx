@@ -966,8 +966,13 @@ export function SlotBookingModal({
                                 type="button"
                                 onClick={() => {
                                   triggerHaptic('tap');
-                                  setSelectedClusterVillageId(cluster.villageId);
-                                  speakGuidance(`${cluster.villageNameGu} કેન્દ્ર પસંદ થયું. ${cluster.availableSlotsToday} સ્લોટ ઉપલબ્ધ છે.`);
+                                  const villageName = isEn ? (cluster.villageNameEn || cluster.villageNameGu) : cluster.villageNameGu;
+                                  const voiceMsg = isEn
+                                    ? `${villageName} center selected. ${cluster.availableSlotsToday} slots available.`
+                                    : lang === 'hi'
+                                    ? `${villageName} केंद्र चुना गया। ${cluster.availableSlotsToday} स्लॉट उपलब्ध हैं।`
+                                    : `${villageName} કેન્દ્ર પસંદ થયું. ${cluster.availableSlotsToday} સ્લોટ ઉપલબ્ધ છે.`;
+                                  speakGuidance(voiceMsg, lang);
                                 }}
                                 className="w-full text-center text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-2 rounded-lg transition shadow-2xs cursor-pointer flex items-center justify-center gap-1"
                               >
