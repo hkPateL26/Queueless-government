@@ -69,6 +69,11 @@ interface QueueCitizen {
   uploadedDocuments?: VerifiedDocumentItem[];
   districtId?: string;
   talukaId?: string;
+  beneficiaryNameGu?: string;
+  beneficiaryNameEn?: string;
+  beneficiaryRelation?: string;
+  applicationType?: 'NEW' | 'UPDATE';
+  physicalDocsStatus?: 'PENDING' | 'SUBMITTED' | 'VERIFIED' | 'REJECTED';
 }
 
 export interface AuditLogEntry {
@@ -307,16 +312,21 @@ function bookingToQueueCitizen(b: BookingDetails): QueueCitizen {
         { nameGu: 'આવકનો દાખલો / રેશનકાર્ડ', nameHi: 'आय प्रमाण पत्र / राशन कार्ड', nameEn: 'Income / Ration Proof', status: 'PRE_CHECK_PASSED' as const }
       ];
 
+  const citizenNameGu = b.beneficiaryNameGu || DEFAULT_CITIZEN_PROFILE.nameGu;
+  const citizenNameEn = b.beneficiaryNameEn || DEFAULT_CITIZEN_PROFILE.nameEn;
+  const schemeTitleGu = b.schemeTitleGu || (b.counterNameGu ? `${b.counterNameGu} સેવા` : 'જન સેવા પ્રમાણપત્ર');
+  const schemeTitleEn = b.schemeTitleEn || b.counterNameEn || 'Jan Seva Service';
+
   return {
     id: `real-tok-${b.tokenNumber.replace('#', '').toLowerCase()}`,
     tokenNumber: b.tokenNumber,
-    citizenNameGu: DEFAULT_CITIZEN_PROFILE.nameGu,
-    citizenNameHi: DEFAULT_CITIZEN_PROFILE.nameEn,
-    citizenNameEn: DEFAULT_CITIZEN_PROFILE.nameEn,
+    citizenNameGu,
+    citizenNameHi: citizenNameEn,
+    citizenNameEn,
     phone: '98765 43210',
-    schemeTitleGu: b.counterNameGu ? `${b.counterNameGu} સેવા` : 'જન સેવા પ્રમાણપત્ર',
-    schemeTitleHi: b.counterNameEn ? `${b.counterNameEn} Service` : 'जन सेवा प्रमाण पत्र',
-    schemeTitleEn: b.counterNameEn || 'Jan Seva Service',
+    schemeTitleGu,
+    schemeTitleHi: schemeTitleEn,
+    schemeTitleEn,
     counterNumber: b.counterNumber || 1,
     isPriority: !!b.isPriority,
     appliedTime: b.slot?.timeRange ? b.slot.timeRange.split(' - ')[0] : '10:30 AM',
@@ -333,7 +343,16 @@ function bookingToQueueCitizen(b: BookingDetails): QueueCitizen {
     payment: b.payment,
     uploadedDocuments: b.uploadedDocuments,
     districtId: b.district?.id,
-    talukaId: b.taluka?.id
+    talukaId: b.taluka?.id,
+    beneficiaryNameGu: b.beneficiaryNameGu,
+    beneficiaryNameEn: b.beneficiaryNameEn,
+    beneficiaryRelation: b.beneficiaryRelation,
+    applicationType: b.applicationType || 'NEW',
+    physicalDocsStatus: ((b.documentSubmissionStatus as any) === 'submitted_at_counter' || (b.documentSubmissionStatus as any) === 'SUBMITTED')
+      ? 'SUBMITTED'
+      : ((b.documentSubmissionStatus as any) === 'officer_approved' || (b.documentSubmissionStatus as any) === 'VERIFIED')
+      ? 'VERIFIED'
+      : 'PENDING'
   };
 }
 
@@ -1001,6 +1020,83 @@ export default function CounterOperatorDesk() {
     speakGuidance(voiceMsg, lang);
   };
 
+  // 2.5 ACCEPT & VERIFY ORIGINAL PHYSICAL DOCUMENTS (STAGE 4)
+  const handleAcceptPhysicalDocs = (targetCitizen?: QueueCitizen) => {
+    const target = targetCitizen || currentServing;
+    if (!target) return;
+    triggerHaptic('success');
+    playNotificationChime();
+
+    setQueue(prev => prev.map(c => 
+      c.tokenNumber === target.tokenNumber ? { ...c, physicalDocsStatus: 'VERIFIED' } : c
+    ));
+
+    if (currentServing?.tokenNumber === target.tokenNumber) {
+      setCurrentServing(prev => prev ? { ...prev, physicalDocsStatus: 'VERIFIED' } : null);
+    }
+
+    try {
+      const storedTokens = localStorage.getItem('qless_real_queue_tokens');
+      if (storedTokens) {
+        const list: BookingDetails[] = JSON.parse(storedTokens);
+        const updated = list.map(b => 
+          b.tokenNumber === target.tokenNumber 
+            ? { ...b, documentSubmissionStatus: 'VERIFIED' as const, currentStage: 4 as const } 
+            : b
+        );
+        localStorage.setItem('qless_real_queue_tokens', JSON.stringify(updated));
+      }
+    } catch {}
+
+    try {
+      const storedHist = localStorage.getItem('qless_booking_history');
+      if (storedHist) {
+        const hist: BookingDetails[] = JSON.parse(storedHist);
+        const updatedHist = hist.map(b => 
+          b.tokenNumber === target.tokenNumber 
+            ? { ...b, documentSubmissionStatus: 'VERIFIED' as const, currentStage: 4 as const } 
+            : b
+        );
+        localStorage.setItem('qless_booking_history', JSON.stringify(updatedHist));
+      }
+    } catch {}
+
+    broadcastQueueEvent({
+      type: 'TOKEN_DOCS_SUBMITTED' as any,
+      tokenNumber: target.tokenNumber,
+      counterNumber: selectedCounter,
+      talukaId: selectedTalukaId,
+      timestamp: Date.now(),
+      payload: {
+        status: 'VERIFIED',
+        beneficiaryName: target.beneficiaryNameGu || target.citizenNameGu,
+        officerRemarks: 'અસલ ભૌતિક દસ્તાવેજો કાઉન્ટર પર સક્ષમ અધિકારી દ્વારા સ્વીકારાયા અને પ્રમાણિત કરાયા.'
+      }
+    });
+
+    addAuditLog(
+      'COMPLETED',
+      target.tokenNumber,
+      `અસલ દસ્તાવેજો રૂબરૂ જમા લીધા અને ભૌતિક ચકાસણી સફળ (તબક્કો ૪ પૂર્ણ)`,
+      `मूल दस्तावेज़ भौतिक रूप से जमा किए गए एवं सत्यापन पूर्ण (चरण ४ संपन्न)`,
+      `Original physical documents submitted and physically verified at desk (Stage 4 Complete)`
+    );
+
+    const announceName = isGu ? (target.beneficiaryNameGu || target.citizenNameGu) : target.citizenNameEn;
+    speakGuidance(
+      isGu 
+        ? `${announceName} ના અસલ દસ્તાવેજો સ્વીકારાયા છે અને ભૌતિક ચકાસણી સફળ થયેલ છે.` 
+        : `Original physical documents verified successfully.`,
+      lang
+    );
+
+    setCounterToast({
+      title: isGu ? "📑 અસલ દસ્તાવેજો જમા & પ્રમાણિત" : isHi ? "📑 मूल दस्तावेज़ स्वीकृत" : "📑 Physical Docs Verified",
+      message: `${target.tokenNumber} (${announceName}) • તબક્કો ૪ સફળતાપૂર્વક પૂર્ણ`,
+      type: 'success'
+    });
+  };
+
   // 3. COMPLETE SERVICE & ISSUE PASS
   const handleMarkComplete = () => {
     if (!currentServing) return;
@@ -1054,8 +1150,15 @@ export default function CounterOperatorDesk() {
       const storedTokens = localStorage.getItem('qless_real_queue_tokens');
       if (storedTokens) {
         const tokenList: BookingDetails[] = JSON.parse(storedTokens);
-        const updatedTokens = tokenList.map(b => b.tokenNumber === completed.tokenNumber ? { ...b, status: 'COMPLETED' as any, approvalDetails: approvalPayload } : b);
+        const updatedTokens = tokenList.map(b => b.tokenNumber === completed.tokenNumber ? { ...b, status: 'COMPLETED' as any, currentStage: 5 as any, approvalDetails: approvalPayload } : b);
         localStorage.setItem('qless_real_queue_tokens', JSON.stringify(updatedTokens));
+      }
+
+      const storedHist = localStorage.getItem('qless_booking_history');
+      if (storedHist) {
+        const histList: BookingDetails[] = JSON.parse(storedHist);
+        const updatedHist = histList.map(b => b.tokenNumber === completed.tokenNumber ? { ...b, status: 'COMPLETED' as any, currentStage: 5 as any, approvalDetails: approvalPayload } : b);
+        localStorage.setItem('qless_booking_history', JSON.stringify(updatedHist));
       }
     } catch (e) {
       console.error(e);
@@ -1604,9 +1707,23 @@ export default function CounterOperatorDesk() {
                       <h3 className="text-lg font-black text-slate-900 mt-1">
                         {isGu ? currentServing.citizenNameGu : isHi ? currentServing.citizenNameHi : currentServing.citizenNameEn}
                       </h3>
-                      <p className="text-xs text-[#005A9C] font-bold">
-                        {isGu ? currentServing.schemeTitleGu : isHi ? currentServing.schemeTitleHi : currentServing.schemeTitleEn}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        <p className="text-xs text-[#005A9C] font-bold">
+                          {isGu ? currentServing.schemeTitleGu : isHi ? currentServing.schemeTitleHi : currentServing.schemeTitleEn}
+                        </p>
+                        {currentServing.beneficiaryNameGu && (
+                          <span className="text-[10px] bg-indigo-50 border border-indigo-200 text-indigo-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            👤 {isGu ? "લાભાર્થી:" : "Beneficiary:"} {currentServing.beneficiaryNameGu} {currentServing.beneficiaryRelation ? `(${currentServing.beneficiaryRelation})` : ''}
+                          </span>
+                        )}
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
+                          currentServing.applicationType === 'UPDATE' 
+                            ? 'bg-amber-50 text-amber-800 border-amber-300' 
+                            : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                        }`}>
+                          {currentServing.applicationType === 'UPDATE' ? (isGu ? '🔄 સુધારો / અપડેટ' : '🔄 Correction/Update') : (isGu ? '🆕 નવી અરજી' : '🆕 New Application')}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="text-right">
@@ -1812,6 +1929,45 @@ export default function CounterOperatorDesk() {
                         }`}
                         style={{ width: `${Math.min((elapsedMinutes / SERVICE_SLA_CONFIG.targetMinutes) * 100, 100)}%` }}
                       />
+                    </div>
+                  </div>
+
+                  {/* 📑 STAGE 4 PHYSICAL DOCUMENT SUBMISSION & VERIFICATION (રૂબરૂ અસલ દસ્તાવેજો ચકાસણી) */}
+                  <div className={`p-3.5 rounded-2xl border transition-all ${
+                    currentServing.physicalDocsStatus === 'VERIFIED'
+                      ? 'bg-emerald-50/90 border-emerald-300 text-emerald-950'
+                      : 'bg-amber-50/90 border-amber-300 text-amber-950'
+                  }`}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="space-y-0.5 max-w-lg">
+                        <div className="flex items-center gap-1.5">
+                          <FileCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                          <span className="font-black text-xs">
+                            {isGu ? "તબક્કો ૪: રૂબરૂ અસલ દસ્તાવેજો જમા & ભૌતિક ચકાસણી" : isHi ? "चरण ४: मूल दस्तावेज़ भौतिक सत्यापन" : "Stage 4: Original Physical Documents Verification"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 leading-relaxed">
+                          {currentServing.physicalDocsStatus === 'VERIFIED'
+                            ? (isGu ? "✓ નાગરિક દ્વારા અસલ દસ્તાવેજો રજૂ કરાયા અને અધિકારી દ્વારા રૂબરૂ ચકાસણી પૂર્ણ થયેલ છે." : isHi ? "✓ मूल दस्तावेज़ जमा एवं भौतिक रूप से सत्यापित हो चुके हैं।" : "✓ Original physical documents submitted & verified at desk.")
+                            : (isGu ? "અરજદારે કાઉન્ટર પર અસલ દસ્તાવેજો રજૂ કર્યા હોય તો નીચેનું બટન દબાવી જમા લો & પ્રમાણિત કરો." : isHi ? "मूल दस्तावेज़ प्राप्त होने पर नीचे दिए बटन से सत्यापन करें।" : "Click below to verify and accept physical documents submitted at counter.")}
+                        </p>
+                      </div>
+
+                      {currentServing.physicalDocsStatus === 'VERIFIED' ? (
+                        <span className="px-3.5 py-1.5 bg-emerald-600 text-white text-xs font-black rounded-xl flex items-center gap-1.5 shadow-xs">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+                          <span>{isGu ? "અસલ દસ્તાવેજો જમા ✓" : isHi ? "मूल दस्तावेज़ जमा ✓" : "Physical Docs Verified ✓"}</span>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleAcceptPhysicalDocs(currentServing)}
+                          className="px-4 py-2.5 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white text-xs font-black rounded-xl flex items-center gap-2 shadow-md active:scale-95 transition cursor-pointer"
+                        >
+                          <FileCheck className="w-4 h-4 text-emerald-300" />
+                          <span>{isGu ? "📑 અસલ દસ્તાવેજો જમા & માન્ય કરો" : isHi ? "📑 मूल दस्तावेज़ स्वीकृत करें" : "📑 Accept & Verify Physical Docs"}</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -2032,6 +2188,20 @@ export default function CounterOperatorDesk() {
                         <p className="text-[11px] text-slate-500 line-clamp-1">
                           {schemeTitle}
                         </p>
+                        {citizen.beneficiaryNameGu && (
+                          <div className="flex flex-wrap items-center gap-1 mt-1">
+                            <span className="text-[9px] bg-indigo-50 text-indigo-700 font-bold px-1.5 py-0.5 rounded border border-indigo-200">
+                              👤 {citizen.beneficiaryNameGu} {citizen.beneficiaryRelation ? `(${citizen.beneficiaryRelation})` : ''}
+                            </span>
+                            {citizen.applicationType && (
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                                citizen.applicationType === 'UPDATE' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              }`}>
+                                {citizen.applicationType === 'UPDATE' ? '🔄 સુધારો' : '🆕 નવી અરજી'}
+                              </span>
+                            )}
+                          </div>
+                        )}
 
                         {/* Payment & Documents Mini Pill Row */}
                         <div className="flex flex-wrap items-center gap-1.5 mt-2">
@@ -2878,19 +3048,39 @@ export default function CounterOperatorDesk() {
               </div>
 
               {/* MODAL FOOTER */}
-              <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
-                <span className="text-[10.5px] text-slate-500 font-mono">
-                  QueueLess Gujarat DPI Verified • {activeCitizen.tokenNumber}
-                </span>
-                <button
-                  onClick={() => {
-                    setSelectedCitizenForDocs(null);
-                    setDocModalOpen(false);
-                  }}
-                  className="bg-[#003366] hover:bg-[#002244] text-white font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-xs"
-                >
-                  {isGu ? "નિરીક્ષણ પૂર્ણ (Close)" : isHi ? "निरीक्षण समाप्त (Close)" : "Close Review"}
-                </button>
+              <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10.5px] text-slate-500 font-mono">
+                    QueueLess Gujarat DPI Verified • {activeCitizen.tokenNumber}
+                  </span>
+                  {activeCitizen.physicalDocsStatus === 'VERIFIED' ? (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-300">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      {isGu ? "અસલ દસ્તાવેજો ચકાસાયેલ" : "Physical Docs Verified"}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-2">
+                  {activeCitizen.physicalDocsStatus !== 'VERIFIED' && (
+                    <button
+                      type="button"
+                      onClick={() => handleAcceptPhysicalDocs(activeCitizen)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs active:scale-95"
+                    >
+                      <FileCheck className="w-4 h-4" />
+                      <span>{isGu ? "📑 અસલ દસ્તાવેજો સ્વીકાર્યા & પ્રમાણિત કરો" : "Accept Physical Docs"}</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedCitizenForDocs(null);
+                      setDocModalOpen(false);
+                    }}
+                    className="bg-[#003366] hover:bg-[#002244] text-white font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-xs"
+                  >
+                    {isGu ? "નિરીક્ષણ પૂર્ણ (Close)" : isHi ? "निरीक्षण समाप्त (Close)" : "Close Review"}
+                  </button>
+                </div>
               </div>
 
             </div>

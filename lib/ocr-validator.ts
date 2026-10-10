@@ -255,17 +255,29 @@ export interface FileValidationInspectionResult {
   confidenceScore: number;
 }
 
+export interface BeneficiaryValidationContext {
+  id?: string;
+  nameGu: string;
+  nameEn: string;
+  relationGu?: string;
+  relationEn?: string;
+}
+
 /**
  * Strict Document File Inspection Engine:
  * Analyzes uploaded image/file for blur, negative keywords (e.g. college fee receipts),
- * wrong document types, resolution issues, and statutory validity rules.
+ * wrong document types, beneficiary/person mismatch, resolution issues, and statutory validity rules.
  */
 export async function inspectUploadedFileStrict(
   file: File,
   targetDocNameGu: string,
-  targetDocNameEn?: string
+  targetDocNameEn?: string,
+  beneficiary?: BeneficiaryValidationContext
 ): Promise<FileValidationInspectionResult> {
   const fileNameLower = file.name.toLowerCase();
+  const effectiveApplicantGu = beneficiary?.nameGu || 'હરિ પટેલ';
+  const effectiveApplicantEn = beneficiary?.nameEn || 'Hari Patel';
+  const effectiveRelationGu = beneficiary?.relationGu || 'સ્વયં';
 
   // 1. Primary Engine: Real-time Gemini Multimodal Vision API via backend (Supports Images & PDFs)
   const isSupportedAiDoc = 
@@ -295,7 +307,10 @@ export async function inspectUploadedFileStrict(
           fileName: file.name,
           targetDocNameGu,
           targetDocNameEn: targetDocNameEn || '',
-          applicantName: 'હરિ પટેલ (Hari Patel)'
+          applicantName: effectiveApplicantGu,
+          targetBeneficiaryNameGu: effectiveApplicantGu,
+          targetBeneficiaryNameEn: effectiveApplicantEn,
+          beneficiaryRelation: effectiveRelationGu
         })
       });
 
@@ -310,8 +325,8 @@ export async function inspectUploadedFileStrict(
             confidenceScore: r.confidenceScore || (r.isValid ? 0.98 : 0.95),
             reasonGu: r.reasonGu,
             reasonEn: r.reasonEn,
-            extractedDetailsGu: r.extractedDetailsGu,
-            extractedDetailsEn: r.extractedDetailsEn,
+            extractedDetailsGu: r.extractedDetailsGu || `સત્તાવાર ${targetDocNameGu} • ${effectiveApplicantGu} • પ્રમાણિત`,
+            extractedDetailsEn: r.extractedDetailsEn || `Official ${targetDocNameEn || targetDocNameGu} • ${effectiveApplicantEn} • Verified`,
             blurDetected: !!r.isBlurry
           };
         }
@@ -479,7 +494,61 @@ export async function inspectUploadedFileStrict(
     };
   }
 
-  // 5. Cross-Document Keyword Conflict Check (e.g. Aadhaar uploaded in Income slot)
+  // 5. Cross-Person / Beneficiary Conflict Check
+  if (beneficiary) {
+    const isTargetHari = effectiveApplicantEn.toLowerCase().includes('hari') || effectiveApplicantGu.includes('હરિ');
+    const isTargetGeeta = effectiveApplicantEn.toLowerCase().includes('geeta') || effectiveApplicantEn.toLowerCase().includes('gita') || effectiveApplicantGu.includes('ગીતા');
+    const isTargetParsottam = effectiveApplicantEn.toLowerCase().includes('parsottam') || effectiveApplicantEn.toLowerCase().includes('purshottam') || effectiveApplicantGu.includes('પરસોત્તમ');
+    const isTargetAayush = effectiveApplicantEn.toLowerCase().includes('aayush') || effectiveApplicantEn.toLowerCase().includes('ayush') || effectiveApplicantGu.includes('આયુષ');
+
+    // If application is for someone else (e.g. Parsottambhai, Geetaben, Aayush), but user uploaded Hari's file
+    if (!isTargetHari && (fileNameLower.includes('hari') || fileNameLower.includes('haripatel'))) {
+      return {
+        isValid: false,
+        status: 'failed',
+        confidenceScore: 0.98,
+        detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (હરિ પટેલ)',
+        reasonGu: `❌ નામમાં વિસંગતતા (Beneficiary Mismatch): અપલોડ કરેલ દસ્તાવેજ હરિ પટેલનો છે, જ્યારે તમે અરજી '${effectiveApplicantGu}' (${effectiveRelationGu}) માટે કરેલ છે! સરકારી નિયમ મુજબ માત્ર ${effectiveApplicantGu} નો જ અસલ દસ્તાવેજ અપલોડ કરો.`,
+        reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Hari Patel, but this application is for ${effectiveApplicantEn}. Please upload ${effectiveApplicantEn}'s document.`
+      };
+    }
+
+    // If application is for Hari, but user uploaded another family member's file
+    if (isTargetHari) {
+      if (fileNameLower.includes('geeta') || fileNameLower.includes('gita')) {
+        return {
+          isValid: false,
+          status: 'failed',
+          confidenceScore: 0.98,
+          detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (ગીતાબેન પટેલ)',
+          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ ગીતાબેન પટેલનો છે, જ્યારે અરજી હરિ પટેલ માટે છે! કૃપા કરીને હરિ પટેલનો જ દસ્તાવેજ અપલોડ કરો.`,
+          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Geetaben Patel, but application is for Hari Patel.`
+        };
+      }
+      if (fileNameLower.includes('parsottam') || fileNameLower.includes('purshottam')) {
+        return {
+          isValid: false,
+          status: 'failed',
+          confidenceScore: 0.98,
+          detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (પરસોત્તમભાઈ પટેલ)',
+          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ પરસોત્તમભાઈ પટેલનો છે, જ્યારે અરજી હરિ પટેલ માટે છે! કૃપા કરીને હરિ પટેલનો જ દસ્તાવેજ અપલોડ કરો.`,
+          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Parsottambhai Patel, but application is for Hari Patel.`
+        };
+      }
+      if (fileNameLower.includes('aayush') || fileNameLower.includes('ayush')) {
+        return {
+          isValid: false,
+          status: 'failed',
+          confidenceScore: 0.98,
+          detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (આયુષ પટેલ)',
+          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ આયુષ પટેલનો છે, જ્યારે અરજી હરિ પટેલ માટે છે! કૃપા કરીને હરિ પટેલનો જ દસ્તાવેજ અપલોડ કરો.`,
+          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Aayush Patel, but application is for Hari Patel.`
+        };
+      }
+    }
+  }
+
+  // 6. Cross-Document Keyword Conflict Check (e.g. Aadhaar uploaded in Income slot)
   const isAadhaarSlot = targetDocNameGu.includes('આધાર') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('aadhaar'));
   const isIncomeSlot = targetDocNameGu.includes('આવક') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('income'));
   const isLandSlot = targetDocNameGu.includes('૭/૧૨') || targetDocNameGu.includes('૮-અ') || targetDocNameGu.includes('જમીન') || (targetDocNameEn && targetDocNameEn.toLowerCase().includes('land'));
@@ -524,8 +593,8 @@ export async function inspectUploadedFileStrict(
     status: 'passed',
     confidenceScore: 0.95,
     detectedDocumentType: targetDocNameGu,
-    extractedDetailsGu: `સત્તાવાર ${targetDocNameGu} • Khunt Harkishan Vinodrai • ઓળખ પ્રમાણિત`,
-    extractedDetailsEn: `Official ${targetDocNameEn || targetDocNameGu} • Khunt Harkishan Vinodrai • Verified`
+    extractedDetailsGu: `સત્તાવાર ${targetDocNameGu} • ${effectiveApplicantGu} • ઓળખ પ્રમાણિત`,
+    extractedDetailsEn: `Official ${targetDocNameEn || targetDocNameGu} • ${effectiveApplicantEn} • Verified`
   };
 }
 

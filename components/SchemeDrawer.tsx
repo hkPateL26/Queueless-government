@@ -29,6 +29,7 @@ import { Language } from '@/lib/translations';
 import { inspectUploadedFileStrict } from '@/lib/ocr-validator';
 
 import { VerifiedDocumentItem } from '@/lib/slot-engine';
+import { DEFAULT_CITIZEN_PROFILE, FamilyMember } from '@/lib/citizen-profile';
 
 export interface DocVerificationState {
   status: 'idle' | 'scanning' | 'passed' | 'failed';
@@ -39,13 +40,21 @@ export interface DocVerificationState {
   fileUrl?: string;
 }
 
+export interface SchemeBookingMeta {
+  beneficiaryId?: string;
+  beneficiaryNameGu?: string;
+  beneficiaryNameEn?: string;
+  beneficiaryRelation?: string;
+  applicationType?: 'NEW' | 'UPDATE';
+}
+
 interface SchemeDrawerProps {
   scheme: SchemeItem | null;
   isOpen: boolean;
   onClose: () => void;
   onOpenScanner: () => void;
   isLoggedIn?: boolean;
-  onCollectToken?: (scheme: SchemeItem, verifiedDocs?: VerifiedDocumentItem[]) => void;
+  onCollectToken?: (scheme: SchemeItem, verifiedDocs?: VerifiedDocumentItem[], meta?: SchemeBookingMeta) => void;
   lang?: Language;
 }
 
@@ -63,6 +72,11 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [showValidationNotice, setShowValidationNotice] = useState(false);
   const [missingDocsModalOpen, setMissingDocsModalOpen] = useState(false);
+
+  // Beneficiary Selection (Self vs Family Member)
+  const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState<string>('mem-1');
+  // Application Type (New vs Correction/Update)
+  const [applicationType, setApplicationType] = useState<'NEW' | 'UPDATE'>('NEW');
 
   // Subscribe to speech synthesis state
   useEffect(() => {
@@ -90,9 +104,31 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const isMr = lang === 'mr';
   const isGu = lang === 'gu';
 
+  const selectedMember = DEFAULT_CITIZEN_PROFILE.familyMembers.find(m => m.id === selectedBeneficiaryId) || DEFAULT_CITIZEN_PROFILE.familyMembers[0];
+
+  // Dynamic Required Documents (appends update proofs if application is for correction/update)
+  const updateSpecificDocs = [
+    { 
+      nameGu: 'સુધારવા માટેનો વર્તમાન જૂનો દસ્તાવેજ / કાર્ડની નકલ', 
+      nameEn: 'Current Existing Document / Card Copy to Update', 
+      required: true, 
+      checkType: 'generic' as const 
+    },
+    { 
+      nameGu: 'સુધારા સંબંધિત સત્તાવાર પુરાવો (ગેઝેટ / મેરેજ સર્ટિ. / એફિડેવિટ / સરનામું)', 
+      nameEn: 'Official Proof for Correction (Gazette/Marriage Cert/Affidavit)', 
+      required: true, 
+      checkType: 'generic' as const 
+    }
+  ];
+
+  const effectiveDocsList = applicationType === 'UPDATE' 
+    ? [...scheme.requiredDocs, ...updateSpecificDocs]
+    : scheme.requiredDocs;
+
   // Calculate Mandatory vs Optional documents
-  const mandatoryDocs = scheme.requiredDocs.filter(d => d.required !== false);
-  const effectiveMandatoryDocs = mandatoryDocs.length > 0 ? mandatoryDocs : scheme.requiredDocs;
+  const mandatoryDocs = effectiveDocsList.filter(d => d.required !== false);
+  const effectiveMandatoryDocs = mandatoryDocs.length > 0 ? mandatoryDocs : effectiveDocsList;
   const totalMandatory = effectiveMandatoryDocs.length;
   
   const verifiedMandatoryDocs = effectiveMandatoryDocs.filter(
@@ -103,7 +139,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     d => docVerifications[d.nameGu]?.status !== 'passed'
   );
 
-  const totalDocs = scheme.requiredDocs.length;
+  const totalDocs = effectiveDocsList.length;
   const verifiedCount = Object.values(docVerifications).filter(v => v.status === 'passed').length;
   const progressPercent = Math.round((verifiedMandatoryDocs.length / totalMandatory) * 100);
   const sourceInfo = getSchemeOfficialSource(scheme);
@@ -113,6 +149,19 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   const toggleDoc = (docKey: string) => {
     triggerHaptic('tap');
     setCheckedDocs(prev => ({ ...prev, [docKey]: !prev[docKey] }));
+  };
+
+  const handleSelectBeneficiary = (id: string) => {
+    triggerHaptic('tap');
+    setSelectedBeneficiaryId(id);
+    // Reset uploads when switching beneficiary to prevent cross-person document leakage
+    setDocVerifications({});
+    setCheckedDocs({});
+  };
+
+  const handleSelectAppType = (type: 'NEW' | 'UPDATE') => {
+    triggerHaptic('tap');
+    setApplicationType(type);
   };
 
   const handleCollectTokenClick = () => {
@@ -133,7 +182,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     }
 
     // When all mandatory docs are AI verified, collect verified documents list
-    const verifiedDocsList: VerifiedDocumentItem[] = scheme.requiredDocs.map(d => {
+    const verifiedDocsList: VerifiedDocumentItem[] = effectiveDocsList.map(d => {
       const v = docVerifications[d.nameGu];
       return {
         nameGu: d.nameGu,
@@ -141,13 +190,21 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         status: (v?.status === 'passed' ? 'passed' : 'pending') as 'passed' | 'pending',
         fileName: v?.fileName || `${d.nameEn.replace(/[^a-zA-Z0-9]/g, '_')}_Verified.pdf`,
         fileUrl: v?.fileUrl,
-        extractedDetails: v?.extractedDetails || `${d.nameGu}: Khunt Harkishan Vinodrai • AI પ્રમાણિત`
+        extractedDetails: v?.extractedDetails || `${d.nameGu}: ${selectedMember.nameGu} • AI પ્રમાણિત`
       };
     });
 
+    const meta: SchemeBookingMeta = {
+      beneficiaryId: selectedMember.id,
+      beneficiaryNameGu: selectedMember.nameGu,
+      beneficiaryNameEn: selectedMember.nameEn,
+      beneficiaryRelation: selectedMember.relationGu,
+      applicationType
+    };
+
     triggerHaptic('success');
     if (onCollectToken) {
-      onCollectToken(scheme, verifiedDocsList);
+      onCollectToken(scheme, verifiedDocsList, meta);
     }
   };
 
@@ -171,7 +228,13 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     } catch {}
 
     try {
-      const res = await inspectUploadedFileStrict(file, docKey, docNameEn);
+      const res = await inspectUploadedFileStrict(file, docKey, docNameEn, {
+        id: selectedMember.id,
+        nameGu: selectedMember.nameGu,
+        nameEn: selectedMember.nameEn,
+        relationGu: selectedMember.relationGu,
+        relationEn: selectedMember.relationEn
+      });
       if (res.isValid) {
         setDocVerifications(prev => ({
           ...prev,
@@ -615,6 +678,108 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             </p>
           </div>
 
+          {/* 👤 BENEFICIARY SELECTOR (SELF VS FAMILY MEMBER) & APPLICATION TYPE */}
+          <div className="bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-slate-50 border-2 border-indigo-200/80 rounded-2xl p-3.5 sm:p-4 space-y-3.5 shadow-xs">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#003366] text-white flex items-center justify-center text-xs font-bold shadow-2xs">
+                  👤
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-[#003366]">
+                    {isEn ? 'Select Beneficiary (Whom is this application for?)' : isHi ? 'लाभार्थी चुनें (आवेदन किसके लिए है?)' : 'કોના માટે અરજી કરવી છે? (અરજદાર / લાભાર્થી)'}
+                  </h4>
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    {isEn ? 'Documents must strictly match the selected family member' : 'દસ્તાવેજો ફરજિયાતપણે પસંદ કરેલ સભ્યના જ હોવા જોઈએ'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] font-black bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full border border-indigo-200">
+                {DEFAULT_CITIZEN_PROFILE.familyMembers.length} {isEn ? 'Members' : 'સભ્યો'}
+              </span>
+            </div>
+
+            {/* Family Member Selector Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {DEFAULT_CITIZEN_PROFILE.familyMembers.map((member) => {
+                const isSelected = selectedBeneficiaryId === member.id;
+                return (
+                  <button
+                    key={member.id}
+                    type="button"
+                    onClick={() => handleSelectBeneficiary(member.id)}
+                    className={`p-2.5 rounded-xl border text-left transition active:scale-95 cursor-pointer relative ${
+                      isSelected
+                        ? 'bg-[#003366] text-white border-[#003366] shadow-sm ring-2 ring-blue-400/40'
+                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    {isSelected && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400" />
+                    )}
+                    <p className="text-xs font-black truncate">{member.nameGu}</p>
+                    <p className={`text-[10px] truncate mt-0.5 ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>
+                      {member.relationGu}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Application Type: NEW vs UPDATE */}
+            <div className="pt-2 border-t border-indigo-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div>
+                <span className="text-[11px] font-bold text-slate-700 block">
+                  {isEn ? 'Application Mode:' : 'અરજીનો પ્રકાર:'}
+                </span>
+                <span className="text-[10px] text-slate-500">
+                  {applicationType === 'UPDATE' 
+                    ? (isEn ? 'Requires existing card + proof for changes' : 'હાલના કાર્ડ/દસ્તાવેજની નકલ + સુધારા પુરાવો જરૂરી બનશે')
+                    : (isEn ? 'Standard fresh government application' : 'નવી અરજી માટે નિયમિત દસ્તાવેજો')}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shrink-0 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => handleSelectAppType('NEW')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                    applicationType === 'NEW'
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>🆕</span>
+                  <span>{isEn ? 'New' : 'નવી અરજી'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSelectAppType('UPDATE')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                    applicationType === 'UPDATE'
+                      ? 'bg-amber-500 text-slate-950 font-black shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span>🔄</span>
+                  <span>{isEn ? 'Update / Correction' : 'સુધારો / અપડેટ'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Warning / Strict Rule Callout */}
+            <div className="bg-amber-50/90 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2 text-[10.5px] text-amber-900 font-medium">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                {isEn 
+                  ? `Strict AI Verification: Only documents of "${selectedMember.nameEn}" are accepted. Files belonging to other members will be automatically rejected.`
+                  : `કડક સરકારી નિયમ: માત્ર '${selectedMember.nameGu}' ના જ અસલ દસ્તાવેજ અપલોડ કરવા. અન્ય સભ્યના કાગળો Gemini AI દ્વારા નામ વિસંગતતા હેઠળ રદ થશે.`}
+              </span>
+            </div>
+          </div>
+
           {/* Document Readiness Progress Gauge */}
           <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2 shadow-xs">
             <div className="flex items-center justify-between text-xs font-bold">
@@ -663,7 +828,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             </h4>
 
             <div className="space-y-3">
-              {scheme.requiredDocs.map((doc, idx) => {
+              {effectiveDocsList.map((doc, idx) => {
                 const isChecked = !!checkedDocs[doc.nameGu];
                 const docLocalized = getLocalizedDocName(doc, lang);
                 const docSecondary = isEn ? doc.nameGu : doc.nameEn;

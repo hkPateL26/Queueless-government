@@ -7,14 +7,14 @@ import {
   RotateCcw, Volume2, QrCode, Ticket, Brain, Crosshair, 
   Users, Building, Award, Bell, CheckCircle2, ChevronDown, Download,
   Layers, ArrowLeft, Calendar, Home as HomeIcon, Radio, Globe, Headphones,
-  Compass, Sparkles, ExternalLink, X
+  Compass, Sparkles, ExternalLink, X, Menu
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { subscribeToQueueEvents } from '@/lib/realtime-bus';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { SchemesCatalog } from '@/components/SchemesCatalog';
-import { SchemeDrawer } from '@/components/SchemeDrawer';
+import { SchemeDrawer, SchemeBookingMeta } from '@/components/SchemeDrawer';
 import { CameraScannerModal } from '@/components/CameraScannerModal';
 import { SlotBookingModal, BookingDetails } from '@/components/SlotBookingModal';
 import { VerifiedDocumentItem } from '@/lib/slot-engine';
@@ -45,6 +45,7 @@ export default function Home() {
   const [citizenProfileModalOpen, setCitizenProfileModalOpen] = useState(false);
   const [locationRadarModalOpen, setLocationRadarModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [radarViewTab, setRadarViewTab] = useState<'nearby' | 'hall'>('nearby');
   const [targetBookingTalukaId, setTargetBookingTalukaId] = useState<string | undefined>(undefined);
   const [targetBookingDistrictId, setTargetBookingDistrictId] = useState<string | undefined>(undefined);
@@ -171,6 +172,10 @@ export default function Home() {
   const [slotModalOpen, setSlotModalOpen] = useState(false);
   const [tokenPassModalOpen, setTokenPassModalOpen] = useState(false);
   const [activeBooking, setActiveBooking] = useState<BookingDetails | null>(null);
+  const [bookingHistory, setBookingHistory] = useState<BookingDetails[]>([]);
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+  const [trackedBooking, setTrackedBooking] = useState<BookingDetails | null>(null);
+  const [bookingMetaForSlot, setBookingMetaForSlot] = useState<SchemeBookingMeta | null>(null);
   const [lateShiftMinutes, setLateShiftMinutes] = useState<number>(0);
   const [uploadedDocsForBooking, setUploadedDocsForBooking] = useState<VerifiedDocumentItem[]>([]);
   const [toastNotification, setToastNotification] = useState<{ title: string; message: string; type?: 'info' | 'success' | 'warning' } | null>(null);
@@ -229,6 +234,22 @@ export default function Home() {
         const parsed = JSON.parse(savedBookingStr);
         setActiveBooking(parsed);
       }
+      const savedHistoryStr = localStorage.getItem('qless_booking_history');
+      if (savedHistoryStr) {
+        try {
+          const list = JSON.parse(savedHistoryStr);
+          if (Array.isArray(list) && list.length > 0) {
+            setBookingHistory(list);
+          }
+        } catch {}
+      } else if (savedBookingStr) {
+        try {
+          const parsed = JSON.parse(savedBookingStr);
+          setBookingHistory([parsed]);
+          localStorage.setItem('qless_booking_history', JSON.stringify([parsed]));
+        } catch {}
+      }
+
       const savedView = localStorage.getItem('qless_current_view') as any;
       if (savedView && ['landing', 'dashboard', 'services'].includes(savedView)) {
         setView(savedView);
@@ -237,6 +258,112 @@ export default function Home() {
       }
     } catch {}
   }, []);
+
+  // Realtime updates for 5-stage lifecycle (Stage 3 Called, Stage 4 Docs Submitted, Stage 5 Order Completed)
+  useEffect(() => {
+    const unsubscribe = subscribeToQueueEvents((event) => {
+      if (event.type === 'TOKEN_DOCS_SUBMITTED' && event.tokenNumber) {
+        // Stage 4: Original documents submitted at kacheri desk & verified by officer
+        setActiveBooking(prev => {
+          if (prev && prev.tokenNumber === event.tokenNumber) {
+            const updated: BookingDetails = {
+              ...prev,
+              currentStage: 4,
+              documentSubmissionStatus: 'submitted_at_counter'
+            };
+            try { localStorage.setItem('qless_active_booking', JSON.stringify(updated)); } catch {}
+            return updated;
+          }
+          return prev;
+        });
+
+        setBookingHistory(prev => {
+          const updated = prev.map(b => (b.tokenNumber === event.tokenNumber ? {
+            ...b,
+            currentStage: 4 as const,
+            documentSubmissionStatus: 'submitted_at_counter' as const
+          } : b));
+          try { localStorage.setItem('qless_booking_history', JSON.stringify(updated)); } catch {}
+          return updated;
+        });
+
+        setTrackedBooking(prev => (prev && prev.tokenNumber === event.tokenNumber ? {
+          ...prev,
+          currentStage: 4,
+          documentSubmissionStatus: 'submitted_at_counter'
+        } : prev));
+
+        triggerHaptic('success');
+        speakGuidance("કચેરી કાઉન્ટર પર તમારા અસલ દસ્તાવેજો જમા લેવામાં આવ્યા છે અને અધિકારી દ્વારા ભૌતિક ચકાસણી પૂર્ણ થઈ છે.", lang);
+        setToastNotification({
+          title: "📑 અસલ દસ્તાવેજો કચેરીએ જમા લેવાયા!",
+          message: `${event.tokenNumber}: અસલ દસ્તાવેજો અધિકારી દ્વારા ભૌતિક રીતે ચકાસીને જમા લીધા છે. સ્ટેજ ૪ પૂર્ણ!`,
+          type: "success"
+        });
+      } else if (event.type === 'TOKEN_COMPLETED' && event.tokenNumber) {
+        // Stage 5: Service officially approved & certificate issued
+        setActiveBooking(prev => {
+          if (prev && prev.tokenNumber === event.tokenNumber) {
+            const updated: BookingDetails = {
+              ...prev,
+              currentStage: 5,
+              status: 'COMPLETED' as any,
+              documentSubmissionStatus: 'officer_approved'
+            };
+            try { localStorage.setItem('qless_active_booking', JSON.stringify(updated)); } catch {}
+            return updated;
+          }
+          return prev;
+        });
+
+        setBookingHistory(prev => {
+          const updated = prev.map(b => (b.tokenNumber === event.tokenNumber ? {
+            ...b,
+            currentStage: 5 as const,
+            status: 'COMPLETED' as any,
+            documentSubmissionStatus: 'officer_approved' as const
+          } : b));
+          try { localStorage.setItem('qless_booking_history', JSON.stringify(updated)); } catch {}
+          return updated;
+        });
+
+        setTrackedBooking(prev => (prev && prev.tokenNumber === event.tokenNumber ? {
+          ...prev,
+          currentStage: 5,
+          status: 'COMPLETED' as any,
+          documentSubmissionStatus: 'officer_approved'
+        } : prev));
+
+        triggerHaptic('success');
+        speakGuidance("અભિનંદન! તમારી અરજી સત્તાવાર મંજૂર થઈ છે અને પ્રમાણપત્ર ડિજિટલ સહી સાથે જારી કરવામાં આવ્યું છે.", lang);
+        setToastNotification({
+          title: "🏆 સત્તાવાર મંજૂરી ઓર્ડર જારી!",
+          message: `${event.tokenNumber}: સેવા સફળતાપૂર્વક મંજૂર થઈ છે. તમારું ડિજિટલ પ્રમાણપત્ર તૈયાર છે!`,
+          type: "success"
+        });
+      } else if (event.type === 'TOKEN_CALLED_REALTIME' && event.tokenNumber) {
+        // Stage 3: Token called to desk
+        setActiveBooking(prev => {
+          if (prev && prev.tokenNumber === event.tokenNumber) {
+            const updated: BookingDetails = { ...prev, currentStage: 3 };
+            try { localStorage.setItem('qless_active_booking', JSON.stringify(updated)); } catch {}
+            return updated;
+          }
+          return prev;
+        });
+
+        setBookingHistory(prev => {
+          const updated = prev.map(b => (b.tokenNumber === event.tokenNumber ? { ...b, currentStage: 3 as const } : b));
+          try { localStorage.setItem('qless_booking_history', JSON.stringify(updated)); } catch {}
+          return updated;
+        });
+
+        setTrackedBooking(prev => (prev && prev.tokenNumber === event.tokenNumber ? { ...prev, currentStage: 3 } : prev));
+      }
+    });
+
+    return () => unsubscribe();
+  }, [lang]);
 
   // Persist currentUser changes
   useEffect(() => {
@@ -269,7 +396,7 @@ export default function Home() {
 
   // STRICT BACKGROUND BODY SCROLL LOCK WHEN ANY MODAL / DRAWER IS OPEN
   useEffect(() => {
-    const isAnyModalOpen = drawerOpen || scannerOpen || slotModalOpen || tokenPassModalOpen || authModalOpen || helpModalOpen || tokenTrackerModalOpen || citizenProfileModalOpen || locationRadarModalOpen || updateModalOpen;
+    const isAnyModalOpen = drawerOpen || scannerOpen || slotModalOpen || tokenPassModalOpen || authModalOpen || helpModalOpen || tokenTrackerModalOpen || citizenProfileModalOpen || locationRadarModalOpen || updateModalOpen || mobileMenuOpen;
     
     if (isAnyModalOpen) {
       const scrollY = window.pageYOffset || document.documentElement.scrollTop;
@@ -507,10 +634,13 @@ export default function Home() {
   };
 
   // VALIDATION CHECK: Require Login to Collect Token from Drawer
-  const handleCollectToken = (scheme: SchemeItem, verifiedDocs?: VerifiedDocumentItem[]) => {
+  const handleCollectToken = (scheme: SchemeItem, verifiedDocs?: VerifiedDocumentItem[], meta?: SchemeBookingMeta) => {
     setActiveScheme(scheme);
     if (verifiedDocs && verifiedDocs.length > 0) {
       setUploadedDocsForBooking(verifiedDocs);
+    }
+    if (meta) {
+      setBookingMetaForSlot(meta);
     }
     if (!currentUser) {
       triggerHaptic('warning');
@@ -563,6 +693,34 @@ export default function Home() {
     setSlotModalOpen(true);
   };
 
+  // Gate Kiosk Check-In Simulation (Stage 1 -> Stage 2)
+  const handleGateCheckin = (targetBooking: BookingDetails) => {
+    triggerHaptic('success');
+    const updated: BookingDetails = {
+      ...targetBooking,
+      currentStage: 2
+    };
+    setActiveBooking(prev => (prev && prev.tokenNumber === targetBooking.tokenNumber ? updated : prev));
+    setBookingHistory(prev => {
+      const list = prev.map(b => (b.tokenNumber === targetBooking.tokenNumber ? updated : b));
+      try { localStorage.setItem('qless_booking_history', JSON.stringify(list)); } catch {}
+      return list;
+    });
+    setTrackedBooking(updated);
+    try { localStorage.setItem('qless_active_booking', JSON.stringify(updated)); } catch {}
+    speakGuidance(
+      lang === 'hi' 
+        ? "कार्यालय गेट चेक-इन सफल! आपकी उपस्थिति दर्ज हो गई है। कृपया टोकन पुकारे जाने की प्रतीक्षा करें।" 
+        : "કચેરી ગેટ કિઓસ્ક ચેક-ઇન સફળ! તમારી હાજરી નોંધાઈ ગઈ છે. કાઉન્ટર પર ટોકન કોલની રાહ જુઓ.", 
+      lang
+    );
+    setToastNotification({
+      title: "🏛️ કચેરી ગેટ ચેક-ઇન સફળ!",
+      message: `${targetBooking.tokenNumber} ની રૂબરૂ હાજરી નોંધાઈ છે. તમારી કતાર સ્થિતિ સક્રિય થઈ ગઈ છે.`,
+      type: "success"
+    });
+  };
+
   // Confirm Slot Booking from Modal
   const handleConfirmBooking = (details: BookingDetails) => {
     // SECURITY GATEWAY: If citizen is NOT logged in, require Mobile OTP before issuing official token!
@@ -593,6 +751,11 @@ export default function Home() {
     }
 
     setActiveBooking(details);
+    setBookingHistory(prev => {
+      const updated = [details, ...prev.filter(b => b.tokenNumber !== details.tokenNumber)];
+      try { localStorage.setItem('qless_booking_history', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
     setSlotModalOpen(false);
     setCurrentUser(prev => prev ? {
       ...prev,
@@ -1020,8 +1183,416 @@ export default function Home() {
                 </button>
               </div>
             )}
+
+            {/* 📱 MOBILE HAMBURGER MENU BUTTON */}
+            <button
+              onClick={() => {
+                triggerHaptic('tap');
+                setMobileMenuOpen(!mobileMenuOpen);
+              }}
+              aria-label={mobileMenuOpen ? "નેવિગેશન મેનુ બંધ કરો" : "નેવિગેશન મેનુ ખોલો"}
+              className={`md:hidden p-2 rounded-xl border transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0 ${
+                mobileMenuOpen 
+                  ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm' 
+                  : 'bg-slate-100 hover:bg-slate-200 text-[#003366] border-slate-200 shadow-2xs'
+              }`}
+              title="નેવિગેશન મેનુ / Navigation Menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5 text-slate-950 font-black" />
+              ) : (
+                <Menu className="w-5 h-5 text-[#003366]" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* 📱 MOBILE HAMBURGER SLIDE-OVER DRAWER */}
+        {mobileMenuOpen && (
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className="md:hidden fixed inset-0 z-[120] bg-black/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-[88vw] max-w-sm h-full bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 text-slate-800"
+            >
+              {/* Drawer Header */}
+              <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white p-4 flex items-center justify-between border-b-2 border-[#FF9933] shrink-0 shadow-md">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <GovLogo className="w-9 h-9 drop-shadow-md shrink-0" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-black text-white truncate">QueueLess કચેરી</span>
+                      <span className="text-[9px] bg-amber-400 text-slate-900 font-extrabold px-1.5 py-0.2 rounded shrink-0">ગુજરાત</span>
+                    </div>
+                    <p className="text-[10px] text-blue-200 font-medium truncate">
+                      {lang === 'gu' ? 'જન સેવા નેવિગેશન મેનુ' : lang === 'hi' ? 'जन सेवा नेविगेशन मेनू' : 'Jan Seva Navigation Menu'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0"
+                  aria-label="Close Navigation Menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Drawer Scrollable Body */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain">
+                
+                {/* 1. ACTIVE TOKEN PASS PROMINENT BANNER (IF BOOKED) */}
+                {activeBooking && (
+                  <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 border-2 border-[#FF9933] rounded-2xl p-3.5 space-y-2 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1">
+                        <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
+                        <span>{lang === 'gu' ? 'તમારો સક્રિય ટોકન પાસ' : lang === 'hi' ? 'आपका सक्रिय टोकन पास' : 'Your Active Token Pass'}</span>
+                      </span>
+                      <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse">
+                        {lang === 'gu' ? 'લાઇવ સક્રિય' : lang === 'hi' ? 'लाइव सक्रिय' : 'Active'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-2xl font-black font-mono text-[#003366]">
+                          {activeBooking.tokenNumber}
+                        </p>
+                        <p className="text-[11px] font-bold text-slate-800 line-clamp-1">
+                          {lang === 'gu' ? `કાઉન્ટર ${activeBooking.counterNumber} • ${activeBooking.counterNameGu || activeBooking.counterNameEn}` : `Counter ${activeBooking.counterNumber} • ${activeBooking.counterNameEn || activeBooking.counterNameGu}`}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-mono">
+                          {activeBooking.slot?.timeRange}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setMobileMenuOpen(false);
+                        setTokenPassModalOpen(true);
+                      }}
+                      className="w-full py-2 px-3 bg-[#003366] hover:bg-[#002244] text-white font-black text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
+                      <span>{lang === 'gu' ? 'સત્તાવાર ડિજિટલ ટોકન પાસ જુઓ' : lang === 'hi' ? 'आधिकारिक डिजिटल टोकन पास देखें' : 'View Official Digital Token Pass'}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* 2. CITIZEN IDENTITY / LOGIN SECTION */}
+                {currentUser ? (
+                  <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-black text-xs shrink-0">
+                          {currentUser.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-extrabold text-xs text-[#003366] truncate">{currentUser.name}</p>
+                          <p className="text-[10px] text-slate-500 font-mono">આધાર: XXXX-XXXX-8842</p>
+                        </div>
+                      </div>
+                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                        <span>{lang === 'gu' ? 'પ્રમાણિત' : 'Verified'}</span>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-blue-200/60">
+                      <button
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setMobileMenuOpen(false);
+                          setCitizenProfileModalOpen(true);
+                        }}
+                        className="py-1.5 px-2 bg-white hover:bg-slate-50 text-[#003366] border border-slate-200 rounded-lg text-[10.5px] font-bold flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                      >
+                        <Users className="w-3 h-3 text-[#005A9C]" />
+                        <span>{lang === 'gu' ? 'પ્રોફાઇલ જુઓ' : lang === 'hi' ? 'प्रोफाइल देखें' : 'View Profile'}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          resetSession();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="py-1.5 px-2 bg-white hover:bg-red-50 text-red-600 border border-slate-200 rounded-lg text-[10.5px] font-bold flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>{lang === 'gu' ? 'લૉગઆઉટ' : lang === 'hi' ? 'लॉगआउट' : 'Logout'}</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+                    <p className="text-[11px] font-extrabold text-slate-700">
+                      {lang === 'gu' ? 'પોર્ટલ લૉગિન પસંદ કરો' : lang === 'hi' ? 'पोर्टल लॉगिन चुनें' : 'Select Portal Login'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setMobileMenuOpen(false);
+                          setAuthModalTab('citizen');
+                          setAuthModalOpen(true);
+                        }}
+                        className="py-2 px-2 bg-[#005A9C] hover:bg-[#003366] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                      >
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{lang === 'gu' ? 'નાગરિક લૉગિન' : lang === 'hi' ? 'नागरिक लॉगिन' : 'Citizen Login'}</span>
+                      </button>
+                      <Link
+                        href="/admin/counter"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="py-2 px-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                      >
+                        <Building className="w-3.5 h-3.5" />
+                        <span>{lang === 'gu' ? 'અધિકારી પોર્ટલ' : lang === 'hi' ? 'अधिकारी पोर्टल' : 'Officer Portal'}</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. MAIN NAVIGATION MENU OPTIONS */}
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1 mb-1.5">
+                    {lang === 'gu' ? 'મુખ્ય સેવાઓ & સુવિધાઓ' : lang === 'hi' ? 'मुख्य सेवाएं एवं सुविधाएं' : 'Main Services & Portals'}
+                  </p>
+
+                  {/* 1. હોમ પેજ (Home) */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setView('landing');
+                      setMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
+                      view === 'landing' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'landing' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <HomeIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navHome', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'મુખ્ય પોર્ટલ અને ઝડપી સેવાઓ' : lang === 'hi' ? 'मुख्य पोर्टल व त्वरित सेवाएं' : 'Main portal & quick access'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 2. સેવાઓ (૩૯ યોજનાઓ) */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setView('services');
+                      setMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
+                      view === 'services' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'services' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <Layers className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs leading-tight">{t('navServices', lang)}</p>
+                          <span className="text-[9px] bg-[#FF9933] text-slate-900 px-1.5 py-0.2 rounded-full font-black">૩૯</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'તમામ ૩૯ સરકારી યોજનાઓ અને ફોર્મ્સ' : lang === 'hi' ? 'सभी ३९ सरकारी योजनाएं व फॉर्म' : 'All 39 Govt Schemes & Forms'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 3. કચેરી રડાર & લાઈવ વેઇટિંગ */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setIsRadarLoading(true);
+                      setTimeout(() => setIsRadarLoading(false), 240);
+                      setView('dashboard');
+                      setMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
+                      view === 'dashboard' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'dashboard' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <Radio className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navRadar', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'લાઈવ વેઇટિંગ સમય અને કતાર સ્થિતિ' : lang === 'hi' ? 'लाइव प्रतीक्षा समय व कतार स्थिति' : 'Live waiting times & queue radar'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 4. ટોકન ટ્રેક કરો */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setMobileMenuOpen(false);
+                      setTokenTrackerModalOpen(true);
+                    }}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#005A9C] flex items-center justify-center">
+                        <Ticket className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navTrackToken', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'તમારો ટોકન નંબર દાખલ કરી સ્થિતિ જુઓ' : lang === 'hi' ? 'टोकन संख्या डालकर स्थिति देखें' : 'Enter token number to check live status'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 5. મદદ અને સહાય */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setMobileMenuOpen(false);
+                      setHelpModalOpen(true);
+                    }}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#FF9933] flex items-center justify-center">
+                        <Headphones className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navHelp', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'ટોલ-ફ્રી હેલ્પલાઇન અને સહાયતા' : lang === 'hi' ? 'टोल-फ्री हेल्पलाइन व सहायता' : 'Toll-free helpline & citizen support'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 6. અધિકારી ડેસ્ક */}
+                  <Link
+                    href="/admin/counter"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                        <Building className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navOfficerDesk', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'કાઉન્ટર ૧ થી ૬ ઓપરેટર કન્સોલ' : lang === 'hi' ? 'काउंटर १ से ६ ऑपरेटर कंसोल' : 'Desk Counter 1-6 Operator Console'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </Link>
+
+                  {/* 7. કલેક્ટર ડેશબોર્ડ */}
+                  <Link
+                    href="/admin/collector"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-amber-50 transition flex items-center justify-between text-amber-950 font-bold cursor-pointer border border-amber-200/80 bg-amber-50/40"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-200 text-amber-950 flex items-center justify-center font-black">
+                        👑
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs leading-tight">
+                            {lang === 'gu' ? 'કલેક્ટર કમાન્ડ સેન્ટર' : lang === 'hi' ? 'कलेक्टर कमांड सेंटर' : 'Collector Apex Command'}
+                          </p>
+                          <span className="text-[9px] bg-amber-400 text-slate-900 px-1 py-0.2 rounded font-black">APEX</span>
+                        </div>
+                        <p className="text-[10px] text-amber-800 font-normal mt-0.5">
+                          {lang === 'gu' ? '૩૩ જિલ્લા કલેક્ટર કમાન્ડ ડેશબોર્ડ' : lang === 'hi' ? '३३ जिला कलेक्टर कमांड डैशबोर्ड' : '33 Gujarat Districts Collector Apex'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
+                  </Link>
+                </div>
+
+                {/* 4. LANGUAGE SELECTOR ROW */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#FF9933]" />
+                    <span>{t('langDropdownTitle', lang)}</span>
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5 text-xs font-bold">
+                    {GUJARAT_LANGUAGES.map((item) => (
+                      <button
+                        key={item.code}
+                        onClick={() => {
+                          handleSelectLang(item.code);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`py-2 px-1 rounded-xl text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                          lang === item.code ? 'bg-[#003366] text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                        }`}
+                      >
+                        <span className="text-[11px] leading-tight">{item.nativeLabel}</span>
+                        <span className="text-[9px] opacity-75">{item.englishLabel}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 5. APP VERSION & CHANGELOG */}
+                <button
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setMobileMenuOpen(false);
+                    setUpdateModalOpen(true);
+                  }}
+                  className="w-full py-2.5 px-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-950 cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <span>{CURRENT_APP_VERSION} {lang === 'gu' ? 'નવા અપડેટ્સ & ચેન્જલોગ' : "What's New & Updates"}</span>
+                  </div>
+                  <span className="text-[10px] bg-amber-400 text-slate-900 px-2 py-0.5 rounded-full font-black">જુઓ ➔</span>
+                </button>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="bg-slate-50 p-3 border-t border-slate-200 text-center space-y-1 shrink-0">
+                <p className="text-[11px] font-black text-[#003366]">
+                  📞 હેલ્પલાઇન: ૧૮૦૦-૨૩૩-૫૫૦૦ (ટોલ-ફ્રી)
+                </p>
+                <p className="text-[9.5px] text-slate-400">
+                  ગુજરાત સરકાર • સામાન્ય વહીવટ વિભાગ • GRTSA માન્ય
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
 
@@ -1393,6 +1964,35 @@ export default function Home() {
                           {`${t('counterLabel', lang)} ${activeBooking.counterNumber} • ${lang === 'en' ? (activeBooking.counterNameEn || activeBooking.counterNameGu) : activeBooking.counterNameGu}`}
                         </span>
                       </div>
+
+                      {/* 🏛️ SPECIFIC SCHEME & BENEFICIARY BADGE */}
+                      <div className="mt-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/90 rounded-2xl p-3 text-center space-y-1.5 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-[#005A9C] uppercase tracking-wider block">
+                          🏛️ સત્તાવાર સરકારી સેવા / યોજના
+                        </span>
+                        <h3 className="text-xs sm:text-sm font-black text-[#003366] leading-tight">
+                          {activeBooking.schemeTitleGu || (lang === 'en' ? (activeBooking.schemeTitleEn || 'જન સેવા પ્રમાણપત્ર') : 'જન સેવા પ્રમાણપત્ર')}
+                        </h3>
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 pt-0.5">
+                          {activeBooking.beneficiaryNameGu && (
+                            <span className="text-[10px] sm:text-[10.5px] font-bold bg-white text-slate-800 px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
+                              👤 અરજદાર: {activeBooking.beneficiaryNameGu} {activeBooking.beneficiaryRelation ? `(${activeBooking.beneficiaryRelation})` : ''}
+                            </span>
+                          )}
+                          <span className={`text-[10px] sm:text-[10.5px] font-bold px-2 py-0.5 rounded-full border shadow-2xs ${
+                            activeBooking.applicationType === 'UPDATE' 
+                              ? 'bg-amber-100 text-amber-900 border-amber-300' 
+                              : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                          }`}>
+                            {activeBooking.applicationType === 'UPDATE' ? '🔄 સુધારો / અપડેટ' : '🆕 નવી અરજી'}
+                          </span>
+                          {activeBooking.date && (
+                            <span className="text-[10px] sm:text-[10.5px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
+                              📅 {activeBooking.date}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
                     {/* 📷 AUTHENTIC HIGH-RES SCANNABLE QR CODE FOR ACTIVE BOOKING */}
@@ -1405,6 +2005,20 @@ export default function Home() {
                         subLabel={lang === 'gu' ? `કચેરી ગેટ અથવા કાઉન્ટર ${activeBooking.counterNumber} પર સ્કેન કરો` : `Scan at Kacheri Gate or Desk ${activeBooking.counterNumber}`}
                       />
                     </div>
+
+                    {/* 🔍 Interactive 5-Stage Kundli Tracking CTA Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setTrackedBooking(activeBooking);
+                        setTrackingModalOpen(true);
+                      }}
+                      className="w-full bg-gradient-to-r from-emerald-600 via-green-600 to-[#138808] hover:from-emerald-700 hover:to-emerald-800 text-white font-black py-3 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-95 cursor-pointer ring-2 ring-emerald-400/30"
+                    >
+                      <Sparkles className="w-4 h-4 text-amber-300 animate-pulse shrink-0" />
+                      <span className="truncate">🔍 લાઈવ કુંડળી & ૫-સ્ટેજ ટ્રેકિંગ જુઓ (Track Live Kundli)</span>
+                    </button>
 
                     {/* Arrive By & Buffer Info */}
                     <div className="bg-[#F5F7FA] border border-slate-200 rounded-2xl p-3.5 text-center space-y-1">
@@ -1580,6 +2194,101 @@ export default function Home() {
                     </div>
                   </div>
                 )}
+
+                {/* 📜 CITIZEN BOOKING HISTORY & 5-STAGE LIFECYCLE TRACKER (કુંડળી) */}
+                <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3.5">
+                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-sm shadow-2xs">
+                        📜
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-[#003366]">
+                          {lang === 'en' ? 'Slot Booking History & Kundli Tracker' : 'બુકિંગ ઇતિહાસ & લાઈવ કુંડળી (Timeline)'}
+                        </h4>
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          {lang === 'en' ? 'Track 5-stage kacheri lifecycle' : 'તમામ સ્લોટ અને કચેરી પ્રક્રિયા ૫-સ્ટેજ ટ્રેકિંગ'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                      {bookingHistory.length > 0 ? bookingHistory.length : (activeBooking ? 1 : 0)} {lang === 'en' ? 'Slots' : 'સ્લોટ્સ'}
+                    </span>
+                  </div>
+
+                  {/* History List */}
+                  <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                    {(bookingHistory.length > 0 ? bookingHistory : (activeBooking ? [activeBooking] : [])).map((item, idx) => {
+                      const stage = item.currentStage || (item.status === 'COMPLETED' ? 5 : 1);
+                      const stageLabelGu = 
+                        stage === 5 ? 'સ્ટેજ ૫: મંજૂર & સર્ટિ જારી' :
+                        stage === 4 ? 'સ્ટેજ ૪: કચેરીએ અસલ દસ્તાવેજ જમા' :
+                        stage === 3 ? 'સ્ટેજ ૩: કાઉન્ટર પર હાજર' :
+                        stage === 2 ? 'સ્ટેજ ૨: કચેરી ગેટ ચેક-ઇન' :
+                        'સ્ટેજ ૧: સ્લોટ કન્ફર્મ';
+
+                      return (
+                        <div 
+                          key={idx}
+                          className="p-3 rounded-2xl border border-slate-200 bg-[#F9FAFB] hover:bg-white hover:border-indigo-300 transition shadow-2xs space-y-2"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[10px] font-mono font-black text-[#FF9933] bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md">
+                                {item.tokenNumber}
+                              </span>
+                              <h5 className="text-xs font-black text-slate-900 mt-1 leading-snug truncate">
+                                {item.schemeTitleGu || (lang === 'en' ? (item.schemeTitleEn || 'જન સેવા પ્રમાણપત્ર') : 'જન સેવા પ્રમાણપત્ર')}
+                              </h5>
+                              <p className="text-[10px] text-slate-600 mt-0.5 truncate">
+                                👤 {item.beneficiaryNameGu || 'હરિ પટેલ'} {item.beneficiaryRelation ? `(${item.beneficiaryRelation})` : ''} • {item.applicationType === 'UPDATE' ? '🔄 સુધારો' : '🆕 નવી અરજી'}
+                              </p>
+                            </div>
+
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border shrink-0 ${
+                              stage >= 4 
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                                : stage === 3 
+                                ? 'bg-blue-50 text-blue-800 border-blue-300'
+                                : 'bg-amber-50 text-amber-800 border-amber-300'
+                            }`}>
+                              {stageLabelGu}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-200/60">
+                            <span>📅 {item.date} • ⏱️ {item.slot?.startTime || '૧૧:૦૦ AM'}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                triggerHaptic('tap');
+                                setTrackedBooking(item);
+                                setTrackingModalOpen(true);
+                              }}
+                              className="text-[#005A9C] hover:text-[#003366] font-extrabold flex items-center gap-1 cursor-pointer hover:underline"
+                            >
+                              <span>કુંડળી જુઓ</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {bookingHistory.length === 0 && !activeBooking && (
+                      <div className="text-center py-6 text-slate-400 text-xs space-y-1">
+                        <p>કોઈ અગાઉના સ્લોટ બુકિંગ ઉપલબ્ધ નથી.</p>
+                        <button
+                          type="button"
+                          onClick={() => handleRequestSlotBooking()}
+                          className="text-[#005A9C] font-bold text-xs hover:underline cursor-pointer"
+                        >
+                          + નવો સ્લોટ બુક કરો
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* Card 2: ♿ MULTI-MODAL ACCESSIBILITY CHANNELS */}
                 <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm">
@@ -2375,6 +3084,7 @@ export default function Home() {
         initialTalukaId={targetBookingTalukaId || 'gondal'}
         initialVillage="ગોમટા"
         uploadedDocs={uploadedDocsForBooking}
+        beneficiaryMeta={bookingMetaForSlot || undefined}
         lang={lang}
       />
 
@@ -2426,6 +3136,221 @@ export default function Home() {
         </div>
       )}
 
+      {/* 🚀 5-STAGE INTERACTIVE LIFECYCLE TIMELINE MODAL (કુંડળી & ટ્રેકિંગ) */}
+      {trackingModalOpen && trackedBooking && (() => {
+        const stage = trackedBooking.currentStage || (trackedBooking.status === 'COMPLETED' ? 5 : 1);
+        const stagesList = [
+          {
+            num: 1,
+            titleGu: 'સ્લોટ બુકિંગ & સત્તાવાર QR પાસ જનરેટ',
+            titleEn: 'Slot Confirmed & Signed QR Pass Generated',
+            descGu: 'તારીખ અને સમય સ્લોટ આરક્ષિત, ડિજિટલી સાઈન થયેલ અધિકૃત QR પાસ જનરેટ.',
+            icon: '🎫',
+            isDone: stage >= 1,
+            isCurrent: stage === 1
+          },
+          {
+            num: 2,
+            titleGu: 'કચેરી આગમન & ગેટ કિઓસ્ક QR ચેક-ઇન',
+            titleEn: 'Kacheri Arrival & Gate Kiosk Check-In',
+            descGu: 'કચેરી પરિસર ગેટ પર કિઓસ્ક સ્કેનર પર QR સ્કેન કરી રૂબરૂ હાજરી નોંધણી.',
+            icon: '🏛️',
+            isDone: stage >= 2,
+            isCurrent: stage === 2,
+            canAction: stage === 1
+          },
+          {
+            num: 3,
+            titleGu: `કાઉન્ટર ${trackedBooking.counterNumber} પર ટોકન કોલ & રૂબરૂ હાજરી`,
+            titleEn: `Counter ${trackedBooking.counterNumber} Calling & Presence`,
+            descGu: `${trackedBooking.counterNameGu || 'સત્તાવાર કાઉન્ટર'} પર નાયબ મામલતદાર દ્વારા લાઈવ ડિજિટલ ટોકન કોલિંગ.`,
+            icon: '📢',
+            isDone: stage >= 3,
+            isCurrent: stage === 3
+          },
+          {
+            num: 4,
+            titleGu: 'અસલ દસ્તાવેજો કચેરીએ જમા & અધિકારી ભૌતિક ચકાસણી',
+            titleEn: 'Original Documents Submission & Officer Physical Verification',
+            descGu: 'કાઉન્ટર પર અસલ પ્રમાણપત્રોની ભૌતિક ચકાસણી, મોહર/સહી વેરીફિકેશન અને સત્તાવાર જમા.',
+            icon: '📑',
+            isDone: stage >= 4,
+            isCurrent: stage === 4,
+            detail: trackedBooking.documentSubmissionStatus === 'submitted_at_counter'
+              ? '✓ અસલ દસ્તાવેજો કચેરીએ સફળતાપૂર્વક જમા લેવાયેલ છે • અધિકારી ચકાસણી પૂર્ણ'
+              : 'કાઉન્ટર પર અસલ દસ્તાવેજો રૂબરૂ રજૂ કરી સત્તાવાર જમા કરાવવા જરૂરી'
+          },
+          {
+            num: 5,
+            titleGu: 'સત્તાવાર મંજૂરી ઓર્ડર / ડિજિટલ પ્રમાણપત્ર જારી',
+            titleEn: 'Official Approval Order & Digitally Signed Certificate',
+            descGu: 'નાયબ મામલતદાર દ્વારા SHA-256 ડિજિટલ સહી સાથે મંજૂરી હુકમ અને ઈ-સર્ટિફિકેટ જારી.',
+            icon: '🏆',
+            isDone: stage >= 5,
+            isCurrent: stage === 5
+          }
+        ];
+
+        return (
+          <div 
+            onClick={() => setTrackingModalOpen(false)}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 modal-backdrop animate-in fade-in duration-200"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border-2 border-indigo-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
+            >
+              {/* Modal Header */}
+              <div className="bg-[#003366] text-white p-4 sm:p-5 flex items-start justify-between">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-xl shrink-0 border border-white/20">
+                    📜
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 block">
+                      સત્તાવાર નાગરિક સેવા લાઈવ કુંડળી (Lifecycle Tracker)
+                    </span>
+                    <h3 className="text-base sm:text-lg font-black leading-tight mt-0.5">
+                      {trackedBooking.schemeTitleGu || (lang === 'en' ? (trackedBooking.schemeTitleEn || 'જન સેવા પ્રમાણપત્ર') : 'જન સેવા પ્રમાણપત્ર')}
+                    </h3>
+                    <p className="text-xs text-blue-200 mt-1 flex flex-wrap items-center gap-2">
+                      <span className="font-mono font-black text-amber-300 bg-black/30 px-2 py-0.5 rounded-md">
+                        {trackedBooking.tokenNumber}
+                      </span>
+                      <span>•</span>
+                      <span>👤 અરજદાર: {trackedBooking.beneficiaryNameGu || 'હરિ પટેલ'} {trackedBooking.beneficiaryRelation ? `(${trackedBooking.beneficiaryRelation})` : ''}</span>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTrackingModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition cursor-pointer shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Modal Body: 5-Stage Interactive Roadmap */}
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
+                {/* Meta Summary Badge */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-500 block text-[10px] font-bold">કચેરી & કાઉન્ટર</span>
+                    <span className="font-bold text-[#003366]">
+                      {trackedBooking.taluka?.officeNameGu || 'મામલતદાર કચેરી, ગોંડલ'} • કાઉન્ટર {trackedBooking.counterNumber}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block text-[10px] font-bold">તારીખ & સમય</span>
+                    <span className="font-mono font-bold text-slate-800">
+                      📅 {trackedBooking.date} • {trackedBooking.slot?.startTime || '૧૧:૦૦ AM'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block text-[10px] font-bold">અરજીનો પ્રકાર</span>
+                    <span className={`font-black px-2 py-0.5 rounded-full text-[10px] border ${
+                      trackedBooking.applicationType === 'UPDATE'
+                        ? 'bg-amber-100 text-amber-900 border-amber-300'
+                        : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                    }`}>
+                      {trackedBooking.applicationType === 'UPDATE' ? '🔄 સુધારો / અપડેટ' : '🆕 નવી અરજી'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 5 Stages Vertical Roadmap */}
+                <div className="space-y-3 pt-1">
+                  {stagesList.map((st) => (
+                    <div 
+                      key={st.num}
+                      className={`p-3.5 sm:p-4 rounded-2xl border transition relative ${
+                        st.isCurrent
+                          ? 'bg-blue-50/80 border-blue-400 ring-2 ring-blue-400/30 shadow-xs'
+                          : st.isDone
+                          ? 'bg-emerald-50/70 border-emerald-300 shadow-2xs'
+                          : 'bg-slate-50/60 border-slate-200 opacity-60'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 shadow-2xs ${
+                          st.isDone 
+                            ? 'bg-emerald-600 text-white' 
+                            : st.isCurrent
+                            ? 'bg-[#003366] text-white animate-pulse'
+                            : 'bg-slate-200 text-slate-500'
+                        }`}>
+                          {st.isDone ? '✓' : st.num}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+                              {st.titleGu}
+                            </h4>
+                            <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-full border shrink-0 ${
+                              st.isDone
+                                ? 'bg-emerald-600 text-white border-emerald-600'
+                                : st.isCurrent
+                                ? 'bg-amber-500 text-slate-950 font-black border-amber-500 animate-pulse'
+                                : 'bg-slate-200 text-slate-600 border-slate-300'
+                            }`}>
+                              {st.isDone ? 'પૂર્ણ (Done)' : st.isCurrent ? 'ચાલુ (Live)' : 'પ્રતીક્ષારત'}
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                            {st.descGu}
+                          </p>
+
+                          {st.detail && (
+                            <div className="mt-2 p-2 bg-white/80 rounded-xl border border-slate-200 text-[10.5px] font-bold text-slate-700 flex items-center gap-1.5">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span>{st.detail}</span>
+                            </div>
+                          )}
+
+                          {/* Action Button for Stage 2 Gate Check-in Simulation */}
+                          {st.canAction && (
+                            <div className="mt-2.5 pt-2 border-t border-slate-200/80">
+                              <button
+                                type="button"
+                                onClick={() => handleGateCheckin(trackedBooking)}
+                                className="bg-[#003366] hover:bg-[#002244] text-white font-black py-2 px-3 rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer shadow-xs"
+                              >
+                                <span>📍</span>
+                                <span>કચેરી ગેટ કિયોસ્ક ચેક-ઇન કરો (Arrival Check-In)</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Statutory Guarantee Banner */}
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-[10.5px] text-slate-600 flex items-center justify-between">
+                  <span className="font-bold">સત્તાવાર અધિકાર પત્ર: GRTSA ૨૦૧૩</span>
+                  <span className="text-emerald-700 font-bold">નાયબ મામલતદાર રજીસ્ટ્રાર પ્રમાણિત</span>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-3 sm:p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setTrackingModalOpen(false)}
+                  className="bg-[#003366] text-white font-bold px-5 py-2.5 rounded-xl text-xs hover:bg-[#002244] transition cursor-pointer"
+                >
+                  બંધ કરો (Close)
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* CITIZEN HELP & GRIEVANCE SUPPORT MODAL */}
       <CitizenHelpModal
         isOpen={helpModalOpen}
@@ -2462,83 +3387,7 @@ export default function Home() {
         {activeBooking ? `ટોકન નંબર ${activeBooking.tokenNumber} સક્રિય છે. કાઉન્ટર ${activeBooking.counterNumber} પર પ્રતીક્ષારત.` : ''}
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR: ONLY DISPLAYED IN INSTALLED PWA APP MODE, NOT IN REGULAR MOBILE BROWSER */}
-      {isStandaloneApp && (
-        <nav 
-          aria-label="Mobile Bottom Navigation"
-          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3 flex items-center justify-around shadow-lg"
-        >
-          <button
-            onClick={() => {
-              triggerHaptic('tap');
-              setView('landing');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-              view === 'landing' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
-            }`}
-            aria-label={t('mobNavHome', lang)}
-          >
-            <HomeIcon className="w-4 h-4" />
-            <span>{t('mobNavHome', lang)}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              triggerHaptic('tap');
-              setView('services');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-              view === 'services' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
-            }`}
-            aria-label={t('mobNavServices', lang)}
-          >
-            <Layers className="w-4 h-4" />
-            <span>{t('mobNavServices', lang)}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              triggerHaptic('tap');
-              if (activeBooking) {
-                setTokenPassModalOpen(true);
-              } else if (currentUser) {
-                setView('dashboard');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                setTokenTrackerModalOpen(true);
-              }
-            }}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-              activeBooking ? 'text-[#FF9933]' : 'text-slate-500 hover:text-slate-700'
-            }`}
-            aria-label={activeBooking ? `${t('mobNavTokenPass', lang)} ${activeBooking.tokenNumber}` : t('mobNavTokenPass', lang)}
-          >
-            <div className={`w-8 h-8 -mt-3.5 rounded-full flex items-center justify-center border-2 border-white shadow-md transition ${
-              activeBooking ? 'bg-[#003366] text-[#FF9933]' : 'bg-[#005A9C] text-white'
-            }`}>
-              <Ticket className="w-4 h-4" />
-            </div>
-            <span>{activeBooking ? activeBooking.tokenNumber : t('mobNavTokenPass', lang)}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              triggerHaptic('tap');
-              setView('dashboard');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 ${
-              view === 'dashboard' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
-            }`}
-            aria-label={t('mobNavRadar', lang)}
-          >
-            <Radio className="w-4 h-4" />
-            <span>{t('mobNavRadar', lang)}</span>
-          </button>
-        </nav>
-      )}
+      {/* MOBILE BOTTOM NAVIGATION REMOVED PER STRICT USER INSTRUCTION (All navigation accessed via Header Hamburger Menu) */}
 
       {/* FOOTER */}
       <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 text-center">

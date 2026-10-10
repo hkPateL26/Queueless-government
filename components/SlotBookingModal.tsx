@@ -133,6 +133,8 @@ import {
   GovernmentPaymentRecord 
 } from '@/lib/slot-engine';
 
+import { SchemeBookingMeta } from '@/components/SchemeDrawer';
+
 export interface BookingDetails {
   district: DistrictItem;
   taluka: TalukaOffice;
@@ -155,6 +157,16 @@ export interface BookingDetails {
   validUntil?: string;
   uploadedDocuments?: VerifiedDocumentItem[];
   payment?: GovernmentPaymentRecord;
+  schemeId?: string;
+  schemeTitleGu?: string;
+  schemeTitleEn?: string;
+  beneficiaryId?: string;
+  beneficiaryNameGu?: string;
+  beneficiaryNameEn?: string;
+  beneficiaryRelation?: string;
+  applicationType?: 'NEW' | 'UPDATE';
+  currentStage?: 1 | 2 | 3 | 4 | 5;
+  documentSubmissionStatus?: 'pending' | 'submitted_at_counter' | 'officer_approved' | 'PENDING' | 'SUBMITTED' | 'VERIFIED' | 'REJECTED';
 }
 
 interface SlotBookingModalProps {
@@ -167,6 +179,7 @@ interface SlotBookingModalProps {
   initialTalukaId?: string;
   initialVillage?: string;
   uploadedDocs?: VerifiedDocumentItem[];
+  beneficiaryMeta?: SchemeBookingMeta;
 }
 
 
@@ -179,7 +192,8 @@ export function SlotBookingModal({
   initialDistrictId,
   initialTalukaId,
   initialVillage,
-  uploadedDocs
+  uploadedDocs,
+  beneficiaryMeta
 }: SlotBookingModalProps) {
   // District & Taluka state (Defaulting to Aadhaar linked district & taluka)
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>(initialDistrictId || DEFAULT_CITIZEN_PROFILE.districtId);
@@ -536,6 +550,12 @@ export function SlotBookingModal({
       slotTime: selectedSlot.timeRange
     });
 
+    const effectiveBeneficiaryId = beneficiaryMeta?.beneficiaryId || 'mem-1';
+    const effectiveBeneficiaryNameGu = beneficiaryMeta?.beneficiaryNameGu || DEFAULT_CITIZEN_PROFILE.nameGu;
+    const effectiveBeneficiaryNameEn = beneficiaryMeta?.beneficiaryNameEn || DEFAULT_CITIZEN_PROFILE.nameEn;
+    const effectiveBeneficiaryRelation = beneficiaryMeta?.beneficiaryRelation || 'સ્વયં (મુખ્ય સભ્ય)';
+    const effectiveApplicationType = beneficiaryMeta?.applicationType || 'NEW';
+
     const finalizeBooking = (paymentRecord: GovernmentPaymentRecord) => {
       const bookingData: BookingDetails = {
         district: selectedDistrict,
@@ -558,15 +578,31 @@ export function SlotBookingModal({
         qrSignatureHash: signedQr.hash,
         validUntil: signedQr.validUntil,
         uploadedDocuments: uploadedDocs || [],
-        payment: paymentRecord
+        payment: paymentRecord,
+        schemeId: scheme?.id,
+        schemeTitleGu: scheme?.titleGu,
+        schemeTitleEn: scheme?.titleEn,
+        beneficiaryId: effectiveBeneficiaryId,
+        beneficiaryNameGu: effectiveBeneficiaryNameGu,
+        beneficiaryNameEn: effectiveBeneficiaryNameEn,
+        beneficiaryRelation: effectiveBeneficiaryRelation,
+        applicationType: effectiveApplicationType,
+        currentStage: 1,
+        documentSubmissionStatus: 'pending'
       };
 
-      // Save to real queue tokens store for officer dynamic queue desk
+      // Save to real queue tokens store for officer dynamic queue desk and citizen history
       try {
         const stored = localStorage.getItem('qless_real_queue_tokens');
         const list: BookingDetails[] = stored ? JSON.parse(stored) : [];
         const updated = [bookingData, ...list.filter(t => t.tokenNumber !== tokenNumber)].slice(0, 50);
         localStorage.setItem('qless_real_queue_tokens', JSON.stringify(updated));
+
+        // Save to persistent user slot booking history (સંપૂર્ણ કુંડળી)
+        const storedHistory = localStorage.getItem('qless_booking_history');
+        const historyList: BookingDetails[] = storedHistory ? JSON.parse(storedHistory) : [];
+        const updatedHistory = [bookingData, ...historyList.filter(t => t.tokenNumber !== tokenNumber)];
+        localStorage.setItem('qless_booking_history', JSON.stringify(updatedHistory));
       } catch (err) {
         console.error('Failed to sync queue token to local storage:', err);
       }
@@ -580,7 +616,9 @@ export function SlotBookingModal({
         timestamp: Date.now(),
         payload: {
           booking: bookingData,
-          citizenName: DEFAULT_CITIZEN_PROFILE.nameGu,
+          citizenName: effectiveBeneficiaryNameGu,
+          beneficiaryRelation: effectiveBeneficiaryRelation,
+          applicationType: effectiveApplicationType,
           schemeTitle: scheme?.titleGu || 'જન સેવા'
         }
       });

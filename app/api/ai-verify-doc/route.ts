@@ -10,13 +10,19 @@ export async function POST(req: NextRequest) {
       fileName = 'document', 
       targetDocNameGu, 
       targetDocNameEn, 
-      applicantName = 'હરિ પટેલ (Hari Patel)' 
+      applicantName = 'હરિ પટેલ (Hari Patel)',
+      targetBeneficiaryNameGu,
+      targetBeneficiaryNameEn,
+      beneficiaryRelation
     } = body;
 
     const dataBase64 = fileBase64 || imageBase64;
     if (!dataBase64) {
       return NextResponse.json({ error: 'Missing document data' }, { status: 400 });
     }
+
+    const effectiveTargetPersonGu = targetBeneficiaryNameGu || applicantName;
+    const effectiveTargetPersonEn = targetBeneficiaryNameEn || '';
 
     let apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -66,6 +72,8 @@ CRITICAL VERIFICATION WORKFLOW:
      * "Non-Document / Irrelevant / Personal Photo" (વ્યક્તિગત ફોટો, પ્રાણી, પ્રકૃતિ, સેલ્ફી, ખોરાક, નોટ્સ, અસાઇનમેન્ટ, પ્રાઇવેટ રસીદ, સ્ક્રીનશોટ)
 
 2. STRICT MATCHING WITH REQUIRED SLOT: "${expectedDocType}"
+   AND TARGET APPLICANT: "${effectiveTargetPersonGu} ${effectiveTargetPersonEn ? `(${effectiveTargetPersonEn})` : ''} ${beneficiaryRelation ? `[સંબંધ: ${beneficiaryRelation}]` : ''}"
+
    - CASE A: The uploaded file is NOT a government document (e.g. selfie, nature, pet, random photo, study assignment, handwritten notes, meme):
      -> "matchesExpected": false
      -> "isValidForGovt": false
@@ -78,20 +86,26 @@ CRITICAL VERIFICATION WORKFLOW:
      -> "qualityScore": 15
      -> "actionableAdvice": "❌ ખોટો દસ્તાવેજ: તમે [Detected Doc Name] અપલોડ કરેલ છે, જ્યારે અહીં '${targetDocNameGu}' અપલોડ કરવો અનિવાર્ય છે. કૃપા કરીને સાચો દસ્તાવેજ અપલોડ કરો."
 
-   - CASE C: The uploaded document is blurry, too dark, out of focus, or text/seal is unreadable:
+   - CASE C: PERSON / BENEFICIARY MISMATCH: If the document is for a DIFFERENT person than the target applicant "${effectiveTargetPersonGu}" (e.g. document shows Hari Patel when target applicant is Parsottambhai Patel or Geetaben Patel, or vice-versa):
+     -> "matchesExpected": false
+     -> "isValidForGovt": false
+     -> "qualityScore": 10
+     -> "actionableAdvice": "❌ નામમાં વિસંગતતા (Beneficiary Mismatch): આ દસ્તાવેજ [દસ્તાવેજ પરનું નામ] નો છે, જ્યારે અરજી '${effectiveTargetPersonGu}' માટે છે! સરકારી નિયમ મુજબ માત્ર અરજદારનો જ સત્તાવાર દસ્તાવેજ અપલોડ કરવો ફરજિયાત છે."
+
+   - CASE D: The uploaded document is blurry, too dark, out of focus, or text/seal is unreadable:
      -> "matchesExpected": false
      -> "isValidForGovt": false
      -> "qualityScore": 20
      -> "actionableAdvice": "⚠️ અસ્પષ્ટ / ધૂંધળો ફોટો: દસ્તાવેજ પરનું લખાણ અથવા સત્તાવાર મોહર સ્પષ્ટ વંચાતી નથી. પૂરતા પ્રકાશમાં સ્પષ્ટ ફોટો ફરીથી પાડો."
 
-   - CASE D: Income Certificate is older than 3 financial years (issued before 2023):
+   - CASE E: Income Certificate is older than 3 financial years (issued before 2023):
      -> "matchesExpected": true
      -> "isValidForGovt": false
      -> "needsUpdate": true
      -> "qualityScore": 25
      -> "actionableAdvice": "❌ મુદત પૂર્ણ (Expired): આ આવકનો દાખલો ૩ નાણાકીય વર્ષથી વધુ જૂનો છે. મહેસૂલ નિયમો મુજબ નવો દાખલો કઢાવવો ફરજિયાત છે."
 
-   - CASE E: Authentic, matching document with clear text and valid date/authority:
+   - CASE F: Authentic, matching document with clear text and valid date/authority belonging to target applicant:
      -> "matchesExpected": true
      -> "isValidForGovt": true
      -> "qualityScore": 95
@@ -119,6 +133,7 @@ Return ONLY a valid JSON object matching this schema without any markdown wrappi
 }
 ====================
 EXPECTED REQUIRED DOCUMENT: "${expectedDocType}"
+TARGET BENEFICIARY: "${effectiveTargetPersonGu} (${effectiveTargetPersonEn}) - ${beneficiaryRelation || 'Self'}"
 ORIGINAL FILENAME: "${fileName}"
 ====================`;
 
