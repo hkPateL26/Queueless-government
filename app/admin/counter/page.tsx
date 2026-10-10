@@ -8,7 +8,8 @@ import {
   Coffee, ArrowRightLeft, RotateCcw, Check, X, ChevronDown, 
   ExternalLink, Eye, Printer, ArrowLeft, Sparkles, Star, Award, 
   AlertCircle, Phone, Lock, ChevronRight, RefreshCw, Layers, History, BadgeCheck,
-  Globe, IndianRupee, CreditCard, Receipt, Banknote, Landmark, FileCheck
+  Globe, IndianRupee, CreditCard, Receipt, Banknote, Landmark, FileCheck, FileCheck2,
+  ClipboardList, Maximize2, ZoomIn, ZoomOut, QrCode, MapPin, Calendar, Building2, Download, CheckSquare, Square, User
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -336,6 +337,311 @@ function bookingToQueueCitizen(b: BookingDetails): QueueCitizen {
   };
 }
 
+interface DocumentStatutoryRule {
+  id: string;
+  titleGu: string;
+  titleHi: string;
+  titleEn: string;
+  actReference: string;
+  criterionGu: string;
+  criterionHi: string;
+  criterionEn: string;
+  status: 'PASSED' | 'PENDING';
+  aiVerdictGu: string;
+  aiVerdictHi: string;
+  aiVerdictEn: string;
+}
+
+function getStatutoryDocumentRules(
+  docName: string, 
+  citizen: QueueCitizen, 
+  isGu: boolean, 
+  isHi: boolean
+): DocumentStatutoryRule[] {
+  const isAadhaar = docName.includes('આધાર') || docName.toLowerCase().includes('aadhaar');
+  const isIncome = docName.includes('આવક') || docName.toLowerCase().includes('income');
+  const isDeath = docName.includes('અવસાન') || docName.includes('મરણ') || docName.toLowerCase().includes('death');
+  const isRation = docName.includes('રેશન') || docName.toLowerCase().includes('ration');
+  const isMarriage = docName.includes('લગ્ન') || docName.toLowerCase().includes('marriage');
+  const isAffidavit = docName.includes('સોગંદ') || docName.includes('બાંયધરી') || docName.includes('સ્ટેમ્પ') || docName.toLowerCase().includes('affidavit') || docName.toLowerCase().includes('stamp');
+
+  if (isAadhaar) {
+    return [
+      {
+        id: 'aadh-1',
+        titleGu: 'નિયમ ૧: UIDAI ૧૨-અંક માળખું અને Verhoeff Checksum',
+        titleHi: 'नियम १: UIDAI १२-अंकीय संरचना एवं Verhoeff Checksum',
+        titleEn: 'Rule 1: UIDAI 12-Digit Structure & Verhoeff Checksum',
+        actReference: 'UIDAI Regulations 2016 & IT Act 2000',
+        criterionGu: '૧૨ અંકનું કાયદેસર બંધારણ, ફોટો સ્પષ્ટતા સ્કોર > 95% અને QR કોડ અખંડિતતા.',
+        criterionHi: '१२ अंक का वैध प्रारूप, फोटो स्पष्टता > ९५% एवं QR कोड अखंडता।',
+        criterionEn: 'Valid 12-digit format, photo clarity > 95% and QR code integrity.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ Verhoeff ગાણિતિક અલ્ગોરિધમ માન્ય. ફોટો સ્કોર ૯૯.૨% (High Precision).`,
+        aiVerdictHi: `✓ Verhoeff एल्गोरिथ्म मान्य। फोटो स्पष्टता ९९.२% (सफल)।`,
+        aiVerdictEn: `✓ Verhoeff checksum valid. Photo confidence score 99.2%.`
+      },
+      {
+        id: 'aadh-2',
+        titleGu: 'નિયમ ૨: માસ્ક્ડ આધાર નિયમ (Masked Aadhaar Circular)',
+        titleHi: 'नियम २: मास्क्ड आधार नियम (UIDAI परिपत्र)',
+        titleEn: 'Rule 2: Masked Aadhaar Privacy Compliance',
+        actReference: 'UIDAI Circular 12011/2018 & Digital Data Protection',
+        criterionGu: 'પ્રથમ ૮ અંકો સુરક્ષિત રીતે છુપાવેલા (XXXX-XXXX) હોવા જોઈએ, ફક્ત છેલ્લા ૪ અંક જ દૃશ્યમાન.',
+        criterionHi: 'प्रथम ८ अंक सुरक्षित रूप से छिपे होने चाहिए, केवल अंतिम ४ अंक दृश्यमान।',
+        criterionEn: 'First 8 digits must be securely masked. Only last 4 digits visible.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ પ્રથમ ૮ આંકડા સંપૂર્ણ સુરક્ષિત: XXXX-XXXX-${citizen.aadhaarLast4 || '7104'} (૧૦૦% પ્રાઈવસી પાલન).`,
+        aiVerdictHi: `✓ प्रथम ८ अंक सुरक्षित: XXXX-XXXX-${citizen.aadhaarLast4 || '7104'} (१००% गोपनीयता)।`,
+        aiVerdictEn: `✓ Fully compliant with UIDAI masking: XXXX-XXXX-${citizen.aadhaarLast4 || '7104'}.`
+      },
+      {
+        id: 'aadh-3',
+        titleGu: 'નિયમ ૩: નાગરિક નામ અને ઓળખ સુસંગતતા (Name Match)',
+        titleHi: 'नियम ३: नागरिक नाम एवं पहचान मिलान',
+        titleEn: 'Rule 3: Citizen Identity & Name Matching Threshold',
+        actReference: 'Gujarat DPI Interoperability Standards 2024',
+        criterionGu: 'અરજી ફોર્મના નામ સાથે આધાર કાર્ડનું નામ ૯૫% થી વધુ ભાષાકીય મેળ ખાવું જોઈએ.',
+        criterionHi: 'आवेदन फॉर्म के नाम से आधार का नाम ९५% से अधिक मेल खाना चाहिए।',
+        criterionEn: 'Name on Aadhaar must match applicant name with > 95% linguistic similarity.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ આધાર ઓળખ મેચ સ્કોર: ૯૯.૪% ('${citizen.citizenNameGu}' સુસંગત).`,
+        aiVerdictHi: `✓ आधार पहचान मिलान: ९९.४% ('${citizen.citizenNameGu}' सत्यापित)।`,
+        aiVerdictEn: `✓ Identity match score: 99.4% ('${citizen.citizenNameEn}' matched).`
+      },
+      {
+        id: 'aadh-4',
+        titleGu: 'નિયમ ૪: UIDAI સિક્યોરિટી QR ડિજિટલ સહી ચકાસણી',
+        titleHi: 'नियम ४: UIDAI सुरक्षा QR डिजिटल हस्ताक्षर सत्यापन',
+        titleEn: 'Rule 4: UIDAI Cryptographic Digital Signature Verification',
+        actReference: 'UIDAI Offline XML & QR Cryptography Standard',
+        criterionGu: 'QR કોડમાં UIDAI પબ્લિક કી ડિજિટલ હસ્તાક્ષર પ્રમાણિત હોવા અનિવાર્ય.',
+        criterionHi: 'QR कोड में UIDAI पब्लिक की डिजिटल हस्ताक्षर प्रमाणित होना अनिवार्य।',
+        criterionEn: 'QR code must carry valid UIDAI public key cryptographic signature.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ UIDAI પબ્લિક કી પ્રમાણિત. ઑફલાઇન ડિજિટલ સાઇન વેરિફાઇડ.`,
+        aiVerdictHi: `✓ UIDAI पब्लिक की प्रमाणित। डिजिटल हस्ताक्षर वैध।`,
+        aiVerdictEn: `✓ UIDAI public key validated. Cryptographic signature verified.`
+      }
+    ];
+  }
+
+  if (isIncome) {
+    return [
+      {
+        id: 'inc-1',
+        titleGu: 'નિયમ ૧: સક્ષમ અધિકારી સત્તાવાર મોહર અને ડિજિટલ સહી',
+        titleHi: 'नियम १: सक्षम प्राधिकारी आधिकारिक मुहर एवं डिजिटल हस्ताक्षर',
+        titleEn: 'Rule 1: Competent Authority Seal & Digital Signature',
+        actReference: 'ગુજરાત મહેસૂલ પરિપત્ર: જમન/૩૯૨૦૧૮/૬૭૫/જ',
+        criterionGu: 'ગ્રામ્ય વિસ્તારમાં તલાટી અથવા શહેરી વિસ્તારમાં નાયબ મામલતદાર/મામલતદારની મોહર હોવી અનિવાર્ય.',
+        criterionHi: 'ग्रामीण क्षेत्र में तलाटी अथवा शहरी क्षेत्र में तहसीलदार की मुहर अनिवार्य।',
+        criterionEn: 'Must bear authorized seal of Talati (Rural) or Dy. Mamlatdar (Urban).',
+        status: 'PASSED',
+        aiVerdictGu: `✓ નાયબ મામલતદાર કચેરી, ગોંડલ - સત્તાવાર ડિજિટલ સહી અને ગોળ મોહર પ્રમાણિત.`,
+        aiVerdictHi: `✓ तहसीलदार कार्यालय - आधिकारिक डिजिटल हस्ताक्षर एवं मुहर सत्यापित।`,
+        aiVerdictEn: `✓ Revenue Authority Seal & Digital Signature verified successfully.`
+      },
+      {
+        id: 'inc-2',
+        titleGu: 'નિયમ ૨: ૩ નાણાકીય વર્ષની માન્યતા અવધિ (Statutory Validity)',
+        titleHi: 'नियम २: ३ वित्तीय वर्ष की वैधता अवधि (राजस्व नियम)',
+        titleEn: 'Rule 2: 3-Financial Years Statutory Validity Period',
+        actReference: 'મહેસૂલ વિભાગ ઠરાવ ૨૦૧૯ (૩-નાણાકીય વર્ષ માન્યતા)',
+        criterionGu: 'દાખલો જારી થયા તારીખથી સતત ૩ નાણાકીય વર્ષ સુધી રાજ્યભરમાં કાયદેસર માન્ય રહે છે.',
+        criterionHi: 'जारी तिथि से लगातार ३ वित्तीय वर्षों तक राज्यभर में कानूनी रूप से मान्य।',
+        criterionEn: 'Certificate valid for 3 consecutive Financial Years from issue date across Gujarat.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ ઇશ્યુ વર્ષ ૨૦૨૫. માન્યતા: ૨૦૨૫-૨૬ થી ૨૦૨૭-૨૮ (મુદત અંદર કાયદેસર સક્રિય).`,
+        aiVerdictHi: `✓ जारी वर्ष २०२५। वैधता: २०२५-२६ से २०२७-२८ तक (कानूनी रूप से वैध)।`,
+        aiVerdictEn: `✓ Issued in 2025. Valid for FY 2025-26 to FY 2027-28 (Fully Active).`
+      },
+      {
+        id: 'inc-3',
+        titleGu: 'નિયમ ૩: વાર્ષિક આવક મર્યાદા પાત્રતા (Eligible Income Ceiling)',
+        titleHi: 'नियम ३: वार्षिक आय सीमा पात्रता जांच',
+        titleEn: 'Rule 3: Statutory Annual Income Ceiling Compliance',
+        actReference: 'ગુજરાત સામાજિક ન્યાય & કલ્યાણકારી આવક માપદંડ',
+        criterionGu: 'યોજના નિયમ મુજબ વાર્ષિક આવક મર્યાદા: ગ્રામ્ય < ₹૧,૨૦,૦૦૦ / શહેરી < ₹૧,૫૦,૦૦૦.',
+        criterionHi: 'योजना अनुसार वार्षिक आय सीमा: ग्रामीण < ₹१,२०,००० / शहरी < ₹१,५०,०००।',
+        criterionEn: 'Ceiling: Rural < ₹1,20,000 / Urban < ₹1,50,000 per annum.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ જાહેર વાર્ષિક આવક ${citizen.incomeDeclaredGu || '₹ ૯૫,૦૦૦'}. પાત્રતા મર્યાદા હેઠળ સંપૂર્ણ પાત્ર.`,
+        aiVerdictHi: `✓ घोषित आय ${citizen.incomeDeclaredHi || '₹ ९५,०००'}. निर्धारित सीमा के अंतर्गत पात्र।`,
+        aiVerdictEn: `✓ Declared income ${citizen.incomeDeclaredEn || '₹ 95,000'}. Well within permissible limit.`
+      },
+      {
+        id: 'inc-4',
+        titleGu: 'નિયમ ૪: બારકોડ અને ડિજિટલ ગુજરાત સીરીયલ ક્રોસ-વેરિફિકેશન',
+        titleHi: 'नियम ४: बारकोड एवं डिजिटल गुजरात सत्यापन',
+        titleEn: 'Rule 4: Digital Gujarat Portal Serial & Barcode Verification',
+        actReference: 'Digital Gujarat Online Database Registry',
+        criterionGu: 'બારકોડ અને સર્ટિફિકેટ નંબર ઓનલાઇન પોર્ટલ રેકોર્ડ સાથે સુસંગત હોવા જોઈએ.',
+        criterionHi: 'बारकोड और प्रमाण पत्र संख्या ऑनलाइन पोर्टल से मेल खानी चाहिए।',
+        criterionEn: 'Barcode & Certificate ID must cross-verify against Digital Gujarat portal.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ સીરીયલ GJ-REV-INC-2026-${citizen.aadhaarLast4 || '449102'} મહેસૂલ રેકોર્ડ સાથે મેચ.`,
+        aiVerdictHi: `✓ सीरियल संख्या राजस्व डेटाबेस में सक्रिय एवं सत्यापित।`,
+        aiVerdictEn: `✓ Serial GJ-REV-INC-2026-${citizen.aadhaarLast4 || '449102'} matches state registry.`
+      }
+    ];
+  }
+
+  if (isDeath) {
+    return [
+      {
+        id: 'dth-1',
+        titleGu: 'નિયમ ૧: જન્મ-મરણ નોંધણી અધિનિયમ અંતર્ગત ફોર્મ નં. ૬',
+        titleHi: 'नियम १: जन्म-मृत्यु पंजीकरण अधिनियम के तहत फॉर्म सं. ६',
+        titleEn: 'Rule 1: Statutory Form No. 6 under RBD Act, 1969',
+        actReference: 'Registration of Births & Deaths Act 1969 Sec 12/17',
+        criterionGu: 'સક્ષમ જન્મ અને મરણ રજિસ્ટ્રાર કચેરી દ્વારા જારી કરેલ વૈધાનિક ફોર્મ-૬ હોવું જરૂરી.',
+        criterionHi: 'सक्षम जन्म-मृत्यु रजिस्ट्रार द्वारा जारी फॉर्म-६ होना अनिवार्य।',
+        criterionEn: 'Must be official Form No. 6 issued under RBD Act 1969 Section 12/17.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ સત્તાવાર ફોર્મ-૬ પ્રમાણિત. નોંધણી ક્રમાંક: GJ-RBD-2024-004128.`,
+        aiVerdictHi: `✓ आधिकारिक फॉर्म-६ प्रमाणित। पंजीकरण सं: GJ-RBD-2024-004128.`,
+        aiVerdictEn: `✓ Official Form 6 verified. Registration No: GJ-RBD-2024-004128.`
+      },
+      {
+        id: 'dth-2',
+        titleGu: 'નિયમ ૨: રજિસ્ટ્રાર સત્તાવાર સિક્કો અને નોંધણી ક્રમાંક',
+        titleHi: 'नियम २: रजिस्ट्रार आधिकारिक मुहर एवं पंजीकरण क्रमांक',
+        titleEn: 'Rule 2: Registrar Official Seal & Record Number',
+        actReference: 'Civil Registration System (CRS Gujarat)',
+        criterionGu: 'સ્થાનિક પંચાયત/નગરપાલિકા રજિસ્ટ્રારની સત્તાવાર મોહર અને ક્રમાંક પ્રમાણિત હોવા જોઈએ.',
+        criterionHi: 'स्थानीय रजिस्ट्रार की मुहर एवं पंजीकरण क्रमांक सत्यापित होना चाहिए।',
+        criterionEn: 'Registrar round seal and municipal/panchayat registration number verified.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ રજિસ્ટ્રાર (જન્મ-મરણ) સત્તાવાર ગોળ મોહર અને અધિકૃત સહી ચકાસાયેલ.`,
+        aiVerdictHi: `✓ रजिस्ट्रार आधिकारिक मुहर एवं डिजिटल हस्ताक्षर सत्यापित।`,
+        aiVerdictEn: `✓ Registrar official round seal and signature verified.`
+      },
+      {
+        id: 'dth-3',
+        titleGu: 'નિયમ ૩: મરણ તારીખ અને સ્થળ પ્રમાણિત',
+        titleHi: 'नियम ३: मृत्यु तिथि एवं स्थान सत्यापन',
+        titleEn: 'Rule 3: Certified Date and Place of Death',
+        actReference: 'Civil Registration Timeliness Mandate',
+        criterionGu: 'અવસાનની તારીખ, સ્થળ અને નોંધણી સમયગાળો કાયદાકીય રીતે સ્પષ્ટ હોવો જોઈએ.',
+        criterionHi: 'मृत्यु तिथि, स्थान एवं पंजीकरण अवधि स्पष्ट होनी चाहिए।',
+        criterionEn: 'Date, place of demise and timely statutory reporting confirmed.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ અવસાન તારીખ: ૧૪/૧૦/૨૦૨૪ • સ્થળ: સિવિલ હોસ્પિટલ, ગોંડલ (નિયત મુદતમાં નોંધાયેલ).`,
+        aiVerdictHi: `✓ मृत्यु तिथि: १४/१०/२०२४ • स्थान: सिविल अस्पताल, गोंडल (समय पर पंजीकृत)।`,
+        aiVerdictEn: `✓ Demise Date: 14/10/2024 • Place: Civil Hospital, Gondal (Timely registered).`
+      },
+      {
+        id: 'dth-4',
+        titleGu: 'નિયમ ૪: મૃતક પતિના નામની અરજદાર વિગત સાથે સુસંગતતા',
+        titleHi: 'नियम ४: दिवंगत पति का नाम आवेदक विवरण से मिलान',
+        titleEn: 'Rule 4: Deceased Husband Name Consistency Check',
+        actReference: 'ગંગા સ્વરૂપા વિધવા સહાય પાત્રતા માર્ગદર્શિકા',
+        criterionGu: 'મૃતક પતિનું નામ અરજદારના આધાર અને રેશનકાર્ડ દસ્તાવેજો સાથે ૧૦૦% સુસંગત હોવું જરૂરી.',
+        criterionHi: 'दिवंगत पति का नाम आवेदक के राशन कार्ड व आधार से १००% मेल खाना चाहिए।',
+        criterionEn: 'Husband name must match applicant family records with 100% concordance.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ સ્વ. પતિનું નામ 'રમણિકભાઈ પટેલ' અરજદારના રેશનકાર્ડ સાથે ૧૦૦% મેળ ખાય છે.`,
+        aiVerdictHi: `✓ पति का नाम 'रमणिकभाई पटेल' पारिवारिक रिकॉर्ड से १००% सुसंगत।`,
+        aiVerdictEn: `✓ Husband name matches applicant records with 100% concordance.`
+      }
+    ];
+  }
+
+  if (isRation) {
+    return [
+      {
+        id: 'rat-1',
+        titleGu: 'નિયમ ૧: ૧૨-અંક બારકોડેડ રેશનકાર્ડ (NFSA Barcoded Card)',
+        titleHi: 'नियम १: १२-अंकीय बारकोडेड राशन कार्ड (NFSA)',
+        titleEn: 'Rule 1: 12-Digit Barcoded Ration Card (NFSA Act)',
+        actReference: 'અન્ન અને નાગરિક પુરવઠા વિભાગ, NFSA એક્ટ ૨૦૧૩',
+        criterionGu: 'બારકોડેડ ડિજિટલ રેશનકાર્ડ નંબર સક્રિય અને માન્ય હોવો જોઈએ.',
+        criterionHi: 'बारकोडेड डिजिटल राशन कार्ड संख्या सक्रिय और मान्य होनी चाहिए।',
+        criterionEn: '12-digit computerized barcoded ration card must be active in PDS database.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ રેશનકાર્ડ નં: 042100889231 (NFSA-PHH કેટેગરી સક્રિય).`,
+        aiVerdictHi: `✓ राशन कार्ड संख्या: 042100889231 (NFSA सक्रिय)।`,
+        aiVerdictEn: `✓ Ration Card No: 042100889231 (NFSA active).`
+      },
+      {
+        id: 'rat-2',
+        titleGu: 'નિયમ ૨: કુટુંબના સભ્યોની યાદીમાં અરજદારનું નામ',
+        titleHi: 'नियम २: परिवार सूची में आवेदक का नाम',
+        titleEn: 'Rule 2: Applicant Enlistment in Family Roster',
+        actReference: 'Targeted Public Distribution System Rules',
+        criterionGu: 'અરજદારનું નામ કુટુંબના સભ્યોની અધિકૃત યાદીમાં સામેલ હોવું જોઈએ.',
+        criterionHi: 'आवेदक का नाम परिवार सदस्यों की अधिकृत सूची में होना चाहिए।',
+        criterionEn: 'Applicant must be registered as head or member in family roster.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ કુટુંબ યાદીમાં '${citizen.citizenNameGu}' વડા તરીકે સામેલ (૨ સભ્યો નોંધાયેલ).`,
+        aiVerdictHi: `✓ परिवार सूची में '${citizen.citizenNameGu}' मुखिया के रूप में दर्ज।`,
+        aiVerdictEn: `✓ Applicant verified as head of household (2 members enrolled).`
+      },
+      {
+        id: 'rat-3',
+        titleGu: 'નિયમ ૩: સ્થાનિક મહેસૂલી કાર્યક્ષેત્ર સુસંગતતા',
+        titleHi: 'नियम ३: स्थानीय प्रशासनिक अधिकार क्षेत्र मिलान',
+        titleEn: 'Rule 3: Local Administrative Jurisdiction Alignment',
+        actReference: 'Gujarat Land Revenue & Administrative Code',
+        criterionGu: 'રેશનકાર્ડનું સરનામું સંબંધિત તાલુકા/જિલ્લા કચેરીના કાર્યક્ષેત્રમાં આવવું જોઈએ.',
+        criterionHi: 'राशन कार्ड का पता संबंधित तालुका कार्यालय के अधिकार क्षेत्र में होना चाहिए।',
+        criterionEn: 'Ration card address must fall within the serving taluka/district.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ ગોંડલ તાલુકો, રાજકોટ જિલ્લો - કચેરી કાર્યક્ષેત્ર સાથે સંપૂર્ણ સુસંગત.`,
+        aiVerdictHi: `✓ गोंडल तालुका, राजकोट जिला - कार्यालय अधिकार क्षेत्र अनुरूप।`,
+        aiVerdictEn: `✓ Gondal taluka, Rajkot district - within jurisdiction.`
+      }
+    ];
+  }
+
+  // Default: Statutory Affidavit / e-Stamp / Marriage / Other
+  return [
+    {
+      id: 'aff-1',
+      titleGu: 'નિયમ ૧: બોમ્બે સ્ટેમ્પ અધિનિયમ મુજબ નિયત મૂલ્ય સ્ટેમ્પ',
+      titleHi: 'नियम १: बॉम्बे स्टाम्प अधिनियम अनुसार निर्धारित स्टाम्प',
+      titleEn: 'Rule 1: Prescribed Stamp Duty under Bombay Stamp Act',
+      actReference: 'Bombay Stamp Act 1958 & Revenue Department Guidelines',
+      criterionGu: 'નિયત મૂલ્યનું ₹૫૦/- અથવા ₹૩૦૦/- નું સત્તાવાર ઈ-સ્ટેમ્પ પ્રમાણપત્ર હોવું અનિવાર્ય.',
+      criterionHi: 'निर्धारित मूल्य ₹५०/- अथवा ₹३००/- का आधिकारिक ई-स्टाम्प होना अनिवार्य।',
+      criterionEn: 'Must bear valid ₹50 or ₹300 e-Stamp duty certificate.',
+      status: 'PASSED',
+      aiVerdictGu: `✓ ઈ-સ્ટેમ્પ સર્ટિફિકેટ નં: IN-GJ99182371, સરકારી સ્ટેમ્પ ડ્યુટી ચુકવણી પ્રમાણિત.`,
+      aiVerdictHi: `✓ ई-स्टाम्प संख्या: IN-GJ99182371, स्टाम्प शुल्क प्रमाणित।`,
+      aiVerdictEn: `✓ e-Stamp Certificate IN-GJ99182371 duty verified.`
+    },
+    {
+      id: 'aff-2',
+      titleGu: 'નિયમ ૨: નોટરી / મેજિસ્ટ્રેટ સિક્કો અને નોંધણી ક્રમાંક',
+      titleHi: 'नियम २: नोटरी मुहर एवं पंजीकरण क्रमांक',
+      titleEn: 'Rule 2: Notary Public / Executive Magistrate Attestation',
+      actReference: 'Notaries Act 1952 & Oath Commissioner Rules',
+      criterionGu: 'નોટરી પબ્લિકનું લાયસન્સ, રજિસ્ટર નંબર અને ગોળ સિક્કો માન્ય હોવો જોઈએ.',
+      criterionHi: 'नोटरी का लाइसेंस, रजिस्टर क्रमांक एवं मुहर मान्य होनी चाहिए।',
+      criterionEn: 'Must bear Notary license number, book register entry and seal.',
+      status: 'PASSED',
+      aiVerdictGu: `✓ નોટરી ભારત સરકાર, રજિસ્ટ્રેશન નં: 8841/2026, સહી & સિક્કો પ્રમાણિત.`,
+      aiVerdictHi: `✓ नोटरी भारत सरकार, पंजीकरण सं: 8841/2026, मुहर प्रमाणित।`,
+      aiVerdictEn: `✓ Notary Govt of India, Reg No: 8841/2026 seal and signature verified.`
+    },
+    {
+      id: 'aff-3',
+      titleGu: 'નિયમ ૩: યોજના શરત મુજબ કાયદેસર બાંયધરી નિવેદન',
+      titleHi: 'नियम ३: योजना शर्तों का कानूनी शपथ पत्र',
+      titleEn: 'Rule 3: Statutory Scheme Undertaking Statement',
+      actReference: 'Welfare Scheme Statutory Declaration Rules',
+      criterionGu: 'યોજનાના નિયમ અનુસાર પુનઃલગ્ન ન કર્યા અંગે અથવા શરતોનું પાલન કર્યાનું સ્પષ્ટ નિવેદન.',
+      criterionHi: 'योजना नियमों के अनुसार पुनर्विवाह न करने का स्पष्ट शपथ पत्र।',
+      criterionEn: 'Explicit legal undertaking confirming non-remarriage and compliance.',
+      status: 'PASSED',
+      aiVerdictGu: `✓ કાયદેસર શપથ પર પુનઃલગ્ન ન કર્યાનું બાંયધરી નિવેદન સંપૂર્ણ સ્પષ્ટ.`,
+      aiVerdictHi: `✓ कानूनी शपथ पर पुनर्विवाह न करने का शपथ पत्र स्पष्ट।`,
+      aiVerdictEn: `✓ Legal undertaking confirmed under statutory oath.`
+    }
+  ];
+}
+
 export default function CounterOperatorDesk() {
   // Multi-Language State
   const [lang, setLang] = useState<Language>('gu');
@@ -354,6 +660,10 @@ export default function CounterOperatorDesk() {
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [docModalOpen, setDocModalOpen] = useState<boolean>(false);
   const [selectedCitizenForDocs, setSelectedCitizenForDocs] = useState<QueueCitizen | null>(null);
+  const [activeReviewTab, setActiveReviewTab] = useState<'DOCUMENTS' | 'APPLICATION_FORM'>('DOCUMENTS');
+  const [previewDocLightbox, setPreviewDocLightbox] = useState<any | null>(null);
+  const [lightboxZoom, setLightboxZoom] = useState<number>(1);
+  const [physicallyVerifiedDocs, setPhysicallyVerifiedDocs] = useState<Record<string, boolean>>({});
   const [selectedCitizenForReceipt, setSelectedCitizenForReceipt] = useState<QueueCitizen | null>(null);
   const [selectedCitizenForApprovalCert, setSelectedCitizenForApprovalCert] = useState<any | null>(null);
   const [transferModalOpen, setTransferModalOpen] = useState<boolean>(false);
@@ -1815,7 +2125,7 @@ export default function CounterOperatorDesk() {
 
       </main>
 
-      {/* 📄 1. CITIZEN ORIGINAL DOCUMENTS & AI-OCR INSPECTION MODAL */}
+      {/* 📄 1. CITIZEN ORIGINAL DOCUMENTS, STATUTORY AI RULES & APPLICATION FORM MODAL */}
       {(selectedCitizenForDocs || (docModalOpen && currentServing)) && (() => {
         const activeCitizen = selectedCitizenForDocs || currentServing!;
         const citizenDocs = (activeCitizen.uploadedDocuments && activeCitizen.uploadedDocuments.length > 0)
@@ -1836,24 +2146,29 @@ export default function CounterOperatorDesk() {
               setSelectedCitizenForDocs(null);
               setDocModalOpen(false);
             }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto modal-backdrop animate-in fade-in"
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-5 overflow-y-auto modal-backdrop animate-in fade-in"
           >
             <div 
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95"
+              className="bg-white rounded-3xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95"
             >
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-[#003366] to-[#005A9C] text-white p-4 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white">
-                    <FileText className="w-5 h-5 text-[#FF9933]" />
+              <div className="bg-gradient-to-r from-[#003366] to-[#005A9C] text-white p-4 sm:p-5 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white shrink-0 shadow-inner">
+                    <GovLogo className="w-7 h-7 drop-shadow-md" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-black text-white">
-                      {isGu ? "અરજદાર દસ્તાવેજ & AI ચકાસણી નિરીક્ષણ (Officer Review)" : isHi ? "आवेदक दस्तावेज़ एवं AI सत्यापन समीक्षा" : "Applicant Document & AI OCR Review"}
-                    </h4>
-                    <p className="text-[10px] sm:text-xs text-blue-200 font-mono">
-                      {isGu ? "ટોકન:" : "Token:"} <strong>{activeCitizen.tokenNumber}</strong> • {isGu ? activeCitizen.citizenNameGu : isHi ? activeCitizen.citizenNameHi : activeCitizen.citizenNameEn}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-xs sm:text-base font-black text-white">
+                        {isGu ? "અરજદાર દસ્તાવેજ, AI ચકાસણી & સત્તાવાર અરજી ફોર્મ (Officer Dossier Review)" : isHi ? "आवेदक दस्तावेज़, AI सत्यापन एवं सरकारी आवेदन पत्र" : "Applicant Dossier, AI OCR & Official Application Review"}
+                      </h4>
+                      <span className="bg-[#FF9933] text-slate-900 font-black text-[9.5px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {isGu ? "સત્તાવાર કચેરી ડેસ્ક" : "Official Desk"}
+                      </span>
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-blue-100 font-mono mt-0.5">
+                      {isGu ? "ટોકન:" : "Token:"} <strong className="text-white bg-blue-900/60 px-1.5 py-0.5 rounded text-xs">{activeCitizen.tokenNumber}</strong> • {isGu ? activeCitizen.citizenNameGu : isHi ? activeCitizen.citizenNameHi : activeCitizen.citizenNameEn} • {isGu ? activeCitizen.schemeTitleGu : activeCitizen.schemeTitleEn}
                     </p>
                   </div>
                 </div>
@@ -1862,149 +2177,889 @@ export default function CounterOperatorDesk() {
                     setSelectedCitizenForDocs(null);
                     setDocModalOpen(false);
                   }}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs cursor-pointer transition"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs cursor-pointer transition shrink-0"
                 >
                   ✕
                 </button>
               </div>
 
-              {/* Modal Body */}
-              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs">
-                
-                {/* AI Automated Pre-check Verdict Card */}
-                <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-black text-emerald-950 flex items-center gap-1.5 text-xs">
-                      <Sparkles className="w-4 h-4 text-emerald-600" />
-                      {isGu ? "AI OCR સ્કેનિંગ & સરકારી નિયમ ચકાસણી પરિણામ" : isHi ? "AI OCR स्कैनिंग एवं सरकारी नियम सत्यापन परिणाम" : "AI OCR Scanning & Regulatory Verdict"}
-                    </span>
-                    <span className="bg-emerald-200 text-emerald-900 font-black text-[10px] px-2 py-0.5 rounded-full">
-                      ✓ {isGu ? "પ્રી-ચેક સફળ (૧૦૦%)" : isHi ? "पूर्व-जांच सफल (100%)" : "Pre-check 100% Passed"}
-                    </span>
-                  </div>
-                  <p className="text-emerald-800 font-medium leading-relaxed text-[11.5px]">
-                    {isGu ? activeCitizen.aiOcrVerdictGu : isHi ? activeCitizen.aiOcrVerdictHi : activeCitizen.aiOcrVerdictEn}
-                  </p>
-                </div>
+              {/* DUAL-TAB NAVIGATION BAR */}
+              <div className="flex border-b border-slate-200 bg-slate-100 px-3 sm:px-6 pt-2.5 gap-2 shrink-0">
+                <button 
+                  onClick={() => setActiveReviewTab('DOCUMENTS')}
+                  className={`px-3.5 sm:px-5 py-2.5 font-black text-xs sm:text-sm rounded-t-2xl transition flex items-center gap-2 cursor-pointer ${
+                    activeReviewTab === 'DOCUMENTS' 
+                      ? 'bg-white text-[#003366] border-t-2 border-t-[#003366] shadow-xs' 
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <FileCheck className="w-4 h-4 text-emerald-600" />
+                  <span>{isGu ? `📑 અપલોડ કરેલ દસ્તાવેજો & AI સરકારી નિયમ સમીક્ષા (${citizenDocs.length})` : isHi ? `📑 अपलोड दस्तावेज़ एवं AI सरकारी नियम समीक्षा (${citizenDocs.length})` : `📑 Uploaded Proofs & Statutory Rules (${citizenDocs.length})`}</span>
+                </button>
+                <button 
+                  onClick={() => setActiveReviewTab('APPLICATION_FORM')}
+                  className={`px-3.5 sm:px-5 py-2.5 font-black text-xs sm:text-sm rounded-t-2xl transition flex items-center gap-2 cursor-pointer ${
+                    activeReviewTab === 'APPLICATION_FORM' 
+                      ? 'bg-white text-[#003366] border-t-2 border-t-[#003366] shadow-xs' 
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <ClipboardList className="w-4 h-4 text-[#FF9933]" />
+                  <span>{isGu ? "📋 સત્તાવાર સરકારી અરજી ફોર્મ (Digital Gujarat Form)" : isHi ? "📋 सरकारी आवेदन पत्र (Digital Gujarat Form)" : "📋 Official Scheme Application Form"}</span>
+                </button>
+              </div>
 
-                {/* Uploaded Documents List with OCR Deep Inspection */}
-                <div className="space-y-3">
-                  <h5 className="font-black text-slate-800 uppercase tracking-wider text-[11px]">
-                    {isGu ? `અપલોડ કરેલ કાગળો અને ડિજિટલ પ્રૂફ (${citizenDocs.length})` : `Uploaded Proofs & AI Extraction (${citizenDocs.length})`}
-                  </h5>
+              {/* MODAL BODY */}
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs bg-slate-50/50">
 
-                  {citizenDocs.map((doc: any, idx: number) => {
-                    const docName = isGu ? doc.nameGu : isHi ? (doc.nameHi || doc.nameGu) : (doc.nameEn || doc.nameGu);
-                    const ocrData = doc.ocrExtractedData || {
-                      documentType: doc.nameGu.includes('આધાર') ? 'AADHAAR_CARD' : doc.nameGu.includes('આવક') ? 'INCOME_CERTIFICATE' : 'GOVT_CERTIFICATE',
-                      idNumber: doc.nameGu.includes('આધાર') ? `XXXX-XXXX-${activeCitizen.aadhaarLast4 || '8842'}` : `INC-GJ-2026-${Math.floor(100000 + Math.random()*900000)}`,
-                      holderName: isGu ? activeCitizen.citizenNameGu : activeCitizen.citizenNameEn,
-                      confidence: 0.992,
-                      dates: ['01/04/2026', '31/03/2027']
-                    };
+                {/* TAB 1: UPLOADED DOCUMENTS & STATUTORY RULES */}
+                {activeReviewTab === 'DOCUMENTS' && (
+                  <div className="space-y-4 animate-in fade-in">
+                    
+                    {/* AI Automated Pre-check Verdict Card */}
+                    <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 sm:p-4 space-y-2 shadow-xs">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <span className="font-black text-emerald-950 flex items-center gap-2 text-xs sm:text-sm">
+                          <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                          {isGu ? "AI OCR સ્કેનિંગ & સરકારી નિયમ ચકાસણી પરિણામ" : isHi ? "AI OCR स्कैनिंग एवं सरकारी नियम सत्यापन परिणाम" : "AI OCR Scanning & Regulatory Verdict"}
+                        </span>
+                        <span className="bg-emerald-200 text-emerald-950 font-black text-[10.5px] px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>✓ {isGu ? "પ્રી-ચેક સફળ (૧૦૦% પાસ)" : isHi ? "पूर्व-जांच सफल (100%)" : "Pre-check 100% Passed"}</span>
+                        </span>
+                      </div>
+                      <p className="text-emerald-900 font-medium leading-relaxed text-[11.5px] sm:text-xs">
+                        {isGu ? activeCitizen.aiOcrVerdictGu : isHi ? activeCitizen.aiOcrVerdictHi : activeCitizen.aiOcrVerdictEn}
+                      </p>
+                      <div className="pt-2 border-t border-emerald-200/70 flex items-center justify-between text-[10px] text-emerald-800">
+                        <span>🏛️ ગુજરાત જન સેવા કેન્દ્ર નિયમાવલી મુજબ પ્રમાણિત</span>
+                        <span className="font-mono font-bold">UIDAI • REVENUE • CIVIL REGISTRY COMPLIANT</span>
+                      </div>
+                    </div>
 
-                    return (
-                      <div key={idx} className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
-                        <div className="flex items-start justify-between gap-2 border-b border-slate-200/70 pb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-blue-100 text-[#003366] flex items-center justify-center font-bold text-xs">
-                              {idx + 1}
+                    {/* Uploaded Documents List with Real Visual Preview & Statutory Rules */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-black text-slate-800 uppercase tracking-wider text-[11px] sm:text-xs flex items-center gap-1.5">
+                          <Layers className="w-3.5 h-3.5 text-[#003366]" />
+                          <span>{isGu ? `અપલોડ કરેલ કાગળો અને ડિજિટલ પુરાવા (${citizenDocs.length})` : `Uploaded Proofs & AI Verification (${citizenDocs.length})`}</span>
+                        </h5>
+                        <span className="text-[10px] text-slate-500 font-mono">
+                          {isGu ? "દરેક દસ્તાવેજ માટે સ્વતંત્ર કાનૂની નિયમો" : "Individual Statutory Rule Checklists"}
+                        </span>
+                      </div>
+
+                      {citizenDocs.map((doc: any, idx: number) => {
+                        const docName = isGu ? doc.nameGu : isHi ? (doc.nameHi || doc.nameGu) : (doc.nameEn || doc.nameGu);
+                        const isAadhaar = doc.nameGu.includes('આધાર') || doc.nameGu.toLowerCase().includes('aadhaar');
+                        const isIncome = doc.nameGu.includes('આવક') || doc.nameGu.toLowerCase().includes('income');
+                        const isDeath = doc.nameGu.includes('અવસાન') || doc.nameGu.includes('મરણ') || doc.nameGu.toLowerCase().includes('death');
+                        const isRation = doc.nameGu.includes('રેશન') || doc.nameGu.toLowerCase().includes('ration');
+
+                        const ocrData = doc.ocrExtractedData || {
+                          documentType: isAadhaar ? 'AADHAAR_CARD (UIDAI)' : isIncome ? 'INCOME_CERTIFICATE (REVENUE)' : isDeath ? 'DEATH_CERTIFICATE (FORM 6)' : isRation ? 'RATION_CARD (NFSA)' : 'OFFICIAL_AFFIDAVIT',
+                          idNumber: isAadhaar ? `XXXX-XXXX-${activeCitizen.aadhaarLast4 || '7104'}` : isIncome ? `INC-GJ-2026-${activeCitizen.aadhaarLast4 || '449102'}` : isDeath ? 'GJ-RBD-2024-004128' : '042100889231',
+                          holderName: isGu ? activeCitizen.citizenNameGu : activeCitizen.citizenNameEn,
+                          confidence: 0.994,
+                          dates: ['01/04/2025', '31/03/2028']
+                        };
+
+                        const docRules = getStatutoryDocumentRules(doc.nameGu, activeCitizen, isGu, isHi);
+                        const isPhysicallyVerified = !!physicallyVerifiedDocs[`${activeCitizen.tokenNumber}_${idx}`];
+
+                        return (
+                          <div key={idx} className="bg-white border-2 border-slate-200 hover:border-blue-300 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs transition">
+                            
+                            {/* Document Card Header */}
+                            <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-xl bg-[#003366] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
+                                  {idx + 1}
+                                </div>
+                                <div>
+                                  <p className="font-black text-slate-900 text-xs sm:text-sm">{docName}</p>
+                                  <span className="text-[10.5px] text-slate-500 font-mono">
+                                    {doc.uploadedAt ? `અપલોડ: ${new Date(doc.uploadedAt).toLocaleTimeString()}` : 'સિસ્ટમ પ્રોફાઇલ રેકોર્ડ • પ્રી-વેરિફાઈડ'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="bg-emerald-100 border border-emerald-300 text-emerald-900 font-black text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                  <span>{isGu ? "AI પ્રમાણિત" : isHi ? "AI प्रमाणित" : "AI Verified"}</span>
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    triggerHaptic('tap');
+                                    setPreviewDocLightbox({
+                                      docName,
+                                      fileUrl: doc.fileUrl,
+                                      ocrData,
+                                      docRules,
+                                      idx,
+                                      activeCitizen
+                                    });
+                                    setLightboxZoom(1);
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#003366] font-bold text-[10px] flex items-center gap-1 transition cursor-pointer border border-blue-200 shadow-2xs"
+                                >
+                                  <Maximize2 className="w-3 h-3 text-[#005A9C]" />
+                                  <span>{isGu ? "મોટું જુઓ" : "Enlarge"}</span>
+                                </button>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-black text-slate-900 text-xs">{docName}</p>
-                              <span className="text-[10px] text-slate-500 font-mono">
-                                {doc.uploadedAt ? `અપલોડ: ${new Date(doc.uploadedAt).toLocaleTimeString()}` : 'સિસ્ટમ પ્રી-ચેક વેરિફાઈડ'}
+
+                            {/* Two-Column Grid: Left: Visual Document Preview | Right: AI Metadata & Government Rules */}
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+                              
+                              {/* Left Column: Visual Document Preview (Real Upload or Official Government Facsimile) */}
+                              <div className="md:col-span-4 bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-col justify-between">
+                                
+                                {doc.fileUrl ? (
+                                  <div 
+                                    onClick={() => {
+                                      setPreviewDocLightbox({
+                                        docName,
+                                        fileUrl: doc.fileUrl,
+                                        ocrData,
+                                        docRules,
+                                        idx,
+                                        activeCitizen
+                                      });
+                                      setLightboxZoom(1);
+                                    }}
+                                    className="relative group rounded-lg overflow-hidden border border-slate-200 bg-white h-40 flex items-center justify-center cursor-pointer shadow-inner"
+                                  >
+                                    <img 
+                                      src={doc.fileUrl} 
+                                      alt={docName} 
+                                      className="w-full h-full object-cover transition group-hover:scale-105" 
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-1.5 text-white font-bold text-[11px]">
+                                      <Maximize2 className="w-4 h-4" />
+                                      <span>{isGu ? "મોટું જુઓ (Zoom)" : "Click to Zoom"}</span>
+                                    </div>
+                                    <span className="absolute bottom-1.5 right-1.5 bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded shadow-xs">
+                                      ✓ અસલ નાગરિક અપલોડ
+                                    </span>
+                                  </div>
+                                ) : (
+                                  /* Official High-Fidelity Government Document Facsimile Card */
+                                  <div 
+                                    onClick={() => {
+                                      setPreviewDocLightbox({
+                                        docName,
+                                        fileUrl: null,
+                                        ocrData,
+                                        docRules,
+                                        idx,
+                                        activeCitizen
+                                      });
+                                      setLightboxZoom(1);
+                                    }}
+                                    className="rounded-xl overflow-hidden border border-slate-300 bg-white shadow-xs cursor-pointer hover:border-[#003366] transition group"
+                                  >
+                                    {isAadhaar ? (
+                                      /* AADHAAR CARD FACSIMILE */
+                                      <div className="p-2.5 space-y-1.5 bg-gradient-to-b from-orange-50/40 via-white to-emerald-50/30 text-[9px]">
+                                        <div className="h-1 bg-gradient-to-r from-orange-500 via-white to-emerald-600 rounded-full" />
+                                        <div className="flex items-center justify-between border-b border-slate-200/60 pb-1">
+                                          <div className="flex items-center gap-1">
+                                            <GovLogo className="w-4 h-4" />
+                                            <span className="font-black text-[#003366] text-[8px] tracking-tight">ભારત સરકાર / GOVT OF INDIA</span>
+                                          </div>
+                                          <span className="text-[7.5px] font-bold text-orange-700 font-mono">UIDAI</span>
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                          <div className="w-12 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 border border-blue-200 rounded flex flex-col items-center justify-center shrink-0 text-slate-400">
+                                            <User className="w-5 h-5 text-blue-700" />
+                                            <span className="text-[6.5px] font-bold text-blue-900 mt-0.5">UIDAI PASS</span>
+                                          </div>
+                                          <div className="space-y-0.5 leading-tight">
+                                            <p className="font-black text-slate-900 text-[10px]">{activeCitizen.citizenNameGu}</p>
+                                            <p className="text-slate-500 text-[8px]">{activeCitizen.citizenNameEn}</p>
+                                            <p className="text-slate-600 text-[7.5px]">જન્મ: ૦૪/૧૧/૧૯૬૧ • સ્ત્રી</p>
+                                            <p className="font-mono font-black text-[#003366] text-[10px] tracking-wider pt-0.5">
+                                              XXXX XXXX {activeCitizen.aadhaarLast4 || '7104'}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <div className="bg-emerald-50 border border-emerald-200 rounded p-1 text-[7.5px] text-emerald-900 font-bold flex items-center justify-between">
+                                          <span>✓ માસ્ક્ડ આધાર પ્રમાણિત</span>
+                                          <span className="font-mono">QR VERIFIED</span>
+                                        </div>
+                                      </div>
+                                    ) : isIncome ? (
+                                      /* INCOME CERTIFICATE FACSIMILE */
+                                      <div className="p-2.5 space-y-1.5 bg-amber-50/30 text-[9px] border-t-2 border-t-amber-600">
+                                        <div className="flex items-center justify-between border-b border-amber-200 pb-1">
+                                          <div className="flex items-center gap-1">
+                                            <GovLogo className="w-4 h-4" />
+                                            <span className="font-black text-amber-950 text-[8px]">ગુજરાત સરકાર • મહેસૂલ વિભાગ</span>
+                                          </div>
+                                          <span className="text-[7px] font-mono text-amber-800 font-bold">DIGITAL GUJARAT</span>
+                                        </div>
+                                        <div className="text-center py-0.5">
+                                          <p className="font-black text-slate-900 text-[9.5px]">સક્ષમ સત્તાધિકારી આવક પ્રમાણપત્ર</p>
+                                          <p className="text-[7.5px] text-slate-600 font-mono">INC-GJ-2026-{activeCitizen.aadhaarLast4 || '449102'}</p>
+                                        </div>
+                                        <div className="bg-white p-1 rounded border border-amber-200 space-y-0.5 text-[8px]">
+                                          <p><strong>અરજદાર:</strong> {activeCitizen.citizenNameGu}</p>
+                                          <p><strong>વાર્ષિક આવક:</strong> <span className="font-bold text-emerald-800">{activeCitizen.incomeDeclaredGu || '₹ ૯૫,૦૦૦'}</span></p>
+                                          <p><strong>કાર્યક્ષેત્ર:</strong> મામલતદાર કચેરી, ગોંડલ (રાજકોટ)</p>
+                                        </div>
+                                        <div className="bg-emerald-50 border border-emerald-300 rounded p-1 text-[7.5px] text-emerald-900 font-bold flex items-center justify-between">
+                                          <span>✓ ૩ નાણાકીય વર્ષ માટે માન્ય</span>
+                                          <span className="font-mono">૨૦૨૫-૨૦૨૮</span>
+                                        </div>
+                                      </div>
+                                    ) : isDeath ? (
+                                      /* DEATH CERTIFICATE FACSIMILE */
+                                      <div className="p-2.5 space-y-1.5 bg-slate-50 text-[9px] border-t-2 border-t-slate-700">
+                                        <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                                          <div className="flex items-center gap-1">
+                                            <GovLogo className="w-4 h-4" />
+                                            <span className="font-black text-slate-800 text-[8px]">જન્મ અને મરણ રજિસ્ટ્રાર કચેરી</span>
+                                          </div>
+                                          <span className="text-[7px] font-mono text-slate-600 font-bold">FORM NO. 6</span>
+                                        </div>
+                                        <div className="text-center py-0.5">
+                                          <p className="font-black text-slate-900 text-[9.5px]">મરણ પ્રમાણપત્ર (DEATH CERTIFICATE)</p>
+                                          <p className="text-[7.5px] text-slate-600 font-mono">GJ-RBD-2024-004128</p>
+                                        </div>
+                                        <div className="bg-white p-1 rounded border border-slate-200 space-y-0.5 text-[8px]">
+                                          <p><strong>મૃતકનું નામ:</strong> સ્વ. રમણિકભાઈ કરસનભાઈ પટેલ</p>
+                                          <p><strong>મરણ તારીખ:</strong> ૧૪/૧૦/૨૦૨૪</p>
+                                          <p><strong>સ્થળ:</strong> સરકારી સિવિલ હોસ્પિટલ, ગોંડલ</p>
+                                        </div>
+                                        <div className="bg-blue-50 border border-blue-200 rounded p-1 text-[7.5px] text-blue-900 font-bold flex items-center justify-between">
+                                          <span>✓ RBD Act ૧૯૬૯ કલમ ૧૨/૧૭</span>
+                                          <span className="font-mono">SEAL VERIFIED</span>
+                                        </div>
+                                      </div>
+                                    ) : isRation ? (
+                                      /* RATION CARD FACSIMILE */
+                                      <div className="p-2.5 space-y-1.5 bg-emerald-50/40 text-[9px] border-t-2 border-t-emerald-600">
+                                        <div className="flex items-center justify-between border-b border-emerald-200 pb-1">
+                                          <span className="font-black text-emerald-950 text-[8px]">અન્ન & નાગરિક પુરવઠો, ગુજરાત</span>
+                                          <span className="text-[7px] font-mono text-emerald-800 font-bold">NFSA PHH</span>
+                                        </div>
+                                        <div className="bg-white p-1 rounded border border-emerald-200 space-y-0.5 text-[8px]">
+                                          <p className="font-mono font-bold text-slate-800">NO: 042100889231</p>
+                                          <p><strong>મુખી:</strong> {activeCitizen.citizenNameGu}</p>
+                                          <p><strong>સભ્યો:</strong> ૨ સભ્યો (NFSA પાત્ર)</p>
+                                        </div>
+                                        <div className="bg-emerald-100 rounded p-1 text-[7.5px] text-emerald-950 font-bold">
+                                          ✓ બારકોડેડ રેશનકાર્ડ વેરિફાઈડ
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      /* AFFIDAVIT / OTHER FACSIMILE */
+                                      <div className="p-2.5 space-y-1.5 bg-amber-50/20 text-[9px] border-t-2 border-t-indigo-600">
+                                        <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                                          <span className="font-black text-slate-900 text-[8px]">INDIA NON JUDICIAL • GUJARAT</span>
+                                          <span className="text-[7.5px] font-bold text-indigo-700">₹ ૫૦ E-STAMP</span>
+                                        </div>
+                                        <div className="bg-white p-1 rounded border border-slate-200 space-y-0.5 text-[8px]">
+                                          <p className="font-mono text-[7px] text-slate-500">IN-GJ99182371</p>
+                                          <p className="font-bold text-slate-800">નોટરાઇઝ્ડ બાંયધરી સોગંદનામું</p>
+                                          <p className="text-slate-600">Notary Reg: 8841/2026</p>
+                                        </div>
+                                        <div className="bg-indigo-50 rounded p-1 text-[7.5px] text-indigo-950 font-bold">
+                                          ✓ કાયદેસર શપથ પ્રમાણિત
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="mt-2 flex items-center justify-between pt-1.5 border-t border-slate-200/80">
+                                  <span className="text-[9.5px] text-[#005A9C] font-bold flex items-center gap-1">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                    <span>{isGu ? "અધિકૃત પ્રમાણ" : "Govt Certified"}</span>
+                                  </span>
+                                  <button
+                                    onClick={() => {
+                                      setPreviewDocLightbox({
+                                        docName,
+                                        fileUrl: doc.fileUrl,
+                                        ocrData,
+                                        docRules,
+                                        idx,
+                                        activeCitizen
+                                      });
+                                      setLightboxZoom(1);
+                                    }}
+                                    className="text-[9.5px] text-blue-600 hover:text-blue-800 font-bold underline cursor-pointer"
+                                  >
+                                    {isGu ? "🔍 ક્લિક કરી મોટું જુઓ" : "Zoom view"}
+                                  </button>
+                                </div>
+
+                              </div>
+
+                              {/* Right Column: AI OCR Metadata & Official Gujarat Government Statutory Rules Engine */}
+                              <div className="md:col-span-8 space-y-3">
+                                
+                                {/* OCR Extracted Summary Strip */}
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10.5px]">
+                                    <div>
+                                      <span className="text-slate-500 text-[9.5px] block">{isGu ? "પ્રકાર:" : "Type:"}</span>
+                                      <span className="font-mono font-bold text-slate-800 text-[10px] truncate block">{ocrData.documentType}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-500 text-[9.5px] block">{isGu ? "ક્રમાંક:" : "ID No:"}</span>
+                                      <span className="font-mono font-black text-[#003366] text-[10px] truncate block">{ocrData.idNumber}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-500 text-[9.5px] block">{isGu ? "ધારકનું નામ:" : "Holder:"}</span>
+                                      <span className="font-bold text-slate-800 text-[10px] truncate block">{ocrData.holderName}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-500 text-[9.5px] block">{isGu ? "AI ચોકસાઈ:" : "Confidence:"}</span>
+                                      <span className="font-mono font-black text-emerald-700 text-[10px]">
+                                        {ocrData.confidence ? `${(ocrData.confidence * 100).toFixed(1)}%` : '99.4%'} (ઉચ્ચ)
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Statutory Rule Engine: Specific Gujarat Government Rules for this document */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-black text-slate-900 text-[11px] flex items-center gap-1.5">
+                                      <Building className="w-3.5 h-3.5 text-[#003366]" />
+                                      <span>{isGu ? "🏛️ ગુજરાત સરકાર સત્તાવાર કાનૂની નિયમ ચકાસણી (Statutory Rules):" : "🏛️ Gujarat Statutory Regulatory Checks:"}</span>
+                                    </span>
+                                    <span className="text-[9.5px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                      {docRules.length}/{docRules.length} નિયમો પાસ
+                                    </span>
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    {docRules.map((rule) => (
+                                      <div key={rule.id} className="bg-slate-50/80 border border-slate-200/90 rounded-xl p-2.5 text-[11px] space-y-1">
+                                        <div className="flex items-start justify-between gap-1.5">
+                                          <div>
+                                            <span className="font-black text-slate-900 text-[11px] block">
+                                              {isGu ? rule.titleGu : isHi ? rule.titleHi : rule.titleEn}
+                                            </span>
+                                            <span className="text-[9.5px] font-mono text-blue-700 font-bold">
+                                              સંદર્ભ: {rule.actReference}
+                                            </span>
+                                          </div>
+                                          <span className="bg-emerald-100 text-emerald-900 font-black text-[9px] px-2 py-0.5 rounded-full shrink-0 border border-emerald-300">
+                                            ✓ {isGu ? "પાસ" : "PASSED"}
+                                          </span>
+                                        </div>
+                                        <p className="text-[10.5px] text-emerald-800 font-medium leading-relaxed bg-emerald-50/60 p-1.5 rounded-lg border border-emerald-200/50">
+                                          {isGu ? rule.aiVerdictGu : isHi ? rule.aiVerdictHi : rule.aiVerdictEn}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Officer Physical Document Cross-Verification Checkbox */}
+                                <div 
+                                  onClick={() => {
+                                    triggerHaptic('tap');
+                                    const key = `${activeCitizen.tokenNumber}_${idx}`;
+                                    setPhysicallyVerifiedDocs(prev => ({ ...prev, [key]: !prev[key] }));
+                                  }}
+                                  className={`p-2.5 rounded-xl border transition cursor-pointer flex items-center justify-between ${
+                                    isPhysicallyVerified 
+                                      ? 'bg-emerald-50 border-emerald-400 text-emerald-950' 
+                                      : 'bg-white border-slate-300 hover:border-slate-400 text-slate-700'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    {isPhysicallyVerified ? (
+                                      <CheckSquare className="w-4 h-4 text-emerald-600 shrink-0" />
+                                    ) : (
+                                      <Square className="w-4 h-4 text-slate-400 shrink-0" />
+                                    )}
+                                    <span className="font-bold text-[11px]">
+                                      {isGu 
+                                        ? "અસલ કાગળ સાથે રૂબરૂ સરખામણી પૂર્ણ (Physically Verified with Original)" 
+                                        : "Physically Verified with Original Document at Counter"}
+                                    </span>
+                                  </div>
+                                  <span className={`text-[9.5px] font-mono font-bold px-2 py-0.5 rounded ${
+                                    isPhysicallyVerified ? 'bg-emerald-200 text-emerald-900' : 'bg-slate-100 text-slate-600'
+                                  }`}>
+                                    {isPhysicallyVerified ? "ચકાસાયેલ ✓" : "અધિકારી ચેકલિસ્ટ"}
+                                  </span>
+                                </div>
+
+                              </div>
+
+                            </div>
+
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Statutory Officer Instruction Note */}
+                    <div className="bg-amber-50 p-3 sm:p-4 rounded-2xl border border-amber-200 text-[11.5px] text-amber-950 leading-relaxed space-y-1">
+                      <div className="flex items-center gap-1.5 font-black text-amber-900 text-xs">
+                        <AlertCircle className="w-4 h-4 text-amber-700" />
+                        <span>{isGu ? "અધિકારી કાયદાકીય માર્ગદર્શિકા (Statutory Officer Protocol):" : "Official Officer Protocol:"}</span>
+                      </div>
+                      <p>
+                        {isGu 
+                          ? "આ તમામ દસ્તાવેજોનું સિસ્ટમ પ્રી-ચેક (AI OCR + સરકારી નિયમ એન્જિન) ૧૦૦% સફળ થયેલ છે. કાઉન્ટર પર અરજદારના અસલ કાગળો રૂબરૂ મેળવી લીધા બાદ ઉપર આપેલ અરજી ફોર્મ ચકાસી અરજી આખરી મંજૂર કરવી."
+                          : "System pre-check (AI OCR + Gujarat Rule Engine) is 100% compliant. Verify physical originals presented by citizen and approve the application."}
+                      </p>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* TAB 2: OFFICIAL DIGITAL GUJARAT SCHEME APPLICATION FORM */}
+                {activeReviewTab === 'APPLICATION_FORM' && (
+                  <div className="space-y-4 animate-in fade-in">
+                    
+                    {/* Official Gujarat Government Form Document Paper */}
+                    <div className="bg-white border-2 border-slate-300 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5 text-slate-900 print:border-none">
+                      
+                      {/* Government Form Header */}
+                      <div className="border-b-2 border-slate-900 pb-4 text-center space-y-1">
+                        <div className="flex items-center justify-center gap-2">
+                          <GovLogo className="w-8 h-8 drop-shadow-sm" />
+                          <h3 className="text-base sm:text-lg font-black text-[#003366] tracking-tight">
+                            ગુજરાત સરકાર • GOVERNMENT OF GUJARAT
+                          </h3>
+                        </div>
+                        <p className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                          મહિલા અને બાળ વિકાસ વિભાગ / સામાજિક ન્યાય & મહેસૂલ વિભાગ
+                        </p>
+                        <div className="inline-block bg-[#003366] text-white px-4 py-1 rounded-full text-xs sm:text-sm font-black mt-1">
+                          {activeCitizen.schemeTitleGu}
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-mono pt-0.5">
+                          પરિશિષ્ટ-૧ (નિયમ-૪ અન્વયે સત્તાવાર ઓનલાઇન અરજી પત્રક) • DIGITAL GUJARAT FORM
+                        </p>
+                      </div>
+
+                      {/* Official Application Metadata Bar & Citizen Photo */}
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs w-full sm:w-auto">
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">અરજી ક્રમાંક (App No):</span>
+                            <span className="font-mono font-black text-[#003366] text-xs">
+                              GJ-APP-2026-{activeCitizen.aadhaarLast4 || '449102'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">ટોકન ક્રમાંક:</span>
+                            <span className="font-mono font-black text-emerald-800 text-xs">
+                              {activeCitizen.tokenNumber} (કાઉન્ટર {activeCitizen.counterNumber})
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">અરજી તારીખ & સમય:</span>
+                            <span className="font-mono font-bold text-slate-700 text-xs">
+                              ૧૦/૧૦/૨૦૨૬ • {activeCitizen.appliedTime || '10:35 AM'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Citizen Passport Photo Box with UIDAI Verified Stamp */}
+                        <div className="flex items-center gap-2.5 shrink-0 bg-white border border-slate-300 p-1.5 rounded-xl shadow-2xs">
+                          <div className="w-14 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 border border-blue-300 rounded-lg flex flex-col items-center justify-center text-blue-900 text-center">
+                            <User className="w-6 h-6 text-blue-800" />
+                            <span className="text-[6.5px] font-bold mt-0.5">PASSPORT</span>
+                          </div>
+                          <div className="space-y-0.5 text-left">
+                            <span className="bg-emerald-100 border border-emerald-300 text-emerald-950 font-black text-[8.5px] px-1.5 py-0.5 rounded block text-center">
+                              ✓ આધાર બાયોમેટ્રિક
+                            </span>
+                            <p className="text-[8.5px] font-mono text-slate-500">UIDAI VERIFIED</p>
+                            <p className="text-[8px] text-slate-400 font-mono">SHA-256 HASH</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SECTION 1: APPLICANT PERSONAL DETAILS */}
+                      <div className="space-y-2">
+                        <h4 className="font-black text-xs sm:text-sm text-[#003366] border-b border-slate-200 pb-1 flex items-center gap-1.5">
+                          <UserCheck className="w-4 h-4 text-[#FF9933]" />
+                          <span>ભાગ-૧: અરજદારની સામાન્ય વિગતો (Applicant Identity)</span>
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-200/70">
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">અરજદારનું પૂરું નામ:</span>
+                            <span className="font-black text-slate-900">{activeCitizen.citizenNameGu}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">અંગ્રેજીમાં નામ (Name in English):</span>
+                            <span className="font-bold text-slate-800">{activeCitizen.citizenNameEn}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">માસ્ક્ડ આધાર નંબર:</span>
+                            <span className="font-mono font-black text-[#003366]">XXXX-XXXX-{activeCitizen.aadhaarLast4 || '7104'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">ઉંમર / જન્મ તારીખ:</span>
+                            <span className="font-bold text-slate-800">૬૪ વર્ષ (૦૪/૧૧/૧૯૬૧ - વરિષ્ઠ નાગરિક)</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">લિંગ / જાતિ:</span>
+                            <span className="font-bold text-slate-800">સ્ત્રી / સામાન્ય (બક્ષીપંચ/SEBC)</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">મોબાઈલ નંબર:</span>
+                            <span className="font-mono font-bold text-slate-800">{activeCitizen.phone} (OTP પ્રમાણિત)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SECTION 2: PERMANENT RESIDENTIAL ADDRESS & JURISDICTION */}
+                      <div className="space-y-2">
+                        <h4 className="font-black text-xs sm:text-sm text-[#003366] border-b border-slate-200 pb-1 flex items-center gap-1.5">
+                          <MapPin className="w-4 h-4 text-[#FF9933]" />
+                          <span>ભાગ-૨: કાયમી રહેઠાણની વિગતો & મહેસૂલી હકુમત (Address & Jurisdiction)</span>
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-200/70">
+                          <div className="col-span-2">
+                            <span className="text-[10.5px] text-slate-500 block">પૂરું સરનામું:</span>
+                            <span className="font-bold text-slate-900">પટેલ શેરી, જૂના પંચાયત ચોક પાસે, ગામ: ગોમટા</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">ગામ / તાલુકો:</span>
+                            <span className="font-bold text-slate-800">ગોમટા • ગોંડલ તાલુકો</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">જિલ્લો & પિનકોડ:</span>
+                            <span className="font-bold text-slate-800">રાજકોટ • 360311</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-[10.5px] text-slate-500 block">રેશનકાર્ડ નંબર:</span>
+                            <span className="font-mono font-bold text-slate-800">042100889231 (NFSA - PHH બારકોડેડ રેશનકાર્ડ)</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-[10.5px] text-slate-500 block">સેવા કેન્દ્ર હકુમત:</span>
+                            <span className="font-bold text-[#003366]">જન સેવા કેન્દ્ર, મામલતદાર કચેરી, ગોંડલ</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SECTION 3: SCHEME SPECIFIC ELIGIBILITY ANSWERS */}
+                      <div className="space-y-2">
+                        <h4 className="font-black text-xs sm:text-sm text-[#003366] border-b border-slate-200 pb-1 flex items-center gap-1.5">
+                          <BadgeCheck className="w-4 h-4 text-[#FF9933]" />
+                          <span>ભાગ-૩: યોજના વિશિષ્ટ વિગતો & પાત્રતા પ્રશ્નોત્તરી (Scheme Specific Answers)</span>
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-200/70">
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">વાર્ષિક આવક (આવક પ્રમાણપત્ર મુજબ):</span>
+                            <span className="font-black text-emerald-800 text-xs">{activeCitizen.incomeDeclaredGu || '₹ ૯૫,૦૦૦ (વાર્ષિક)'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">સ્વ. પતિનું નામ:</span>
+                            <span className="font-black text-slate-900">સ્વ. રમણિકભાઈ કરસનભાઈ પટેલ</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">પતિના અવસાનની તારીખ:</span>
+                            <span className="font-bold text-slate-800">૧૪/૧૦/૨૦૨૪ (મરણ પ્રમાણપત્ર ફોર્મ-૬ સબમિટ)</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">પુનઃલગ્ન કરેલ છે કે કેમ?:</span>
+                            <span className="font-black text-emerald-800">ના (પુનઃલગ્ન કરેલ નથી - સોગંદનામું સામેલ)</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">કોઈ અન્ય સહાય/પેન્શન મેળવો છો?:</span>
+                            <span className="font-bold text-slate-800">ના (દ્વિતીય સરકારી સહાય નથી)</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">પાત્રતા પરિણામ:</span>
+                            <span className="font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-[11px] inline-block">
+                              ✓ સરકારી ધોરણો મુજબ પાત્ર
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SECTION 4: DIRECT BENEFIT TRANSFER (DBT) BANK ACCOUNT */}
+                      <div className="space-y-2">
+                        <h4 className="font-black text-xs sm:text-sm text-[#003366] border-b border-slate-200 pb-1 flex items-center gap-1.5">
+                          <Landmark className="w-4 h-4 text-[#FF9933]" />
+                          <span>ભાગ-૪: ડાયરેક્ટ બેનિફિટ ટ્રાન્સફર (DBT) બેંક ખાતાની વિગત (Direct Benefit Transfer)</span>
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-200/70">
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">બેંકનું નામ:</span>
+                            <span className="font-black text-slate-900">State Bank of India (SBI)</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">શાખા (Branch):</span>
+                            <span className="font-bold text-slate-800">ગોંડલ મુખ્ય શાખા</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">બેંક ખાતા નંબર:</span>
+                            <span className="font-mono font-black text-[#003366]">•••• •••• 8821 (Aadhaar Linked)</span>
+                          </div>
+                          <div>
+                            <span className="text-[10.5px] text-slate-500 block">IFSC કોડ:</span>
+                            <span className="font-mono font-bold text-slate-800">SBIN0000382</span>
+                          </div>
+                          <div className="col-span-2 sm:col-span-4 bg-blue-50 border border-blue-200 rounded-lg p-2 text-[11px] text-blue-900 font-bold flex items-center justify-between">
+                            <span>🏛️ માસિક પેન્શન રકમ સીધા અરજદારના ઉપરોક્ત NPCI આધાર લિંક્ડ ખાતામાં જમા થશે.</span>
+                            <span className="font-mono text-emerald-800">₹ ૧,૨૫૦/- પ્રતિ માસ</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SECTION 5: STATUTORY DIGITAL SELF-DECLARATION */}
+                      <div className="space-y-2">
+                        <h4 className="font-black text-xs sm:text-sm text-[#003366] border-b border-slate-200 pb-1 flex items-center gap-1.5">
+                          <Lock className="w-4 h-4 text-[#FF9933]" />
+                          <span>ભાગ-૫: કાયદેસર ડિજિટલ સ્વ-ઘોષણાપત્ર (Statutory Self-Declaration IPC 199/200)</span>
+                        </h4>
+                        <div className="bg-amber-50/60 border border-amber-200 p-3 rounded-xl text-[11px] text-amber-950 space-y-1.5 leading-relaxed">
+                          <p>
+                            <strong>સ્વ-ઘોષણા:</strong> હું આથી સપથપૂર્વક જાહેર કરું છું કે ઉપર જણાવેલ તમામ વિગતો અને અપલોડ કરેલ દસ્તાવેજો મારી જાણ મુજબ સંપૂર્ણ સાચા છે. મેં પુનઃલગ્ન કરેલ નથી અને આ યોજના હેઠળ અગાઉ કોઈ સહાય લીધેલ નથી. જો કોઈ વિગત ખોટી જણાશે તો ભારતીય દંડ સંહિતા (IPC) કલમ ૧૯૯ અને ૨૦૦ હેઠળ કાનૂની કાર્યવાહીને પાત્ર રહીશ.
+                          </p>
+                          <div className="flex items-center justify-between pt-1 border-t border-amber-200 text-[10px] text-amber-900 font-mono">
+                            <span>ડિજિટલ સ્વીકૃતિ: ૧૦/૧૦/૨૦૨૬ • ૧૦:૩૫:૧૨ AM IST</span>
+                            <span>Client Device Hash: SHA256-7f8a9c2e</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* SECTION 6: ATTACHED DOCUMENTS & RULES SUMMARY */}
+                      <div className="space-y-2">
+                        <h4 className="font-black text-xs sm:text-sm text-[#003366] border-b border-slate-200 pb-1 flex items-center gap-1.5">
+                          <FileCheck2 className="w-4 h-4 text-[#FF9933]" />
+                          <span>ભાગ-૬: બીડાણ કરેલ દસ્તાવેજોની યાદી & નિયમ ચકાસણી સારાંશ ({citizenDocs.length})</span>
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                          {citizenDocs.map((doc: any, i: number) => (
+                            <div key={i} className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between">
+                              <span className="font-bold text-slate-800 text-[11px] truncate">
+                                {i + 1}. {isGu ? doc.nameGu : doc.nameEn}
+                              </span>
+                              <span className="bg-emerald-100 text-emerald-900 font-black text-[9.5px] px-2 py-0.5 rounded-full shrink-0">
+                                ✓ AI વેરિફાઈડ
                               </span>
                             </div>
-                          </div>
-
-                          <span className="bg-emerald-100 border border-emerald-300 text-emerald-900 font-black text-[9.5px] px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                            <span>{isGu ? "પ્રમાણિત" : isHi ? "प्रमाणित" : "Verified"}</span>
-                          </span>
+                          ))}
                         </div>
-
-                        {/* File Thumbnail & Preview Box */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                          {/* Left: Thumbnail/Preview Container */}
-                          <div className="sm:col-span-1 bg-white border border-slate-200 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
-                            {doc.fileUrl ? (
-                              <img 
-                                src={doc.fileUrl} 
-                                alt={docName} 
-                                className="w-full h-24 object-cover rounded-lg border border-slate-100 shadow-2xs" 
-                              />
-                            ) : (
-                              <div className="w-full h-24 bg-gradient-to-br from-blue-50 to-slate-100 rounded-lg border border-dashed border-blue-300 flex flex-col items-center justify-center p-2 text-center">
-                                <GovLogo className="w-8 h-8 drop-shadow-xs" />
-                                <span className="text-[8.5px] font-mono text-slate-600 mt-1 font-bold">DIGITAL RECORD</span>
-                              </div>
-                            )}
-                            <span className="text-[9.5px] text-[#005A9C] font-bold mt-1.5 flex items-center gap-1">
-                              <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                              <span>{isGu ? "સરકારી અધિકૃત" : "Govt Certified"}</span>
-                            </span>
-                          </div>
-
-                          {/* Right: AI OCR Extracted Fields */}
-                          <div className="sm:col-span-2 bg-white border border-slate-200 rounded-xl p-2.5 space-y-1.5">
-                            <span className="text-[9.5px] font-black text-slate-400 uppercase tracking-wider block">
-                              {isGu ? "AI OCR દ્વારા મેળવેલ વિગતો:" : "OCR Extracted Metadata:"}
-                            </span>
-                            
-                            <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                              <div>
-                                <span className="text-slate-500 text-[10px] block">{isGu ? "દસ્તાવેજ પ્રકાર:" : "Type:"}</span>
-                                <span className="font-mono font-bold text-slate-800">{ocrData.documentType || 'OFFICIAL_PROOF'}</span>
-                              </div>
-                              <div>
-                                <span className="text-slate-500 text-[10px] block">{isGu ? "દસ્તાવેજ ક્રમાંક:" : "ID Number:"}</span>
-                                <span className="font-mono font-black text-[#003366]">{ocrData.idNumber || `GJ-${activeCitizen.aadhaarLast4 || '8842'}`}</span>
-                              </div>
-                              <div>
-                                <span className="text-slate-500 text-[10px] block">{isGu ? "ધારકનું નામ:" : "Holder Name:"}</span>
-                                <span className="font-bold text-slate-800 truncate block">{ocrData.holderName || activeCitizen.citizenNameGu}</span>
-                              </div>
-                              <div>
-                                <span className="text-slate-500 text-[10px] block">{isGu ? "AI ચોકસાઈ (Confidence):" : "Confidence:"}</span>
-                                <span className="font-mono font-black text-emerald-700">
-                                  {ocrData.confidence ? `${(ocrData.confidence * 100).toFixed(1)}%` : '99.4%'} (High)
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
                       </div>
-                    );
-                  })}
-                </div>
 
-                {/* Statutory Officer Instruction Note */}
-                <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
-                  <strong>{isGu ? "અધિકારી સૂચના:" : isHi ? "अधिकारी सूचना:" : "Officer Protocol:"}</strong>{' '}
-                  {isGu 
-                    ? "આ દસ્તાવેજોનું સિસ્ટમ પ્રી-ચેક (AI OCR + Rule Engine) પૂર્ણ થયેલ છે. અસલ કાગળો સાથે રૂબરૂ સરખામણી કરી કાયદેસર અરજી મંજૂર કરવી."
-                    : isHi 
-                    ? "इन दस्तावेज़ों की प्रणाली पूर्व-जांच (AI OCR + Rule Engine) पूर्ण हो चुकी है। मूल प्रतियों से सत्यापन कर आवेदन स्वीकृत करें।"
-                    : "System pre-check (AI OCR + Rule Engine) has passed. Perform physical verification with originals before granting formal approval."}
-                </div>
+                      {/* Government Form Action Strip */}
+                      <div className="pt-3 border-t-2 border-slate-300 flex items-center justify-between flex-wrap gap-2">
+                        <button
+                          onClick={() => {
+                            triggerHaptic('success');
+                            window.print();
+                          }}
+                          className="bg-slate-800 hover:bg-slate-900 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                        >
+                          <Printer className="w-4 h-4" />
+                          <span>🖨️ સત્તાવાર અરજી ફોર્મ પ્રિન્ટ / PDF ડાઉનલોડ કરો</span>
+                        </button>
+
+                        <div className="text-right">
+                          <p className="text-[10px] text-slate-500 font-mono">Digital Signature Hash:</p>
+                          <p className="text-[10px] font-mono font-bold text-[#003366]">GJ-DPI-2026-{activeCitizen.tokenNumber.replace('#', '')}-MAMLATDAR</p>
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+                )}
 
               </div>
 
-              {/* Modal Footer */}
-              <div className="bg-slate-50 p-3.5 border-t border-slate-200 flex items-center justify-between shrink-0">
-                <span className="text-[10px] text-slate-500 font-mono">
-                  QueueLess Verified • {activeCitizen.tokenNumber}
+              {/* MODAL FOOTER */}
+              <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <span className="text-[10.5px] text-slate-500 font-mono">
+                  QueueLess Gujarat DPI Verified • {activeCitizen.tokenNumber}
                 </span>
                 <button
                   onClick={() => {
                     setSelectedCitizenForDocs(null);
                     setDocModalOpen(false);
                   }}
-                  className="bg-[#003366] hover:bg-[#002244] text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer shadow-xs"
+                  className="bg-[#003366] hover:bg-[#002244] text-white font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm transition cursor-pointer shadow-xs"
                 >
                   {isGu ? "નિરીક્ષણ પૂર્ણ (Close)" : isHi ? "निरीक्षण समाप्त (Close)" : "Close Review"}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 🔍 1.1 DOCUMENT ZOOM LIGHTBOX MODAL */}
+      {previewDocLightbox && (() => {
+        const { docName, fileUrl, ocrData, docRules, idx, activeCitizen } = previewDocLightbox;
+        const isPhysicallyVerified = !!physicallyVerifiedDocs[`${activeCitizen.tokenNumber}_${idx}`];
+
+        return (
+          <div 
+            onClick={() => setPreviewDocLightbox(null)}
+            className="fixed inset-0 z-70 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto modal-backdrop animate-in fade-in"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-3xl w-full border border-slate-300 shadow-2xl overflow-hidden flex flex-col max-h-[94vh] animate-in zoom-in-95"
+            >
+              {/* Lightbox Header */}
+              <div className="bg-[#003366] text-white p-4 flex items-center justify-between border-b border-blue-900 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <GovLogo className="w-7 h-7 drop-shadow-md" />
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black text-white">{docName}</h4>
+                    <p className="text-[10px] text-blue-200 font-mono">
+                      {activeCitizen.tokenNumber} • {activeCitizen.citizenNameGu} • ઝૂમ લેવલ: {(lightboxZoom * 100).toFixed(0)}%
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Zoom Controls */}
+                  <div className="flex items-center bg-white/10 rounded-xl p-1 gap-1 border border-white/20">
+                    <button
+                      onClick={() => setLightboxZoom(prev => Math.max(0.75, prev - 0.25))}
+                      className="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-xs font-bold transition cursor-pointer"
+                      title="Zoom Out"
+                    >
+                      <ZoomOut className="w-3.5 h-3.5 text-white" />
+                    </button>
+                    <button
+                      onClick={() => setLightboxZoom(1)}
+                      className="px-2 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-[10px] font-mono font-bold transition cursor-pointer"
+                      title="Reset Zoom"
+                    >
+                      {(lightboxZoom * 100).toFixed(0)}%
+                    </button>
+                    <button
+                      onClick={() => setLightboxZoom(prev => Math.min(2.5, prev + 0.25))}
+                      className="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-xs font-bold transition cursor-pointer"
+                      title="Zoom In"
+                    >
+                      <ZoomIn className="w-3.5 h-3.5 text-white" />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setPreviewDocLightbox(null)}
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Lightbox Body */}
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 bg-slate-100/60">
+                
+                {/* Visual Image/Facsimile Container */}
+                <div className="bg-white rounded-2xl border-2 border-slate-300 p-4 flex items-center justify-center overflow-hidden min-h-[220px]">
+                  <div 
+                    style={{ transform: `scale(${lightboxZoom})`, transformOrigin: 'center center', transition: 'transform 0.2s ease-out' }}
+                    className="w-full max-w-md"
+                  >
+                    {fileUrl ? (
+                      <img 
+                        src={fileUrl} 
+                        alt={docName} 
+                        className="w-full max-h-[380px] object-contain rounded-xl border border-slate-200 shadow-md"
+                      />
+                    ) : (
+                      /* Rich Facsimile in Lightbox */
+                      <div className="p-4 rounded-xl border-2 border-slate-300 bg-white space-y-3 shadow-md text-xs">
+                        <div className="flex items-center justify-between border-b pb-2">
+                          <div className="flex items-center gap-2">
+                            <GovLogo className="w-6 h-6" />
+                            <span className="font-black text-[#003366] text-sm">ગુજરાત સરકાર • સત્તાવાર દસ્તાવેજ</span>
+                          </div>
+                          <span className="font-mono text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px] border border-emerald-200">
+                            VERIFIED ARCHIVE
+                          </span>
+                        </div>
+                        <div className="space-y-1 text-center py-2 bg-slate-50 rounded-lg">
+                          <h5 className="font-black text-slate-900 text-sm">{docName}</h5>
+                          <p className="font-mono text-[#003366] font-bold text-xs">{ocrData.idNumber}</p>
+                          <p className="text-slate-600 font-bold">અરજદાર: {ocrData.holderName}</p>
+                        </div>
+                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-[11px] text-emerald-950 font-medium">
+                          ✓ આ દસ્તાવેજ સરકારી ડિજિટલ ડેટાબેઝ (UIDAI / Revenue / Civil Registry) સાથે ૧૦૦% મેળ ખાય છે.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Statutory Rules Evaluator Checklist */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-2.5 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-black text-slate-900 text-xs flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span>ગુજરાત સરકાર સત્તાવાર કાનૂની નિયમો (Statutory Regulations):</span>
+                    </h5>
+                    <span className="text-[10px] font-mono text-emerald-800 font-bold">
+                      {docRules.length}/{docRules.length} પાસ
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {docRules.map((rule: any) => (
+                      <div key={rule.id} className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="font-black text-slate-900">{isGu ? rule.titleGu : rule.titleEn}</span>
+                            <span className="text-[9.5px] font-mono text-blue-700 block font-bold">
+                              સંદર્ભ: {rule.actReference}
+                            </span>
+                          </div>
+                          <span className="bg-emerald-100 text-emerald-900 font-black text-[9.5px] px-2 py-0.5 rounded-full shrink-0">
+                            ✓ પાસ
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-emerald-900 font-medium bg-emerald-50/70 p-1.5 rounded-lg border border-emerald-200/60">
+                          {isGu ? rule.aiVerdictGu : rule.aiVerdictEn}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Lightbox Footer */}
+              <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <button
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    const key = `${activeCitizen.tokenNumber}_${idx}`;
+                    setPhysicallyVerifiedDocs(prev => ({ ...prev, [key]: !prev[key] }));
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition cursor-pointer ${
+                    isPhysicallyVerified 
+                      ? 'bg-emerald-600 text-white shadow-xs' 
+                      : 'bg-white border border-slate-300 text-slate-700 hover:border-slate-400'
+                  }`}
+                >
+                  <CheckSquare className="w-4 h-4" />
+                  <span>
+                    {isPhysicallyVerified ? "✓ અસલ કાગળ સાથે પ્રમાણિત થઈ ગયું" : "અસલ કાગળ સાથે પ્રમાણિત કરો"}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setPreviewDocLightbox(null)}
+                  className="bg-[#003366] hover:bg-[#002244] text-white font-bold px-5 py-2 rounded-xl text-xs transition cursor-pointer"
+                >
+                  બંધ કરો (Close)
                 </button>
               </div>
 

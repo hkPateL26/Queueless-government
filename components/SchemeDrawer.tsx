@@ -36,6 +36,7 @@ export interface DocVerificationState {
   reasonEn?: string;
   reasonGu?: string;
   fileName?: string;
+  fileUrl?: string;
 }
 
 interface SchemeDrawerProps {
@@ -139,6 +140,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
         nameEn: d.nameEn,
         status: (v?.status === 'passed' ? 'passed' : 'pending') as 'passed' | 'pending',
         fileName: v?.fileName || `${d.nameEn.replace(/[^a-zA-Z0-9]/g, '_')}_Verified.pdf`,
+        fileUrl: v?.fileUrl,
         extractedDetails: v?.extractedDetails || `${d.nameGu}: Khunt Harkishan Vinodrai • AI પ્રમાણિત`
       };
     });
@@ -157,6 +159,17 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
       [docKey]: { status: 'scanning', fileName: file.name }
     }));
 
+    // Read file as base64 data URL for instant officer preview
+    let previewDataUrl = '';
+    try {
+      previewDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve((e.target?.result as string) || '');
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(file);
+      });
+    } catch {}
+
     try {
       const res = await inspectUploadedFileStrict(file, docKey, docNameEn);
       if (res.isValid) {
@@ -165,6 +178,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           [docKey]: {
             status: 'passed',
             fileName: file.name,
+            fileUrl: previewDataUrl,
             extractedDetails: isEn ? res.extractedDetailsEn : res.extractedDetailsGu
           }
         }));
