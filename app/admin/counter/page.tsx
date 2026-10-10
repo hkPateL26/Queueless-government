@@ -9,7 +9,7 @@ import {
   ExternalLink, Eye, Printer, ArrowLeft, Sparkles, Star, Award, 
   AlertCircle, Phone, Lock, ChevronRight, RefreshCw, Layers, History, BadgeCheck,
   Globe, IndianRupee, CreditCard, Receipt, Banknote, Landmark, FileCheck, FileCheck2,
-  ClipboardList, Maximize2, ZoomIn, ZoomOut, QrCode, MapPin, Calendar, Building2, Download, CheckSquare, Square, User
+  ClipboardList, Maximize2, ZoomIn, ZoomOut, QrCode, MapPin, Calendar, Building2, Download, CheckSquare, Square, User, LogOut
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -26,6 +26,8 @@ import { Language, GUJARAT_LANGUAGES } from '@/lib/translations';
 import { VerifiedDocumentItem, GovernmentPaymentRecord } from '@/lib/slot-engine';
 import { BookingDetails } from '@/components/SlotBookingModal';
 import { DEFAULT_CITIZEN_PROFILE } from '@/lib/citizen-profile';
+import { getActiveOfficer, clearOfficerSession, OfficerAccount } from '@/lib/admin-auth';
+import { useRouter } from 'next/navigation';
 
 interface QueueCitizen {
   id: string;
@@ -132,7 +134,24 @@ const INITIAL_QUEUE: QueueCitizen[] = [
         nameEn: 'Income Certificate (Competent Authority)', 
         status: 'PRE_CHECK_PASSED' 
       }
-    ]
+    ],
+    payment: {
+      mode: 'ONLINE_CYBER_TREASURY',
+      amount: 30,
+      status: 'PAID',
+      transactionId: 'TXN-P07-GS-2026',
+      cyberTreasuryTxnId: 'CYB-GJ-2026-9921',
+      grasChallanNo: 'GRAS/2026/08104',
+      kacheriChallanNo: 'ECH-GJ-2026-08104',
+      paidAt: '10:36 AM',
+      paymentMethod: 'UPI',
+      payerName: 'ગંગાબેન પટેલ',
+      receiptNumber: 'REC-2026-P07',
+      upiId: 'trushasomaiya@okaxis',
+      payeeName: 'Trusha Somaiya',
+      bankName: 'Axis Bank Cyber Treasury Gateway',
+      utrNumber: 'UPI/AXIS/410298492020'
+    }
   },
   {
     id: 'tok-a42',
@@ -175,7 +194,24 @@ const INITIAL_QUEUE: QueueCitizen[] = [
         nameEn: 'Ration Card Copy', 
         status: 'PRE_CHECK_PASSED' 
       }
-    ]
+    ],
+    payment: {
+      mode: 'ONLINE_CYBER_TREASURY',
+      amount: 20,
+      status: 'PAID',
+      transactionId: 'TXN-A42-INC-2026',
+      cyberTreasuryTxnId: 'CYB-GJ-2026-8812',
+      grasChallanNo: 'GRAS/2026/08105',
+      kacheriChallanNo: 'ECH-GJ-2026-08105',
+      paidAt: '10:46 AM',
+      paymentMethod: 'UPI',
+      payerName: 'મોહનભાઈ પટેલ',
+      receiptNumber: 'REC-2026-A42',
+      upiId: 'trushasomaiya@okaxis',
+      payeeName: 'Trusha Somaiya',
+      bankName: 'Axis Bank Cyber Treasury Gateway',
+      utrNumber: 'UPI/AXIS/410298492021'
+    }
   },
   {
     id: 'tok-a43',
@@ -212,7 +248,14 @@ const INITIAL_QUEUE: QueueCitizen[] = [
         nameEn: 'Income Panchnama Verification', 
         status: 'PRE_CHECK_PASSED' 
       }
-    ]
+    ],
+    payment: {
+      mode: 'CASH_AT_COUNTER',
+      amount: 20,
+      status: 'PAY_AT_COUNTER',
+      transactionId: 'TXN-A43-CASH-2026',
+      kacheriChallanNo: 'CSH-GJ-2026-08106'
+    }
   },
   {
     id: 'tok-a44',
@@ -676,9 +719,14 @@ function getStatutoryDocumentRules(
 }
 
 export default function CounterOperatorDesk() {
+  const router = useRouter();
+
   // Multi-Language State
   const [lang, setLang] = useState<Language>('gu');
   const [langDropdownOpen, setLangDropdownOpen] = useState<boolean>(false);
+
+  // Authenticated Officer Session
+  const [officerSession, setOfficerSession] = useState<OfficerAccount | null>(null);
 
   // Jurisdiction & Officer Profile
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('rajkot');
@@ -686,6 +734,17 @@ export default function CounterOperatorDesk() {
   const [selectedCounter, setSelectedCounter] = useState<number>(1);
   const [isLunchRecess, setIsLunchRecess] = useState<boolean>(false);
   const [realtimeConnected, setRealtimeConnected] = useState<boolean>(true);
+
+  // Load authenticated officer session on mount
+  useEffect(() => {
+    const off = getActiveOfficer(true);
+    setOfficerSession(off);
+    if (off && off.role === 'COUNTER_OPERATOR') {
+      if (off.districtId) setSelectedDistrictId(off.districtId);
+      if (off.talukaId) setSelectedTalukaId(off.talukaId);
+      if (off.assignedCounter) setSelectedCounter(off.assignedCounter);
+    }
+  }, []);
 
   // Queue state
   const [queue, setQueue] = useState<QueueCitizen[]>(INITIAL_QUEUE);
@@ -922,14 +981,20 @@ export default function CounterOperatorDesk() {
     return `${m}:${s}`;
   };
 
+  const handleOfficerLogout = () => {
+    triggerHaptic('tap');
+    clearOfficerSession();
+    router.push('/admin/login');
+  };
+
   // Add audit trail event
   const addAuditLog = (action: AuditLogEntry['action'], tokenNumber: string, remarksGu: string, remarksHi: string, remarksEn: string) => {
     const newEntry: AuditLogEntry = {
       id: `aud-${Date.now()}`,
       timestamp: new Date().toLocaleTimeString(isGu ? 'gu-IN' : isHi ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      officerNameGu: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
-      officerNameHi: 'श्री के. एम. त्रिवेदी (नायब तहसीलदार)',
-      officerNameEn: 'Shri K. M. Trivedi (Dy. Mamlatdar)',
+      officerNameGu: officerSession?.nameGu || 'શ્રી આર. વી. ચૌહાણ (મહેસૂલ કારકૂન)',
+      officerNameHi: officerSession?.nameEn || 'श्री आर. वी. चौहान (राजस्व लिपिक)',
+      officerNameEn: officerSession?.nameEn || 'Shri R. V. Chauhan (Revenue Clerk)',
       action,
       tokenNumber,
       counterNumber: selectedCounter,
@@ -1339,23 +1404,20 @@ export default function CounterOperatorDesk() {
       {/* 🚀 LIVE GUJARAT GOVERNMENT TELEMETRY & SYSTEM HEALTH MARQUEE */}
       <GovTelemetryMarquee lang={lang} />
 
-      {/* 🟠 DEMO MODE BANNER */}
-      <div className="bg-amber-500 text-slate-900 text-xs px-3 sm:px-4 py-1.5 font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-amber-600 shadow-xs">
+      {/* 🏛️ AUTHENTICATED OFFICER SESSION STATUS BANNER */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-blue-950 text-white text-xs px-3 sm:px-4 py-1.5 font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-emerald-500/40 shadow-xs">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="bg-slate-900 text-amber-300 text-[10px] uppercase font-black px-1.5 py-0.5 rounded shrink-0">
-            🟠 DEMO MODE
+          <span className="bg-emerald-600 text-white text-[10px] uppercase font-black px-1.5 py-0.5 rounded shrink-0 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+            <span>સત્તાવાર પ્રમાણિત સત્ર</span>
           </span>
-          <span className="text-[11px] sm:text-xs leading-snug">
-            {isGu 
-              ? 'ડેમો ઓફિસર પર્સોના (મૂલ્યાંકન હેતુ) • વાસ્તવિક સરકારી ડિપ્લોયમેન્ટ માટે ભૂમિકા-આધારિત પ્રમાણીકરણ (RBAC) આવશ્યક છે.'
-              : isHi
-              ? 'डेमो अधिकारी व्यक्तित्व (मूल्यांकन हेतु) • वास्तविक सरकारी परिनियोजन के लिए भूमिका-आधारित प्रमाणीकरण (RBAC) आवश्यक है।'
-              : 'Demo Officer Persona (Evaluation Mode) • Production deployment requires Role-Based Access Control (RBAC).'}
+          <span className="text-[11px] sm:text-xs leading-snug text-emerald-200 truncate">
+            {officerSession?.nameGu || (isGu ? 'શ્રી આર. વી. ચૌહાણ' : 'Shri R. V. Chauhan')} ({officerSession?.designationGu || (isGu ? 'મહેસૂલ કારકૂન' : 'Revenue Clerk')}) • કોડ: {officerSession?.officerCode || 'GJ-REV-GDL-4011'}
           </span>
         </div>
         <div className="flex items-center gap-2 text-[10px] sm:text-[11px] shrink-0 self-end sm:self-auto">
-          <span className={`w-2 h-2 rounded-full ${realtimeConnected ? 'bg-emerald-900 animate-pulse' : 'bg-red-800'}`} />
-          <span>
+          <span className={`w-2 h-2 rounded-full ${realtimeConnected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+          <span className="text-slate-300">
             {realtimeConnected 
               ? (isGu ? 'રીઅલ-ટાઇમ બેકએન્ડ સિંક સક્રિય' : isHi ? 'रीयल-टाइम बैकएंड सिंक सक्रिय' : 'Real-time Backend Sync Active')
               : (isGu ? 'પુનઃ કનેક્ટિંગ...' : isHi ? 'पुनः कनेक्ट हो रहा है...' : 'Reconnecting...')}
@@ -1453,18 +1515,39 @@ export default function CounterOperatorDesk() {
                 <span className="hidden sm:inline">{isGu ? "👑 કલેક્ટર ડેશબોર્ડ" : isHi ? "👑 कलेक्टर डैशबोर्ड" : "👑 Collector Command"}</span>
               </span>
             </Link>
+
+            <Link
+              href="/admin/mamlatdar"
+              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-900/60 hover:bg-blue-800 text-blue-200 border border-blue-700/50 text-[11px] font-bold transition flex items-center gap-1 shrink-0 whitespace-nowrap"
+              title="મામલતદાર કન્સોલ"
+            >
+              <span>⚖️ મામલતદાર</span>
+            </Link>
             
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black text-white">
-                {isGu ? "શ્રી કે. એમ. ત્રિવેદી" : isHi ? "श्री के. एम. त्रिवेदी" : "Shri K. M. Trivedi"}
+                {officerSession?.nameGu || (isGu ? "શ્રી આર. વી. ચૌહાણ" : "Shri R. V. Chauhan")}
               </p>
-              <p className="text-[10px] text-blue-200 font-mono">
-                {isGu ? "નાયબ મામલતદાર • ડેમો પર્સોના" : isHi ? "नायब तहसीलदार • डेमो व्यक्तित्व" : "Dy. Mamlatdar • Demo Persona"}
+              <p className="text-[10px] text-amber-300 font-mono">
+                {officerSession?.designationGu || (isGu ? "મહેસૂલ કારકૂન • કાઉન્ટર ૧" : "Revenue Clerk • Desk 1")}
               </p>
             </div>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-400/20 border-2 border-[#FF9933] text-[#FF9933] flex items-center justify-center font-black text-xs sm:text-sm shadow shrink-0">
-              KT
-            </div>
+
+            <Link
+              href="/admin/login"
+              className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10.5px] font-bold border border-white/20 transition cursor-pointer"
+              title="અધિકારી પર્સોના બદલો (Switch Officer Persona)"
+            >
+              🔄 બદલો
+            </Link>
+
+            <button
+              onClick={handleOfficerLogout}
+              className="p-1.5 rounded-lg bg-red-950/60 hover:bg-red-600 text-red-200 hover:text-white border border-red-700/50 transition cursor-pointer"
+              title="સત્ર સમાપ્ત કરો (Logout)"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </header>
@@ -1480,38 +1563,51 @@ export default function CounterOperatorDesk() {
               </span>
             </div>
 
-            {/* Mobile 2-column grid for District & Taluka, inline on sm+ */}
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 flex-1 min-w-0">
-              {/* District Selector */}
-              <select
-                value={selectedDistrictId}
-                onChange={(e) => {
-                  setSelectedDistrictId(e.target.value);
-                  const d = GUJARAT_33_DISTRICTS.find(x => x.id === e.target.value);
-                  if (d && d.talukas[0]) setSelectedTalukaId(d.talukas[0].id);
-                }}
-                className="w-full sm:w-auto bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-[#003366] truncate min-w-0"
-              >
-                {GUJARAT_33_DISTRICTS.map(d => (
-                  <option key={d.id} value={d.id}>
-                    {isEn ? `${d.nameEn} (${d.nameGu})` : isHi ? `${getLocalizedDistrictName(d, 'hi')} (${d.nameEn})` : `${d.nameGu} (${d.nameEn})`}
-                  </option>
-                ))}
-              </select>
+            {/* Scope Isolation: If Counter Operator, lock scope to assigned district & taluka */}
+            {officerSession?.role === 'COUNTER_OPERATOR' ? (
+              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-xl text-xs text-emerald-950 font-bold truncate">
+                <Lock className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                <span className="truncate">
+                  સોંપાયેલ વહીવટી અધિકાર ક્ષેત્ર: <strong>{currentDistrict.nameGu} ➔ {currentTaluka.nameGu} ➔ કાઉન્ટર {selectedCounter} ({officerSession.counterNameGu || 'આવક & દાખલા'})</strong>
+                </span>
+                <span className="text-[9px] bg-emerald-200 text-emerald-900 px-1.5 py-0.2 rounded font-black shrink-0">
+                  🔒 અધિકૃત લૉક
+                </span>
+              </div>
+            ) : (
+              /* Supervisors can switch taluka / district */
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 flex-1 min-w-0">
+                {/* District Selector */}
+                <select
+                  value={selectedDistrictId}
+                  onChange={(e) => {
+                    setSelectedDistrictId(e.target.value);
+                    const d = GUJARAT_33_DISTRICTS.find(x => x.id === e.target.value);
+                    if (d && d.talukas[0]) setSelectedTalukaId(d.talukas[0].id);
+                  }}
+                  className="w-full sm:w-auto bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-[#003366] truncate min-w-0"
+                >
+                  {GUJARAT_33_DISTRICTS.map(d => (
+                    <option key={d.id} value={d.id}>
+                      {isEn ? `${d.nameEn} (${d.nameGu})` : isHi ? `${getLocalizedDistrictName(d, 'hi')} (${d.nameEn})` : `${d.nameGu} (${d.nameEn})`}
+                    </option>
+                  ))}
+                </select>
 
-              {/* Taluka Selector */}
-              <select
-                value={selectedTalukaId}
-                onChange={(e) => setSelectedTalukaId(e.target.value)}
-                className="w-full sm:w-auto bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-[#003366] truncate min-w-0"
-              >
-                {currentDistrict.talukas.map(t => (
-                  <option key={t.id} value={t.id}>
-                    {isEn ? `${t.nameEn} (${t.nameGu})` : isHi ? `${getLocalizedTalukaName(t, 'hi')} (${t.nameEn})` : `${t.nameGu} (${t.nameEn})`}
-                  </option>
-                ))}
-              </select>
-            </div>
+                {/* Taluka Selector */}
+                <select
+                  value={selectedTalukaId}
+                  onChange={(e) => setSelectedTalukaId(e.target.value)}
+                  className="w-full sm:w-auto bg-slate-50 border border-slate-300 font-bold text-slate-800 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-[#003366] truncate min-w-0"
+                >
+                  {currentDistrict.talukas.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {isEn ? `${t.nameEn} (${t.nameGu})` : isHi ? `${getLocalizedTalukaName(t, 'hi')} (${t.nameEn})` : `${t.nameGu} (${t.nameEn})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Configurable Counter Switcher */}
             <select
@@ -2238,8 +2334,8 @@ export default function CounterOperatorDesk() {
                               <span>₹{citizen.payment.amount || 20} {isGu ? "કાઉન્ટર રોકડ" : isHi ? "काउंटर नकद" : "Cash at Counter"}</span>
                             </span>
                           ) : (
-                            <span className="bg-blue-100 text-blue-900 font-bold text-[9px] px-2 py-0.5 rounded-full border border-blue-200">
-                              {isGu ? "મફત સેવા (₹૦)" : "Free (₹0)"}
+                            <span className="bg-emerald-100 text-emerald-900 font-bold text-[9px] px-2 py-0.5 rounded-full border border-emerald-300">
+                              {isGu ? "સરકારી ફી: ₹૨૦ ચૂકતે" : isHi ? "सरकारी शुल्क: ₹२०" : "Govt Fee: ₹20 Paid"}
                             </span>
                           )}
 

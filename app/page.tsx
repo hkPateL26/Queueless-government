@@ -1149,9 +1149,9 @@ export default function Home() {
                       </div>
                     </button>
 
-                    {/* 2. કચેરી / અધિકારી લૉગિન (Kacheri / Officer Portal - /admin/counter) */}
+                    {/* 2. કચેરી / અધિકારી લૉગિન (Kacheri / Officer Portal - /admin/login) */}
                     <Link
-                      href="/admin/counter"
+                      href="/admin/login"
                       onClick={() => {
                         triggerHaptic('tap');
                         setLoginMenuOpen(false);
@@ -1172,12 +1172,12 @@ export default function Home() {
                         </div>
                         <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
                           {lang === 'en' 
-                            ? 'Counter Operator & Collector Console' 
+                            ? '5-Tier RBAC • Collector, Mamlatdar & Operator' 
                             : lang === 'hi' 
-                            ? 'काउंटर ऑपरेटर व कलेक्टर डैशबोर्ड' 
+                            ? '५-स्तरीय RBAC • कलेक्टर, तहसीलदार व ऑपरेटर' 
                             : lang === 'mr' 
-                            ? 'काउंटर ऑपरेटर आणि जिल्हाधिकारी डॅशबोर्ड' 
-                            : 'કાઉન્ટર ૧ થી ૬ ઓપરેટર & કલેક્ટર કન્સોલ'}
+                            ? '५-स्तरीय RBAC • जिल्हाधिकारी, तहसीलदार व ऑपरेटर' 
+                            : '૫-સ્તરીય વહીવટી લૉગિન • કલેક્ટર, મામલતદાર & કારકૂન'}
                         </p>
                       </div>
                     </Link>

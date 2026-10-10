@@ -7,8 +7,10 @@ import {
   ArrowRight, FileText, CheckCircle2, ChevronRight, Download, 
   Printer, ArrowLeft, RefreshCw, BarChart3, TrendingUp, AlertCircle, 
   Send, Sparkles, Filter, ExternalLink, Activity, Award, Star,
-  Lock, EyeOff, Check, Globe, ChevronDown, X
+  Lock, EyeOff, Check, Globe, ChevronDown, X, LogOut
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { getActiveOfficer, clearOfficerSession, OfficerAccount } from '@/lib/admin-auth';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { 
@@ -106,15 +108,35 @@ const INITIAL_QUEUE_DELAYS: QueueDelayAlert[] = [
 ];
 
 export default function CollectorCommandDashboard() {
+  const router = useRouter();
+
   // Multi-Language State
   const [lang, setLang] = useState<Language>('gu');
   const [langDropdownOpen, setLangDropdownOpen] = useState<boolean>(false);
+
+  // Authenticated Officer Session
+  const [officerSession, setOfficerSession] = useState<OfficerAccount | null>(null);
 
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('rajkot');
   const [delayAlerts, setDelayAlerts] = useState<QueueDelayAlert[]>(INITIAL_QUEUE_DELAYS);
   const [misModalOpen, setMisModalOpen] = useState<boolean>(false);
   const [filterMode, setFilterMode] = useState<'ALL' | 'CONGESTED' | 'DELAY_ALERT'>('ALL');
   const [actionNotification, setActionNotification] = useState<{ title: string; message: string } | null>(null);
+
+  // Load officer session on mount
+  useEffect(() => {
+    const off = getActiveOfficer(true);
+    setOfficerSession(off);
+    if (off && off.districtId) {
+      setSelectedDistrictId(off.districtId);
+    }
+  }, []);
+
+  const handleOfficerLogout = () => {
+    triggerHaptic('tap');
+    clearOfficerSession();
+    router.push('/admin/login');
+  };
 
   // Load language preference from LocalStorage on mount
   useEffect(() => {
@@ -355,12 +377,28 @@ export default function CollectorCommandDashboard() {
 
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black text-white">
-                {isGu ? "શ્રી પ્રભાતકુમાર શર્મા, IAS" : isHi ? "श्री प्रभातकुमार शर्मा, IAS" : "Shri Prabhat Kumar Sharma, IAS"}
+                {officerSession?.nameGu || (isGu ? "શ્રી પ્રભવ જોશી, IAS" : "Shri Prabhav Joshi, IAS")}
               </p>
               <p className="text-[10px] text-amber-200 font-mono">
-                {isGu ? "જિલ્લા કલેક્ટર • ડેમો પર્સોના" : isHi ? "जिला कलेक्टर • डेमो व्यक्तित्व" : "District Collector • Demo Persona"}
+                {officerSession?.designationGu || (isGu ? "જિલ્લા કલેક્ટર & DM, રાજકોટ" : "District Collector & DM, Rajkot")}
               </p>
             </div>
+
+            <Link
+              href="/admin/mamlatdar"
+              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-900/60 hover:bg-blue-800 text-blue-200 border border-blue-700/50 text-[11px] font-bold transition flex items-center gap-1 shrink-0 whitespace-nowrap"
+              title="મામલતદાર કન્સોલ"
+            >
+              <span>⚖️ મામલતદાર</span>
+            </Link>
+
+            <Link
+              href="/admin/incharge"
+              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-900/60 hover:bg-blue-800 text-blue-200 border border-blue-700/50 text-[11px] font-bold transition flex items-center gap-1 shrink-0 whitespace-nowrap"
+              title="ઇન્ચાર્જ કન્સોલ"
+            >
+              <span>🏢 ઇન્ચાર્જ</span>
+            </Link>
 
             <Link
               href="/admin/counter"
@@ -373,13 +411,29 @@ export default function CollectorCommandDashboard() {
               </span>
             </Link>
 
+            <Link
+              href="/admin/login"
+              className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10.5px] font-bold border border-white/20 transition cursor-pointer"
+              title="અધિકારી પર્સોના બદલો"
+            >
+              🔄 બદલો
+            </Link>
+
+            <button
+              onClick={handleOfficerLogout}
+              className="p-1.5 rounded-lg bg-red-950/60 hover:bg-red-600 text-red-200 hover:text-white border border-red-700/50 transition cursor-pointer"
+              title="સત્ર સમાપ્ત કરો (Logout)"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+
             <button
               onClick={() => setMisModalOpen(true)}
               className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#FF9933] hover:bg-amber-600 text-slate-900 text-xs font-black transition flex items-center gap-1 sm:gap-1.5 shadow-md active:scale-95 cursor-pointer shrink-0 whitespace-nowrap"
             >
               <FileText className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">
-                {isGu ? "દૈનિક MIS રિપોર્ટ (Demo)" : isHi ? "दैनिक MIS रिपोर्ट (Demo)" : "Daily MIS Report"}
+                {isGu ? "દૈનિક MIS રિપોર્ટ" : isHi ? "दैनिक MIS रिपोर्ट" : "Daily MIS Report"}
               </span>
               <span className="sm:hidden font-black">
                 MIS
