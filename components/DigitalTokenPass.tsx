@@ -960,31 +960,31 @@ export function DigitalTokenPass({
           </div>
 
           {/* REQUIREMENT 14: APPOINTMENT ACTIONS (RESCHEDULE / CANCEL / CALENDAR) */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-200">
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-gray-200">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <button
                 onClick={handleDownload}
-                className="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+                className="px-2.5 sm:px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-[11px] sm:text-xs font-bold flex items-center justify-center sm:justify-start gap-1.5 transition active:scale-95"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>{isEn ? 'Print / PDF' : isHi ? 'प्रिंट / PDF' : isMr ? 'प्रिंट / PDF' : 'પ્રિન્ટ / PDF'}</span>
+                <Printer className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{isEn ? 'Print / PDF' : isHi ? 'प्रिंट / PDF' : isMr ? 'प्रिंट / PDF' : 'પ્રિન્ટ / PDF'}</span>
               </button>
 
               <button
                 onClick={handleWhatsAppShare}
-                className="px-3 py-2 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+                className="px-2.5 sm:px-3 py-2 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 text-[11px] sm:text-xs font-bold flex items-center justify-center sm:justify-start gap-1.5 transition active:scale-95"
               >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>{isEn ? 'WhatsApp Share' : isHi ? 'व्हाट्सएप साझा करें' : isMr ? 'व्हॉट्सॲप शेअर' : 'વોટ્સએપ શેર'}</span>
+                <Share2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{isEn ? 'WhatsApp' : isHi ? 'व्हाट्सएप' : isMr ? 'व्हॉट्सॲप' : 'વોટ્સએપ શેર'}</span>
               </button>
 
               {/* Requirement 20: Add to Google Calendar */}
               <button
                 onClick={handleAddToCalendar}
-                className="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#005A9C] border border-blue-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+                className="px-2.5 sm:px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#003366] border border-blue-200 text-[11px] sm:text-xs font-bold flex items-center justify-center sm:justify-start gap-1.5 transition active:scale-95"
               >
-                <Calendar className="w-3.5 h-3.5" />
-                <span>{isEn ? 'Add to Google Calendar' : isHi ? 'गूगल कैलेंडर जोड़ें' : isMr ? 'गुगल कॅलेंडर जोडा' : 'ગૂગલ કેલેન્ડર'}</span>
+                <Calendar className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">{isEn ? 'Calendar' : isHi ? 'कैलेंडर' : isMr ? 'कॅलेंडर' : 'ગૂગલ કેલેન્ડર'}</span>
               </button>
 
               {/* Requirement 14: Reschedule Action */}
@@ -993,10 +993,10 @@ export function DigitalTokenPass({
                   triggerHaptic('tap');
                   setRescheduleModalOpen(true);
                 }}
-                className="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+                className="px-2.5 sm:px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] sm:text-xs font-bold flex items-center justify-center sm:justify-start gap-1.5 transition active:scale-95"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-indigo-600" />
-                <span>{isEn ? 'Reschedule Slot' : isHi ? 'स्लॉट बदलें' : isMr ? 'स्लॉट बदला' : 'રિશિડ્યુલ કરો'}</span>
+                <RefreshCw className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                <span className="truncate">{isEn ? 'Reschedule' : isHi ? 'स्लॉट बदलें' : isMr ? 'स्लॉट बदला' : 'રિશિડ્યુલ કરો'}</span>
               </button>
 
               {/* Requirement 14: Cancel Action */}
@@ -1005,10 +1005,10 @@ export function DigitalTokenPass({
                   triggerHaptic('warning');
                   setCancelModalOpen(true);
                 }}
-                className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+                className="px-2.5 sm:px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-[11px] sm:text-xs font-bold flex items-center justify-center sm:justify-start gap-1.5 transition active:scale-95"
               >
-                <CalendarX2 className="w-3.5 h-3.5 text-red-600" />
-                <span>{isEn ? 'Cancel Appointment' : isHi ? 'अपॉइंटमेंट रद्द करें' : isMr ? 'अपॉइंटमेंट रद्द करा' : 'અપોઇન્ટમેન્ટ રદ કરો'}</span>
+                <CalendarX2 className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                <span className="truncate">{isEn ? 'Cancel' : isHi ? 'रद्द करें' : isMr ? 'रद्द करा' : 'અપોઇન્ટમેન્ટ રદ'}</span>
               </button>
 
               {/* Requirement 19: Multi-Channel Touchpoints Drawer */}
@@ -1017,17 +1017,17 @@ export function DigitalTokenPass({
                   triggerHaptic('tap');
                   setChannelsModalOpen(true);
                 }}
-                className="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+                className="px-2.5 sm:px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-[11px] sm:text-xs font-bold flex items-center justify-center sm:justify-start gap-1.5 transition active:scale-95"
               >
-                <Layers className="w-3.5 h-3.5 text-purple-600" />
-                <span>{isEn ? 'Multi-Channel Demo' : isHi ? 'मल्टी-चैनल डेमो' : isMr ? 'मल्टी-चॅनल डेमो' : 'મલ્ટી-ચેનલ ડેમો'}</span>
+                <Layers className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <span className="truncate">{isEn ? 'Channels' : isHi ? 'चैनल डेमो' : isMr ? 'चॅनल डेमो' : 'મલ્ટી-ચેનલ'}</span>
               </button>
             </div>
 
             {onClose && (
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-xs font-bold transition ml-auto"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-xs font-bold transition flex items-center justify-center cursor-pointer shrink-0"
               >
                 {isEn ? 'Go to Dashboard' : isHi ? 'डैशबोर्ड पर जाएँ' : isMr ? 'डॅशबोर्डवर जा' : 'ડેશબોર્ડ પર જાઓ'}
               </button>

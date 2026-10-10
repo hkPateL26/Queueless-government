@@ -276,10 +276,10 @@ export default function CollectorCommandDashboard() {
       {/* 🏛️ EXECUTIVE COLLECTORATE HEADER */}
       <header className="bg-gradient-to-r from-[#002244] via-[#003366] to-[#001933] text-white border-b-2 border-[#FF9933] shadow-lg sticky top-0 z-40">
         <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link 
               href="/"
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1 text-xs font-bold"
+              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1 text-xs font-bold shrink-0"
               title={isGu ? "નાગરિક પોર્ટલ" : isHi ? "नागरिक पोर्टल" : "Citizen Portal"}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -288,20 +288,20 @@ export default function CollectorCommandDashboard() {
               </span>
             </Link>
 
-            <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
+            <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
 
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black tracking-widest text-[#FF9933] uppercase bg-amber-950/50 border border-amber-800/50 px-1.5 py-0.5 rounded">
+                <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#FF9933] uppercase bg-amber-950/50 border border-amber-800/50 px-1.5 py-0.5 rounded truncate max-w-[130px] xs:max-w-[200px] sm:max-w-none">
                   {isGu ? "ગુજરાત સરકાર • મહેસૂલ & પ્રશાસન" : isHi ? "गुजरात सरकार • राजस्व एवं प्रशासन" : "Govt of Gujarat • Revenue & Administration"}
                 </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
                 <span className="text-[10px] text-emerald-300 font-bold hidden md:inline">
                   {isGu ? "૩૩ જિલ્લા લાઈવ કમાન્ડ સેન્ટર" : isHi ? "३३ जिले लाइव कमांड सेंटर" : "33 Districts Live Command"}
                 </span>
               </div>
-              <h1 className="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2">
-                <span>
+              <h1 className="text-xs sm:text-base font-black tracking-tight text-white flex items-center gap-2">
+                <span className="truncate max-w-[140px] xs:max-w-[220px] sm:max-w-none">
                   {isGu ? "જિલ્લા કલેક્ટર & DDO કમાન્ડ ડેશબોર્ડ" : isHi ? "जिला कलेक्टर एवं डीडीओ कमांड डैशबोर्ड" : "District Collector & DDO Command Dashboard"}
                 </span>
               </h1>

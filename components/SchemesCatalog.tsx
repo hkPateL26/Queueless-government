@@ -425,7 +425,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
       {/* Pagination & "View All 39 Schemes" Controls */}
       {maxItems && displayedSchemes.length < filteredSchemes.length && (
         <div className="bg-gradient-to-r from-blue-50 via-white to-amber-50 rounded-2xl p-4 sm:p-6 border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm text-center sm:text-left">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center sm:items-start gap-3 text-left">
             <GovLogo className="w-10 h-10 shrink-0" />
             <div>
               <h4 className="font-black text-[#003366] text-sm sm:text-base">

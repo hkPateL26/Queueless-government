@@ -187,16 +187,16 @@ export function TokenTrackerModal({
         </div>
 
         {/* HEADER */}
-        <div className="bg-[#003366] text-white px-5 sm:px-6 py-4 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#FF9933] text-slate-900 flex items-center justify-center font-black shadow-md">
-              <Ticket className="w-5 h-5" />
+        <div className="bg-[#003366] text-white px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#FF9933] text-slate-900 flex items-center justify-center font-black shadow-md shrink-0">
+              <Ticket className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-blue-900/80 text-blue-200 px-2 py-0.5 rounded border border-blue-700">
+            <div className="min-w-0 flex-1">
+              <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-blue-900/80 text-blue-200 px-1.5 sm:px-2 py-0.5 rounded border border-blue-700 whitespace-nowrap">
                 {isGu ? 'લાઈવ કતાર સ્થિતિ' : isHi ? 'लाइव कतार स्थिति' : isMr ? 'थेट रांग स्थिती' : 'Live Queue Status'}
               </span>
-              <h2 className="text-base sm:text-lg font-black text-white tracking-tight mt-0.5">
+              <h2 className="text-sm sm:text-lg font-black text-white tracking-tight mt-0.5 truncate max-w-[200px] xs:max-w-xs sm:max-w-none">
                 {isGu ? 'ટોકન ટ્રેક કરો (Token Tracker)' : isHi ? 'टोकन ट्रैक करें (Token Tracker)' : isMr ? 'टोकन ट्रॅक करा (Token Tracker)' : 'Track Office Token'}
               </h2>
             </div>
@@ -207,7 +207,7 @@ export function TokenTrackerModal({
               stopVoice();
               onClose();
             }}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0 ml-2"
             aria-label="Close Token Tracker"
           >
             <X className="w-4 h-4" />
@@ -296,18 +296,18 @@ export function TokenTrackerModal({
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">
+              <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:p-3 text-center min-w-0">
+                <p className="text-[9.5px] sm:text-[10px] font-bold text-slate-500 uppercase truncate">
                   {isGu ? 'ફાળવેલ કાઉન્ટર' : isMr ? 'नियुक्त काउंटर' : isHi ? 'आवंटित काउंटर' : 'Assigned Counter'}
                 </p>
-                <p className="text-sm font-black text-[#003366] mt-0.5">{tokenData.counter}</p>
+                <p className="text-xs sm:text-sm font-black text-[#003366] mt-0.5 leading-snug break-words">{tokenData.counter}</p>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-bold text-slate-500 uppercase">
+              <div className="bg-white border border-slate-200 rounded-xl p-2.5 sm:p-3 text-center min-w-0">
+                <p className="text-[9.5px] sm:text-[10px] font-bold text-slate-500 uppercase truncate">
                   {isGu ? 'અંદાજિત પ્રતીક્ષા' : isMr ? 'अंदाजित प्रतीक्षा' : isHi ? 'अनुमानित प्रतीक्षा' : 'Est. Wait'}
                 </p>
-                <p className="text-sm font-black text-[#FF9933] mt-0.5">
+                <p className="text-xs sm:text-sm font-black text-[#FF9933] mt-0.5">
                   ~{tokenData.estMinutes} {isMr ? 'मिनिटे' : isHi ? 'मिनट' : isEn ? 'min' : 'મિનિટ'}
                 </p>
               </div>

@@ -416,9 +416,9 @@ export function CitizenProfileModal({
 
         {/* MODAL HEADER */}
         <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#005A9C] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
             <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-md shrink-0" />
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-[#FF9933] border border-amber-400/30 px-1.5 sm:px-2 py-0.5 rounded">
                   {isEn ? 'Official Identity Vault' : isHi ? 'आधिकारिक नागरिक पहचान वॉल्ट' : isMr ? 'अधिकृत नागरिक ओळख व्हॉल्ट' : 'સત્તાવાર નાગરિક ઓળખ વૉલ્ટ'}

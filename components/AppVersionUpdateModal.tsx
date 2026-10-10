@@ -161,11 +161,11 @@ export const AppVersionUpdateModal: React.FC<AppVersionUpdateModalProps> = ({
 
         {/* HEADER */}
         <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#005A9C] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
-              <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300 animate-pulse" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-900 px-2 py-0.5 rounded font-mono shadow-2xs">
                   {CURRENT_APP_VERSION}

@@ -436,9 +436,9 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
       >
         {/* Drawer Header (Fixed) */}
         <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white px-4 py-3 sm:px-5 sm:py-3.5 shrink-0 flex items-center justify-between gap-3 border-b-2 border-[#FF9933] shadow-md">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
             <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
-            <div className="space-y-0.5 min-w-0">
+            <div className="space-y-0.5 min-w-0 flex-1">
               <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#FF9933] bg-[#002244]/80 px-2 py-0.5 rounded-full border border-blue-700/60 inline-block truncate max-w-[200px] xs:max-w-[260px] sm:max-w-full">
                 {displayCategory} • {displayDepartment}
               </span>
@@ -1046,7 +1046,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
               {isAllMandatoryVerified ? (
                 <>
                   <CheckCircle2 className="w-4 h-4 text-white shrink-0 animate-pulse" />
-                  <span>
+                  <span className="truncate">
                     {isEn 
                       ? '✓ All Docs Verified • Collect Live Token ➔' 
                       : isHi 
@@ -1059,7 +1059,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
               ) : (
                 <>
                   <Upload className="w-4 h-4 text-[#FF9933] shrink-0" />
-                  <span>
+                  <span className="truncate">
                     {isEn 
                       ? `Upload Documents to Collect Token (${verifiedMandatoryDocs.length}/${totalMandatory})` 
                       : isHi 

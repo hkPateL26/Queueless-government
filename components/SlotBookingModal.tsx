@@ -704,18 +704,18 @@ export function SlotBookingModal({
         
         {/* HEADER */}
         <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
-          <div className="flex items-center gap-3">
-            <GovLogo className="w-10 h-10 shrink-0 drop-shadow-md" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-bold">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 drop-shadow-md" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h3 className="text-sm sm:text-lg font-bold truncate max-w-[170px] xs:max-w-[240px] sm:max-w-none">
                   {isEn ? 'Jurisdiction Routing & Appointment Scheduling' : isHi ? 'अधिकार क्षेत्र और अपॉइंटमेंट शेड्यूलिंग' : isMr ? 'अधिकार क्षेत्र आणि अपॉइंटमेंट शेड्यूलिंग' : 'અધિકારક્ષેત્ર & સ્લોટ બુકિંગ'}
                 </h3>
-                <span className="bg-[#005A9C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-400">
+                <span className="bg-[#005A9C] text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-blue-400 whitespace-nowrap">
                   {isEn ? 'Capacity Controlled' : isHi ? 'क्षमता नियंत्रित' : isMr ? 'क्षमता नियंत्रित' : 'કેપેસિટી કંટ્રોલ્ડ'}
                 </span>
               </div>
-              <p className="text-xs text-blue-200 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-blue-200 mt-0.5 truncate">
                 {scheme 
                   ? (isEn ? scheme.titleEn : isMr ? (scheme.titleEn) : isHi ? (scheme.titleEn) : scheme.titleGu) 
                   : (isEn ? 'All 33 Districts & Taluka Centers of Gujarat' : isMr ? 'गुजरातमधील सर्व ३३ जिल्हे आणि तालुका केंद्रे' : isHi ? 'गुजरात के सभी ३३ जिले और तहसील केंद्र' : 'ગુજરાતના તમામ ૩૩ જિલ્લાઓ & તાલુકા કેન્દ્રો')}
@@ -1803,18 +1803,18 @@ export function SlotBookingModal({
         </div>
 
         {/* FOOTER ACTIONS - STICKY BOTTOM BAR */}
-        <div className="bg-white/95 backdrop-blur-md p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0 sticky bottom-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-lg">
+        <div className="bg-white/95 backdrop-blur-md p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0 sticky bottom-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-lg">
           <button
             onClick={() => {
               triggerHaptic('tap');
               onClose();
             }}
-            className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer"
+            className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer shrink-0"
           >
             {isEn ? 'Cancel' : isHi ? 'रद्द करें' : isMr ? 'रद्द करा' : 'રદ કરો'}
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {scheme && (
               <div className="hidden sm:flex flex-col text-right">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
@@ -1831,13 +1831,13 @@ export function SlotBookingModal({
             <button
               disabled={holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'}
               onClick={handleFinalConfirm}
-              className={`px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl font-black text-xs sm:text-sm flex items-center gap-2 shadow-md transition cursor-pointer ${
+              className={`px-3.5 sm:px-7 py-2 sm:py-3 rounded-xl font-black text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-md transition cursor-pointer shrink-0 ${
                 holidayCheck.isClosed || selectedSlot.isLunchBreak || selectedSlot.status === 'full'
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
                   : 'bg-[#003366] hover:bg-[#002244] active:scale-[0.98] text-white hover:shadow-lg'
               }`}
             >
-              <span>
+              <span className="truncate">
                 {scheme && scheme.fee > 0
                   ? (isEn ? `Confirm & Pay ₹${scheme.fee}` : isHi ? `पुष्टि करें एवं ₹${scheme.fee} भुगतान करें` : `સ્લોટ કન્ફર્મ કરો & ₹${scheme.fee} ફી ચૂકવો`)
                   : (isEn ? 'Confirm & Get Free Token' : isHi ? 'स्लॉट पुष्टि करें व टोकन लें' : 'સ્લોટ કન્ફર્મ કરો & ટોકન મેળવો')}

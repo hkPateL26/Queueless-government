@@ -121,29 +121,29 @@ export function CitizenHelpModal({ isOpen, onClose, lang }: CitizenHelpModalProp
         </div>
 
         {/* MODAL HEADER */}
-        <div className="bg-[#003366] text-white px-5 sm:px-6 py-4 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#FF9933] text-slate-900 flex items-center justify-center font-black shadow-md">
-              <Headphones className="w-5 h-5" />
+        <div className="bg-[#003366] text-white px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#FF9933] text-slate-900 flex items-center justify-center font-black shadow-md shrink-0">
+              <Headphones className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider bg-blue-900/80 text-blue-200 px-2 py-0.5 rounded border border-blue-700">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-blue-900/80 text-blue-200 px-1.5 sm:px-2 py-0.5 rounded border border-blue-700 whitespace-nowrap">
                   {isGu ? 'ગુજરાત સરકાર • GAD' : isHi ? 'गुजरात सरकार • GAD' : isMr ? 'गुजरात शासन • GAD' : 'Govt of Gujarat • GAD'}
                 </span>
-                <span className="text-[10px] text-emerald-300 font-bold flex items-center gap-1">
+                <span className="text-[9px] sm:text-[10px] text-emerald-300 font-bold flex items-center gap-1 whitespace-nowrap">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   {isGu ? 'સહાય ડેસ્ક કાર્યરત' : isHi ? 'हेल्प डेस्क सक्रिय' : isMr ? 'मदत डेस्क कार्यरत' : 'Help Desk Active'}
                 </span>
               </div>
-              <h2 className="text-base sm:text-lg font-black text-white tracking-tight mt-0.5">
+              <h2 className="text-sm sm:text-lg font-black text-white tracking-tight mt-0.5 truncate max-w-[200px] xs:max-w-xs sm:max-w-none">
                 {isGu ? 'નાગરિક સહાય અને ફરિયાદ નિવારણ ડેસ્ક' : isHi ? 'नागरिक सहायता एवं शिकायत निवारण डेस्क' : isMr ? 'नागरिक सहाय्य व तक्रार निवारण डेस्क' : 'Citizen Help & Grievance Redressal Desk'}
               </h2>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0 ml-2"
             aria-label="Close Help Modal"
           >
             <X className="w-4 h-4" />
