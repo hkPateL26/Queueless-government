@@ -440,13 +440,14 @@ export default function Home() {
         delete document.body.dataset.scrollY;
       }
     };
-  }, [drawerOpen, scannerOpen, slotModalOpen, tokenPassModalOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, citizenProfileModalOpen, locationRadarModalOpen, updateModalOpen]);
+  }, [drawerOpen, scannerOpen, slotModalOpen, tokenPassModalOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, citizenProfileModalOpen, locationRadarModalOpen, updateModalOpen, mobileMenuOpen]);
 
   // ESC KEY TO DISMISS ACTIVE MODAL
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (updateModalOpen) setUpdateModalOpen(false);
+        if (mobileMenuOpen) setMobileMenuOpen(false);
+        else if (updateModalOpen) setUpdateModalOpen(false);
         else if (citizenProfileModalOpen) setCitizenProfileModalOpen(false);
         else if (locationRadarModalOpen) setLocationRadarModalOpen(false);
         else if (tokenPassModalOpen) setTokenPassModalOpen(false);
@@ -462,7 +463,7 @@ export default function Home() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tokenPassModalOpen, slotModalOpen, scannerOpen, drawerOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, citizenProfileModalOpen, locationRadarModalOpen, updateModalOpen, loginMenuOpen, langMenuOpen]);
+  }, [tokenPassModalOpen, slotModalOpen, scannerOpen, drawerOpen, authModalOpen, helpModalOpen, tokenTrackerModalOpen, citizenProfileModalOpen, locationRadarModalOpen, updateModalOpen, loginMenuOpen, langMenuOpen, mobileMenuOpen]);
 
   // 1-Click Demo Fill Handlers
   const loginAsDemo = (role: 'farmer' = 'farmer') => {
@@ -1210,12 +1211,16 @@ export default function Home() {
         {/* 📱 MOBILE HAMBURGER SLIDE-OVER DRAWER */}
         {mobileMenuOpen && (
           <div
-            onClick={() => setMobileMenuOpen(false)}
-            className="md:hidden fixed inset-0 z-[120] bg-black/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200"
+            onClick={() => {
+              triggerHaptic('tap');
+              setMobileMenuOpen(false);
+            }}
+            className="md:hidden fixed inset-0 z-[120] bg-black/75 backdrop-blur-xs flex justify-end modal-backdrop animate-in fade-in duration-200"
+            style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="w-[88vw] max-w-sm h-full bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 text-slate-800"
+              className="w-full sm:max-w-md h-full h-[100dvh] bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 text-slate-800"
             >
               {/* Drawer Header */}
               <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white p-4 flex items-center justify-between border-b-2 border-[#FF9933] shrink-0 shadow-md">
