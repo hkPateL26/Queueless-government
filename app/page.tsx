@@ -62,18 +62,7 @@ export default function Home() {
     } catch {}
   }, []);
 
-  // Auto-prompt latest update changelog if citizen hasn't seen current version
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const lastSeen = localStorage.getItem('qless_last_seen_changelog');
-      if (!lastSeen || lastSeen !== CURRENT_APP_VERSION) {
-        const timer = setTimeout(() => {
-          setUpdateModalOpen(true);
-        }, 900);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, []);
+  // Changelog is accessible anytime via the top bar "v1.2 Live Updates" badge
 
   // Localized Citizen Identity Helpers (Dynamic for gu, hi, en, mr, etc.)
   const getCitizenDisplayName = (l: Language, rawName?: string) => {

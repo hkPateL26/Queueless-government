@@ -152,8 +152,10 @@ export function CitizenLocationRadar({
   };
 
   useEffect(() => {
-    refreshLocation();
-  }, []);
+    if (isOpen && !isStandaloneCard) {
+      refreshLocation();
+    }
+  }, [isOpen, isStandaloneCard]);
 
   const activeKacheri = kacheris.find(k => k.id === selectedKacheriId) || kacheris[0] || NEARBY_KACHERIS_DATA[0];
 
@@ -517,6 +519,7 @@ export function CitizenLocationRadar({
           {onClose && (
             <button
               onClick={onClose}
+              aria-label="Close location radar dialog"
               className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition active:scale-95 cursor-pointer shrink-0 ml-2"
             >
               <X className="w-5 h-5" />

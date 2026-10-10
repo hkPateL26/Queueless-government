@@ -182,6 +182,7 @@ export const AppVersionUpdateModal: React.FC<AppVersionUpdateModalProps> = ({
 
           <button
             onClick={handleDismiss}
+            aria-label="Close update changelog dialog"
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition active:scale-95 cursor-pointer shrink-0 ml-2"
           >
             <X className="w-4 h-4" />

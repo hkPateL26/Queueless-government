@@ -93,7 +93,7 @@ export function GovJanSevaGateway({
                     : 'Govt of Gujarat • Revenue Dept'}
                 </span>
               </div>
-              <h3 className="text-base sm:text-lg font-black text-white tracking-tight mt-1">
+              <h2 className="text-base sm:text-lg font-black text-white tracking-tight mt-1">
                 {isKhi || isGu 
                   ? 'જન સેવા કેન્દ્ર • અધિકૃત ડેસ્ક' 
                   : isHi 
@@ -101,7 +101,7 @@ export function GovJanSevaGateway({
                   : isMr 
                   ? 'जन सेवा केंद्र • अधिकृत डेस्क' 
                   : 'Jan Seva Kendra • Official Gateway'}
-              </h3>
+              </h2>
             </div>
           </div>
 
@@ -138,10 +138,12 @@ export function GovJanSevaGateway({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {/* District Dropdown */}
             <div>
-              <label className="text-[10px] font-bold text-slate-600 block mb-1">
+              <label htmlFor="gov-gateway-district" className="text-[10px] font-bold text-slate-600 block mb-1">
                 {isGu ? 'જિલ્લો (District):' : isHi ? 'ज़िला (District):' : isMr ? 'जिल्हा (District):' : 'District:'}
               </label>
               <select
+                id="gov-gateway-district"
+                aria-label={isGu ? 'જિલ્લો પસંદ કરો' : isHi ? 'ज़िला चुनें' : isMr ? 'जिल्हा निवडा' : 'Select District'}
                 value={selectedDistrictId}
                 onChange={(e) => handleDistrictChange(e.target.value)}
                 className="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-[#003366] focus:border-[#005A9C] outline-none shadow-xs truncate"
@@ -156,10 +158,12 @@ export function GovJanSevaGateway({
 
             {/* Taluka Dropdown */}
             <div>
-              <label className="text-[10px] font-bold text-slate-600 block mb-1">
+              <label htmlFor="gov-gateway-taluka" className="text-[10px] font-bold text-slate-600 block mb-1">
                 {isGu ? 'તાલુકો / કચેરી:' : isHi ? 'तहसील / कार्यालय:' : isMr ? 'तालुका / कार्यालय:' : 'Taluka / Office:'}
               </label>
               <select
+                id="gov-gateway-taluka"
+                aria-label={isGu ? 'તાલુકો પસંદ કરો' : isHi ? 'तहसील चुनें' : isMr ? 'तालुका निवडा' : 'Select Taluka'}
                 value={selectedTalukaId}
                 onChange={(e) => {
                   triggerHaptic('tap');

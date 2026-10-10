@@ -472,6 +472,7 @@ export function CitizenProfileModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close citizen profile dialog"
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition active:scale-95 cursor-pointer shrink-0 ml-2"
           >
             <X className="w-5 h-5" />
