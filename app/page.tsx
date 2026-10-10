@@ -1223,30 +1223,37 @@ export default function Home() {
               className="w-full sm:max-w-md h-full h-[100dvh] bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 text-slate-800"
             >
               {/* Drawer Header */}
-              <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white p-4 flex items-center justify-between border-b-2 border-[#FF9933] shrink-0 shadow-md">
+              <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white px-4 py-3 sm:px-5 sm:py-3.5 flex items-center justify-between border-b-2 border-[#FF9933] shrink-0 shadow-md">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <GovLogo className="w-9 h-9 drop-shadow-md shrink-0" />
+                  <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-md shrink-0" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-black text-white truncate">QueueLess કચેરી</span>
+                      <span className="text-sm sm:text-base font-black text-white truncate">QueueLess કચેરી</span>
                       <span className="text-[9px] bg-amber-400 text-slate-900 font-extrabold px-1.5 py-0.2 rounded shrink-0">ગુજરાત</span>
                     </div>
-                    <p className="text-[10px] text-blue-200 font-medium truncate">
+                    <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium truncate">
                       {lang === 'gu' ? 'જન સેવા નેવિગેશન મેનુ' : lang === 'hi' ? 'जन सेवा नेविगेशन मेनू' : 'Jan Seva Navigation Menu'}
                     </p>
                   </div>
                 </div>
+                
+                {/* Prominent High-Contrast Close Button */}
                 <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer shrink-0"
-                  aria-label="Close Navigation Menu"
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 text-white flex items-center gap-1.5 text-xs font-bold transition border border-white/25 shadow-xs cursor-pointer shrink-0"
+                  aria-label={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
+                  title={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-white font-black" />
+                  <span>{lang === 'gu' ? 'બંધ કરો' : lang === 'hi' ? 'बंद करें' : 'Close'}</span>
                 </button>
               </div>
 
               {/* Drawer Scrollable Body */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 overscroll-contain">
+              <div className="flex-1 overflow-y-auto modal-scroll-area p-4 space-y-4 overscroll-contain touch-pan-y">
                 
                 {/* 1. ACTIVE TOKEN PASS PROMINENT BANNER (IF BOOKED) */}
                 {activeBooking && (
