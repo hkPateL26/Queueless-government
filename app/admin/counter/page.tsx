@@ -1352,10 +1352,10 @@ export default function CounterOperatorDesk() {
       {/* 🏛️ COUNTER OPERATOR CONSOLE HEADER */}
       <header className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white border-b-2 border-[#FF9933] shadow-md sticky top-0 z-40">
         <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link 
               href="/"
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1 text-xs font-bold"
+              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition flex items-center gap-1 text-xs font-bold shrink-0"
               title={isGu ? "નાગરિક પોર્ટલ પર પાછા જાઓ" : isHi ? "नागरिक पोर्टल पर वापस जाएं" : "Return to Citizen Portal"}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -1364,20 +1364,20 @@ export default function CounterOperatorDesk() {
               </span>
             </Link>
             
-            <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
+            <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
 
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black tracking-widest text-[#FF9933] uppercase bg-amber-950/40 border border-amber-800/40 px-1.5 py-0.5 rounded">
+                <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#FF9933] uppercase bg-amber-950/40 border border-amber-800/40 px-1.5 py-0.5 rounded truncate max-w-[130px] xs:max-w-[200px] sm:max-w-none">
                   {isGu ? "જન સેવા અધિકારી ડેસ્ક • પ્રશાસનિક પોર્ટલ" : isHi ? "जन सेवा अधिकारी डेस्क • प्रशासनिक पोर्टल" : "Jan Seva Officer Desk • Admin Portal"}
                 </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                 <span className="text-[10px] text-emerald-300 font-bold hidden md:inline">
                   {isGu ? "લાઇવ સિંક્રોનાઇઝ્ડ" : isHi ? "लाइव सिंक्रोनाइज़्ड" : "Live Synchronized"}
                 </span>
               </div>
-              <h1 className="text-sm sm:text-base font-black tracking-tight text-white flex items-center gap-2">
-                <span>
+              <h1 className="text-xs sm:text-base font-black tracking-tight text-white flex items-center gap-2">
+                <span className="truncate max-w-[140px] xs:max-w-[220px] sm:max-w-none">
                   {isGu ? "કાઉન્ટર ઓપરેટર કન્સોલ • ઈ-જન સેવા ડેસ્ક" : isHi ? "काउंटर ऑपरेटर कंसोल • ई-जन सेवा डेस्क" : "Counter Operator Console • e-Jan Seva Desk"}
                 </span>
               </h1>

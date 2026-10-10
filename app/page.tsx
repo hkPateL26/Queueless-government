@@ -998,13 +998,13 @@ export default function Home() {
             </div>
           </button>
 
-          <div className="hidden md:flex items-center gap-7 text-xs font-bold text-slate-600">
+          <div className="hidden lg:flex items-center gap-3.5 xl:gap-7 text-xs font-bold text-slate-600">
             <button 
               onClick={() => {
                 triggerHaptic('tap');
                 setView('landing');
               }} 
-              className={`transition cursor-pointer ${view === 'landing' ? 'text-[#005A9C] font-extrabold' : 'hover:text-[#005A9C]'}`}
+              className={`transition cursor-pointer whitespace-nowrap ${view === 'landing' ? 'text-[#005A9C] font-extrabold' : 'hover:text-[#005A9C]'}`}
             >
               {t('navHome', lang)}
             </button>
@@ -1013,7 +1013,7 @@ export default function Home() {
                 triggerHaptic('tap');
                 setView('services');
               }} 
-              className={`transition cursor-pointer flex items-center gap-1 ${view === 'services' ? 'text-[#005A9C] font-black' : 'hover:text-[#005A9C]'}`}
+              className={`transition cursor-pointer flex items-center gap-1 whitespace-nowrap ${view === 'services' ? 'text-[#005A9C] font-black' : 'hover:text-[#005A9C]'}`}
             >
               <span>{t('navServices', lang)}</span>
               <span className="text-[9px] bg-[#FF9933] text-slate-900 px-1.5 rounded-full font-bold">39</span>
@@ -1025,7 +1025,7 @@ export default function Home() {
                 setTimeout(() => setIsRadarLoading(false), 240);
                 setView('dashboard');
               }} 
-              className={`transition cursor-pointer ${view === 'dashboard' ? 'text-[#005A9C] font-extrabold' : 'hover:text-[#005A9C]'}`}
+              className={`transition cursor-pointer whitespace-nowrap ${view === 'dashboard' ? 'text-[#005A9C] font-extrabold' : 'hover:text-[#005A9C]'}`}
             >
               {t('navRadar', lang)}
             </button>
@@ -1034,7 +1034,7 @@ export default function Home() {
                 triggerHaptic('tap');
                 setTokenTrackerModalOpen(true);
               }} 
-              className="hover:text-[#005A9C] flex items-center gap-1 transition cursor-pointer text-slate-700"
+              className="hover:text-[#005A9C] flex items-center gap-1 transition cursor-pointer text-slate-700 whitespace-nowrap"
               title="તમારો ટોકન નંબર દાખલ કરી લાઈવ સ્થિતિ તપાસો"
             >
               <Ticket className="w-3.5 h-3.5 text-[#005A9C]" />
@@ -1045,7 +1045,7 @@ export default function Home() {
                 triggerHaptic('tap');
                 setHelpModalOpen(true);
               }} 
-              className="hover:text-[#005A9C] text-slate-700 flex items-center gap-1 transition cursor-pointer"
+              className="hover:text-[#005A9C] text-slate-700 flex items-center gap-1 transition cursor-pointer whitespace-nowrap"
               title="ટોલ-ફ્રી હેલ્પલાઇન અને સહાય"
             >
               <Headphones className="w-3.5 h-3.5 text-[#FF9933]" />
@@ -1053,7 +1053,7 @@ export default function Home() {
             </button>
             <Link
               href="/admin/counter"
-              className="hover:text-[#005A9C] text-slate-700 flex items-center gap-1 transition cursor-pointer"
+              className="hover:text-[#005A9C] text-slate-700 flex items-center gap-1 transition cursor-pointer whitespace-nowrap"
               title={lang === 'gu' ? 'કચેરી કાઉન્ટર ઓપરેટર અને કલેક્ટર કન્સોલ' : 'Kacheri Counter & Collector Console'}
             >
               <Building className="w-3.5 h-3.5 text-[#005A9C]" />
@@ -1213,7 +1213,7 @@ export default function Home() {
                   setMobileMenuOpen(!mobileMenuOpen);
                 }}
                 aria-label={mobileMenuOpen ? "નેવિગેશન મેનુ બંધ કરો" : "નેવિગેશન મેનુ ખોલો"}
-                className={`md:hidden p-2 rounded-xl border transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0 ${
+                className={`lg:hidden p-2 rounded-xl border transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0 ${
                   mobileMenuOpen 
                     ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm' 
                     : 'bg-slate-100 hover:bg-slate-200 text-[#003366] border-slate-200 shadow-2xs'
@@ -1337,40 +1337,40 @@ export default function Home() {
           <section className="bg-white border-t border-slate-200 py-8 sm:py-12">
             <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-14">
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 min-w-0">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-700 flex items-center gap-1 sm:gap-1.5 min-w-0">
                     <Users className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
-                    <span>{t('statLiveTokens', lang)}</span>
+                    <span className="truncate">{t('statLiveTokens', lang)}</span>
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">12,483</h3>
-                  <p className="text-[10px] sm:text-[11px] text-emerald-800 font-bold mt-0.5">{t('todayGrowth', lang)}</p>
+                  <h3 className="text-xl sm:text-3xl font-black text-[#003366] mt-0.5 sm:mt-1 truncate">12,483</h3>
+                  <p className="text-[9.5px] sm:text-[11px] text-emerald-800 font-bold mt-0.5 truncate">{t('todayGrowth', lang)}</p>
                 </div>
 
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 min-w-0">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-700 flex items-center gap-1 sm:gap-1.5 min-w-0">
                     <Clock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
-                    <span>{t('statAvgWait', lang)}</span>
+                    <span className="truncate">{t('statAvgWait', lang)}</span>
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">14 min</h3>
-                  <p className="text-[10px] sm:text-[11px] text-emerald-800 font-bold mt-0.5">{t('vsWalkin', lang)}</p>
+                  <h3 className="text-xl sm:text-3xl font-black text-[#003366] mt-0.5 sm:mt-1 truncate">14 min</h3>
+                  <p className="text-[9.5px] sm:text-[11px] text-emerald-800 font-bold mt-0.5 truncate">{t('vsWalkin', lang)}</p>
                 </div>
 
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 min-w-0">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-700 flex items-center gap-1 sm:gap-1.5 min-w-0">
                     <Building className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-                    <span>{t('statActiveKacheris', lang)}</span>
+                    <span className="truncate">{t('statActiveKacheris', lang)}</span>
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">250+</h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-600 font-semibold mt-0.5">{t('statAllDistricts', lang)}</p>
+                  <h3 className="text-xl sm:text-3xl font-black text-[#003366] mt-0.5 sm:mt-1 truncate">250+</h3>
+                  <p className="text-[9.5px] sm:text-[11px] text-slate-600 font-semibold mt-0.5 truncate">{t('statAllDistricts', lang)}</p>
                 </div>
 
-                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 min-w-0">
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-700 flex items-center gap-1 sm:gap-1.5 min-w-0">
                     <Award className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
-                    <span>{t('statGrtsaSla', lang)}</span>
+                    <span className="truncate">{t('statGrtsaSla', lang)}</span>
                   </p>
-                  <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">99.8%</h3>
-                  <p className="text-[10px] sm:text-[11px] text-emerald-800 font-bold mt-0.5">{t('statTimeBound', lang)}</p>
+                  <h3 className="text-xl sm:text-3xl font-black text-[#003366] mt-0.5 sm:mt-1 truncate">99.8%</h3>
+                  <p className="text-[9.5px] sm:text-[11px] text-emerald-800 font-bold mt-0.5 truncate">{t('statTimeBound', lang)}</p>
                 </div>
               </div>
             </div>
@@ -3166,7 +3166,7 @@ export default function Home() {
               triggerHaptic('tap');
               setMobileMenuOpen(false);
             }}
-            className="md:hidden fixed inset-0 z-[250] bg-black/80 backdrop-blur-sm flex justify-end modal-backdrop animate-in fade-in duration-200"
+            className="lg:hidden fixed inset-0 z-[250] bg-black/80 backdrop-blur-sm flex justify-end modal-backdrop animate-in fade-in duration-200"
             style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
           >
             <div

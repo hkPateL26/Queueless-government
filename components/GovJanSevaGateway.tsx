@@ -78,12 +78,12 @@ export function GovJanSevaGateway({
         {/* Subtle Ashoka / Gujarat emblem background tint */}
         <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/5 rounded-full pointer-events-none" />
         
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
-            <div>
+        <div className="flex items-center justify-between gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded">
+                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30 px-1.5 sm:px-2 py-0.5 rounded truncate max-w-full">
                   {isKhi || isGu 
                     ? 'ગુજરાત સરકાર • મહેસૂલ વિભાગ' 
                     : isHi 
@@ -93,7 +93,7 @@ export function GovJanSevaGateway({
                     : 'Govt of Gujarat • Revenue Dept'}
                 </span>
               </div>
-              <h2 className="text-base sm:text-lg font-black text-white tracking-tight mt-1">
+              <h2 className="text-sm sm:text-base lg:text-lg font-black text-white tracking-tight mt-0.5 sm:mt-1 truncate">
                 {isKhi || isGu 
                   ? 'જન સેવા કેન્દ્ર • અધિકૃત ડેસ્ક' 
                   : isHi 
@@ -107,13 +107,13 @@ export function GovJanSevaGateway({
 
           {/* Live Kacheri Status Pill */}
           <div className="text-right shrink-0">
-            <span className="inline-flex items-center gap-1.5 bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 text-[10px] font-black px-2.5 py-1 rounded-full shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs whitespace-nowrap">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>
                 {isKhi ? 'કચેરી ખુલી આય' : isGu ? 'કચેરી ખુલ્લી છે' : isHi ? 'कार्यालय खुला है' : isMr ? 'कार्यालय सुरू आहे' : 'Kacheri Open'}
               </span>
             </span>
-            <p className="text-[9px] text-blue-200 mt-1 font-mono">10:30 AM – 6:10 PM</p>
+            <p className="text-[8.5px] sm:text-[9px] text-blue-200 mt-0.5 sm:mt-1 font-mono">10:30 AM – 6:10 PM</p>
           </div>
         </div>
       </div>
@@ -205,15 +205,15 @@ export function GovJanSevaGateway({
 
         {/* 🎫 CONDITIONAL: ACTIVE CITIZEN TOKEN PASS */}
         {(activeBooking || currentUser) && (
-          <div className="bg-gradient-to-r from-blue-50 to-amber-50 border-2 border-[#005A9C] rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2.5 sm:gap-3 shadow-sm animate-in fade-in">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#003366] text-[#FF9933] flex flex-col items-center justify-center font-black shrink-0 shadow-xs">
-                <span className="text-[8.5px] sm:text-[9px] text-blue-200 leading-none">TOKEN</span>
+          <div className="bg-gradient-to-r from-blue-50 to-amber-50 border-2 border-[#005A9C] rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2 sm:gap-3 shadow-sm animate-in fade-in">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#003366] text-[#FF9933] flex flex-col items-center justify-center font-black shrink-0 shadow-xs">
+                <span className="text-[8px] sm:text-[9px] text-blue-200 leading-none">TOKEN</span>
                 <span className="text-xs sm:text-sm leading-tight">{activeBooking ? activeBooking.tokenNumber : (currentUser?.token || '#A-42')}</span>
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[8.5px] sm:text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded border border-emerald-300 shrink-0">
+                  <span className="text-[8px] sm:text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded border border-emerald-300 shrink-0">
                     {isKhi ? 'ચાલુ પાસ' : isGu ? 'સક્રિય પાસ' : isHi ? 'सक्रिय पास' : isMr ? 'सक्रिय पास' : 'ACTIVE PASS'}
                   </span>
                   <p className="text-xs font-black text-[#003366] truncate">{isEn ? 'Hari Patel' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'હરિ પટેલ'}</p>
@@ -232,7 +232,7 @@ export function GovJanSevaGateway({
                 if (activeBooking) onOpenTokenPassModal();
                 else onOpenTokenTracker();
               }}
-              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-[10.5px] sm:text-[11px] font-extrabold shadow-sm active:scale-95 transition shrink-0 cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-[10px] sm:text-[11px] font-extrabold shadow-sm active:scale-95 transition shrink-0 cursor-pointer whitespace-nowrap"
             >
               {isKhi ? 'પાસ જોવો' : isGu ? 'પાસ જુઓ' : isHi ? 'पास देखें' : isMr ? 'पास पहा' : 'View Pass'}
             </button>
@@ -356,7 +356,7 @@ export function GovJanSevaGateway({
 
       {/* ⚖️ STATUTORY SERVICE GUARANTEE FOOTER */}
       <div className="p-3 sm:p-3.5 bg-slate-50 border-t border-slate-200 text-center">
-        <div className="flex items-center justify-center gap-1.5 text-[10.5px] font-black text-[#003366]">
+        <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 text-[9.5px] sm:text-[10.5px] font-black text-[#003366]">
           <ShieldCheck className="w-3.5 h-3.5 text-[#138808] shrink-0" />
           <span>
             {isKhi
@@ -370,7 +370,7 @@ export function GovJanSevaGateway({
               : '100% Timely Service Guarantee under GRTSA 2013'}
           </span>
         </div>
-        <p className="text-[9.5px] text-slate-600 font-medium mt-0.5">
+        <p className="text-[8.5px] sm:text-[9.5px] text-slate-600 font-medium mt-0.5">
           {isKhi
             ? 'સમય મર્યાદા: ૨૪ કલાક થી ૭ દિવસ • ૧૦૦% પારદર્શક ટ્રેકિંગ'
             : isGu 

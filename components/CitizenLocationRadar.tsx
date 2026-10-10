@@ -498,20 +498,20 @@ export function CitizenLocationRadar({
 
         {/* HEADER */}
         <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#005A9C] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
-              <Compass className="w-5 h-5 text-[#FF9933] animate-spin" />
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
+              <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF9933] animate-spin" />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-[#FF9933] border border-amber-400/30 px-1.5 sm:px-2 py-0.5 rounded">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-amber-400/20 text-[#FF9933] border border-amber-400/30 px-1.5 sm:px-2 py-0.5 rounded whitespace-nowrap">
                   {isEn ? 'Live GPS Kacheri Radar' : isHi ? 'लाइव GPS कचहरी रडार' : isMr ? 'थेट GPS कचेरी रडार' : 'લાઈવ GPS કચેરી રડાર'}
                 </span>
-                <span className="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1.5 sm:px-2 py-0.5 rounded font-bold font-mono">
+                <span className="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1.5 sm:px-2 py-0.5 rounded font-bold font-mono whitespace-nowrap">
                   {isEn ? 'Precise Geolocation' : isHi ? 'सटीक भू-स्थान' : isMr ? 'अचूक स्थान ट्रॅकिंग' : 'ચોક્કસ સ્થાન ટ્રેકિંગ'}
                 </span>
               </div>
-              <h2 className="text-sm sm:text-lg font-black text-white mt-0.5 line-clamp-1">
+              <h2 className="text-xs sm:text-lg font-black text-white mt-0.5 truncate max-w-[200px] xs:max-w-xs sm:max-w-none">
                 {isEn ? 'Your Location, Nearby Kacheris & Free Desks' : isHi ? 'आपका स्थान, निकटतम कार्यालय एवं मुक्त काउंटर' : isMr ? 'आपले स्थान, जवळचे कार्यालय आणि मोफत काउंटर' : 'તમારું લોકેશન, નજીકની કચેરીઓ અને મુક્ત કાઉન્ટર'}
               </h2>
             </div>

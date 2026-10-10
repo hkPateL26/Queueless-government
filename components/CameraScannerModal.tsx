@@ -180,19 +180,19 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
         
         {/* Top Header */}
         <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <GovLogo className="w-10 h-10 shrink-0 drop-shadow-md" />
-            <div>
-              <h3 className="font-extrabold text-sm sm:text-base leading-tight">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 drop-shadow-md" />
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-sm sm:text-base leading-tight truncate">
                 {isEn 
                   ? 'Document OCR & Pre-Verification' 
                   : isHi 
                   ? 'दस्तावेज़ OCR एवं पूर्व-सत्यापन' 
                   : isMr 
                   ? 'कागदपत्रे OCR आणि पूर्व-तपासणी' 
-                  : 'દસ્તાવેજ OCR & પૂર્વ-ચકાસણી (Document Pre-Verification)'}
+                  : 'દસ્તાવેજ OCR & પૂર્વ-ચકાસણી'}
               </h3>
-              <p className="text-[11px] text-blue-200">
+              <p className="text-[11px] text-blue-200 truncate">
                 Client-Side OCR + Rule Engine • {localizedSchemeTitle}
               </p>
             </div>
@@ -202,7 +202,7 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               triggerHaptic('tap');
               onClose();
             }}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0 cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0 cursor-pointer ml-2"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -216,15 +216,15 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               triggerHaptic('tap');
               setActiveTab('camera');
             }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer ${
+            className={`flex-1 py-2 px-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer min-w-0 ${
               activeTab === 'camera'
                 ? 'bg-white text-[#003366] shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Camera className="w-3.5 h-3.5" />
-            <span>
-              {isEn ? 'Camera Scanner' : isHi ? 'कैमरा स्कैनर' : isMr ? 'कॅमेरा स्कॅनर' : 'કેમેરા સ્કેનર (Camera Scanner)'}
+            <Camera className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">
+              {isEn ? 'Camera Scanner' : isHi ? 'कैमरा स्कैनर' : isMr ? 'कॅमेरा स्कॅनर' : 'કેમેરા સ્કેનર'}
             </span>
           </button>
           <button
@@ -232,15 +232,15 @@ export const CameraScannerModal: React.FC<CameraScannerModalProps> = ({
               triggerHaptic('tap');
               setActiveTab('drive');
             }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer ${
+            className={`flex-1 py-2 px-2 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer min-w-0 ${
               activeTab === 'drive'
                 ? 'bg-white text-[#003366] shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Cloud className="w-3.5 h-3.5 text-[#005A9C]" />
-            <span>
-              {isEn ? 'Cloud / Local Import (Demo)' : isHi ? 'क्लाउड / लोकल इम्पोर्ट (डेमो)' : isMr ? 'क्लाउड / स्थानिक आयात (डेमो)' : 'Cloud Import — Demo'}
+            <Cloud className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
+            <span className="truncate">
+              {isEn ? 'Cloud Import' : isHi ? 'क्लाउड इम्पोर्ट' : isMr ? 'क्लाउड आयात' : 'ક્લાઉડ ઈમ્પોર્ટ'}
             </span>
           </button>
         </div>
