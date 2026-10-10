@@ -989,6 +989,12 @@ export const TRANSLATIONS = {
     hi: 'कचहरी रडार',
     mr: 'कचेरी रडार'
   },
+  mobNavMenu: {
+    en: 'Menu',
+    gu: 'મેનુ',
+    hi: 'मेनू',
+    mr: 'मेनू'
+  },
 
   // Footer
   footerDisclaimer: {

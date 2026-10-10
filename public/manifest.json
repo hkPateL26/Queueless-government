@@ -3,7 +3,7 @@
   "short_name": "QueueLess",
   "description": "ગુજરાત સરકાર જન સેવા કેન્દ્રો અને મામલતદાર કચેરીઓ માટે કતાર મુક્ત સેવા પ્રણાલી",
   "id": "/",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

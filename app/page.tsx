@@ -201,14 +201,28 @@ export default function Home() {
       const checkStandalone = () => {
         const isStandalone = 
           window.matchMedia('(display-mode: standalone)').matches ||
+          window.matchMedia('(display-mode: fullscreen)').matches ||
+          window.matchMedia('(display-mode: minimal-ui)').matches ||
           (window.navigator as any).standalone === true ||
-          document.referrer.includes('android-app://');
+          document.referrer.includes('android-app://') ||
+          window.location.search.includes('source=pwa') ||
+          window.location.search.includes('mode=pwa') ||
+          window.location.search.includes('mode=app') ||
+          window.location.search.includes('standalone=true');
         setIsStandaloneApp(isStandalone);
       };
       checkStandalone();
-      const mql = window.matchMedia('(display-mode: standalone)');
-      mql.addEventListener?.('change', checkStandalone);
-      return () => mql.removeEventListener?.('change', checkStandalone);
+      const mqlStandalone = window.matchMedia('(display-mode: standalone)');
+      mqlStandalone.addEventListener?.('change', checkStandalone);
+      const mqlFullscreen = window.matchMedia('(display-mode: fullscreen)');
+      mqlFullscreen.addEventListener?.('change', checkStandalone);
+      window.addEventListener('appinstalled', () => {
+        setIsStandaloneApp(true);
+      });
+      return () => {
+        mqlStandalone.removeEventListener?.('change', checkStandalone);
+        mqlFullscreen.removeEventListener?.('change', checkStandalone);
+      };
     }
   }, []);
 
@@ -1191,26 +1205,28 @@ export default function Home() {
               </div>
             )}
 
-            {/* 📱 MOBILE HAMBURGER MENU BUTTON */}
-            <button
-              onClick={() => {
-                triggerHaptic('tap');
-                setMobileMenuOpen(!mobileMenuOpen);
-              }}
-              aria-label={mobileMenuOpen ? "નેવિગેશન મેનુ બંધ કરો" : "નેવિગેશન મેનુ ખોલો"}
-              className={`md:hidden p-2 rounded-xl border transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0 ${
-                mobileMenuOpen 
-                  ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm' 
-                  : 'bg-slate-100 hover:bg-slate-200 text-[#003366] border-slate-200 shadow-2xs'
-              }`}
-              title="નેવિગેશન મેનુ / Navigation Menu"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5 text-slate-950 font-black" />
-              ) : (
-                <Menu className="w-5 h-5 text-[#003366]" />
-              )}
-            </button>
+            {/* 📱 MOBILE HAMBURGER MENU BUTTON (SHOWN IN REGULAR BROWSER; IN INSTALLED PWA APP, BOTTOM NAV IS USED) */}
+            {!isStandaloneApp && (
+              <button
+                onClick={() => {
+                  triggerHaptic('tap');
+                  setMobileMenuOpen(!mobileMenuOpen);
+                }}
+                aria-label={mobileMenuOpen ? "નેવિગેશન મેનુ બંધ કરો" : "નેવિગેશન મેનુ ખોલો"}
+                className={`md:hidden p-2 rounded-xl border transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0 ${
+                  mobileMenuOpen 
+                    ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm' 
+                    : 'bg-slate-100 hover:bg-slate-200 text-[#003366] border-slate-200 shadow-2xs'
+                }`}
+                title="નેવિગેશન મેનુ / Navigation Menu"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5 text-slate-950 font-black" />
+                ) : (
+                  <Menu className="w-5 h-5 text-[#003366]" />
+                )}
+              </button>
+            )}
           </div>
         </div>
 
@@ -3045,6 +3061,103 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* 📱 MOBILE BOTTOM NAVIGATION BAR: ONLY DISPLAYED IN INSTALLED PWA APP MODE, NOT IN REGULAR MOBILE BROWSER */}
+      {isStandaloneApp && (
+        <nav 
+          aria-label="Mobile Bottom Navigation"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3 flex items-center justify-around shadow-lg"
+        >
+          {/* 1. Home */}
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setView('landing');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 cursor-pointer ${
+              view === 'landing' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={t('mobNavHome', lang)}
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span>{t('mobNavHome', lang)}</span>
+          </button>
+
+          {/* 2. Services */}
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setView('services');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 cursor-pointer ${
+              view === 'services' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={t('mobNavServices', lang)}
+          >
+            <Layers className="w-4 h-4" />
+            <span>{t('mobNavServices', lang)}</span>
+          </button>
+
+          {/* 3. Center Elevated Token Pass / Tracker */}
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              if (activeBooking) {
+                setTokenPassModalOpen(true);
+              } else if (currentUser) {
+                setView('dashboard');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                setTokenTrackerModalOpen(true);
+              }
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 cursor-pointer ${
+              activeBooking ? 'text-[#FF9933]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={activeBooking ? `${t('mobNavTokenPass', lang)} ${activeBooking.tokenNumber}` : t('mobNavTokenPass', lang)}
+          >
+            <div className={`w-8 h-8 -mt-3.5 rounded-full flex items-center justify-center border-2 border-white shadow-md transition ${
+              activeBooking ? 'bg-[#003366] text-[#FF9933]' : 'bg-[#005A9C] text-white'
+            }`}>
+              <Ticket className="w-4 h-4" />
+            </div>
+            <span>{activeBooking ? activeBooking.tokenNumber : t('mobNavTokenPass', lang)}</span>
+          </button>
+
+          {/* 4. Queue Radar / Timeline */}
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setView('dashboard');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 cursor-pointer ${
+              view === 'dashboard' ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={t('mobNavRadar', lang)}
+          >
+            <Radio className="w-4 h-4" />
+            <span>{t('mobNavRadar', lang)}</span>
+          </button>
+
+          {/* 5. Menu Drawer */}
+          <button
+            onClick={() => {
+              triggerHaptic('tap');
+              setMobileMenuOpen(true);
+            }}
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-bold min-h-[44px] justify-center transition active:scale-95 focus-visible:ring-2 focus-visible:ring-[#005A9C] rounded-lg px-2 cursor-pointer ${
+              mobileMenuOpen ? 'text-[#005A9C]' : 'text-slate-500 hover:text-slate-700'
+            }`}
+            aria-label={t('mobNavMenu', lang)}
+          >
+            <Menu className="w-4 h-4" />
+            <span>{t('mobNavMenu', lang)}</span>
+          </button>
+        </nav>
+      )}
 
         {/* 📱 MOBILE HAMBURGER SLIDE-OVER DRAWER */}
         {mobileMenuOpen && (
