@@ -3075,19 +3075,18 @@ export default function Home() {
                   </div>
                 </div>
                 
-                {/* Prominent High-Contrast Close Button */}
+                {/* Clean Simple Close Button */}
                 <button
                   type="button"
                   onClick={() => {
                     triggerHaptic('tap');
                     setMobileMenuOpen(false);
                   }}
-                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white flex items-center gap-1.5 text-xs font-black transition border-2 border-red-500 shadow-md cursor-pointer shrink-0"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white flex items-center justify-center transition border border-white/20 cursor-pointer shrink-0"
                   aria-label={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
                   title={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
                 >
-                  <X className="w-4 h-4 text-white stroke-[3]" />
-                  <span>{lang === 'gu' ? 'બંધ કરો' : lang === 'hi' ? 'बंद करें' : 'Close'}</span>
+                  <X className="w-5 h-5 text-white" />
                 </button>
               </div>
 
@@ -3432,28 +3431,14 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Drawer Footer with Both Primary Close Button and Helpline */}
-              <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 space-y-2.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('tap');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
-                >
-                  <X className="w-4 h-4 text-white stroke-[3]" />
-                  <span>{lang === 'gu' ? '✕ મેનુ બંધ કરો (Close Menu)' : lang === 'hi' ? '✕ मेनू बंद करें (Close Menu)' : '✕ Close Navigation Menu'}</span>
-                </button>
-
-                <div className="text-center space-y-0.5 pt-0.5">
-                  <p className="text-[11px] font-black text-[#003366]">
-                    📞 હેલ્પલાઇન: ૧૮૦૦-૨૩૩-૫૫૦૦ (ટોલ-ફ્રી)
-                  </p>
-                  <p className="text-[9.5px] text-slate-400">
-                    ગુજરાત સરકાર • સામાન્ય વહીવટ વિભાગ • GRTSA માન્ય
-                  </p>
-                </div>
+              {/* Drawer Footer */}
+              <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200 text-center space-y-0.5 shrink-0">
+                <p className="text-[11px] font-black text-[#003366]">
+                  📞 હેલ્પલાઇન: ૧૮૦૦-૨૩૩-૫૫૦૦ (ટોલ-ફ્રી)
+                </p>
+                <p className="text-[9.5px] text-slate-400">
+                  ગુજરાત સરકાર • સામાન્ય વહીવટ વિભાગ • GRTSA માન્ય
+                </p>
               </div>
             </div>
           </div>
