@@ -148,11 +148,21 @@ export const broadcastQueueEvent = (event: QueueEvent) => {
   } catch (e) {
     // Ignore storage quota
   }
+
+  // 4. Cloud Layer: Firebase Cloud Firestore Event Stream
+  try {
+    import('./firebase-service').then(({ saveQueueEventToFirebase }) => {
+      saveQueueEventToFirebase(event).catch(() => {});
+    }).catch(() => {});
+  } catch {
+    // Non-blocking
+  }
 };
 
 /**
  * 📡 Multi-Layer Event Subscription
  * Receives events from:
+ * - Firebase Cloud Firestore Stream (instant cross-device across the internet)
  * - Cross-device backend polling (/api/queue-events)
  * - BroadcastChannel (local tabs on same device)
  * - StorageEvent fallback
@@ -204,7 +214,17 @@ export const subscribeToQueueEvents = (callback: (event: QueueEvent) => void): (
   };
   window.addEventListener('storage', storageHandler);
 
-  // 3. Cross-Device Layer: Background Transport Polling (Every 1.5s for seamless phone <-> laptop sync)
+  // 3. Cloud Layer: Firebase Firestore Stream
+  let unsubFirebase: (() => void) | null = null;
+  try {
+    import('./firebase-service').then(({ subscribeToFirebaseEvents }) => {
+      unsubFirebase = subscribeToFirebaseEvents(handleIncomingEvent);
+    }).catch(() => {});
+  } catch {
+    // Non-blocking
+  }
+
+  // 4. Cross-Device Layer: Background Transport Polling (Every 1.5s for seamless phone <-> laptop sync)
   let isPolling = true;
   const pollBackend = async () => {
     if (!isPolling) return;
@@ -236,6 +256,7 @@ export const subscribeToQueueEvents = (callback: (event: QueueEvent) => void): (
     isPolling = false;
     clearTimeout(pollTimer);
     if (bc) bc.close();
+    if (unsubFirebase) unsubFirebase();
     window.removeEventListener('storage', storageHandler);
   };
 };

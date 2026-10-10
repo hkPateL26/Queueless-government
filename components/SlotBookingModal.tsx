@@ -32,6 +32,7 @@ import {
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
 import { broadcastQueueEvent } from '@/lib/realtime-bus';
+import { saveTokenToFirebase } from '@/lib/firebase-service';
 import { SchemeItem, getProcessingTimelineInfo } from '@/lib/schemes-data';
 import { GovLogo } from '@/components/GovLogo';
 import { SlotSkeleton } from '@/components/ui/Skeleton';
@@ -657,6 +658,11 @@ export function SlotBookingModal({
       } catch (err) {
         console.error('Failed to sync queue token to local storage:', err);
       }
+
+      // Sync token directly to Firebase Cloud Firestore
+      saveTokenToFirebase(bookingData).catch((err) => {
+        console.warn('Firebase token sync warning:', err);
+      });
 
       // Broadcast real-time event to Admin Counter and Collector desks
       broadcastQueueEvent({

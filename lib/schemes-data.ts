@@ -1396,3 +1396,5 @@ export const ALL_YOJANAS: SchemeItem[] = [
     validationRuleDesc: 'PDS ડેટાબેઝ કુટુંબ સભ્ય વેરિફિકેશન અને બાયોમેટ્રિક સીડિંગ'
   }
 ];
+
+export const GUJARAT_SCHEMES_CATALOG = ALL_YOJANAS;

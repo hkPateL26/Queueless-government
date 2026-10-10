@@ -19,6 +19,7 @@ import { Language } from '@/lib/translations';
 import { 
   getActiveOfficer, clearOfficerSession, OfficerAccount, OFFICIAL_SEED_OFFICERS 
 } from '@/lib/admin-auth';
+import { FirebaseBadge } from '@/components/FirebaseBadge';
 
 interface PendingApproval {
   id: string;
@@ -133,6 +134,8 @@ export default function TalukaMamlatdarPage() {
                 </p>
               </div>
             </div>
+
+            <FirebaseBadge lang="gu" />
 
             <Link
               href="/admin/incharge"

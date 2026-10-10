@@ -21,6 +21,7 @@ import {
 import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { Language, GUJARAT_LANGUAGES } from '@/lib/translations';
+import { FirebaseBadge } from '@/components/FirebaseBadge';
 
 interface DistrictMetric extends DistrictItem {
   totalTokensToday: number;
@@ -334,6 +335,9 @@ export default function CollectorCommandDashboard() {
 
           {/* Collector Profile, Language Switcher & Fast Links */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {/* 🔥 FIREBASE REALTIME CLOUD BADGE */}
+            <FirebaseBadge lang={lang} />
+
             {/* 🌐 ADMIN LANGUAGE SWITCHER DROPDOWN */}
             <div className="relative shrink-0">
               <button

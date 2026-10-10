@@ -13,6 +13,7 @@ import { GovLogo } from '@/components/GovLogo';
 import { 
   OFFICIAL_SEED_OFFICERS, OfficerAccount, authenticateOfficer, saveOfficerSession 
 } from '@/lib/admin-auth';
+import { FirebaseBadge } from '@/components/FirebaseBadge';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -73,13 +74,17 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl border border-white/15 transition cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>નાગરિક પોર્ટલ</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <FirebaseBadge lang="gu" />
+
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs text-blue-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl border border-white/15 transition cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>નાગરિક પોર્ટલ</span>
+            </Link>
+          </div>
         </div>
       </header>
 

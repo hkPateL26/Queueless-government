@@ -28,6 +28,8 @@ import { BookingDetails } from '@/components/SlotBookingModal';
 import { DEFAULT_CITIZEN_PROFILE } from '@/lib/citizen-profile';
 import { getActiveOfficer, clearOfficerSession, OfficerAccount } from '@/lib/admin-auth';
 import { useRouter } from 'next/navigation';
+import { FirebaseBadge } from '@/components/FirebaseBadge';
+import { updateTokenStatusInFirebase, subscribeToFirebaseTokens } from '@/lib/firebase-service';
 
 interface QueueCitizen {
   id: string;
@@ -873,6 +875,8 @@ export default function CounterOperatorDesk() {
       }
     } catch {}
 
+    updateTokenStatusInFirebase(citizen.tokenNumber, { payment: updatedPayment }).catch(() => {});
+
     broadcastQueueEvent({
       type: 'TOKEN_PAYMENT_COLLECTED',
       tokenNumber: citizen.tokenNumber,
@@ -1048,6 +1052,11 @@ export default function CounterOperatorDesk() {
       nextCitizen.isPriority ? 'प्राथमिकता नीति अंतर्गत पहले बुलाया गया' : 'नियमित कतार क्रम अनुसार बुलाया गया',
       nextCitizen.isPriority ? 'Called with high priority under senior/divyang policy' : 'Called as per regular queue order'
     );
+
+    updateTokenStatusInFirebase(nextCitizen.tokenNumber, { 
+      status: 'IN_SERVICE', 
+      counterNumber: selectedCounter 
+    }).catch(() => {});
 
     broadcastQueueEvent({
       type: 'TOKEN_CALLED',
@@ -1243,6 +1252,12 @@ export default function CounterOperatorDesk() {
       console.error(e);
     }
 
+    updateTokenStatusInFirebase(completed.tokenNumber, {
+      status: 'COMPLETED',
+      currentStage: 5,
+      approvalDetails: approvalPayload
+    }).catch(() => {});
+
     addAuditLog(
       'COMPLETED', 
       completed.tokenNumber, 
@@ -1297,6 +1312,10 @@ export default function CounterOperatorDesk() {
       'आवेदक अनुपस्थित (Citizen absent)',
       'Applicant marked absent (Citizen absent)'
     );
+
+    updateTokenStatusInFirebase(skipped.tokenNumber, {
+      status: 'SKIPPED'
+    }).catch(() => {});
 
     broadcastQueueEvent({
       type: 'TOKEN_SKIPPED',
@@ -1464,6 +1483,9 @@ export default function CounterOperatorDesk() {
 
           {/* Right Controls: Language Selector, Collector Dashboard, Officer Profile */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {/* 🔥 FIREBASE REALTIME CLOUD BADGE */}
+            <FirebaseBadge lang={lang} />
+
             {/* 🌐 ADMIN LANGUAGE SWITCHER DROPDOWN */}
             <div className="relative shrink-0">
               <button

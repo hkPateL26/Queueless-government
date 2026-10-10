@@ -27,6 +27,7 @@ import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
 import { CounterGridSkeleton } from '@/components/ui/Skeleton';
 import { CitizenLocationRadar } from '@/components/CitizenLocationRadar';
 import { CURRENT_APP_VERSION } from '@/components/AppVersionUpdateModal';
+import { FirebaseBadge } from '@/components/FirebaseBadge';
 
 // High-Performance Dynamic Imports for Heavy Modals (Loaded On-Demand)
 const SchemeDrawer = dynamic(() => import('@/components/SchemeDrawer').then(m => m.SchemeDrawer), { ssr: false });
@@ -838,6 +839,9 @@ export default function Home() {
                 <span>{lang === 'gu' ? 'એપ ઇન્સ્ટોલ' : 'Install App'}</span>
               </button>
             )}
+
+            {/* 🔥 FIREBASE REALTIME CLOUD SYNC BADGE */}
+            <FirebaseBadge lang={lang as any} />
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">

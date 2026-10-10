@@ -17,6 +17,7 @@ import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
 import { 
   getActiveOfficer, clearOfficerSession, OfficerAccount 
 } from '@/lib/admin-auth';
+import { FirebaseBadge } from '@/components/FirebaseBadge';
 
 interface CounterFloorStatus {
   counterNumber: number;
@@ -167,6 +168,8 @@ export default function OfficeInchargePage() {
                 </p>
               </div>
             </div>
+
+            <FirebaseBadge lang="gu" />
 
             <Link
               href="/admin/counter"
