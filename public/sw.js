@@ -1,10 +1,18 @@
 // QueueLess Kacheri (NagrikSeva AI) - Production Resilient Service Worker
-const CACHE_NAME = 'queueless-v1.3';
+const CACHE_NAME = 'queueless-v2.0';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/icon.svg',
-  '/emblem.svg'
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/icons/icon-maskable-192x192.png',
+  '/icons/icon-maskable-512x512.png',
+  '/icons/apple-touch-icon.png',
+  '/brand/queueless-kacheri-logo-transparent-hd.png',
+  '/brand/queueless-kacheri-favicon-square-hd.png',
+  '/favicon.png',
+  '/favicon-32x32.png',
+  '/favicon-16x16.png'
 ];
 
 self.addEventListener('install', (event) => {

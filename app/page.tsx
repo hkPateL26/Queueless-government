@@ -823,6 +823,21 @@ export default function Home() {
               <Sparkles className="w-3 h-3 text-slate-900" />
               <span>{CURRENT_APP_VERSION} <span className="hidden xs:inline">{lang === 'gu' ? 'નવું શું છે?' : "What's New?"}</span></span>
             </button>
+
+            {/* 📲 1-CLICK APP INSTALL BUTTON IN TOP BAR (WHEN NOT RUNNING STANDALONE) */}
+            {!isStandaloneApp && (
+              <button
+                onClick={() => {
+                  triggerHaptic('success');
+                  window.dispatchEvent(new CustomEvent('qless-trigger-pwa-install'));
+                }}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer shrink-0 border border-emerald-400"
+                title={lang === 'gu' ? '૧-ક્લિકમાં સત્તાવાર એપ ઇન્સ્ટોલ કરો' : '1-Click Install Official App'}
+              >
+                <Download className="w-3 h-3 text-white" />
+                <span>{lang === 'gu' ? 'એપ ઇન્સ્ટોલ' : 'Install App'}</span>
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
@@ -3527,7 +3542,40 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* 5. APP VERSION & CHANGELOG */}
+                {/* 5. 1-CLICK PWA APP INSTALL BUTTON IN MOBILE DRAWER */}
+                {!isStandaloneApp && (
+                  <button
+                    onClick={() => {
+                      triggerHaptic('success');
+                      setMobileMenuOpen(false);
+                      window.dispatchEvent(new CustomEvent('qless-trigger-pwa-install'));
+                    }}
+                    className="w-full py-2.5 px-3 bg-gradient-to-r from-[#003366] to-[#004080] border-2 border-[#FF9933] rounded-2xl flex items-center justify-between text-xs font-black text-white cursor-pointer shadow-md transition active:scale-95"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-slate-900 border border-white/20 p-0.5 shrink-0 flex items-center justify-center">
+                        <img 
+                          src="/brand/queueless-kacheri-favicon-square-hd.png" 
+                          alt="App Icon" 
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <p className="text-xs font-black text-white truncate">
+                          {lang === 'en' ? 'Install Official App' : 'QueueLess કચેરી એપ ઇન્સ્ટોલ કરો'}
+                        </p>
+                        <p className="text-[10px] text-amber-300 font-bold">
+                          {lang === 'en' ? '1-Click Fast Install' : '૧-ક્લિકમાં ફોનમાં ઉમેરો'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] bg-[#FF9933] text-slate-950 px-2 py-1 rounded-full font-black shrink-0">
+                      ઇન્સ્ટોલ ➔
+                    </span>
+                  </button>
+                )}
+
+                {/* 6. APP VERSION & CHANGELOG */}
                 <button
                   onClick={() => {
                     triggerHaptic('tap');
