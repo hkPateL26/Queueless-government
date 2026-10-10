@@ -168,7 +168,17 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
     if (!isAllMandatoryVerified) {
       triggerHaptic('warning');
       setShowValidationNotice(true);
-      setMissingDocsModalOpen(true);
+      const firstPendingIdx = effectiveDocsList.findIndex(d => d.required && docVerifications[d.nameGu]?.status !== 'passed');
+      if (firstPendingIdx !== -1) {
+        const el = document.getElementById(`doc-slot-${firstPendingIdx}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          document.getElementById('docs-checklist-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else {
+        document.getElementById('docs-checklist-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
 
       speakGuidance(
         isEn 
@@ -417,24 +427,24 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 bg-[#003366]/70 backdrop-blur-xs z-50 flex justify-end modal-backdrop animate-in fade-in duration-200"
+      className="fixed inset-0 bg-black/75 backdrop-blur-xs z-[110] flex justify-end modal-backdrop animate-in fade-in duration-200"
+      style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-white w-full max-w-lg h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between animate-in slide-in-from-right duration-250 overscroll-contain overflow-hidden"
+        className="bg-white w-full sm:max-w-xl h-full h-[100dvh] shadow-2xl flex flex-col min-h-0 overflow-hidden animate-in slide-in-from-right duration-250 overscroll-contain"
       >
         {/* Drawer Header (Fixed) */}
-        <div className="bg-[#003366] text-white p-4 sm:p-5 shrink-0 flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <GovLogo className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 drop-shadow-md mt-0.5" />
-            <div className="space-y-1 min-w-0">
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF9933] bg-[#002244] px-2.5 py-0.5 rounded-full border border-blue-800 inline-block truncate max-w-full">
+        <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white px-4 py-3 sm:px-5 sm:py-3.5 shrink-0 flex items-center justify-between gap-3 border-b-2 border-[#FF9933] shadow-md">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <GovLogo className="w-9 h-9 sm:w-11 sm:h-11 shrink-0 drop-shadow-md" />
+            <div className="space-y-0.5 min-w-0">
+              <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#FF9933] bg-[#002244]/80 px-2 py-0.5 rounded-full border border-blue-700/60 inline-block truncate max-w-[200px] xs:max-w-[260px] sm:max-w-full">
                 {displayCategory} • {displayDepartment}
               </span>
-              <h2 className="text-xl font-black text-white mt-1 leading-tight">
+              <h2 className="text-sm sm:text-lg font-black text-white leading-tight truncate">
                 {displayTitle}
               </h2>
-              
             </div>
           </div>
           <button
@@ -442,14 +452,16 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
               triggerHaptic('tap');
               onClose();
             }}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 text-white flex items-center gap-1.5 text-xs font-bold transition border border-white/25 shadow-xs cursor-pointer shrink-0"
+            aria-label={isEn ? 'Close' : 'બંધ કરો'}
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 text-white font-black" />
+            <span>{isEn ? 'Close' : isHi ? 'बंद करें' : 'બંધ કરો'}</span>
           </button>
         </div>
 
         {/* Scrollable Center Body with Touch Action Pan-Y */}
-        <div className="flex-1 overflow-y-auto modal-scroll-area p-4 sm:p-5 space-y-4 sm:space-y-5">
+        <div className="flex-1 min-h-0 overflow-y-auto modal-scroll-area p-3.5 sm:p-5 space-y-3.5 sm:space-y-4 overscroll-contain touch-pan-y">
             
           {/* 📋 WHAT YOU NEED BEFORE VISITING */}
           <div className="bg-amber-50/70 border-2 border-amber-300 rounded-2xl p-4 space-y-3">
@@ -701,7 +713,7 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
             </div>
 
             {/* Family Member Selector Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
               {DEFAULT_CITIZEN_PROFILE.familyMembers.map((member) => {
                 const isSelected = selectedBeneficiaryId === member.id;
                 return (
@@ -709,17 +721,17 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                     key={member.id}
                     type="button"
                     onClick={() => handleSelectBeneficiary(member.id)}
-                    className={`p-2.5 rounded-xl border text-left transition active:scale-95 cursor-pointer relative ${
+                    className={`p-2 sm:p-2.5 rounded-xl border text-left transition active:scale-95 cursor-pointer relative ${
                       isSelected
                         ? 'bg-[#003366] text-white border-[#003366] shadow-sm ring-2 ring-blue-400/40'
                         : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
                     }`}
                   >
                     {isSelected && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     )}
-                    <p className="text-xs font-black truncate">{member.nameGu}</p>
-                    <p className={`text-[10px] truncate mt-0.5 ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>
+                    <p className="text-[11.5px] sm:text-xs font-black truncate leading-tight">{member.nameGu}</p>
+                    <p className={`text-[9.5px] sm:text-[10px] truncate mt-0.5 ${isSelected ? 'text-blue-200 font-bold' : 'text-slate-500'}`}>
                       {member.relationGu}
                     </p>
                   </button>
@@ -837,7 +849,8 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                 return (
                   <div
                     key={idx}
-                    className={`p-3 sm:p-3.5 rounded-2xl border transition shadow-xs ${
+                    id={`doc-slot-${idx}`}
+                    className={`p-3 sm:p-3.5 rounded-2xl border transition-all duration-300 shadow-xs ${
                       vState.status === 'passed'
                         ? 'bg-gradient-to-r from-emerald-50 to-green-50/80 border-emerald-400 ring-2 ring-emerald-400/20'
                         : vState.status === 'failed'
@@ -931,13 +944,13 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                     )}
 
                     {/* Action Toolbar: Real File Upload (No Demo Buttons) */}
-                    <div className="mt-2.5 pt-2 border-t border-slate-200/80 flex items-center justify-between gap-2">
+                    <div className="mt-2.5 pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                       {/* Real File Input Trigger */}
-                      <label className="text-[11px] font-bold text-[#003366] bg-white hover:bg-slate-50 border border-slate-300 hover:border-[#005A9C] px-3 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition active:scale-95 shadow-2xs">
+                      <label className="text-xs font-bold text-[#003366] bg-white hover:bg-slate-50 border border-slate-300 hover:border-[#005A9C] px-3.5 py-2.5 sm:py-2 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition active:scale-95 shadow-2xs w-full sm:w-auto">
                         {vState.status === 'failed' ? (
-                          <RefreshCw className="w-3.5 h-3.5 text-red-500" />
+                          <RefreshCw className="w-4 h-4 text-red-500 shrink-0" />
                         ) : (
-                          <Upload className="w-3.5 h-3.5 text-[#FF9933]" />
+                          <Upload className="w-4 h-4 text-[#FF9933] shrink-0" />
                         )}
                         <span>
                           {vState.status === 'failed'
@@ -960,9 +973,9 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                         />
                       </label>
 
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">
-                        <Sparkles className="w-3 h-3 text-indigo-600" />
-                        <span>{isEn ? 'Google Gemini AI Verified' : isHi ? 'जेमिनी AI विज़न सत्यापित' : isMr ? 'जेमिनी AI व्हिजन तपासणी' : 'Gemini AI વિઝન સ્કેનિંગ'}</span>
+                      <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500 font-bold bg-slate-100 px-2.5 py-1.5 rounded-lg shrink-0">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span>{isEn ? 'Google Gemini AI Verified' : isHi ? 'जेमिनी AI विज़न' : isMr ? 'जेमिनी AI व्हिजन' : 'Gemini AI વિઝન સ્કેનિંગ'}</span>
                       </div>
                     </div>
                   </div>
@@ -1001,62 +1014,33 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 
         </div>
 
-        {/* Bottom Drawer Actions (Fixed & Sticky) */}
-        <div className="p-3 sm:p-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 space-y-2.5 shrink-0 sticky bottom-0 z-20">
+        {/* Bottom Drawer Actions (Fixed & Responsive) */}
+        <div className="p-3 sm:p-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 space-y-2 shrink-0 shadow-lg">
           
-          {/* Verification Status Notice Card */}
-          {!isAllMandatoryVerified ? (
-            <div className={`p-3 rounded-2xl border transition-all ${
-              showValidationNotice 
-                ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300/50 animate-pulse' 
-                : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${showValidationNotice ? 'text-amber-600' : 'text-slate-500'}`} />
-                <div className="text-[11px] leading-snug">
-                  <p className="font-extrabold text-slate-800">
-                    {isEn 
-                      ? `Mandatory Docs: ${verifiedMandatoryDocs.length}/${totalMandatory} AI-Verified` 
-                      : isHi 
-                      ? `अनिवार्य दस्तावेज़: ${verifiedMandatoryDocs.length}/${totalMandatory} AI सत्यापित` 
-                      : isMr 
-                      ? `आवश्यक कागदपत्रे: ${verifiedMandatoryDocs.length}/${totalMandatory} AI प्रमाणित` 
-                      : `ફરજિયાત દસ્તાવેજો: ${verifiedMandatoryDocs.length}/${totalMandatory} AI પ્રમાણિત`}
-                  </p>
-                  <p className="text-slate-600 mt-0.5">
-                    {isEn 
-                      ? 'Upload original photos or PDFs for all mandatory documents above to collect token.' 
-                      : isHi 
-                      ? 'टोकन प्राप्त करने के लिए कृपया ऊपर दिए गए सभी अनिवार्य दस्तावेज़ अपलोड करें।' 
-                      : isMr 
-                      ? 'टोकन मिळवण्यासाठी कृपया सर्व आवश्यक कागदपत्रे अपलोड करा.' 
-                      : 'કચેરી ટોકન મેળવવા માટે ઉપર આપેલા તમામ ફરજિયાત દસ્તાવેજો અપલોડ કરો.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center gap-2 text-emerald-900 text-[11px] font-bold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>
-                {isEn 
-                  ? '✓ All mandatory documents AI-verified! You can now collect your live token.' 
-                  : isHi 
-                  ? '✓ सभी अनिवार्य दस्तावेज़ AI सत्यापित हैं! अब आप टोकन प्राप्त कर सकते हैं।' 
-                  : isMr 
-                  ? '✓ सर्व आवश्यक कागदपत्रे AI प्रमाणित झाली आहेत! आता आपण टोकन मिळवू शकता.' 
-                  : '✓ તમામ ફરજિયાત દસ્તાવેજો Gemini AI દ્વારા પ્રમાણિત થયેલ છે! હવે ટોકન મેળવો.'}
+          {/* Compact Status Indicator Bar */}
+          <div className="flex items-center justify-between text-xs px-1">
+            <div className="flex items-center gap-1.5 font-bold">
+              <span className={`w-2 h-2 rounded-full ${isAllMandatoryVerified ? 'bg-emerald-600 animate-ping' : 'bg-amber-500 animate-pulse'}`} />
+              <span className={isAllMandatoryVerified ? 'text-emerald-800 font-extrabold' : 'text-slate-700'}>
+                {isAllMandatoryVerified
+                  ? (isEn ? '✓ All mandatory documents verified' : '✓ તમામ ફરજિયાત દસ્તાવેજો પ્રમાણિત')
+                  : (isEn ? `Mandatory Docs: ${verifiedMandatoryDocs.length}/${totalMandatory} Verified` : `ફરજિયાત દસ્તાવેજો: ${verifiedMandatoryDocs.length}/${totalMandatory} AI પ્રમાણિત`)}
               </span>
             </div>
-          )}
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+              isAllMandatoryVerified ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'
+            }`}>
+              {progressPercent}% {isEn ? 'Done' : 'પૂર્ણ'}
+            </span>
+          </div>
 
           {onCollectToken && (
             <button
               onClick={handleCollectTokenClick}
-              className={`w-full font-extrabold py-3.5 px-3 rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-center cursor-pointer ${
+              className={`w-full font-black py-3 sm:py-3.5 px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer ${
                 isAllMandatoryVerified
-                  ? 'bg-emerald-700 hover:bg-emerald-800 text-white ring-2 ring-emerald-500/40 shadow-lg'
-                  : 'bg-[#003366] hover:bg-[#002244] text-white'
+                  ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-emerald-500/25 ring-2 ring-emerald-400/30'
+                  : 'bg-[#003366] hover:bg-[#002244] text-white shadow-blue-900/20'
               }`}
             >
               {isAllMandatoryVerified ? (
@@ -1064,25 +1048,25 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                   <CheckCircle2 className="w-4 h-4 text-white shrink-0 animate-pulse" />
                   <span>
                     {isEn 
-                      ? '✓ All Docs Verified • Collect Live Token' 
+                      ? '✓ All Docs Verified • Collect Live Token ➔' 
                       : isHi 
-                      ? '✓ सभी दस्तावेज़ सत्यापित • कार्यालय टोकन प्राप्त करें' 
+                      ? '✓ सभी दस्तावेज़ सत्यापित • कार्यालय टोकन प्राप्त करें ➔' 
                       : isMr 
-                      ? '✓ सर्व कागदपत्रे प्रमाणित • थेट टोकन मिळवा' 
-                      : '✓ તમામ દસ્તાવેજ પ્રમાણિત • કચેરી ટોકન કલેક્ટ કરો'}
+                      ? '✓ सर्व कागदपत्रे प्रमाणित • थेट टोकन मिळवा ➔' 
+                      : '✓ તમામ દસ્તાવેજ પ્રમાણિત • કચેરી ટોકન મેળવો ➔'}
                   </span>
                 </>
               ) : (
                 <>
-                  <Lock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
+                  <Upload className="w-4 h-4 text-[#FF9933] shrink-0" />
                   <span>
                     {isEn 
-                      ? `Upload Docs to Collect Token (${verifiedMandatoryDocs.length}/${totalMandatory})` 
+                      ? `Upload Documents to Collect Token (${verifiedMandatoryDocs.length}/${totalMandatory})` 
                       : isHi 
-                      ? `टोकन हेतु दस्तावेज़ अपलोड करें (${verifiedMandatoryDocs.length}/${totalMandatory})` 
+                      ? `दस्तावेज़ अपलोड करें (${verifiedMandatoryDocs.length}/${totalMandatory})` 
                       : isMr 
-                      ? `टोकनसाठी कागदपत्रे अपलोड करा (${verifiedMandatoryDocs.length}/${totalMandatory})` 
-                      : `ટોકન મેળવવા દસ્તાવેજ અપલોડ કરો (${verifiedMandatoryDocs.length}/${totalMandatory})`}
+                      ? `कागदपत्रे अपलोड करा (${verifiedMandatoryDocs.length}/${totalMandatory})` 
+                      : `દસ્તાવેજ અપલોડ કરો (${verifiedMandatoryDocs.length}/${totalMandatory})`}
                   </span>
                 </>
               )}

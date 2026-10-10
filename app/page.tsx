@@ -1214,403 +1214,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 📱 MOBILE HAMBURGER SLIDE-OVER DRAWER */}
-        {mobileMenuOpen && (
-          <div
-            onClick={() => {
-              triggerHaptic('tap');
-              setMobileMenuOpen(false);
-            }}
-            className="md:hidden fixed inset-0 z-[120] bg-black/75 backdrop-blur-xs flex justify-end modal-backdrop animate-in fade-in duration-200"
-            style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="w-full sm:max-w-md h-full h-[100dvh] bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 text-slate-800"
-            >
-              {/* Drawer Header */}
-              <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white px-4 py-3 sm:px-5 sm:py-3.5 flex items-center justify-between border-b-2 border-[#FF9933] shrink-0 shadow-md">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-md shrink-0" />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm sm:text-base font-black text-white truncate">QueueLess કચેરી</span>
-                      <span className="text-[9px] bg-amber-400 text-slate-900 font-extrabold px-1.5 py-0.2 rounded shrink-0">ગુજરાત</span>
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium truncate">
-                      {lang === 'gu' ? 'જન સેવા નેવિગેશન મેનુ' : lang === 'hi' ? 'जन सेवा नेविगेशन मेनू' : 'Jan Seva Navigation Menu'}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Prominent High-Contrast Close Button */}
-                <button
-                  onClick={() => {
-                    triggerHaptic('tap');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="px-3.5 py-1.5 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 text-white flex items-center gap-1.5 text-xs font-bold transition border border-white/25 shadow-xs cursor-pointer shrink-0"
-                  aria-label={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
-                  title={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
-                >
-                  <X className="w-4 h-4 text-white font-black" />
-                  <span>{lang === 'gu' ? 'બંધ કરો' : lang === 'hi' ? 'बंद करें' : 'Close'}</span>
-                </button>
-              </div>
-
-              {/* Drawer Scrollable Body */}
-              <div className="flex-1 overflow-y-auto modal-scroll-area p-4 space-y-4 overscroll-contain touch-pan-y">
-                
-                {/* 1. ACTIVE TOKEN PASS PROMINENT BANNER (IF BOOKED) */}
-                {activeBooking && (
-                  <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 border-2 border-[#FF9933] rounded-2xl p-3.5 space-y-2 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1">
-                        <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
-                        <span>{lang === 'gu' ? 'તમારો સક્રિય ટોકન પાસ' : lang === 'hi' ? 'आपका सक्रिय टोकन पास' : 'Your Active Token Pass'}</span>
-                      </span>
-                      <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse">
-                        {lang === 'gu' ? 'લાઇવ સક્રિય' : lang === 'hi' ? 'लाइव सक्रिय' : 'Active'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-2xl font-black font-mono text-[#003366]">
-                          {activeBooking.tokenNumber}
-                        </p>
-                        <p className="text-[11px] font-bold text-slate-800 line-clamp-1">
-                          {lang === 'gu' ? `કાઉન્ટર ${activeBooking.counterNumber} • ${activeBooking.counterNameGu || activeBooking.counterNameEn}` : `Counter ${activeBooking.counterNumber} • ${activeBooking.counterNameEn || activeBooking.counterNameGu}`}
-                        </p>
-                        <p className="text-[10px] text-slate-500 font-mono">
-                          {activeBooking.slot?.timeRange}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        triggerHaptic('tap');
-                        setMobileMenuOpen(false);
-                        setTokenPassModalOpen(true);
-                      }}
-                      className="w-full py-2 px-3 bg-[#003366] hover:bg-[#002244] text-white font-black text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
-                    >
-                      <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
-                      <span>{lang === 'gu' ? 'સત્તાવાર ડિજિટલ ટોકન પાસ જુઓ' : lang === 'hi' ? 'आधिकारिक डिजिटल टोकन पास देखें' : 'View Official Digital Token Pass'}</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* 2. CITIZEN IDENTITY / LOGIN SECTION */}
-                {currentUser ? (
-                  <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-black text-xs shrink-0">
-                          {currentUser.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-extrabold text-xs text-[#003366] truncate">{currentUser.name}</p>
-                          <p className="text-[10px] text-slate-500 font-mono">આધાર: XXXX-XXXX-8842</p>
-                        </div>
-                      </div>
-                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                        <span>{lang === 'gu' ? 'પ્રમાણિત' : 'Verified'}</span>
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-blue-200/60">
-                      <button
-                        onClick={() => {
-                          triggerHaptic('tap');
-                          setMobileMenuOpen(false);
-                          setCitizenProfileModalOpen(true);
-                        }}
-                        className="py-1.5 px-2 bg-white hover:bg-slate-50 text-[#003366] border border-slate-200 rounded-lg text-[10.5px] font-bold flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
-                      >
-                        <Users className="w-3 h-3 text-[#005A9C]" />
-                        <span>{lang === 'gu' ? 'પ્રોફાઇલ જુઓ' : lang === 'hi' ? 'प्रोफाइल देखें' : 'View Profile'}</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          triggerHaptic('tap');
-                          resetSession();
-                          setMobileMenuOpen(false);
-                        }}
-                        className="py-1.5 px-2 bg-white hover:bg-red-50 text-red-600 border border-slate-200 rounded-lg text-[10.5px] font-bold flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                        <span>{lang === 'gu' ? 'લૉગઆઉટ' : lang === 'hi' ? 'लॉगआउट' : 'Logout'}</span>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
-                    <p className="text-[11px] font-extrabold text-slate-700">
-                      {lang === 'gu' ? 'પોર્ટલ લૉગિન પસંદ કરો' : lang === 'hi' ? 'पोर्टल लॉगिन चुनें' : 'Select Portal Login'}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => {
-                          triggerHaptic('tap');
-                          setMobileMenuOpen(false);
-                          setAuthModalTab('citizen');
-                          setAuthModalOpen(true);
-                        }}
-                        className="py-2 px-2 bg-[#005A9C] hover:bg-[#003366] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs cursor-pointer"
-                      >
-                        <Users className="w-3.5 h-3.5" />
-                        <span>{lang === 'gu' ? 'નાગરિક લૉગિન' : lang === 'hi' ? 'नागरिक लॉगिन' : 'Citizen Login'}</span>
-                      </button>
-                      <Link
-                        href="/admin/counter"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="py-2 px-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs cursor-pointer"
-                      >
-                        <Building className="w-3.5 h-3.5" />
-                        <span>{lang === 'gu' ? 'અધિકારી પોર્ટલ' : lang === 'hi' ? 'अधिकारी पोर्टल' : 'Officer Portal'}</span>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. MAIN NAVIGATION MENU OPTIONS */}
-                <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1 mb-1.5">
-                    {lang === 'gu' ? 'મુખ્ય સેવાઓ & સુવિધાઓ' : lang === 'hi' ? 'मुख्य सेवाएं एवं सुविधाएं' : 'Main Services & Portals'}
-                  </p>
-
-                  {/* 1. હોમ પેજ (Home) */}
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setView('landing');
-                      setMobileMenuOpen(false);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
-                      view === 'landing' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'landing' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
-                        <HomeIcon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs leading-tight">{t('navHome', lang)}</p>
-                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                          {lang === 'gu' ? 'મુખ્ય પોર્ટલ અને ઝડપી સેવાઓ' : lang === 'hi' ? 'मुख्य पोर्टल व त्वरित सेवाएं' : 'Main portal & quick access'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-
-                  {/* 2. સેવાઓ (૩૯ યોજનાઓ) */}
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setView('services');
-                      setMobileMenuOpen(false);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
-                      view === 'services' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'services' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
-                        <Layers className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs leading-tight">{t('navServices', lang)}</p>
-                          <span className="text-[9px] bg-[#FF9933] text-slate-900 px-1.5 py-0.2 rounded-full font-black">૩૯</span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                          {lang === 'gu' ? 'તમામ ૩૯ સરકારી યોજનાઓ અને ફોર્મ્સ' : lang === 'hi' ? 'सभी ३९ सरकारी योजनाएं व फॉर्म' : 'All 39 Govt Schemes & Forms'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-
-                  {/* 3. કચેરી રડાર & લાઈવ વેઇટિંગ */}
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setIsRadarLoading(true);
-                      setTimeout(() => setIsRadarLoading(false), 240);
-                      setView('dashboard');
-                      setMobileMenuOpen(false);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
-                      view === 'dashboard' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'dashboard' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
-                        <Radio className="w-4 h-4 text-emerald-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs leading-tight">{t('navRadar', lang)}</p>
-                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                          {lang === 'gu' ? 'લાઈવ વેઇટિંગ સમય અને કતાર સ્થિતિ' : lang === 'hi' ? 'लाइव प्रतीक्षा समय व कतार स्थिति' : 'Live waiting times & queue radar'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-
-                  {/* 4. ટોકન ટ્રેક કરો */}
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setMobileMenuOpen(false);
-                      setTokenTrackerModalOpen(true);
-                    }}
-                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#005A9C] flex items-center justify-center">
-                        <Ticket className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs leading-tight">{t('navTrackToken', lang)}</p>
-                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                          {lang === 'gu' ? 'તમારો ટોકન નંબર દાખલ કરી સ્થિતિ જુઓ' : lang === 'hi' ? 'टोकन संख्या डालकर स्थिति देखें' : 'Enter token number to check live status'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-
-                  {/* 5. મદદ અને સહાય */}
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setMobileMenuOpen(false);
-                      setHelpModalOpen(true);
-                    }}
-                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#FF9933] flex items-center justify-center">
-                        <Headphones className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs leading-tight">{t('navHelp', lang)}</p>
-                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                          {lang === 'gu' ? 'ટોલ-ફ્રી હેલ્પલાઇન અને સહાયતા' : lang === 'hi' ? 'टोल-फ्री हेल्पलाइन व सहायता' : 'Toll-free helpline & citizen support'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-
-                  {/* 6. અધિકારી ડેસ્ક */}
-                  <Link
-                    href="/admin/counter"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
-                        <Building className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs leading-tight">{t('navOfficerDesk', lang)}</p>
-                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                          {lang === 'gu' ? 'કાઉન્ટર ૧ થી ૬ ઓપરેટર કન્સોલ' : lang === 'hi' ? 'काउंटर १ से ६ ऑपरेटर कंसोल' : 'Desk Counter 1-6 Operator Console'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                  </Link>
-
-                  {/* 7. કલેક્ટર ડેશબોર્ડ */}
-                  <Link
-                    href="/admin/collector"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-left p-3 rounded-2xl hover:bg-amber-50 transition flex items-center justify-between text-amber-950 font-bold cursor-pointer border border-amber-200/80 bg-amber-50/40"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-amber-200 text-amber-950 flex items-center justify-center font-black">
-                        👑
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs leading-tight">
-                            {lang === 'gu' ? 'કલેક્ટર કમાન્ડ સેન્ટર' : lang === 'hi' ? 'कलेक्टर कमांड सेंटर' : 'Collector Apex Command'}
-                          </p>
-                          <span className="text-[9px] bg-amber-400 text-slate-900 px-1 py-0.2 rounded font-black">APEX</span>
-                        </div>
-                        <p className="text-[10px] text-amber-800 font-normal mt-0.5">
-                          {lang === 'gu' ? '૩૩ જિલ્લા કલેક્ટર કમાન્ડ ડેશબોર્ડ' : lang === 'hi' ? '३३ जिला कलेक्टर कमांड डैशबोर्ड' : '33 Gujarat Districts Collector Apex'}
-                        </p>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
-                  </Link>
-                </div>
-
-                {/* 4. LANGUAGE SELECTOR ROW */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
-                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-[#FF9933]" />
-                    <span>{t('langDropdownTitle', lang)}</span>
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5 text-xs font-bold">
-                    {GUJARAT_LANGUAGES.map((item) => (
-                      <button
-                        key={item.code}
-                        onClick={() => {
-                          handleSelectLang(item.code);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`py-2 px-1 rounded-xl text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
-                          lang === item.code ? 'bg-[#003366] text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
-                        }`}
-                      >
-                        <span className="text-[11px] leading-tight">{item.nativeLabel}</span>
-                        <span className="text-[9px] opacity-75">{item.englishLabel}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 5. APP VERSION & CHANGELOG */}
-                <button
-                  onClick={() => {
-                    triggerHaptic('tap');
-                    setMobileMenuOpen(false);
-                    setUpdateModalOpen(true);
-                  }}
-                  className="w-full py-2.5 px-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-950 cursor-pointer shadow-2xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-600" />
-                    <span>{CURRENT_APP_VERSION} {lang === 'gu' ? 'નવા અપડેટ્સ & ચેન્જલોગ' : "What's New & Updates"}</span>
-                  </div>
-                  <span className="text-[10px] bg-amber-400 text-slate-900 px-2 py-0.5 rounded-full font-black">જુઓ ➔</span>
-                </button>
-              </div>
-
-              {/* Drawer Footer */}
-              <div className="bg-slate-50 p-3 border-t border-slate-200 text-center space-y-1 shrink-0">
-                <p className="text-[11px] font-black text-[#003366]">
-                  📞 હેલ્પલાઇન: ૧૮૦૦-૨૩૩-૫૫૦૦ (ટોલ-ફ્રી)
-                </p>
-                <p className="text-[9.5px] text-slate-400">
-                  ગુજરાત સરકાર • સામાન્ય વહીવટ વિભાગ • GRTSA માન્ય
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </nav>
 
 
@@ -3442,6 +3045,420 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+        {/* 📱 MOBILE HAMBURGER SLIDE-OVER DRAWER */}
+        {mobileMenuOpen && (
+          <div
+            onClick={() => {
+              triggerHaptic('tap');
+              setMobileMenuOpen(false);
+            }}
+            className="md:hidden fixed inset-0 z-[250] bg-black/80 backdrop-blur-sm flex justify-end modal-backdrop animate-in fade-in duration-200"
+            style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full sm:max-w-md h-full h-[100dvh] bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 text-slate-800"
+            >
+              {/* Drawer Header - Sticky at top with high-contrast red close button */}
+              <div className="bg-gradient-to-r from-[#003366] via-[#004080] to-[#002244] text-white px-4 py-3 sm:px-5 sm:py-3.5 flex items-center justify-between border-b-2 border-[#FF9933] shrink-0 shadow-md sticky top-0 z-20">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-md shrink-0" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm sm:text-base font-black text-white truncate">QueueLess કચેરી</span>
+                      <span className="text-[9px] bg-amber-400 text-slate-900 font-extrabold px-1.5 py-0.2 rounded shrink-0">ગુજરાત</span>
+                    </div>
+                    <p className="text-[10px] sm:text-[11px] text-blue-200 font-medium truncate">
+                      {lang === 'gu' ? 'જન સેવા નેવિગેશન મેનુ' : lang === 'hi' ? 'जन सेवा नेविगेशन मेनू' : 'Jan Seva Navigation Menu'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Prominent High-Contrast Close Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white flex items-center gap-1.5 text-xs font-black transition border-2 border-red-500 shadow-md cursor-pointer shrink-0"
+                  aria-label={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
+                  title={lang === 'gu' ? 'મેનુ બંધ કરો' : 'Close navigation menu'}
+                >
+                  <X className="w-4 h-4 text-white stroke-[3]" />
+                  <span>{lang === 'gu' ? 'બંધ કરો' : lang === 'hi' ? 'बंद करें' : 'Close'}</span>
+                </button>
+              </div>
+
+              {/* Drawer Scrollable Body */}
+              <div className="flex-1 overflow-y-auto modal-scroll-area p-4 space-y-4 overscroll-contain touch-pan-y">
+                
+                {/* 1. ACTIVE TOKEN PASS PROMINENT BANNER (IF BOOKED) */}
+                {activeBooking && (
+                  <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 border-2 border-[#FF9933] rounded-2xl p-3.5 space-y-2 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1">
+                        <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
+                        <span>{lang === 'gu' ? 'તમારો સક્રિય ટોકન પાસ' : lang === 'hi' ? 'आपका सक्रिय टोकन पास' : 'Your Active Token Pass'}</span>
+                      </span>
+                      <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse">
+                        {lang === 'gu' ? 'લાઇવ સક્રિય' : lang === 'hi' ? 'लाइव सक्रिय' : 'Active'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-2xl font-black font-mono text-[#003366]">
+                          {activeBooking.tokenNumber}
+                        </p>
+                        <p className="text-[11px] font-bold text-slate-800 line-clamp-1">
+                          {lang === 'gu' ? `કાઉન્ટર ${activeBooking.counterNumber} • ${activeBooking.counterNameGu || activeBooking.counterNameEn}` : `Counter ${activeBooking.counterNumber} • ${activeBooking.counterNameEn || activeBooking.counterNameGu}`}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-mono">
+                          {activeBooking.slot?.timeRange}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        triggerHaptic('tap');
+                        setMobileMenuOpen(false);
+                        setTokenPassModalOpen(true);
+                      }}
+                      className="w-full py-2 px-3 bg-[#003366] hover:bg-[#002244] text-white font-black text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer"
+                    >
+                      <Ticket className="w-3.5 h-3.5 text-[#FF9933]" />
+                      <span>{lang === 'gu' ? 'સત્તાવાર ડિજિટલ ટોકન પાસ જુઓ' : lang === 'hi' ? 'आधिकारिक डिजिटल टोकन पास देखें' : 'View Official Digital Token Pass'}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* 2. CITIZEN IDENTITY / LOGIN SECTION */}
+                {currentUser ? (
+                  <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-black text-xs shrink-0">
+                          {currentUser.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-extrabold text-xs text-[#003366] truncate">{currentUser.name}</p>
+                          <p className="text-[10px] text-slate-500 font-mono">આધાર: XXXX-XXXX-8842</p>
+                        </div>
+                      </div>
+                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                        <span>{lang === 'gu' ? 'પ્રમાણિત' : 'Verified'}</span>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-blue-200/60">
+                      <button
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setMobileMenuOpen(false);
+                          setCitizenProfileModalOpen(true);
+                        }}
+                        className="py-1.5 px-2 bg-white hover:bg-slate-50 text-[#003366] border border-slate-200 rounded-lg text-[10.5px] font-bold flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                      >
+                        <Users className="w-3 h-3 text-[#005A9C]" />
+                        <span>{lang === 'gu' ? 'પ્રોફાઇલ જુઓ' : lang === 'hi' ? 'प्रोफाइल देखें' : 'View Profile'}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          resetSession();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="py-1.5 px-2 bg-white hover:bg-red-50 text-red-600 border border-slate-200 rounded-lg text-[10.5px] font-bold flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>{lang === 'gu' ? 'લૉગઆઉટ' : lang === 'hi' ? 'लॉगआउट' : 'Logout'}</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+                    <p className="text-[11px] font-extrabold text-slate-700">
+                      {lang === 'gu' ? 'પોર્ટલ લૉગિન પસંદ કરો' : lang === 'hi' ? 'पोर्टल लॉगिन चुनें' : 'Select Portal Login'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => {
+                          triggerHaptic('tap');
+                          setMobileMenuOpen(false);
+                          setAuthModalTab('citizen');
+                          setAuthModalOpen(true);
+                        }}
+                        className="py-2 px-2 bg-[#005A9C] hover:bg-[#003366] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                      >
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{lang === 'gu' ? 'નાગરિક લૉગિન' : lang === 'hi' ? 'नागरिक लॉगिन' : 'Citizen Login'}</span>
+                      </button>
+                      <Link
+                        href="/admin/counter"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="py-2 px-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-xs font-bold flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                      >
+                        <Building className="w-3.5 h-3.5" />
+                        <span>{lang === 'gu' ? 'અધિકારી પોર્ટલ' : lang === 'hi' ? 'अधिकारी पोर्टल' : 'Officer Portal'}</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. MAIN NAVIGATION MENU OPTIONS */}
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1 mb-1.5">
+                    {lang === 'gu' ? 'મુખ્ય સેવાઓ & સુવિધાઓ' : lang === 'hi' ? 'मुख्य सेवाएं एवं सुविधाएं' : 'Main Services & Portals'}
+                  </p>
+
+                  {/* 1. હોમ પેજ (Home) */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setView('landing');
+                      setMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
+                      view === 'landing' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'landing' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <HomeIcon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navHome', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'મુખ્ય પોર્ટલ અને ઝડપી સેવાઓ' : lang === 'hi' ? 'मुख्य पोर्टल व त्वरित सेवाएं' : 'Main portal & quick access'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 2. સેવાઓ (૩૯ યોજનાઓ) */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setView('services');
+                      setMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
+                      view === 'services' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'services' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <Layers className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs leading-tight">{t('navServices', lang)}</p>
+                          <span className="text-[9px] bg-[#FF9933] text-slate-900 px-1.5 py-0.2 rounded-full font-black">૩૯</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'તમામ ૩૯ સરકારી યોજનાઓ અને ફોર્મ્સ' : lang === 'hi' ? 'सभी ३९ सरकारी योजनाएं व फॉर्म' : 'All 39 Govt Schemes & Forms'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 3. કચેરી રડાર & લાઈવ વેઇટિંગ */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setIsRadarLoading(true);
+                      setTimeout(() => setIsRadarLoading(false), 240);
+                      setView('dashboard');
+                      setMobileMenuOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`w-full text-left p-3 rounded-2xl transition flex items-center justify-between cursor-pointer ${
+                      view === 'dashboard' ? 'bg-blue-50 text-[#003366] font-black border border-blue-200 shadow-2xs' : 'hover:bg-slate-50 text-slate-700 font-bold'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${view === 'dashboard' ? 'bg-[#003366] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        <Radio className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navRadar', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'લાઈવ વેઇટિંગ સમય અને કતાર સ્થિતિ' : lang === 'hi' ? 'लाइव प्रतीक्षा समय व कतार स्थिति' : 'Live waiting times & queue radar'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 4. ટોકન ટ્રેક કરો */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setMobileMenuOpen(false);
+                      setTokenTrackerModalOpen(true);
+                    }}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#005A9C] flex items-center justify-center">
+                        <Ticket className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navTrackToken', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'તમારો ટોકન નંબર દાખલ કરી સ્થિતિ જુઓ' : lang === 'hi' ? 'टोकन संख्या डालकर स्थिति देखें' : 'Enter token number to check live status'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 5. મદદ અને સહાય */}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('tap');
+                      setMobileMenuOpen(false);
+                      setHelpModalOpen(true);
+                    }}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-50 text-[#FF9933] flex items-center justify-center">
+                        <Headphones className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navHelp', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'ટોલ-ફ્રી હેલ્પલાઇન અને સહાયતા' : lang === 'hi' ? 'टोल-फ्री हेल्पलाइन व सहायता' : 'Toll-free helpline & citizen support'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+
+                  {/* 6. અધિકારી ડેસ્ક */}
+                  <Link
+                    href="/admin/counter"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 transition flex items-center justify-between text-slate-700 font-bold cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                        <Building className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs leading-tight">{t('navOfficerDesk', lang)}</p>
+                        <p className="text-[10px] text-slate-400 font-normal mt-0.5">
+                          {lang === 'gu' ? 'કાઉન્ટર ૧ થી ૬ ઓપરેટર કન્સોલ' : lang === 'hi' ? 'काउंटर १ से ६ ऑपरेटर कंसोल' : 'Desk Counter 1-6 Operator Console'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                  </Link>
+
+                  {/* 7. કલેક્ટર ડેશબોર્ડ */}
+                  <Link
+                    href="/admin/collector"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-amber-50 transition flex items-center justify-between text-amber-950 font-bold cursor-pointer border border-amber-200/80 bg-amber-50/40"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-amber-200 text-amber-950 flex items-center justify-center font-black">
+                        👑
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs leading-tight">
+                            {lang === 'gu' ? 'કલેક્ટર કમાન્ડ સેન્ટર' : lang === 'hi' ? 'कलेक्टर कमांड सेंटर' : 'Collector Apex Command'}
+                          </p>
+                          <span className="text-[9px] bg-amber-400 text-slate-900 px-1 py-0.2 rounded font-black">APEX</span>
+                        </div>
+                        <p className="text-[10px] text-amber-800 font-normal mt-0.5">
+                          {lang === 'gu' ? '૩૩ જિલ્લા કલેક્ટર કમાન્ડ ડેશબોર્ડ' : lang === 'hi' ? '३३ जिला कलेक्टर कमांड डैशबोर्ड' : '33 Gujarat Districts Collector Apex'}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-amber-700" />
+                  </Link>
+                </div>
+
+                {/* 4. LANGUAGE SELECTOR ROW */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#FF9933]" />
+                    <span>{t('langDropdownTitle', lang)}</span>
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5 text-xs font-bold">
+                    {GUJARAT_LANGUAGES.map((item) => (
+                      <button
+                        key={item.code}
+                        onClick={() => {
+                          handleSelectLang(item.code);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`py-2 px-1 rounded-xl text-center transition flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                          lang === item.code ? 'bg-[#003366] text-white font-black shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                        }`}
+                      >
+                        <span className="text-[11px] leading-tight">{item.nativeLabel}</span>
+                        <span className="text-[9px] opacity-75">{item.englishLabel}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 5. APP VERSION & CHANGELOG */}
+                <button
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setMobileMenuOpen(false);
+                    setUpdateModalOpen(true);
+                  }}
+                  className="w-full py-2.5 px-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-950 cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <span>{CURRENT_APP_VERSION} {lang === 'gu' ? 'નવા અપડેટ્સ & ચેન્જલોગ' : "What's New & Updates"}</span>
+                  </div>
+                  <span className="text-[10px] bg-amber-400 text-slate-900 px-2 py-0.5 rounded-full font-black">જુઓ ➔</span>
+                </button>
+              </div>
+
+              {/* Drawer Footer with Both Primary Close Button and Helpline */}
+              <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 space-y-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
+                >
+                  <X className="w-4 h-4 text-white stroke-[3]" />
+                  <span>{lang === 'gu' ? '✕ મેનુ બંધ કરો (Close Menu)' : lang === 'hi' ? '✕ मेनू बंद करें (Close Menu)' : '✕ Close Navigation Menu'}</span>
+                </button>
+
+                <div className="text-center space-y-0.5 pt-0.5">
+                  <p className="text-[11px] font-black text-[#003366]">
+                    📞 હેલ્પલાઇન: ૧૮૦૦-૨૩૩-૫૫૦૦ (ટોલ-ફ્રી)
+                  </p>
+                  <p className="text-[9.5px] text-slate-400">
+                    ગુજરાત સરકાર • સામાન્ય વહીવટ વિભાગ • GRTSA માન્ય
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       {/* 🚀 Floating In-App Toast Notification */}
       {toastNotification && (
         <div className="fixed bottom-6 right-6 z-[130] max-w-md w-full p-4 animate-in slide-in-from-bottom-5 fade-in duration-200 pointer-events-auto">
