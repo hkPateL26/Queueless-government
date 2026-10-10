@@ -252,7 +252,7 @@ export const AppVersionUpdateModal: React.FC<AppVersionUpdateModalProps> = ({
 
               {/* DYNAMIC LIST OF CHANGES */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-[11px] font-black text-slate-400 uppercase tracking-wide px-1">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 uppercase tracking-wide px-1">
                   <span>{isEn ? 'Key Enhancements:' : isHi ? 'मुख्य सुधार एवं नई सुविधाएं:' : isMr ? 'मुख्य सुधारणा आणि नवीन वैशिष्ट्ये:' : isKhi ? 'મુખ્ય સુધારા:' : 'મુખ્ય સુધારાઓ & નવા ફીચર્સ:'}</span>
                   <span>{currentRelease.changes.length} {isEn ? 'items' : isHi ? 'मदें' : isMr ? 'आयटम' : 'આઇટમ'}</span>
                 </div>

@@ -144,7 +144,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                 ? `યોજના ગોતો & કાગળ પૂર્વ-ચકાસણી (${ALL_YOJANAS.length} સેવાયું)`
                 : `યોજના શોધ & દસ્તાવેજ પૂર્વ-ચકાસણી (${ALL_YOJANAS.length} સેવાઓ)`}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
               {isEn 
                 ? 'Verify scheme eligibility, required documents, statutory fees, and expected processing time before visiting the office.' 
                 : isHi 
@@ -261,7 +261,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                     {displayCategory}
                   </span>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[10px] font-bold text-[#138808] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                       {scheme.fee === 0 
       ? (isEn ? 'Govt Fee: ₹0 (Free)' : isHi ? 'सरकारी शुल्क: ₹० (मुफ्त)' : isMr ? 'शासकीय शुल्क: ₹० (मोफत)' : 'સરકારી ફી: ₹૦ (મફત)') 
       : (isEn ? `Govt Fee: ₹${scheme.fee}` : isHi ? `सरकारी शुल्क: ₹${scheme.fee}` : isMr ? `शासकीय शुल्क: ₹${scheme.fee}` : `સરકારી ફી: ₹${scheme.fee}`)}
@@ -287,7 +287,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   <p className="text-[11px] font-bold text-slate-700 line-clamp-2 leading-relaxed">
                     ✨ {displayBenefit}
                   </p>
-                  <p className="text-[9.5px] text-slate-400 italic">
+                  <p className="text-[9.5px] text-slate-600 italic">
                     {isEn 
                       ? '(Amount/eligibility depends on category rules)' 
                       : isMr
@@ -352,7 +352,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
 
                   {/* SLA Type Tag (Only statutory for GRTSA) */}
                   <div className="flex items-center justify-between text-[9.5px]">
-                    <span className="text-slate-400">
+                    <span className="text-slate-600 font-medium">
                       {isEn ? 'Timeline Standard:' : isHi ? 'समय-सीमा मानक:' : isMr ? 'वेळ-मर्यादा मानक:' : 'સમયમર્યાદા ધોરણ:'}
                     </span>
                     {scheme.slaType === 'statutory_grtsa' ? (
@@ -360,11 +360,11 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                         {isEn ? '⚖️ GRTSA 2013 Statutory' : isHi ? '⚖️ GRTSA २०१३ अधिसूचित' : isMr ? '⚖️ GRTSA २०१३ अधिसूचित' : '⚖️ GRTSA ૨૦૧૩ અધિસૂચિત'}
                       </span>
                     ) : scheme.slaType === 'departmental_norm' ? (
-                      <span className="font-bold text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">
+                      <span className="font-bold text-emerald-800 bg-emerald-100/60 px-1.5 py-0.5 rounded">
                         {isEn ? '🏛️ Citizen Charter' : isHi ? '🏛️ सिटीजन चार्टर' : isMr ? '🏛️ सिटिझन चार्टर' : '🏛️ સિટીઝન ચાર્ટર'}
                       </span>
                     ) : (
-                      <span className="font-medium text-slate-500 bg-slate-200/60 px-1.5 py-0.5 rounded">
+                      <span className="font-medium text-slate-700 bg-slate-200/80 px-1.5 py-0.5 rounded">
                         {isEn ? '📋 Scheme Cycle / Quota' : isHi ? '📋 योजना चक्र / कोटा' : isMr ? '📋 योजना चक्र / कोटा' : '📋 યોજના ચક્ર / ક્વોટા'}
                       </span>
                     )}
@@ -381,7 +381,7 @@ export const SchemesCatalog: React.FC<SchemesCatalogProps> = ({
                   </div>
 
                   {/* Official Source & Updated */}
-                  <div className="pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-400">
+                  <div className="pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-600 font-medium">
                     <span className="truncate max-w-[150px]" title={scheme.officialSource}>
                       {isEn ? 'Source: ' : isHi ? 'स्रोत: ' : isMr ? 'स्रोत: ' : 'સ્ત્રોત: '}{scheme.officialSource}
                     </span>

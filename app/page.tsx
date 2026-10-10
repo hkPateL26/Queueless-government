@@ -14,23 +14,29 @@ import { speakGuidance } from '@/lib/voice';
 import { subscribeToQueueEvents } from '@/lib/realtime-bus';
 import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { SchemesCatalog } from '@/components/SchemesCatalog';
-import { SchemeDrawer, SchemeBookingMeta } from '@/components/SchemeDrawer';
-import { CameraScannerModal } from '@/components/CameraScannerModal';
-import { SlotBookingModal, BookingDetails } from '@/components/SlotBookingModal';
+import dynamic from 'next/dynamic';
+import type { SchemeBookingMeta } from '@/components/SchemeDrawer';
+import { BookingDetails } from '@/components/SlotBookingModal';
 import { VerifiedDocumentItem } from '@/lib/slot-engine';
-import { DigitalTokenPass } from '@/components/DigitalTokenPass';
 import { GovLogo } from '@/components/GovLogo';
 import { GovTelemetryMarquee } from '@/components/GovTelemetryMarquee';
-import { CitizenHelpModal } from '@/components/CitizenHelpModal';
-import { TokenTrackerModal } from '@/components/TokenTrackerModal';
 import { GovJanSevaGateway } from '@/components/GovJanSevaGateway';
 import { AuthenticQrCode } from '@/components/AuthenticQrCode';
 import { SchemeItem, ALL_YOJANAS } from '@/lib/schemes-data';
 import { Language, GUJARAT_LANGUAGES, t } from '@/lib/translations';
 import { CounterGridSkeleton } from '@/components/ui/Skeleton';
-import { CitizenProfileModal } from '@/components/CitizenProfileModal';
 import { CitizenLocationRadar } from '@/components/CitizenLocationRadar';
-import { AppVersionUpdateModal, CURRENT_APP_VERSION } from '@/components/AppVersionUpdateModal';
+import { CURRENT_APP_VERSION } from '@/components/AppVersionUpdateModal';
+
+// High-Performance Dynamic Imports for Heavy Modals (Loaded On-Demand)
+const SchemeDrawer = dynamic(() => import('@/components/SchemeDrawer').then(m => m.SchemeDrawer), { ssr: false });
+const CameraScannerModal = dynamic(() => import('@/components/CameraScannerModal').then(m => m.CameraScannerModal), { ssr: false });
+const SlotBookingModal = dynamic(() => import('@/components/SlotBookingModal').then(m => m.SlotBookingModal), { ssr: false });
+const DigitalTokenPass = dynamic(() => import('@/components/DigitalTokenPass').then(m => m.DigitalTokenPass), { ssr: false });
+const CitizenHelpModal = dynamic(() => import('@/components/CitizenHelpModal').then(m => m.CitizenHelpModal), { ssr: false });
+const TokenTrackerModal = dynamic(() => import('@/components/TokenTrackerModal').then(m => m.TokenTrackerModal), { ssr: false });
+const CitizenProfileModal = dynamic(() => import('@/components/CitizenProfileModal').then(m => m.CitizenProfileModal), { ssr: false });
+const AppVersionUpdateModal = dynamic(() => import('@/components/AppVersionUpdateModal').then(m => m.AppVersionUpdateModal), { ssr: false });
 
 export default function Home() {
   const [view, setView] = useState<'landing' | 'dashboard' | 'services'>('landing');
@@ -972,7 +978,7 @@ export default function Home() {
             <div className="text-left min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-sm sm:text-xl tracking-tight text-[#003366] leading-none truncate">{t('appTitle', lang)}</span>
-                <span className="text-[9px] sm:text-[10px] bg-amber-50 text-[#FF9933] border border-amber-200 px-1 py-0.5 rounded font-extrabold shrink-0">{t('appTag', lang)}</span>
+                <span className="text-[9px] sm:text-[10px] bg-amber-100 text-amber-800 border border-amber-300 px-1 py-0.5 rounded font-extrabold shrink-0">{t('appTag', lang)}</span>
               </div>
               <p className="text-[10px] text-slate-500 font-medium hidden sm:block">{t('appSubtitle', lang)}</p>
             </div>
@@ -1669,13 +1675,13 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 text-xs text-slate-500 font-medium">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 text-xs text-slate-700 font-semibold">
                 <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                   <span>{t('heroTagDistricts', lang)}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-[#138808] shrink-0" />
+                  <Lock className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                   <span>{t('heroTagPrivacy', lang)}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -1713,39 +1719,39 @@ export default function Home() {
             <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-14">
                 <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-[#005A9C] shrink-0" />
                     <span>{t('statLiveTokens', lang)}</span>
                   </p>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">12,483</h3>
-                  <p className="text-[10px] sm:text-[11px] text-[#138808] font-bold mt-0.5">{t('todayGrowth', lang)}</p>
+                  <p className="text-[10px] sm:text-[11px] text-emerald-800 font-bold mt-0.5">{t('todayGrowth', lang)}</p>
                 </div>
 
                 <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                     <span>{t('statAvgWait', lang)}</span>
                   </p>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">14 min</h3>
-                  <p className="text-[10px] sm:text-[11px] text-[#138808] font-bold mt-0.5">{t('vsWalkin', lang)}</p>
+                  <p className="text-[10px] sm:text-[11px] text-emerald-800 font-bold mt-0.5">{t('vsWalkin', lang)}</p>
                 </div>
 
                 <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
-                    <Building className="w-3.5 h-3.5 text-[#138808] shrink-0" />
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                     <span>{t('statActiveKacheris', lang)}</span>
                   </p>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">250+</h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold mt-0.5">{t('statAllDistricts', lang)}</p>
+                  <p className="text-[10px] sm:text-[11px] text-slate-600 font-semibold mt-0.5">{t('statAllDistricts', lang)}</p>
                 </div>
 
                 <div className="bg-[#F5F7FA] border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
-                  <p className="text-[11px] sm:text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                  <p className="text-[11px] sm:text-xs font-bold text-slate-700 flex items-center gap-1.5">
                     <Award className="w-3.5 h-3.5 text-[#FF9933] shrink-0" />
                     <span>{t('statGrtsaSla', lang)}</span>
                   </p>
                   <h3 className="text-2xl sm:text-3xl font-black text-[#003366] mt-1">99.8%</h3>
-                  <p className="text-[10px] sm:text-[11px] text-[#138808] font-bold mt-0.5">{t('statTimeBound', lang)}</p>
+                  <p className="text-[10px] sm:text-[11px] text-emerald-800 font-bold mt-0.5">{t('statTimeBound', lang)}</p>
                 </div>
               </div>
             </div>
@@ -2480,7 +2486,7 @@ export default function Home() {
                         </svg>
                         <div className="absolute bottom-0 inset-x-0 flex flex-col items-center">
                           <span className="text-2xl font-black text-[#003366] leading-none">75%</span>
-                          <span className="text-[10px] font-bold text-slate-400 mt-0.5">{t('capacityText', lang)}</span>
+                          <span className="text-[10px] font-bold text-slate-600 font-semibold mt-0.5">{t('capacityText', lang)}</span>
                         </div>
                       </div>
 
@@ -3406,7 +3412,7 @@ export default function Home() {
         <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 space-y-2 flex flex-col items-center">
           <GovLogo className="w-12 h-12 mb-1 drop-shadow-sm" />
           <p className="font-bold text-[#003366]">{t('footerDisclaimer', lang)}</p>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-600 font-medium">
             {t('footerGrtsaCompliance', lang)}
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
