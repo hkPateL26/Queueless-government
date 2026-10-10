@@ -111,6 +111,23 @@ CRITICAL VERIFICATION WORKFLOW:
      -> "qualityScore": 95
      -> "actionableAdvice": "✅ માન્ય [Doc Name]: સત્તાવાર વિગતો અને ઓળખ પ્રમાણિત છે."
 
+   - CASE G: DUAL-SIDED AADHAAR CARD (SINGLE FILE OR PDF WITH FRONT & BACK SIDES):
+     * UIDAI Aadhaar cards have TWO components: Front side (Citizen Photo, Name in English/Gujarati, DOB/YOB, Gender, 12-Digit UID) and Back side (Residential Address, C/O / W/O / S/O, and Secure QR Code).
+     * If the uploaded file (PDF page 1 & 2, or single merged/side-by-side image) contains BOTH the Front and Back sides:
+       -> DO NOT reject as multiple documents or clutter!
+       -> Validate BOTH sides together as a 100% complete Aadhaar card submission.
+       -> "matchesExpected": true
+       -> "isValidForGovt": true
+       -> "qualityScore": 98
+       -> "extractedInfo": {
+            "detectedName": [name on front],
+            "documentNumberMasked": "XXXX-XXXX-[last 4 digits]",
+            "yearOrDate": [DOB or YOB],
+            "addressSnippet": [City / District / Pincode from back side],
+            "isDualSided": true
+          }
+       -> "actionableAdvice": "✅ આધાર કાર્ડ (આગળ-પાછળ બંને બાજુ) સંપૂર્ણ માન્ય: ઓળખ, જન્મ તારીખ અને સરનામું સફળતાપૂર્વક ચકાસાયેલ છે."
+
 3. RETURN FORMAT:
 Return ONLY a valid JSON object matching this schema without any markdown wrapping or text:
 {
@@ -125,7 +142,9 @@ Return ONLY a valid JSON object matching this schema without any markdown wrappi
   "extractedInfo": {
     "detectedName": string or null,
     "documentNumberMasked": string or null,
-    "yearOrDate": string or null
+    "yearOrDate": string or null,
+    "addressSnippet": string or null,
+    "isDualSided": boolean or null
   },
   "verificationPoints": [
     { "point": string, "status": "pass" | "fail", "note": string }
@@ -204,6 +223,10 @@ ORIGINAL FILENAME: "${fileName}"
           const partsGu: string[] = [];
           const partsEn: string[] = [];
 
+          if (info.isDualSided) {
+            partsGu.push('આગળ-પાછળ બંને બાજુ (Front & Back) પ્રમાણિત');
+            partsEn.push('Dual-Sided (Front & Back) Verified');
+          }
           if (info.detectedName) {
             partsGu.push(`અરજદાર/નામ: ${info.detectedName}`);
             partsEn.push(`Applicant/Name: ${info.detectedName}`);
@@ -215,6 +238,10 @@ ORIGINAL FILENAME: "${fileName}"
           if (info.yearOrDate) {
             partsGu.push(`તારીખ/વર્ષ: ${info.yearOrDate}`);
             partsEn.push(`Date/Year: ${info.yearOrDate}`);
+          }
+          if (info.addressSnippet) {
+            partsGu.push(`રહેઠાણ: ${info.addressSnippet}`);
+            partsEn.push(`Address: ${info.addressSnippet}`);
           }
           if (parsed.actionableAdvice && isValid) {
             partsGu.push(parsed.actionableAdvice);

@@ -441,6 +441,20 @@ function getStatutoryDocumentRules(
         aiVerdictGu: `✓ UIDAI પબ્લિક કી પ્રમાણિત. ઑફલાઇન ડિજિટલ સાઇન વેરિફાઇડ.`,
         aiVerdictHi: `✓ UIDAI पब्लिक की प्रमाणित। डिजिटल हस्ताक्षर वैध।`,
         aiVerdictEn: `✓ UIDAI public key validated. Cryptographic signature verified.`
+      },
+      {
+        id: 'aadh-5',
+        titleGu: 'નિયમ ૫: આગળ-પાછળ બંને બાજુ સત્તાવાર ખરાઈ (Dual-Sided Verification)',
+        titleHi: 'नियम ५: आधार आगे एवं पीछे दोनों ओर सत्यापन (Dual-Side Verification)',
+        titleEn: 'Rule 5: Dual-Sided Aadhaar Front & Back Verification',
+        actReference: 'UIDAI Aadhaar Act Regulation Section 4 & Gujarat Digital Service Guidelines',
+        criterionGu: 'આગળની બાજુ (ફોટો, નામ, જન્મ તારીખ, ૧૨-અંક UID) અને પાછળની બાજુ (રહેઠાણનું સરનામું, પિતા/પતિનું નામ, સિક્યોર QR કોડ) બંને એક જ ફાઇલ/પીડીએફમાં ચકાસાયેલ હોવા અનિવાર્ય.',
+        criterionHi: 'आगे का भाग (फोटो, नाम, जन्मतिथि) एवं पीछे का भाग (निवास पता, QR कोड) दोनों सत्यापित होने चाहिए।',
+        criterionEn: 'Both front side (Photo, Name, DOB, UID) and back side (Residential Address, C/O, Secure QR) must be verified.',
+        status: 'PASSED',
+        aiVerdictGu: `✓ આધાર કાર્ડ આગળ-પાછળ બંને બાજુ (Front & Back) સત્તાવાર ચકાસાયેલ છે. સરનામું અને ઓળખ ૧૦૦% સુસંગત.`,
+        aiVerdictHi: `✓ आधार कार्ड आगे और पीछे दोनों तरफ सफलतापूर्वक सत्यापित। निवास पता मान्य।`,
+        aiVerdictEn: `✓ Both Front and Back sides of Aadhaar card verified. Full address & biometric link matched.`
       }
     ];
   }

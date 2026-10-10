@@ -895,30 +895,101 @@ export function DigitalTokenPass({
             </div>
           </div>
 
-          {/* ORIGINAL DOCUMENTS CHECKLIST */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
-            <div className="flex items-center justify-between">
+          {/* ORIGINAL DOCUMENTS & XEROX SUBMISSION CHECKLIST */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-slate-200">
               <span className="text-xs font-bold text-[#003366] flex items-center gap-1.5">
                 <FileCheck2 className="w-4 h-4 text-[#005A9C]" />
                 <span>
-                  {isEn ? 'Original Documents Checklist to Carry' : isHi ? 'साथ लाने हेतु मूल आवश्यक दस्तावेज़ चेकलिस्ट' : isMr ? 'सोबत आणायची मूळ कागदपत्रे यादी' : 'કચેરીએ સાથે લઈ જવાના અસલ કાગળો (Original Documents Checklist)'}
+                  {isEn ? 'Physical Documents to Carry (Originals & Xerox Copies)' : isHi ? 'साथ लाने हेतु मूल आवश्यक दस्तावेज़ एवं ज़ेरॉक्स प्रतियां' : isMr ? 'सोबत आणायची मूळ कागदपत्रे व झेरॉक्स प्रती' : 'કચેરીએ સાથે લઈ જવાના અસલ દસ્તાવેજો અને ઝેરોક્ષ નકલો'}
                 </span>
               </span>
-              <span className="text-[9.5px] text-emerald-700 font-extrabold bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">
-                {isEn ? 'Original Mandatory' : isHi ? 'मूल अनिवार्य' : isMr ? 'मूळ आवश्यक' : 'અસલ ફરજિયાત'}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[9.5px] text-emerald-800 font-extrabold bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">
+                  {isEn ? 'Originals Mandatory' : isHi ? 'मूल अनिवार्य' : 'અસલ ફરજિયાત'}
+                </span>
+                <span className="text-[9.5px] text-blue-800 font-extrabold bg-blue-100 border border-blue-300 px-2 py-0.5 rounded-full">
+                  {isEn ? '1 Self-Attested Xerox' : isHi ? '१ स्व-प्रमाणित ज़ेरॉक्स' : '૧ સ્વ-પ્રમાણિત ઝેરોક્ષ'}
+                </span>
+              </div>
             </div>
+
+            {/* Scheme Specific Documents */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              {docsList.slice(0, 4).map((doc, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#138808] shrink-0" />
-                  <span className="font-semibold text-slate-800 text-[11px] truncate">{doc}</span>
+              {docsList.map((doc, idx) => (
+                <div key={idx} className="flex items-start justify-between gap-2 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                  <div className="flex items-start gap-2 min-w-0">
+                    <CheckCircle2 className="w-4 h-4 text-[#138808] shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <span className="font-bold text-slate-800 text-[11px] block leading-snug">{doc}</span>
+                      <span className="text-[9.5px] text-slate-500 block mt-0.5">
+                        {isEn ? '1 Original + 1 Self-Attested Copy' : '૧ અસલ + ૧ સ્વ-પ્રમાણિત નકલ'}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[8.5px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
+                    {isEn ? 'Orig + Xerox' : 'અસલ+નકલ'}
+                  </span>
                 </div>
               ))}
+
+              {/* Extra Gujarat Govt Statutory Requirements */}
+              <div className="flex items-start justify-between gap-2 bg-amber-50/70 p-2.5 rounded-xl border border-amber-200">
+                <div className="flex items-start gap-2 min-w-0">
+                  <span className="text-sm shrink-0">📸</span>
+                  <div className="min-w-0">
+                    <span className="font-bold text-amber-950 text-[11px] block leading-snug">
+                      {isEn ? '2 Recent Passport Size Color Photos' : '૨ તાજેતરના પાસપોર્ટ સાઇઝ રંગીન ફોટોગ્રાફ્સ'}
+                    </span>
+                    <span className="text-[9.5px] text-amber-800 block mt-0.5">
+                      {isEn ? 'White background for office records' : 'સફેદ બેકગ્રાઉન્ડ, સત્તાવાર રેકોર્ડ અર્થે'}
+                    </span>
+                  </div>
+                </div>
+                <span className="shrink-0 text-[8.5px] font-black uppercase tracking-wider bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300">
+                  ૨ ફોટા
+                </span>
+              </div>
+
+              <div className="flex items-start justify-between gap-2 bg-indigo-50/70 p-2.5 rounded-xl border border-indigo-200">
+                <div className="flex items-start gap-2 min-w-0">
+                  <span className="text-sm shrink-0">🎫</span>
+                  <div className="min-w-0">
+                    <span className="font-bold text-indigo-950 text-[11px] block leading-snug">
+                      {isEn ? 'Digital Token Pass / e-Challan Print Copy' : 'ડિજિટલ ટોકન પાસ / સાયબર ટ્રેઝરી ચલણ પ્રિન્ટ'}
+                    </span>
+                    <span className="text-[9.5px] text-indigo-800 block mt-0.5">
+                      {isEn ? '1 Physical Print Copy for Security & Desk Entry' : '૧ પ્રિન્ટ નકલ ગેટ અને કાઉન્ટર પ્રવેશ માટે'}
+                    </span>
+                  </div>
+                </div>
+                <span className="shrink-0 text-[8.5px] font-black uppercase tracking-wider bg-indigo-200/80 text-indigo-900 px-1.5 py-0.5 rounded border border-indigo-300">
+                  ૧ પ્રિન્ટ
+                </span>
+              </div>
             </div>
-            <p className="text-[9.5px] text-slate-500">
-              {isEn ? '* Note: Please present original documents at the counter for on-spot verification.' : isHi ? '* नोट: कृपया सत्यापन हेतु काउंटर पर मूल दस्तावेज प्रस्तुत करें।' : isMr ? '* नोंद: काउंटरवर पडताळणीसाठी मूळ कागदपत्रे सादर करा.' : '* નોંધ: કાઉન્ટર પર અધિકારી સમક્ષ અસલ કાગળો રજૂ કરવાના રહેશે.'}
-            </p>
+
+            {/* Statutory Gujarat Govt Instructions Banner */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200 rounded-xl p-2.5 text-[10.5px] text-[#003366] space-y-1">
+              <p className="font-black flex items-center gap-1.5 text-xs text-[#003366]">
+                <span>🏛️</span>
+                <span>{isEn ? 'Gujarat Government Statutory Submission Rules:' : 'ગુજરાત સરકાર સત્તાવાર જમા નિયમો:'}</span>
+              </p>
+              <ul className="list-disc list-inside space-y-0.5 text-slate-700 text-[10px] pl-1">
+                <li>
+                  <strong className="text-slate-900">{isEn ? 'Originals Mandatory:' : 'અસલ દસ્તાવેજ ફરજિયાત:'}</strong>{' '}
+                  {isEn ? 'All originals must be presented to the desk officer for live physical verification & biometric validation.' : 'કાઉન્ટર પર અધિકારી સમક્ષ રૂબરૂ ખરાઈ અને બાયોમેટ્રિક ચકાસણી માટે તમામ અસલ કાગળો રજૂ કરવાના રહેશે.'}
+                </li>
+                <li>
+                  <strong className="text-slate-900">{isEn ? 'Self-Attested Xerox Copies:' : 'સ્વ-પ્રમાણિત ઝેરોક્ષ:'}</strong>{' '}
+                  {isEn ? 'Attach 1 self-attested photocopy of each document with the citizen signature.' : 'દરેક દસ્તાવેજની ૧-૧ સ્વ-પ્રમાણિત (અરજદારની પોતાની સહી વાળી) ઝેરોક્ષ નકલ કચેરીમાં જમા કરાવવી.'}
+                </li>
+                <li>
+                  <strong className="text-slate-900">{isEn ? 'Dual-Sided Aadhaar Card:' : 'આધાર કાર્ડ બંને બાજુ:'}</strong>{' '}
+                  {isEn ? 'Aadhaar xerox must clearly include both Front side (Photo/DOB/UID) and Back side (Address & QR code).' : 'આધાર કાર્ડની આગળની બાજુ (ફોટો/નામ) અને પાછળની બાજુ (સરનામું/QR કોડ) બંને સ્પષ્ટ વંચાય તેવી ઝેરોક્ષ જોડવી.'}
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* REQUIREMENT 13: "I'M RUNNING LATE" (DYNAMIC ETA RECALCULATION) */}

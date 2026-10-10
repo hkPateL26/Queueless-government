@@ -748,21 +748,120 @@ export function getLocalizedSchemeDepartment(scheme: SchemeItem, lang: Language)
   return scheme.department;
 }
 
+export const SCHEME_ELIGIBILITY_GU: Record<string, string> = {
+  'ikhedut-subsidy-schemes': 'ગુજરાતના તમામ જમીન ખાતાધારક ખેડૂતો કે જેમના નામે ૭/૧૨ અને ૮-અ જમીન ઉતારો હોય. i-Khedut પોર્ટલ પર નોંધણી કરાવેલી હોવી જરૂરી છે.',
+  'ikhedut-tractor': 'ગુજરાતના ૭/૧૨ ખાતાધારક ખેડૂત. કુટુંબ દીઠ એક જ ટ્રેક્ટર પર સહાય મળવાપાત્ર છે. અગાઉ છેલ્લા ૫-૭ વર્ષમાં ટ્રેક્ટર સહાય મેળવેલ ન હોવી જોઈએ. SC/ST અને નાના ખેડૂતોને અગ્રતા.',
+  'ikhedut-tools': 'ગુજરાતના તમામ જમીન માલિક ખેડૂતો. માન્ય ડીલર પાસેથી સરકારી માન્યતા પ્રાપ્ત રોટાવેટર, થ્રેશર અથવા ઓજારોની ખરીદી કરતા ખેડૂતો.',
+  'ikhedut-drip': 'જમીન માલિકી ધરાવતા ખેડૂતો કે જેમની પાસે બોરવેલ, કૂવો અથવા નહેર જેવો નિશ્ચિત પાણીનો સ્ત્રોત હોય. GGRC ના નિયમાનુસાર ૭૦% થી ૮૫% સહાય.',
+  'ikhedut-tarpaulin': '૭/૧૨ ધારક ખેડૂત. એક ખાતા દીઠ મહત્તમ ૨ નંગ તાડપત્રી માટે સહાય મળવાપાત્ર. i-Khedut પર ખુલ્લી અરજી વિન્ડો દરમિયાન અરજી જરૂરી.',
+  'ikhedut-seeds': 'ગુજરાતના લઘુ, સીમાંત અને સામાન્ય ખેડૂતો. માન્ય સહકારી મંડળી કે ગુજકોમાસોલ પાસેથી પ્રમાણિત બિયારણ ખરીદતા ખેડૂતો.',
+  'crop-storage-godown': 'પોતાની માલિકીની ખેતીની જમીન (૭/૧૨) ધરાવતા ખેડૂત કે જેઓ ખેતરમાં લઘુત્તમ ૩૩૦ ચો.ફૂટનું પાક સંગ્રહ સ્ટ્રક્ચર બનાવવા માંગતા હોય.',
+  'pm-kisan': 'પોતાના નામે ખેતીલાયક જમીન ધરાવતા તમામ પાત્ર ખેડૂત પરિવારો. આધાર ઇ-કેવાયસી (e-KYC) અને બેંક ખાતું આધાર સીડેડ હોવું ફરજિયાત. સરકારી પેન્શનર્સ (>₹૧૦,૦૦૦) કે ઇન્કમટેક્સ ભરનારા બાકાત.',
+  'mksy-crop-loss': 'કુદરતી આપત્તિ (અતિવૃષ્ટિ, કમોસમી વરસાદ કે દુષ્કાળ) માં ૩૩% કે તેથી વધુ પાક નુકસાન વેઠનાર ગુજરાતના તમામ ૭/૧૨ ખાતાધારક ખેડૂતો.',
+  'deshi-gay-sahay': 'પોતાની માલિકીની દેશી ગાય ધરાવતા અને પ્રાકૃતિક/જીવામૃત ખેતી કરતા ૭/૧૨ ધારક ખેડૂતો. ગાયને કાનમાં ૧૨-અંકનો INAF ટેગ હોવો ફરજિયાત.',
+  'smartphone-sahay': 'ગુજરાતમાં જમીન ધરાવતા ખેડૂત (કુટુંબ દીઠ એક સભ્ય). GST બિલ સાથે નવો સ્માર્ટફોન ખરીદનાર ખેડૂત.',
+  'pmjay-ayushman': 'NFSA રેશનકાર્ડ ધરાવતા પરિવારો, અથવા વાર્ષિક ₹૪,૦૦,૦૦૦ સુધીની આવક ધરાવતા પરિવારો. ગુજરાતના કાયમી રહેવાસી પરિવારોને ₹૧૦ લાખનું કેશલેસ આરોગ્ય કવચ.',
+  'maa-amrutam': 'વાર્ષિક ₹૪,૦૦,૦૦૦ કે તેથી ઓછી આવક ધરાવતા મધ્યમ/ગરીબ પરિવારો અને NFSA રેશનકાર્ડ ધારકો. ગંભીર બીમારીઓ માટે કેશલેસ સારવાર.',
+  'ganga-swarupa': '૧૮ વર્ષ કે તેથી વધુ વયની વિધવા બહેનો. વાર્ષિક આવક મર્યાદા ગ્રામ્ય વિસ્તારમાં ₹૧,૨૦,૦૦૦ અને શહેરી વિસ્તારમાં ₹૧,૫૦,૦૦૦. પુનઃલગ્ન ન કરેલા હોવા જોઈએ.',
+  'pmsby-insurance': '૧૮ થી ૭૦ વર્ષની વય ધરાવતા તમામ નાગરિકો કે જેઓ સક્રિય બેંક બચત ખાતું ધરાવે છે અને વાર્ષિક ₹૨૦ ઓટો-ડેબિટ માટે સંમતિ આપે છે.',
+  'matrushakti-yojana': 'સગર્ભા બહેનો અને ૨ વર્ષ સુધીના બાળકની ધાત્રી માતાઓ (બાળકના પ્રથમ ૧,૦૦૦ દિવસ). સરકારી આંગણવાડીમાં TeCHO હેલ્થ પોર્ટલ પર નોંધણી જરૂરી.',
+  'chiranjeevi-yojana': 'BPL રેશનકાર્ડ ધરાવતી અથવા વાર્ષિક ₹૨ લાખથી ઓછી આવક ધરાવતી સગર્ભા મહિલાઓ. માન્ય ખાનગી હોસ્પિટલમાં મફત પ્રસૂતિ સારવાર.',
+  'poshan-sudha': 'ગુજરાતના અધિસૂચિત ૧૪ આદિજાતિ તાલુકાઓની આંગણવાડીમાં નોંધાયેલી સગર્ભા અને ધાત્રી માતાઓ.',
+  'janani-suraksha': 'સરકારી પ્રાથમિક આરોગ્ય કેન્દ્ર (PHC), સામુહિક આરોગ્ય કેન્દ્ર (CHC) અથવા સરકારી હોસ્પિટલમાં સંસ્થાકીય પ્રસૂતિ કરાવતી ગ્રામીણ/શહેરી માતાઓ.',
+  'niradhar-vrudh': '૬૦ વર્ષ કે તેથી વધુ વયના નિરાધાર વૃદ્ધ નાગરિકો. કોઈ પુખ્ત કમાતો પુત્ર ન હોય અને વાર્ષિક આવક ગ્રામ્યમાં ₹૧,૨૦,૦૦૦ / શહેરીમાં ₹૧,૫૦,૦૦૦ થી ઓછી હોય.',
+  'namo-lakshmi': 'ગુજરાતની સરકારી, અનુદાનિત અથવા ખાનગી શાળામાં ધોરણ ૯ થી ૧૨ માં અભ્યાસ કરતી તમામ દીકરીઓ. વાર્ષિક આવક મર્યાદા ₹૬,૦૦,૦૦૦ સુધી.',
+  'mysy-scholarship': 'ધોરણ ૧૦ અથવા ૧૨ ની બોર્ડ પરીક્ષામાં ૮૦ કે તેથી વધુ પર્સન્ટાઇલ મેળવનાર અને ડિપ્લોમા/ડિગ્રી કોલેજમાં પ્રવેશ લેનાર તેજસ્વી વિદ્યાર્થીઓ. કુટુંબની વાર્ષિક આવક ₹૬,૦૦,૦૦૦ થી ઓછી હોવી જોઈએ.',
+  'namo-saraswati': 'ગુજરાતમાં ધોરણ ૧૧ અને ૧૨ વિજ્ઞાન પ્રવાહ (Science Stream - A/B/AB ગ્રૂપ) માં અભ્યાસ કરતા તમામ વિદ્યાર્થીઓ. વાર્ષિક આવક મર્યાદા ₹૬ લાખ સુધી.',
+  'digital-gujarat-pre': 'ધોરણ ૧ થી ૧૦ માં અભ્યાસ કરતા SC, ST, SEBC/OBC અને EWS કેટેગરીના વિદ્યાર્થીઓ. વાર્ષિક કૌટુંબિક આવક મર્યાદા ₹૨,૫૦,૦૦૦ સુધી.',
+  'digital-gujarat-post': 'મેટ્રિક પછી માન્ય કોલેજ/યુનિવર્સિટીમાં ડિપ્લોમા, ગ્રેજ્યુએટ અથવા પોસ્ટ ગ્રેજ્યુએટ અભ્યાસ કરતા SC, ST, SEBC વિદ્યાર્થીઓ (વાર્ષિક આવક ₹૨.૫૦ લાખ સુધી).',
+  'cmss-scholarship': 'ગુજરાતના પ્રતિભાશાળી તેજસ્વી વિદ્યાર્થીઓ કે જેઓ ઉચ્ચ શૈક્ષણિક મેરિટ ધરાવે છે અને કુટુંબની વાર્ષિક આવક ₹૪,૫૦,૦૦૦ થી ઓછી છે.',
+  'saraswati-sadhana-cycle': 'સરકારી અથવા અનુદાનિત શાળામાં ધોરણ ૯ માં પ્રવેશ મેળવતી અનુસૂચિત જાતિ (SC) અને વિકસતી જાતિ (SEBC) ની દીકરીઓ. ગ્રામ્ય આવક ₹૧.૨L / શહેરી ₹૧.૫L.',
+  'foreign-study-loan': 'વિદેશમાં ઉચ્ચ શિક્ષણ માટે પ્રવેશ મેળવનાર બિનઅનામત વર્ગના વિદ્યાર્થીઓ કે જેઓએ ધો. ૧૨ માં ૬૦%+ મેળવ્યા હોય. વાર્ષિક આવક ₹૬ લાખ સુધી (૪% વ્યાજ).',
+  'pmay-gramin': 'ગ્રામીણ વિસ્તારમાં કાચા મકાનમાં રહેતા અથવા બેઘર પરિવારો (SECC 2011 યાદી/આવાસ પ્લસ પાત્રતા). ભારતમાં અન્ય ક્યાંય પાકું મકાન ન હોવું જોઈએ.',
+  'pmay-urban': 'શહેરી વિસ્તારમાં વસતા EWS (આવક < ₹૩ લાખ) અથવા LIG (આવક ₹૩ થી ૬ લાખ) પરિવારો કે જેમના નામે ભારતમાં પાકું મકાન નથી.',
+  'dr-ambedkar-awas': 'પોતાની માલિકીનો પ્લોટ ધરાવતા અનુસૂચિત જાતિ (SC) ના બેઘર પરિવારો. વાર્ષિક આવક મર્યાદા ગ્રામ્યમાં ₹૧,૨૦,૦૦૦ અને શહેરીમાં ₹૧,૫૦,૦૦૦.',
+  'pandit-deendayal-awas': 'સામાજિક અને શૈક્ષણિક રીતે પછાત વર્ગ (SEBC/OBC) ના પરિવારો કે જેઓ પોતાની જમીન/પ્લોટ ધરાવે છે અને વાર્ષિક આવક ગ્રામ્ય ₹૧.૨L / શહેરી ₹૧.૫L સુધી છે.',
+  'manav-garima': 'અનુસૂચિત જાતિ (SC) અને વિકસતી જાતિના ૧૮ થી ૬૦ વર્ષના કારીગરો. વાર્ષિક આવક મર્યાદા ગ્રામ્ય ₹૧,૨૦,૦૦૦ / શહેરી ₹૧,૫૦,૦૦૦. ૨૮ વ્યવસાયો માટે કિટ.',
+  'vahli-dikri': 'તારીખ ૦૨/૦૮/૨૦૧૯ પછી જન્મેલી કુટુંબની પ્રથમ બે દીકરીઓ. માતા-પિતાની સંયુક્ત વાર્ષિક આવક ₹૨,૦૦,૦૦૦ કે તેથી ઓછી હોવી જોઈએ.',
+  'kunwarbai-mameru': 'અનુસૂચિત જાતિ (SC) અને સામાજિક-શૈક્ષણિક પછાત વર્ગ (SEBC) ની દીકરીઓ. કન્યાની ઉંમર લગ્ન સમયે ૧૮+ અને વરરાજાની ૨૧+. વાર્ષિક આવક મર્યાદા ₹૬,૦૦,૦૦૦ (લગ્નના ૨ વર્ષમાં અરજી).',
+  'sathshri-seva-divyang': '૮૦% કે તેથી વધુ દિવ્યાંગતા ધરાવતા વ્યક્તિઓ (સક્ષમ મેડિકલ બોર્ડ / UDID કાર્ડ). વાર્ષિક આવક મર્યાદા ગ્રામ્ય ₹૧,૨૦,૦૦૦ અને શહેરી ₹૧,૫૦,૦૦૦.',
+  'income-certificate-service': 'ગુજરાતમાં કાયમી વસવાટ કરતા તમામ નાગરિકો. તલાટી પંચનામું, રેશનકાર્ડ અને આધાર પુરાવા સાથે કુટુંબની આવક પ્રમાણિત કરવા માટે. (૩ નાણાકીય વર્ષ માટે માન્ય).',
+  'caste-certificate-service': 'ગુજરાતના મૂળ વતની (૧૯૭૮ કે તે પહેલાંનો કાયમી વસવાટ ધરાવતા) અનુસૂચિત જાતિ (SC), અનુસૂચિત જનજાતિ (ST) અથવા સામાજિક-શૈક્ષણિક પછાત વર્ગ (SEBC/OBC) ના નાગરિકો.',
+  'widow-assistance-scheme': 'વિધવા માતા-બહેનો (ઉંમર ૧૮+ વર્ષ). વાર્ષિક આવક મર્યાદા ગ્રામ્યમાં ₹૧,૨૦,૦૦૦ અને શહેરીમાં ₹૧,૫૦,૦૦૦. પુનઃલગ્ન ન કર્યાનું સોગંદનામું અનિવાર્ય.',
+  'aadhaar-new-enrollment': 'ભારતમાં રહેતા કોઈપણ વયના નાગરિક (નવજાત શિશુ સહિત) કે જેઓએ અગાઉ આધાર કાર્ડ કઢાવેલ ન હોય. સંપૂર્ણ ૧૦૦% મફત સરકારી સેવા.',
+  'aadhaar-address-update': 'હાલનું આધાર કાર્ડ ધરાવતા નાગરિકો કે જેઓ નવું સરનામું અપડેટ કરવા માંગે છે. માન્ય રહેઠાણ પુરાવો (લાઈટબિલ, રેશનકાર્ડ, બેંક પાસબુક) હોવો અનિવાર્ય છે.',
+  'aadhaar-demographic-update': 'નામ, જન્મ તારીખ અથવા લિંગમાં સત્તાવાર સુધારો કરવા માંગતા આધારધારકો. જન્મ પ્રમાણપત્ર અથવા સરકારી ગેઝેટ પુરાવો અનિવાર્ય છે.',
+  'aadhaar-biometric-mandatory': 'બાળકો ૫ અને ૧૫ વર્ષની ઉંમરે ફરજિયાત બાયોમેટ્રિક અપડેટ (મફત), અથવા પુખ્ત નાગરિકો કે જેઓ ફિંગરપ્રિન્ટ/આઇરીસ અથવા મોબાઈલ નંબર લિંક કરવા માંગે છે (₹૧૦૦ ફી).',
+  'ration-card-new-barcoded': 'ગુજરાતમાં કાયમી વસવાટ ધરાવતું અલગ કુટુંબ. કુટુંબના તમામ સભ્યોના આધાર કાર્ડ અને અલગ ચૂલાનો રહેઠાણ પુરાવો અનિવાર્ય.',
+  'ration-card-member-add-remove': 'હાલનું બારકોડેડ રેશનકાર્ડ ધરાવતા કુટુંબો કે જેઓ નવા જન્મેલા બાળક/પત્નીનું નામ ઉમેરવા અથવા મૃત્યુ/લગ્ન બાદ નામ કમી કરવા માંગે છે.'
+};
+
+export const SCHEME_ELIGIBILITY_EN: Record<string, string> = {
+  'ikhedut-subsidy-schemes': 'All landholding farmers of Gujarat holding certified 7/12 & 8-A land records registered on i-Khedut portal.',
+  'ikhedut-tractor': 'Gujarat farmers owning 7/12 land. Limited to 1 tractor subsidy per family once in 7 years. Priority to SC/ST and small/marginal farmers.',
+  'ikhedut-tools': 'All landowning farmers of Gujarat purchasing government-approved implements from authorized dealers.',
+  'ikhedut-drip': 'Farmers with verified water source (well, tubewell, canal) on their agricultural land. 70%-85% subsidy via GGRC.',
+  'ikhedut-tarpaulin': 'Registered 7/12 landholders. Maximum 2 tarpaulins per farmer account during active i-Khedut window.',
+  'ikhedut-seeds': 'Small, marginal and general farmers purchasing certified seeds from authorized cooperative outlets.',
+  'crop-storage-godown': 'Farmers owning agricultural land constructing minimum 330 sq.ft on-farm crop storage structure.',
+  'pm-kisan': 'Landholding farmer families with cultivable land. Aadhaar e-KYC and NPCI bank seeding mandatory. Income taxpayers excluded.',
+  'mksy-crop-loss': 'All Gujarat farmers suffering 33% or more crop damage due to notified natural calamities (excess rain, drought, hailstorm).',
+  'deshi-gay-sahay': 'Farmers practicing cow-based natural farming with certified indigenous cow bearing 12-digit INAF ear tag.',
+  'smartphone-sahay': 'Landholding farmers of Gujarat purchasing new smartphone with valid GST invoice (1 per family).',
+  'pmjay-ayushman': 'NFSA ration card holders or families with annual income up to ₹4 Lakh. Cashless health cover of ₹10 Lakh per family per year.',
+  'maa-amrutam': 'Families with annual income up to ₹4 Lakh or NFSA cardholders. Cashless treatment for catastrophic illnesses.',
+  'ganga-swarupa': 'Widows aged 18+ years. Annual family income up to ₹1,20,000 (rural) or ₹1,50,000 (urban). Must not have remarried.',
+  'pmsby-insurance': 'Citizens aged 18 to 70 years holding a savings bank account with annual auto-debit consent for ₹20 premium.',
+  'matrushakti-yojana': 'Pregnant women and lactating mothers with children up to 2 years (first 1,000 days), registered on TeCHO portal.',
+  'chiranjeevi-yojana': 'BPL or low-income pregnant women for institutional delivery in empanelled private nursing homes.',
+  'poshan-sudha': 'Pregnant and lactating mothers residing in notified 14 tribal talukas of Gujarat registered at local Anganwadi.',
+  'janani-suraksha': 'Mothers delivering in public health institutions (PHC/CHC/Sub-district hospitals).',
+  'niradhar-vrudh': 'Destitute elderly citizens aged 60+ without adult earning son; family income within rural ₹1.2L / urban ₹1.5L ceiling.',
+  'namo-lakshmi': 'Girls studying in classes 9 to 12 across government, aided and private schools in Gujarat (Family income up to ₹6 Lakh).',
+  'mysy-scholarship': 'Students securing 80+ percentile in 10th/12th board exams enrolling in diploma/degree courses. Family annual income up to ₹6 Lakh.',
+  'namo-saraswati': 'Students pursuing Std 11 & 12 Science stream in Gujarat higher secondary schools (Family income up to ₹6 Lakh).',
+  'digital-gujarat-pre': 'SC, ST, SEBC/OBC & EWS category students studying in classes 1 to 10. Family income up to ₹2.50 Lakh.',
+  'digital-gujarat-post': 'SC, ST, SEBC students pursuing post-matric diploma/degree in recognized institutions with income up to ₹2.50 Lakh.',
+  'cmss-scholarship': 'Bright meritorious students enrolled in accredited degree programs with family income up to ₹4.50 Lakh.',
+  'saraswati-sadhana-cycle': 'SC and SEBC girl students enrolled in class 9 of government or grant-in-aid schools (Family income limits apply).',
+  'foreign-study-loan': 'Unreserved category students with 60%+ in Std 12 securing admission in recognized foreign universities (Income up to ₹6 Lakh).',
+  'pmay-gramin': 'Rural homeless or kutcha house dwelling families listed in SECC 2011 / Awas+ survey with no pucca house anywhere in India.',
+  'pmay-urban': 'Urban EWS (income < ₹3 Lakh) or LIG (income ₹3-6 Lakh) families owning no pucca house in India.',
+  'dr-ambedkar-awas': 'Scheduled Caste (SC) families owning a residential plot without a pucca house (Income ceiling ₹1.2L rural / ₹1.5L urban).',
+  'pandit-deendayal-awas': 'SEBC/OBC families owning a residential plot with annual income within rural ₹1.2L / urban ₹1.5L norms.',
+  'manav-garima': 'Artisans aged 18 to 60 from SC/SEBC communities with income within ₹1.2L (rural) or ₹1.5L (urban) for 28 vocation toolkits.',
+  'vahli-dikri': 'First two surviving girl children born on or after 02/08/2019 to parents with joint annual income up to ₹2.00 Lakh.',
+  'kunwarbai-mameru': 'SC and SEBC brides aged 18+ (groom 21+) applying within 2 years of marriage. Family annual income up to ₹6.00 Lakh.',
+  'sathshri-seva-divyang': 'Persons with 80% or severe permanent disability holding valid UDID card, with family income within notified ceilings.',
+  'income-certificate-service': 'Permanent residents of Gujarat with proof of residence, Talati panchnama and family ration card (Valid for 3 Financial Years).',
+  'caste-certificate-service': 'Indigenous Gujarat residents belonging to SC, ST or SEBC communities with historical lineage in Gujarat prior to 1978.',
+  'widow-assistance-scheme': 'Destitute widows aged 18+ meeting rural ₹1.2L / urban ₹1.5L income ceiling with non-remarriage declaration.',
+  'aadhaar-new-enrollment': 'All residents of India of any age (including newborns) who have never enrolled for Aadhaar before. 100% Free.',
+  'aadhaar-address-update': 'Existing Aadhaar holders needing residential address correction with valid proof of address (Electricity/Ration/Bank).',
+  'aadhaar-demographic-update': 'Aadhaar holders seeking correction in Name, Date of Birth or Gender with gazette notification or birth certificate.',
+  'aadhaar-biometric-mandatory': 'Children aged 5 & 15 for mandatory biometric update (Free), or adults updating biometrics/mobile number (₹100).',
+  'ration-card-new-barcoded': 'Separate nuclear families residing in Gujarat with Aadhaar of all members and separate residence proof.',
+  'ration-card-member-add-remove': 'Existing ration card holders adding newborn child/spouse or removing deceased/married family members.'
+};
+
 /**
  * Returns localized eligibility criteria.
  */
 export function getLocalizedSchemeEligibility(scheme: SchemeItem, lang: Language): string {
-  if (lang === 'en') return scheme.eligibilityEn || 'Gujarat Resident with required documents';
+  if (lang === 'en') {
+    return scheme.eligibilityEn || SCHEME_ELIGIBILITY_EN[scheme.id] || 'Permanent resident citizens of Gujarat meeting departmental guidelines.';
+  }
   if (lang === 'mr') {
-    return SCHEME_TRANSLATIONS_MR[scheme.id]?.eligibility || 'गुजरात राज्यातील नागरिक';
+    return SCHEME_TRANSLATIONS_MR[scheme.id]?.eligibility || 'गुजरात राज्यातील पात्र नागरिक.';
   }
   if (lang === 'hi') {
-    return SCHEME_TRANSLATIONS_HI[scheme.id]?.eligibility || 'गुजरात राज्य के निवासी';
+    return SCHEME_TRANSLATIONS_HI[scheme.id]?.eligibility || SCHEME_ELIGIBILITY_EN[scheme.id] || 'गुजरात राज्य के पात्र निवासी.';
   }
   if (lang === 'khi') {
-    return (scheme.eligibilityGu || 'ગુજરાતના પાત્ર નાગરિકો').replace('ગુજરાતના', 'કચ્છ ને ગુજરાત જે').replace('નાગરિકો', 'નાગરિક');
+    const raw = scheme.eligibilityGu || SCHEME_ELIGIBILITY_GU[scheme.id] || 'ગુજરાતના પાત્ર નાગરિકો.';
+    return raw.replace(/ગુજરાતના/g, 'કચ્છ ને ગુજરાત જે').replace(/નાગરિકો/g, 'નાગરિક');
   }
-  return scheme.eligibilityGu || 'ગુજરાતના પાત્ર નાગરિકો';
+  return scheme.eligibilityGu || SCHEME_ELIGIBILITY_GU[scheme.id] || 'ગુજરાતના પાત્ર નાગરિકો.';
 }
 
 /**

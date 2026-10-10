@@ -702,8 +702,10 @@ export function SlotBookingModal({
           <div className="w-12 h-1.5 bg-white/40 rounded-full" />
         </div>
         
-        {/* HEADER */}
-        <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
+        {!paymentModalOpen ? (
+          <>
+            {/* HEADER */}
+            <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
             <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 drop-shadow-md" />
             <div className="min-w-0 flex-1">
@@ -1839,56 +1841,53 @@ export function SlotBookingModal({
             >
               <span className="truncate">
                 {scheme && scheme.fee > 0
-                  ? (isEn ? `Confirm & Pay ₹${scheme.fee}` : isHi ? `पुष्टि करें एवं ₹${scheme.fee} भुगतान करें` : `સ્લોટ કન્ફર્મ કરો & ₹${scheme.fee} ફી ચૂકવો`)
-                  : (isEn ? 'Confirm & Get Free Token' : isHi ? 'स्लॉट पुष्टि करें व टोकन लें' : 'સ્લોટ કન્ફર્મ કરો & ટોકન મેળવો')}
+                  ? (isEn ? `Proceed: Fee & Payment (₹${scheme.fee})` : isHi ? `आगे बढ़ें: शुल्क एवं भुगतान (₹${scheme.fee})` : `આગળ વધો: ફી & ચુકવણી (₹${scheme.fee})`)
+                  : (isEn ? 'Confirm & Get Free Token' : isHi ? 'स्लॉट पुष्टि करें व टोकन लें' : 'સ્લોટ કન્ફર્મ કરો & ટોકન મેળવો (₹૦)')}
               </span>
               <ArrowRight className="w-4 h-4 text-[#FF9933] shrink-0" />
             </button>
           </div>
         </div>
-
-        {/* CYBER TREASURY GUJARAT PAYMENT GATEWAY OVERLAY MODAL */}
-        {paymentModalOpen && (
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="fixed inset-0 z-60 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
-          >
-            <div className="bg-white w-full max-w-xl rounded-t-[28px] sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95">
-              
-              {/* TREASURY HEADER */}
-              <div className="bg-[#003366] text-white p-4 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
-                <div className="flex items-center gap-3">
-                  <GovLogo className="w-10 h-10 shrink-0 drop-shadow-md" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm sm:text-base font-black">
-                        {isEn ? 'Cyber Treasury Gujarat (GRAS)' : isHi ? 'साइबर ट्रेजरी गुजरात (GRAS)' : 'ગુજરાત સાયબર ટ્રેઝરી (GRAS e-Payment)'}
-                      </h3>
-                      <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        {isEn ? 'Official' : 'સત્તાવાર'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-blue-200 mt-0.5">
-                      {isEn ? 'Finance Department • Government of Gujarat' : isHi ? 'वित्त विभाग • गुजरात सरकार' : 'નાણાં વિભાગ, ગુજરાત સરકાર • સત્તાવાર ફી રસીદ ગેટવે'}
-                    </p>
-                  </div>
-                </div>
-                {!isProcessingPayment && (
-                  <button
-                    onClick={() => {
-                      triggerHaptic('tap');
-                      setPaymentModalOpen(false);
-                    }}
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
+      </>
+    ) : (
+      /* ================================================================ */
+      /* STEP 2: CYBER TREASURY GUJARAT PAYMENT GATEWAY & e-CHALLAN       */
+      /* ================================================================ */
+      <>
+        {/* TREASURY HEADER */}
+        <div className="bg-[#003366] text-white p-3.5 sm:p-5 flex items-center justify-between border-b border-blue-900 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+            <GovLogo className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 drop-shadow-md" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-black truncate">
+                  {isEn ? 'Cyber Treasury Gujarat (GRAS)' : isHi ? 'साइबर ट्रेजरी गुजरात (GRAS)' : 'ગુજરાત સાયબર ટ્રેઝરી (GRAS e-Payment)'}
+                </h3>
+                <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+                  {isEn ? 'Official' : 'સત્તાવાર'}
+                </span>
               </div>
+              <p className="text-[11px] text-blue-200 mt-0.5 truncate">
+                {isEn ? 'Finance Department • Government of Gujarat' : isHi ? 'वित्त विभाग • गुजरात सरकार' : 'નાણાં વિભાગ, ગુજરાત સરકાર • સત્તાવાર ફી રસીદ ગેટવે'}
+              </p>
+            </div>
+          </div>
+          {!isProcessingPayment && (
+            <button
+              onClick={() => {
+                triggerHaptic('tap');
+                setPaymentModalOpen(false);
+              }}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
               {/* PROCESSING SCREEN */}
               {isProcessingPayment ? (
-                <div className="p-8 sm:p-12 text-center space-y-4 flex flex-col items-center justify-center my-auto">
+                <div className="p-8 sm:p-12 text-center space-y-4 flex flex-col items-center justify-center my-auto flex-1">
                   <div className="w-16 h-16 rounded-full border-4 border-[#005A9C] border-t-transparent animate-spin flex items-center justify-center">
                     <IndianRupee className="w-6 h-6 text-[#003366]" />
                   </div>
@@ -1904,7 +1903,7 @@ export function SlotBookingModal({
                 </div>
               ) : (
                 /* PAYMENT SELECTION BODY */
-                <div className="p-4 sm:p-6 overflow-y-auto modal-scroll-area space-y-4 text-[#1F2937]">
+                <div className="p-4 sm:p-6 overflow-y-auto modal-scroll-area space-y-4 flex-1 text-[#1F2937]">
                   
                   {/* SERVICE & STATUTORY FEE SUMMARY CARD */}
                   <div className="bg-gradient-to-br from-slate-50 to-blue-50/60 border border-slate-200 rounded-2xl p-3.5 sm:p-4 space-y-2.5">
@@ -2226,15 +2225,15 @@ export function SlotBookingModal({
 
               {/* PAYMENT FOOTER BUTTONS */}
               {!isProcessingPayment && (
-                <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <div className="bg-slate-50 p-3.5 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0 sticky bottom-0 z-30 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-lg">
                   <button
                     onClick={() => {
                       triggerHaptic('tap');
                       setPaymentModalOpen(false);
                     }}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+                    className="px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
                   >
-                    {isEn ? 'Back' : isHi ? 'वापस' : 'પાછળ જાઓ'}
+                    {isEn ? '← Back to Slot' : isHi ? '← वापस' : '← સ્લોટ બદલો'}
                   </button>
 
                   <button
@@ -2252,10 +2251,8 @@ export function SlotBookingModal({
                   </button>
                 </div>
               )}
-
-            </div>
-          </div>
-        )}
+            </>
+          )}
 
       </div>
     </div>

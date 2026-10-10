@@ -843,6 +843,19 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
               </span>
             </h4>
 
+            {/* Gujarat Govt Statutory Physical Copies Guidelines */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50/80 border border-blue-200 rounded-2xl p-3 text-xs text-blue-950 space-y-1 shadow-2xs">
+              <div className="flex items-center gap-1.5 font-black text-[#003366]">
+                <span className="text-sm">🏛️</span>
+                <span>{isEn ? 'Statutory Gujarat Govt Submission Guidelines:' : 'ગુજરાત સરકાર સત્તાવાર કચેરી જમા નિયમો:'}</span>
+              </div>
+              <p className="text-[10.5px] text-slate-700 leading-relaxed">
+                {isEn 
+                  ? '• Bring all Originals for live desk verification + 1 Self-Attested Xerox copy of each document. Aadhaar card must clearly include both Front & Back sides.' 
+                  : '• કાઉન્ટર પર રૂબરૂ ચકાસણી માટે તમામ અસલ (Originals) દસ્તાવેજો લાવવા ફરજિયાત છે + દરેકની ૧ સ્વ-પ્રમાણિત (Self-Attested) ઝેરોક્ષ નકલ + ૨ પાસપોર્ટ સાઇઝ રંગીન ફોટા. આધાર કાર્ડ માટે આગળ અને પાછળ બંને બાજુ (Front & Back) સ્પષ્ટ હોવી જરૂરી છે.'}
+              </p>
+            </div>
+
             <div className="space-y-3">
               {effectiveDocsList.map((doc, idx) => {
                 const isChecked = !!checkedDocs[doc.nameGu];
@@ -885,7 +898,10 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                        <span className="text-[8.5px] font-bold text-slate-700 bg-white border border-slate-300 px-1.5 py-0.5 rounded shadow-2xs">
+                          {isEn ? 'Orig + 1 Xerox' : '૧ અસલ + ૧ ઝેરોક્ષ'}
+                        </span>
                         {vState.status === 'passed' ? (
                           <span className="text-[9.5px] font-black bg-emerald-600 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                             <CheckCircle2 className="w-3 h-3 text-white shrink-0" />
