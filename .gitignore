@@ -37,4 +37,5 @@ next-env.d.ts
 # media recordings
 *.mp4
 *.webm
+*.zip
 

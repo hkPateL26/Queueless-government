@@ -6,9 +6,12 @@ export const metadata: Metadata = {
   description: 'Zero physical queues for Gujarat Government Kacheris and Jan Seva Kendras',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/brand/queueless-kacheri-favicon-square-hd.png', type: 'image/png' }
+    ],
+    shortcut: '/favicon.png',
+    apple: '/apple-icon.png',
   },
 };
 
@@ -28,8 +31,9 @@ export default function RootLayout({
   return (
     <html lang="gu" suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-        <link rel="apple-touch-icon" href="/icon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="shortcut icon" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
