@@ -3409,6 +3409,30 @@ export default function CounterOperatorDesk() {
                           {citizen.payment?.gatewayName || (citizen.payment?.mode === 'CASH_AT_COUNTER' ? 'કચેરી કાઉન્ટર રોકડ ચલણ (Cash at Desk)' : 'Cyber Treasury UPI / NetBanking')}
                         </td>
                       </tr>
+                      {citizen.payment?.payeeName && (
+                        <tr className="border-b border-slate-200">
+                          <td className="p-2.5 font-bold text-slate-600">લાભાર્થી / સત્તાવાર ખાતું (Payee)</td>
+                          <td className="p-2.5 font-bold text-slate-900">{citizen.payment.payeeName}</td>
+                        </tr>
+                      )}
+                      {citizen.payment?.upiId && (
+                        <tr className="border-b border-slate-200 bg-slate-100/70">
+                          <td className="p-2.5 font-bold text-slate-600">સત્તાવાર UPI ID / VPA</td>
+                          <td className="p-2.5 font-mono font-bold text-[#003366]">{citizen.payment.upiId}</td>
+                        </tr>
+                      )}
+                      {citizen.payment?.bankName && (
+                        <tr className="border-b border-slate-200">
+                          <td className="p-2.5 font-bold text-slate-600">બેંક અને ગેટવે (Bank / Clearing)</td>
+                          <td className="p-2.5 font-bold text-slate-800">{citizen.payment.bankName}</td>
+                        </tr>
+                      )}
+                      {citizen.payment?.utrNumber && (
+                        <tr className="border-b border-slate-200 bg-slate-100/70">
+                          <td className="p-2.5 font-bold text-slate-600">UPI UTR / બેંક રેફરન્સ નં.</td>
+                          <td className="p-2.5 font-mono font-bold text-emerald-800">{citizen.payment.utrNumber}</td>
+                        </tr>
+                      )}
                       {citizen.payment?.cyberTreasuryTxnId && (
                         <tr className="border-b border-slate-200">
                           <td className="p-2.5 font-bold text-slate-600">ટ્રેઝરી ટ્રાન્ઝેક્શન ID</td>

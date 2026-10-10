@@ -5,7 +5,8 @@ import {
   Building2, MapPin, Calendar, Clock, AlertTriangle, 
   CheckCircle2, X, ChevronRight, ChevronDown, ChevronUp, ShieldCheck, ArrowRight,
   Info, Sparkles, UserCheck, Utensils, Navigation,
-  FileCheck, IndianRupee, AlertCircle, Upload, CreditCard, Landmark, Banknote, QrCode, Receipt, Lock
+  FileCheck, IndianRupee, AlertCircle, Upload, CreditCard, Landmark, Banknote, QrCode, Receipt, Lock,
+  Copy, Check, ExternalLink, Smartphone
 } from 'lucide-react';
 import { 
   GUJARAT_33_DISTRICTS, 
@@ -240,6 +241,56 @@ export function SlotBookingModal({
   const [selectedBank, setSelectedBank] = useState<string>('State Bank of India (SBI)');
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [paymentStepText, setPaymentStepText] = useState<string>('');
+  const [copiedUpi, setCopiedUpi] = useState<boolean>(false);
+  const [qrViewMode, setQrViewMode] = useState<'dynamic' | 'original'>('dynamic');
+
+  const upiId = 'trushasomaiya@okaxis';
+  const payeeName = 'Trusha Somaiya';
+  const targetFee = scheme?.fee ?? 20;
+  const transactionNote = `Govt Fee - ${(scheme?.titleGu || 'Citizen Service').slice(0, 24)}`;
+
+  const upiDeepLink = useMemo(() => {
+    return `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${targetFee}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+  }, [upiId, payeeName, targetFee, transactionNote]);
+
+  const gpayDeepLink = useMemo(() => {
+    return `tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${targetFee}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+  }, [upiId, payeeName, targetFee, transactionNote]);
+
+  const phonepeDeepLink = useMemo(() => {
+    return `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${targetFee}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+  }, [upiId, payeeName, targetFee, transactionNote]);
+
+  const paytmDeepLink = useMemo(() => {
+    return `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${targetFee}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+  }, [upiId, payeeName, targetFee, transactionNote]);
+
+  const dynamicQrUrl = useMemo(() => {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=${encodeURIComponent(upiDeepLink)}`;
+  }, [upiDeepLink]);
+
+  const handleCopyUpiId = () => {
+    triggerHaptic('success');
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(upiId);
+    }
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+  };
+
+  const handleLaunchUpiApp = (app: 'gpay' | 'phonepe' | 'paytm' | 'bhim' | 'any') => {
+    triggerHaptic('tap');
+    let targetUrl = upiDeepLink;
+    if (app === 'gpay') targetUrl = gpayDeepLink;
+    else if (app === 'phonepe') targetUrl = phonepeDeepLink;
+    else if (app === 'paytm') targetUrl = paytmDeepLink;
+
+    try {
+      window.location.href = targetUrl;
+    } catch (e) {
+      window.location.href = upiDeepLink;
+    }
+  };
 
   const nearbyClusters = useMemo(() => {
     return getNearbyVillageCluster(initialVillage || 'ગોમટા');
@@ -682,7 +733,12 @@ export function SlotBookingModal({
         cyberTreasuryTxnId: `CYBER-GJ-2026-X${Math.floor(100000 + Math.random() * 900000)}`,
         grasChallanNo: `GRAS/2026/04/${Math.floor(100000 + Math.random() * 900000)}`,
         paidAt: new Date().toISOString(),
-        gatewayName: onlineMethod === 'upi' ? `Cyber Treasury UPI (${upiApp.toUpperCase()})` : onlineMethod === 'card' ? 'Cyber Treasury RuPay / Debit Card' : `Cyber Treasury NetBanking (${selectedBank})`
+        gatewayName: onlineMethod === 'upi' ? `Cyber Treasury UPI (${upiApp.toUpperCase()})` : onlineMethod === 'card' ? 'Cyber Treasury RuPay / Debit Card' : `Cyber Treasury NetBanking (${selectedBank})`,
+        upiId: onlineMethod === 'upi' ? upiId : undefined,
+        payeeName: `${payeeName} (સાયબર ટ્રેઝરી સત્તાવાર ખાતું)`,
+        bankName: onlineMethod === 'upi' ? 'Axis Bank UPI Gateway' : onlineMethod === 'card' ? 'RuPay NSDL' : selectedBank,
+        utrNumber: `UPI/AXIS/${Math.floor(400000000000 + Math.random() * 599999999999)}`,
+        dynamicQrUrl
       };
       finalizeBooking(onlineRecord);
     }, 1400);
@@ -2055,40 +2111,211 @@ export function SlotBookingModal({
                               </button>
                             </div>
 
-                            {/* UPI APP SELECTION */}
+                            {/* DYNAMIC UPI & QR CODE PAYMENT SECTION */}
                             {onlineMethod === 'upi' && (
-                              <div className="bg-white p-3 rounded-xl border border-blue-200 space-y-2">
-                                <span className="text-[10px] font-bold text-slate-600 block">
-                                  {isEn ? 'Select UPI App for Cyber Treasury Payment:' : 'સાયબર ટ્રેઝરી ચુકવણી માટે UPI એપ પસંદ કરો:'}
-                                </span>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                                  {[
-                                    { id: 'gpay', name: 'Google Pay', icon: '🟢' },
-                                    { id: 'phonepe', name: 'PhonePe', icon: '🟣' },
-                                    { id: 'paytm', name: 'Paytm UPI', icon: '🔵' },
-                                    { id: 'bhim', name: 'BHIM UPI', icon: '🇮🇳' },
-                                  ].map((app) => (
-                                    <button
-                                      key={app.id}
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        triggerHaptic('tap');
-                                        setUpiApp(app.id as any);
-                                      }}
-                                      className={`p-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition ${
-                                        upiApp === app.id ? 'bg-blue-100/70 text-[#003366] border-[#005A9C]' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                                      }`}
-                                    >
-                                      <span>{app.icon}</span>
-                                      <span className="text-[11px] truncate">{app.name}</span>
-                                    </button>
-                                  ))}
+                              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border-2 border-blue-200 space-y-3.5 shadow-2xs">
+                                
+                                {/* RECIPIENT & GOVT ACCOUNT HEADER (Matching Screenshot 4) */}
+                                <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-10 h-10 rounded-full bg-[#1b7340] text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                                      T
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center gap-1.5">
+                                        <h4 className="text-sm font-black text-slate-900 leading-none">Trusha Somaiya</h4>
+                                        <span className="bg-emerald-100 text-emerald-800 text-[9px] font-black px-1.5 py-0.2 rounded-full border border-emerald-300">
+                                          ✓ {isEn ? 'Govt Verified' : 'પ્રમાણિત'}
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                                        {isEn ? 'Cyber Treasury Official Collection Account' : 'સાયબર ટ્રેઝરી સત્તાવાર મહેસૂલ ખાતું'}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="text-right shrink-0">
+                                    <span className="text-[9.5px] text-slate-500 font-bold block">{isEn ? 'Amount to Pay' : 'સરકારી સેવા ફી'}</span>
+                                    <span className="text-base sm:text-lg font-black text-emerald-700">₹{targetFee}.00</span>
+                                  </div>
                                 </div>
-                                <p className="text-[9.5px] text-emerald-700 font-bold flex items-center gap-1 pt-1">
-                                  <ShieldCheck className="w-3.5 h-3.5" />
-                                  <span>{isEn ? 'Zero Convenience Fee • NPCI Verified' : 'ઝીરો વધારાનો ચાર્જ • NPCI સત્તાવાર સુરક્ષિત ગેટવે'}</span>
-                                </p>
+
+                                {/* QR CODE TABS (Dynamic with Auto-amount vs Original GPay QR) */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-slate-600 flex items-center gap-1">
+                                      <QrCode className="w-3.5 h-3.5 text-[#005A9C]" />
+                                      <span>{isEn ? 'Scan QR Code with any UPI App:' : 'કોઈપણ UPI એપથી સ્કેન કરી ચૂકવો:'}</span>
+                                    </span>
+                                    <div className="flex rounded-lg border border-slate-200 p-0.5 bg-slate-100 text-[10px] font-bold">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          triggerHaptic('tap');
+                                          setQrViewMode('dynamic');
+                                        }}
+                                        className={`px-2 py-0.5 rounded-md transition ${
+                                          qrViewMode === 'dynamic' ? 'bg-white text-[#003366] shadow-xs' : 'text-slate-600'
+                                        }`}
+                                      >
+                                        ⚡ ડાયનેમિક (₹{targetFee})
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          triggerHaptic('tap');
+                                          setQrViewMode('original');
+                                        }}
+                                        className={`px-2 py-0.5 rounded-md transition ${
+                                          qrViewMode === 'original' ? 'bg-white text-[#003366] shadow-xs' : 'text-slate-600'
+                                        }`}
+                                      >
+                                        🖼️ ઓરિજિનલ GPay QR
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* THE QR CONTAINER */}
+                                  <div className="bg-gradient-to-b from-slate-50 to-white p-3 rounded-2xl border border-slate-200 text-center flex flex-col items-center justify-center space-y-2">
+                                    <div className="relative p-2 bg-white rounded-2xl border-2 border-slate-300 shadow-sm inline-block">
+                                      {qrViewMode === 'dynamic' ? (
+                                        <img 
+                                          src={dynamicQrUrl} 
+                                          alt={`Dynamic UPI QR for Rs ${targetFee}`} 
+                                          className="w-44 h-44 sm:w-48 sm:h-48 object-contain rounded-lg"
+                                        />
+                                      ) : (
+                                        <img 
+                                          src="/images/trusha-upi-qr.jpg" 
+                                          alt="Original Trusha Somaiya GPay QR" 
+                                          className="w-44 h-44 sm:w-48 sm:h-48 object-contain rounded-lg"
+                                        />
+                                      )}
+                                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full shadow-md border border-slate-200 pointer-events-none">
+                                        <div className="w-5 h-5 rounded-full bg-[#1b7340] text-white text-[10px] font-black flex items-center justify-center">
+                                          ₹
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-0.5">
+                                      <p className="text-[11px] font-black text-slate-800">
+                                        {qrViewMode === 'dynamic' 
+                                          ? `આ QR માં ₹${targetFee} અને યોજના નામ ઓટોમેટિક ભરેલું છે` 
+                                          : 'Scan to pay with any UPI app'}
+                                      </p>
+                                      <p className="text-[9.5px] text-slate-500">
+                                        Google Pay • PhonePe • Paytm • BHIM • CRED • કોઈપણ બેંક એપ
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* UPI ID COPY BAR */}
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2 sm:p-2.5 flex items-center justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <span className="text-[9px] text-slate-500 font-bold block uppercase tracking-wider">
+                                      {isEn ? 'Official UPI ID' : 'સત્તાવાર UPI આઈડી'}
+                                    </span>
+                                    <p className="font-mono font-black text-[#003366] text-xs sm:text-sm truncate select-all">
+                                      {upiId}
+                                    </p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCopyUpiId();
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition shrink-0 active:scale-95 cursor-pointer ${
+                                      copiedUpi 
+                                        ? 'bg-emerald-600 text-white shadow-xs' 
+                                        : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 shadow-2xs'
+                                    }`}
+                                  >
+                                    {copiedUpi ? (
+                                      <>
+                                        <Check className="w-3.5 h-3.5 text-white" />
+                                        <span>{isEn ? 'Copied!' : 'કોપી થઈ ગઈ!'}</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Copy className="w-3.5 h-3.5 text-[#005A9C]" />
+                                        <span>{isEn ? 'Copy UPI' : 'કોપી કરો'}</span>
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+
+                                {/* DIRECT MOBILE UPI APP REDIRECT BUTTONS (Native App Handshake) */}
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-slate-600 flex items-center gap-1">
+                                      <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
+                                      <span>{isEn ? 'Instant Pay via Installed Mobile App:' : 'મોબાઈલમાં સીધું એપ દ્વારા ચૂકવો:'}</span>
+                                    </span>
+                                    <span className="text-[9.5px] text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                      1-Tap Redirect
+                                    </span>
+                                  </div>
+
+                                  {/* MASTER 1-TAP LAUNCH BUTTON */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleLaunchUpiApp('any');
+                                    }}
+                                    className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.98] cursor-pointer"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                                    <span>
+                                      {isEn 
+                                        ? `⚡ Open Installed UPI App (Auto-filled ₹${targetFee})` 
+                                        : `⚡ સીધું UPI એપમાં ખોલો (Auto ₹${targetFee} રકમ સાથે)`}
+                                    </span>
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </button>
+
+                                  {/* SPECIFIC APP SELECTORS */}
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
+                                    {[
+                                      { id: 'gpay', name: 'Google Pay', icon: '🟢' },
+                                      { id: 'phonepe', name: 'PhonePe', icon: '🟣' },
+                                      { id: 'paytm', name: 'Paytm UPI', icon: '🔵' },
+                                      { id: 'bhim', name: 'BHIM UPI', icon: '🇮🇳' },
+                                    ].map((app) => (
+                                      <button
+                                        key={app.id}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setUpiApp(app.id as any);
+                                          handleLaunchUpiApp(app.id as any);
+                                        }}
+                                        className={`p-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition cursor-pointer active:scale-95 ${
+                                          upiApp === app.id 
+                                            ? 'bg-blue-100/80 text-[#003366] border-[#005A9C] shadow-2xs' 
+                                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                                        }`}
+                                      >
+                                        <span>{app.icon}</span>
+                                        <span className="text-[11px] truncate">{app.name}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="p-2 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between text-[9.5px] text-emerald-800 font-bold">
+                                  <span className="flex items-center gap-1">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                                    <span>NPCI & Axis Bank સત્તાવાર સાયબર ટ્રેઝરી • 0% એક્સ્ટ્રા ચાર્જ</span>
+                                  </span>
+                                  <span className="font-mono text-emerald-950 font-black">₹{targetFee} EXACT</span>
+                                </div>
+
                               </div>
                             )}
 

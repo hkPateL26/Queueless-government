@@ -53,6 +53,11 @@ export interface GovernmentPaymentRecord {
   instructionsGu?: string;
   instructionsEn?: string;
   instructionsHi?: string;
+  upiId?: string;
+  payeeName?: string;
+  bankName?: string;
+  utrNumber?: string;
+  dynamicQrUrl?: string;
 }
 
 export interface TimeSlot {
