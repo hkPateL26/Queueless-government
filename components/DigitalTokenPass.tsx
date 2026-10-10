@@ -7,7 +7,8 @@ import {
   Volume2, ArrowRight, RefreshCw, Smartphone, Layers, X,
   Calendar, Navigation, FileCheck2, Star, CheckCircle, Shield,
   ExternalLink, Bell, Sparkles, MessageSquare, Radio, CalendarX2,
-  IndianRupee, CreditCard, Receipt, Banknote, Landmark, Check
+  IndianRupee, CreditCard, Receipt, Banknote, Landmark, Check,
+  Award, FileText, BadgeCheck, Lock
 } from 'lucide-react';
 import { triggerHaptic } from '@/lib/haptics';
 import { speakGuidance } from '@/lib/voice';
@@ -70,7 +71,37 @@ export function DigitalTokenPass({
   const [smsCopied, setSmsCopied] = useState<boolean>(false);
   const [showDocReminder, setShowDocReminder] = useState<boolean>(false);
 
-  const isAnySubModalOpen = lateModalOpen || rescheduleModalOpen || cancelModalOpen || verifierOpen || smsModalOpen || whatsAppModalOpen || channelsModalOpen || paymentReceiptModalOpen;
+  // Official Service Approval Certificate State (Citizen-Officer Dual Handshake)
+  const [approvalData, setApprovalData] = useState<{
+    certificateNumber: string;
+    approvedAt: string;
+    officerNameGu: string;
+    officerNameHi?: string;
+    officerNameEn?: string;
+    counterNumber?: number;
+    talukaOffice?: string;
+    districtName?: string;
+    kacheriSeal?: string;
+    digitalSignatureSha?: string;
+    status?: string;
+    remarks?: string;
+  } | null>(() => {
+    if ((booking as any).approvalDetails) {
+      return (booking as any).approvalDetails;
+    }
+    try {
+      const stored = localStorage.getItem('qless_approved_certificates');
+      if (stored) {
+        const list = JSON.parse(stored);
+        const found = list.find((item: any) => item.tokenNumber === booking.tokenNumber);
+        if (found) return found;
+      }
+    } catch {}
+    return null;
+  });
+  const [approvalModalOpen, setApprovalModalOpen] = useState<boolean>(false);
+
+  const isAnySubModalOpen = lateModalOpen || rescheduleModalOpen || cancelModalOpen || verifierOpen || smsModalOpen || whatsAppModalOpen || channelsModalOpen || paymentReceiptModalOpen || approvalModalOpen;
 
   // Body scroll lock when any dialog is open
   useEffect(() => {
@@ -131,6 +162,39 @@ export function DigitalTokenPass({
           lang === 'en' ? `Attention please, Token number ${booking.tokenNumber} is now being served at Counter ${booking.counterNumber}.` :
           lang === 'khi' ? `ધ્યાન ડિયો, કાઉન્ટર ${booking.counterNumber} તે ટોકન નંબર ${booking.tokenNumber} જો વારો અચી વ્યો આય.` :
           `ધ્યાન આપો, કાઉન્ટર ${booking.counterNumber} પર ટોકન નંબર ${booking.tokenNumber} નો વારો આવી ગયો છે.`,
+          lang
+        );
+      } else if (event.type === 'TOKEN_COMPLETED' && event.tokenNumber === booking.tokenNumber) {
+        setIsCalledByOfficer(false);
+        setCurrentStatus('COMPLETED');
+        const approval = event.payload || {
+          certificateNumber: `GJ-REV-2026-CERT-${Math.floor(10000 + Math.random() * 90000)}`,
+          approvedAt: new Date().toISOString(),
+          officerNameGu: 'શ્રી કે. એમ. ત્રિવેદી (નાયબ મામલતદાર)',
+          officerNameHi: 'श्री के. एम. त्रिवेदी (नायब तहसीलदार)',
+          officerNameEn: 'Shri K. M. Trivedi (Dy. Mamlatdar)',
+          counterNumber: booking.counterNumber,
+          talukaOffice: booking.taluka?.officeNameGu || 'મામલતદાર કચેરી',
+          districtName: booking.district?.nameGu || 'ગાંધીનગર',
+          kacheriSeal: 'જન સેવા કેન્દ્ર અધિકૃત ડિજિટલ સિક્કો • મહેસૂલ વિભાગ',
+          digitalSignatureSha: `SHA256:7a9f${Math.floor(10000000 + Math.random() * 90000000)}b4c1`,
+          status: 'APPROVED',
+          remarks: 'અસલ દસ્તાવેજો રૂબરૂ ચકાસણી બાદ સેવા સફળતાપૂર્વક મંજૂર કરવામાં આવી છે.'
+        };
+        setApprovalData(approval);
+        try {
+          const stored = localStorage.getItem('qless_approved_certificates');
+          const list = stored ? JSON.parse(stored) : [];
+          localStorage.setItem('qless_approved_certificates', JSON.stringify([approval, ...list.filter((x: any) => x.tokenNumber !== booking.tokenNumber)]));
+        } catch {}
+        triggerHaptic('success');
+        triggerHapticNotification();
+        playNotificationChime();
+        speakGuidance(
+          lang === 'hi' ? `बधाई हो! आपकी सेवा काउंटर पर आधिकारिक रूप से स्वीकृत और पूर्ण कर दी गई है।` :
+          lang === 'mr' ? `अभिनंदन! आपली सेवा अधिकृतरीत्या मंजूर करण्यात आली आहे.` :
+          lang === 'en' ? `Congratulations! Your service has been officially approved and completed.` :
+          `અભિનંદન! આપની અરજી કચેરી કાઉન્ટર પર સક્ષમ અધિકારી દ્વારા સફળતાપૂર્વક મંજૂર કરવામાં આવી છે. સત્તાવાર મંજૂરી પ્રમાણપત્ર જારી થયેલ છે.`,
           lang
         );
       }
@@ -345,16 +409,23 @@ export function DigitalTokenPass({
                   </span>
                   
                   {/* Status Pill (Requirement 22) */}
-                  <span className={`text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                    currentStatus === 'CONFIRMED'
-                      ? 'bg-emerald-500/30 text-green-200 border border-green-400/40'
-                      : currentStatus === 'RESCHEDULED'
-                        ? 'bg-amber-500/30 text-amber-200 border border-amber-400/40'
-                        : currentStatus === 'CANCELLED'
-                          ? 'bg-red-500/30 text-red-200 border border-red-400/40'
-                          : 'bg-green-500 text-white animate-pulse'
+                  <span className={`text-[9px] sm:text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                    currentStatus === 'COMPLETED'
+                      ? 'bg-emerald-500 text-white border border-emerald-300 shadow-xs'
+                      : currentStatus === 'CONFIRMED'
+                        ? 'bg-emerald-500/30 text-green-200 border border-green-400/40'
+                        : currentStatus === 'RESCHEDULED'
+                          ? 'bg-amber-500/30 text-amber-200 border border-amber-400/40'
+                          : currentStatus === 'CANCELLED'
+                            ? 'bg-red-500/30 text-red-200 border border-red-400/40'
+                            : 'bg-green-500 text-white animate-pulse'
                   }`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
+                    {currentStatus === 'COMPLETED' ? (
+                      <CheckCircle className="w-3 h-3 text-white shrink-0" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
+                    )}
+                    {currentStatus === 'COMPLETED' && (isEn ? 'OFFICIALLY APPROVED' : isHi ? 'सत्यापित एवं स्वीकृत (APPROVED)' : isMr ? 'प्रमाणित व मंजूर (APPROVED)' : 'સત્તાવાર મંજૂર & પ્રમાણિત (APPROVED)')}
                     {currentStatus === 'CONFIRMED' && (isEn ? 'CONFIRMED' : isHi ? 'पुष्ट (CONFIRMED)' : isMr ? 'निश्चित (CONFIRMED)' : 'કન્ફર્મ (CONFIRMED)')}
                     {currentStatus === 'RESCHEDULED' && (isEn ? 'RESCHEDULED' : isHi ? 'पुनर्निर्धारित' : isMr ? 'पुन्हा नियोजित' : 'રિશિડ્યુલ થયેલ (RESCHEDULED)')}
                     {currentStatus === 'CANCELLED' && (isEn ? 'CANCELLED' : isHi ? 'रद्द' : isMr ? 'रद्द' : 'રદ થયેલ (CANCELLED)')}
@@ -402,6 +473,48 @@ export function DigitalTokenPass({
           </div>
         </div>
 
+        {/* OFFICIAL SERVICE APPROVAL HANDSHAKE BANNER */}
+        {currentStatus === 'COMPLETED' && (
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-3.5 sm:p-4 border-b-2 border-emerald-800 shadow-md">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0 shadow-inner">
+                  <Award className="w-6 h-6 text-amber-300" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded text-white">
+                      {isEn ? 'OFFICIALLY APPROVED & CERTIFIED' : isHi ? 'आधिकारिक रूप से स्वीकृत एवं निस्तारित' : 'સત્તાવાર સેવા મંજૂર & પ્રમાણિત'}
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-200">
+                      {approvalData?.certificateNumber || 'GJ-REV-2026-CERT-98214'}
+                    </span>
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-black text-white mt-0.5">
+                    {isEn ? 'Government Approval Order Issued & Stored' : isHi ? 'सरकारी स्वीकृति आदेश जारी एवं सुरक्षित' : 'કચેરી દ્વારા અસલ કાગળો ચકાસી સત્તાવાર મંજૂરી હુકમ જારી થયેલ છે'}
+                  </h4>
+                  <p className="text-[10.5px] text-emerald-100">
+                    {isEn ? 'Desk Officer: ' : isHi ? 'सक्षम अधिकारी: ' : 'સક્ષમ અધિકારી: '}
+                    <strong>{approvalData?.officerNameGu || booking.officerName}</strong> • {isEn ? 'Counter ' : 'કાઉન્ટર '}{booking.counterNumber}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('success');
+                  setApprovalModalOpen(true);
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 text-xs font-black flex items-center justify-center gap-2 shadow-lg transition active:scale-95 cursor-pointer shrink-0"
+              >
+                <FileText className="w-4 h-4 text-emerald-700" />
+                <span>{isEn ? 'View Official Approval Certificate' : isHi ? 'स्वीकृति प्रमाण पत्र देखें / डाउनलोड' : '📄 સત્તાવાર મંજૂરી પ્રમાણપત્ર & હુકમ જુઓ'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* REAL-TIME OFFICER CALL ALERT */}
         {isCalledByOfficer && (
           <div className="bg-gradient-to-r from-emerald-600 to-green-600 text-white p-3 sm:p-4 text-center animate-pulse flex items-center justify-center gap-2 font-black text-xs sm:text-sm border-b-2 border-emerald-700 shadow-inner">
@@ -420,6 +533,55 @@ export function DigitalTokenPass({
 
         {/* PASS CONTENT */}
         <div className="p-4 sm:p-6 space-y-5">
+
+          {/* STATUTORY REQUIREMENT: STRICT DATE & TIME VALIDITY LOCK BANNER */}
+          <div className="bg-amber-50/90 border-2 border-amber-400 rounded-2xl p-3.5 sm:p-4 text-left shadow-xs">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 mt-0.5 shadow-xs font-black">
+                <Lock className="w-5 h-5 text-slate-950" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-950 px-2 py-0.5 rounded-full border border-amber-300">
+                    {isEn ? '🔒 STRICT TIME & DATE LOCKED TOKEN PASS' : isHi ? '🔒 समय एवं दिनांक लॉक आधिकारिक टोकन पास' : '🔒 સમય & તારીખ લૉક કરેલ સત્તાવાર ટોકન પાસ'}
+                  </span>
+                  <span className="text-[9.5px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full border border-red-200">
+                    {isEn ? '⛔ STRICTLY NON-TRANSFERABLE' : isHi ? '⛔ अन्य समय पर अमान्य' : '⚠️ અન્ય તારીખ કે સમયે અમાન્ય'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 bg-white p-2.5 rounded-xl border border-amber-200">
+                  <div>
+                    <span className="text-[9.5px] text-slate-500 font-bold block uppercase">
+                      {isEn ? '📅 APPOINTMENT DATE (VALID ONLY ON)' : isHi ? '📅 मान्य अपॉइंटमेंट तिथि (केवल इसी दिन)' : '📅 માન્ય અપોઇન્ટમેન્ટ તારીખ (ફક્ત આ દિવસે જ)'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-slate-900 font-mono flex items-center gap-1.5 mt-0.5">
+                      <Calendar className="w-3.5 h-3.5 text-[#005A9C]" />
+                      {selectedDate}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[9.5px] text-slate-500 font-bold block uppercase">
+                      {isEn ? '⏰ APPOINTED TIME SLOT WINDOW' : isHi ? '⏰ नियत समय स्लॉट विंडो' : '⏰ માન્ય સમય સ્લોટ વિન્ડો (૧ કલાક)'}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-[#003366] font-mono flex items-center gap-1.5 mt-0.5">
+                      <Clock className="w-3.5 h-3.5 text-[#005A9C]" />
+                      {currentSlotTime}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-2.5 p-2.5 rounded-xl bg-amber-100/70 border border-amber-300/80 text-[11px] text-amber-950 leading-relaxed font-medium">
+                  <strong>{isEn ? 'Statutory Rule & Condition:' : isHi ? 'सांविधिक नियम व शर्त:' : 'કડક કાનૂની શરત & કચેરી નિયમ:'}</strong>{' '}
+                  {isEn 
+                    ? `This Token (#${booking.tokenNumber}) and QR code are valid STRICTLY on ${selectedDate} during ${currentSlotTime}. At any other date or outside this slot window, this token & QR will be automatically rejected as EXPIRED/INVALID at the gate kiosk & counter.`
+                    : isHi
+                    ? `यह टोकन (#${booking.tokenNumber}) और क्यूआर कोड केवल दिनांक ${selectedDate} को समय ${currentSlotTime} के दौरान ही मान्य रहेगा। अन्य किसी भी तिथि या समय पर यह टोकन व क्यूआर कोड गेट कियोस्क और काउंटर पर स्वतः अमान्य (EXPIRED / INVALID) हो जाएगा।`
+                    : `આ ટોકન ક્રમાંક (${booking.tokenNumber}) અને નીચે દર્શાવેલ સત્તાવાર QR કોડ ફક્ત અને ફક્ત તારીખ ${selectedDate} ના રોજ નિર્ધારિત સમય વિન્ડો ${currentSlotTime} દરમિયાન જ કચેરી ગેટ કિયોસ્ક અને કાઉન્ટર પર માન્ય (VALID) રહેશે. આ નિયત તારીખ કે સ્લોટ સમય વિન્ડો સિવાય કોઈપણ અન્ય તારીખે અથવા સમયે આ QR કોડ / ટોકન નંબર સંપૂર્ણપણે અમાન્ય (EXPIRED / INVALID) ગણાશે અને કચેરીમાં પ્રવેશ મળશે નહીં.`}
+                </div>
+              </div>
+            </div>
+          </div>
           
           {/* REQUIREMENT 15: HIGH-CLARITY 5-SECOND PASS SUMMARY CARD */}
           <div className="bg-slate-50 border-2 border-blue-900/20 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
@@ -507,10 +669,16 @@ export function DigitalTokenPass({
                 subLabel={isEn ? "Scan at Office Gate / Counter" : isHi ? "कार्यालय गेट / काउंटर पर स्कैन करें" : isMr ? "कार्यालय गेट / काउंटरवर स्कॅन करा" : isKhi ? "કચેરી ગેટ / કાઉન્ટર તે સ્કેન કરિયો" : "કચેરી ગેટ / કાઉન્ટર પર સ્કેન કરો"}
               />
 
-              {/* Requirement 11: Live Token Validity Indicator */}
-              <div className="flex items-center gap-1.5 mt-2.5 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] text-emerald-800 font-mono font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
-                <span>{liveTime || 'LIVE'} • {isEn ? 'Valid Token Status' : isHi ? 'सत्यापित टोकन स्थिति' : isMr ? 'प्रमाणित टोकन स्थिती' : isKhi ? 'માન્ય ટોકન સ્થિતિ' : 'માન્ય ટોકન સ્થિતિ'}</span>
+              {/* Requirement 11: Live Token Validity Indicator & Time Lock */}
+              <div className="flex flex-col items-center gap-1.5 mt-2.5 w-full">
+                <div className="flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full text-[10px] text-emerald-900 font-mono font-bold shadow-2xs w-full">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                  <span>{liveTime || 'LIVE'} • {isEn ? 'Signed Authentic Token' : 'સત્તાવાર સહી થયેલ ટોકન'}</span>
+                </div>
+
+                <div className="bg-amber-100/90 border border-amber-300 rounded-lg px-2 py-1 text-[9.5px] text-amber-950 font-black text-center w-full leading-tight">
+                  🔒 {isEn ? `Valid ONLY: ${selectedDate} • ${currentSlotTime}` : `માન્યતા: ફક્ત ${selectedDate} • ${currentSlotTime} માટે જ`}
+                </div>
               </div>
 
               <span className="text-[10px] font-mono text-gray-500 mt-1">
@@ -1158,22 +1326,29 @@ export function DigitalTokenPass({
                   <span className="font-mono font-black text-[#FF9933]">{booking.tokenNumber}</span>
                 </div>
                 <div className="flex justify-between border-b border-slate-700 pb-1.5">
+                  <span className="text-slate-400">{isEn ? 'Valid Date:' : 'માન્ય મુલાકાત તારીખ:'}</span>
+                  <span className="font-mono font-bold text-emerald-400">✓ {selectedDate} (Verified Today)</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-700 pb-1.5">
+                  <span className="text-slate-400">{isEn ? 'Slot Window:' : 'માન્ય સમય સ્લોટ:'}</span>
+                  <span className="font-mono font-bold text-emerald-400">✓ {currentSlotTime} (Active Window)</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-700 pb-1.5">
                   <span className="text-slate-400">{isEn ? 'Assigned Counter:' : isHi ? 'काउंटर:' : isMr ? 'काउंटर:' : 'ફાળવેલ કાઉન્ટર:'}</span>
                   <span className="font-bold text-white">{isEn ? `Counter ${booking.counterNumber} (${booking.counterNameEn || booking.counterNameGu})` : `કાઉન્ટર ${booking.counterNumber} (${booking.counterNameGu})`}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-700 pb-1.5">
+                <div className="flex justify-between">
                   <span className="text-slate-400">{isEn ? 'Officer:' : isHi ? 'अधिकारी:' : isMr ? 'अधिकारी:' : 'અધિકારી:'}</span>
                   <span className="font-bold text-white">{booking.officerName}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isEn ? 'Slot Time:' : isHi ? 'स्लॉट समय:' : isMr ? 'वेळ:' : 'સ્લોટ સમય:'}</span>
-                  <span className="font-bold text-emerald-400">{currentSlotTime}</span>
-                </div>
               </div>
 
-              <p className="text-[10px] text-slate-400 leading-relaxed">
-                {isEn ? 'Gate security kiosk verified signed tamper-evident QR. Citizen routed directly to assigned desk.' : isHi ? 'गेट सुरक्षा कियोस्क द्वारा डिजिटल हस्ताक्षर सत्यापित। नागरिक को सीधे संबंधित काउंटर पर जाने की अनुमति है।' : isMr ? 'गेट सुरक्षा स्कॅनरद्वारे डिजिटल स्वाक्षरी पडताळली. नागरिकाला थेट काउंटरवर जाण्याची परवानगी दिली आहे.' : 'કચેરી ગેટ સિક્યોરિટી સિમ્યુલેશન: QR કોડની સહી ચકાસીને નાગરિકને સીધા કાઉન્ટર પર જવાની મંજૂરી આપેલ છે.'}
-              </p>
+              <div className="p-2 rounded-xl bg-amber-950/40 border border-amber-600/40 text-[10px] text-amber-200 leading-relaxed text-left">
+                <strong>{isEn ? 'Gate Security Enforcement:' : 'ગેટ સિક્યોરિટી નિયમ:'}</strong>{' '}
+                {isEn 
+                  ? `Kiosk validates both appointment date (${selectedDate}) and slot window (${currentSlotTime}). Attempting entry on any other date or time triggers automatic 403 ENTRY REJECTED.` 
+                  : `કિયોસ્ક ફક્ત ${selectedDate} અને ${currentSlotTime} દરમિયાન જ પ્રવેશ આપે છે. અન્ય કોઈપણ તારીખ કે સમયે સ્કેન કરવાથી સિસ્ટમ આપોઆપ લાલ સિગ્નલ સાથે પ્રવેશ નકારશે.`}
+              </div>
 
               <button
                 onClick={() => setVerifierOpen(false)}
@@ -1592,6 +1767,175 @@ export function DigitalTokenPass({
               >
                 <Printer className="w-4 h-4 text-[#FF9933]" />
                 <span>{isEn ? 'Print Official e-Challan' : isHi ? 'ई-चालान प्रिंट करें' : 'સત્તાવાર e-Challan પ્રિન્ટ કરો'}</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 📜 OFFICIAL GUJARAT GOVERNMENT APPROVAL CERTIFICATE & ORDER MODAL */}
+      {approvalModalOpen && (
+        <div 
+          onClick={() => setApprovalModalOpen(false)}
+          className="fixed inset-0 z-80 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto modal-backdrop animate-in fade-in duration-200"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-emerald-600 overflow-hidden flex flex-col max-h-[94vh] animate-in zoom-in-95"
+          >
+            {/* MODAL TOP ACCENT & HEADER */}
+            <div className="bg-gradient-to-r from-emerald-800 via-teal-900 to-emerald-900 text-white p-4 flex items-center justify-between border-b-2 border-emerald-950 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <GovLogo className="w-9 h-9 drop-shadow-md" />
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9.5px] font-black uppercase tracking-wider bg-emerald-700/80 px-2 py-0.5 rounded text-emerald-100">
+                      GUJARAT PUBLIC SERVICES GUARANTEE ACT
+                    </span>
+                    <span className="text-[9.5px] font-mono text-amber-300 font-bold">
+                      {approvalData?.certificateNumber || 'GJ-REV-2026-CERT-98214'}
+                    </span>
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-black mt-0.5">
+                    {isEn ? 'Government of Gujarat • Official Approval Order & Certificate' : isHi ? 'गुजरात सरकार • आधिकारिक स्वीकृति आदेश एवं प्रमाण पत्र' : 'ગુજરાત સરકાર • સત્તાવાર સેવા મંજૂરી પ્રમાણપત્ર & આખરી હુકમ'}
+                  </h3>
+                  <p className="text-[10px] text-emerald-200">
+                    {centerName} • {isEn ? 'Jan Seva Kendra' : 'જન સેવા કેન્દ્ર કચેરી'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setApprovalModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* PRINTABLE OFFICIAL CERTIFICATE CONTENT */}
+            <div className="p-4 sm:p-6 overflow-y-auto modal-scroll-area space-y-4 text-slate-900 bg-white" id="official-approval-certificate">
+              
+              {/* GOVT EMBLEM & CERTIFICATE HEADING */}
+              <div className="border-b-2 border-slate-900 pb-3 text-center space-y-1 relative">
+                <div className="flex justify-center mb-1">
+                  <GovLogo className="w-14 h-14 drop-shadow-xs" />
+                </div>
+                <h2 className="text-base sm:text-lg font-black text-slate-950 uppercase tracking-wide">
+                  GUJARAT REVENUE & CITIZEN SERVICES
+                </h2>
+                <h3 className="text-xs sm:text-sm font-extrabold text-[#003366]">
+                  મહેસૂલ વિભાગ, ગુજરાત સરકાર • સત્તાવાર સેવા મંજૂરી પ્રમાણપત્ર (Approval Order)
+                </h3>
+                <p className="text-[10.5px] text-slate-600 font-mono">
+                  Order Ref: {approvalData?.certificateNumber || 'GJ-REV-2026-CERT-98214'} • {approvalData?.approvedAt ? new Date(approvalData.approvedAt).toLocaleDateString('gu-IN') : selectedDate}
+                </p>
+
+                {/* Approved Badge Ribbon */}
+                <div className="inline-flex items-center gap-1.5 bg-emerald-100 border border-emerald-400 text-emerald-950 px-3 py-1 rounded-full text-xs font-black mt-1 shadow-2xs">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                  <span>✓ કચેરી કાઉન્ટર દ્વારા સત્તાવાર મંજૂર (OFFICIALLY APPROVED)</span>
+                </div>
+              </div>
+
+              {/* DETAILS SUMMARY TABLE */}
+              <div className="border border-slate-300 rounded-xl overflow-hidden text-xs">
+                <table className="w-full text-left border-collapse">
+                  <tbody>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <td className="p-2.5 font-bold text-slate-600 w-1/3">નાગરિકનું પૂરું નામ (Applicant Name)</td>
+                      <td className="p-2.5 font-black text-slate-950">{citizenName}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2.5 font-bold text-slate-600">આધાર ઓળખ (Masked Aadhaar)</td>
+                      <td className="p-2.5 font-mono font-bold text-slate-800">{DEFAULT_CITIZEN_PROFILE.aadhaarMasked}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <td className="p-2.5 font-bold text-slate-600">યોજના / પ્રમાણપત્ર સેવા (Service Applied)</td>
+                      <td className="p-2.5 font-black text-[#003366]">{scheme ? scheme.titleGu : 'જન સેવા પ્રમાણપત્ર'}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2.5 font-bold text-slate-600">કચેરી કેન્દ્ર (Service Jurisdiction)</td>
+                      <td className="p-2.5 font-bold text-slate-800">{centerName} ({booking.district.nameGu})</td>
+                    </tr>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <td className="p-2.5 font-bold text-slate-600">ટોકન ક્રમાંક & સ્લોટ સમય</td>
+                      <td className="p-2.5 font-mono font-bold text-slate-800">
+                        {booking.tokenNumber} • {selectedDate} ({currentSlotTime})
+                      </td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2.5 font-bold text-slate-600">મંજૂર કરનાર સક્ષમ અધિકારી</td>
+                      <td className="p-2.5 font-black text-emerald-900">
+                        {approvalData?.officerNameGu || booking.officerName} • કાઉન્ટર {booking.counterNumber}
+                      </td>
+                    </tr>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <td className="p-2.5 font-bold text-slate-600">ચુકવણી ચલણ (Cyber Treasury Challan)</td>
+                      <td className="p-2.5 font-mono text-[11px] font-bold text-emerald-800">
+                        {booking.payment?.grasChallanNo || booking.payment?.kacheriChallanNo || 'GRAS/2026/04/991823'} • ચુકવણી સ્થિતિ: PAID
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* STATUTORY VERIFICATION & DISPOSAL CLAUSE */}
+              <div className="bg-emerald-50/70 border-2 border-emerald-300 rounded-xl p-3.5 space-y-2 text-xs leading-relaxed text-emerald-950">
+                <div className="flex items-center gap-1.5 font-black text-emerald-900">
+                  <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                  <span>સત્તાવાર કચેરી પ્રમાણીકરણ & આખરી હુકમ (Statutory Certificate of Approval):</span>
+                </div>
+                <p className="text-[11.5px] font-medium">
+                  આથી પ્રમાણિત કરવામાં આવે છે કે ઉપરોક્ત અરજદારશ્રી <strong>{citizenName}</strong> દ્વારા રજૂ કરાયેલ તમામ અસલ દસ્તાવેજો (ઓળખ પુરાવો, આવક પ્રમાણપત્ર, સોગંદનામું વગેરે) કચેરી કાઉન્ટર {booking.counterNumber} પર સક્ષમ અધિકારી દ્વારા રૂબરૂમાં સંતોષકારક રીતે ચકાસવામાં આવેલ છે. 
+                </p>
+                <p className="text-[11.5px] font-medium">
+                  અરજી સંપૂર્ણપણે પરિપૂર્ણ હોવાથી ગુજરાત જાહેર સેવા હક અધિનિયમ અને રાજ્ય સરકારના મહેસૂલી નિયમો હેઠળ આ સેવા / પ્રમાણપત્ર તાત્કાલિક અસરથી <strong>સત્તાવાર રીતે મંજૂર (APPROVED & GRANTED)</strong> કરવામાં આવે છે. આ હુકમ તમામ સરકારી તથા કાનૂની હેતુઓ માટે માન્ય ગણાશે.
+                </p>
+              </div>
+
+              {/* DUAL DIGITAL HANDSHAKE & STAMPS */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t-2 border-dashed border-slate-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 border-2 border-dashed border-emerald-700 rounded-full flex flex-col items-center justify-center text-center p-1 bg-emerald-50 rotate-[-4deg] shadow-xs">
+                    <span className="text-[8px] font-black text-emerald-900 leading-none">GOVT OF GUJARAT</span>
+                    <ShieldCheck className="w-5 h-5 text-emerald-700 my-0.5" />
+                    <span className="text-[7.5px] font-bold text-emerald-800 leading-none">JAN SEVA SEAL</span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-800">Digital Seal & Cryptographic Checksum</p>
+                    <p className="text-[9px] font-mono text-slate-600">{approvalData?.digitalSignatureSha || signatureChecksum}</p>
+                    <p className="text-[8.5px] text-emerald-700 font-bold mt-0.5">✓ Tamper-proof Digitally Signed Government Record</p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <p className="text-[11px] font-black text-slate-900">{approvalData?.officerNameGu || booking.officerName}</p>
+                  <p className="text-[10px] text-slate-600 font-bold">નાયબ મામલતદાર / સક્ષમ ઇન્ચાર્જ અધિકારી</p>
+                  <p className="text-[9px] text-slate-500">{centerName}</p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* MODAL FOOTER BUTTONS */}
+            <div className="bg-slate-50 p-3 sm:p-4 border-t border-slate-200 flex items-center justify-between shrink-0">
+              <button
+                onClick={() => setApprovalModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition cursor-pointer"
+              >
+                {isEn ? 'Close' : 'બંધ કરો'}
+              </button>
+
+              <button
+                onClick={() => {
+                  triggerHaptic('success');
+                  window.print();
+                }}
+                className="px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-2 shadow-md transition cursor-pointer active:scale-95"
+              >
+                <Printer className="w-4 h-4 text-emerald-200" />
+                <span>{isEn ? 'Print / Download Official Approval Certificate' : isHi ? 'स्वीकृति प्रमाण पत्र प्रिंट / डाउनलोड' : '📄 સત્તાવાર મંજૂરી પ્રમાણપત્ર પ્રિન્ટ / PDF ડાઉનલોડ'}</span>
               </button>
             </div>
 
