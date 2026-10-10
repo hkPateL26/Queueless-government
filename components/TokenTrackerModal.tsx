@@ -40,7 +40,7 @@ const getLocalizedTokenData = (cleanQuery: string, l: Language, activeBooking: B
   if (cleanQuery === 'A-42') {
     return {
       token: 'A-42',
-      name: isEn ? 'Hari Patel' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'હરિ પટેલ',
+      name: isEn ? 'Trusha Somaiya' : isHi ? 'तृषा सोमैया' : isMr ? 'तृषा सोमय्या' : 'તૃષા સોમૈયા',
       center: isEn ? 'Gondal Jan Seva Kendra — Rajkot' : isHi ? 'गोंडल जन सेवा केंद्र — राजकोट' : isMr ? 'गोंडल जन सेवा केंद्र — राजकोट' : 'ગોંડલ જન સેવા કેન્દ્ર — રાજકોટ',
       counter: isEn ? 'Counter 1 (Income/Caste Service)' : isHi ? 'काउंटर १ (आय/जाति सेवा)' : isMr ? 'काउंटर १ (उत्पन्न/जात दाखले)' : 'કાઉન્ટર ૧ (આવક/જાતિ સેવા)',
       ahead: 2,

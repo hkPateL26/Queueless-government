@@ -73,7 +73,7 @@ export const validateIncomeCertificateText = (
 
   // 2. Extract Applicant Name
   const nameMatch = text.match(/(?:શ્રી|Shri|Mr\.)\s+([^\n,]+)/i);
-  const applicantName = nameMatch ? nameMatch[1].trim() : 'હરિ પટેલ (Hari Patel)';
+  const applicantName = nameMatch ? nameMatch[1].trim() : 'તૃષા સોમૈયા (Trusha Somaiya)';
 
   // 3. Extract Issue Date / Year
   let detectedYear: number | null = null;
@@ -275,8 +275,8 @@ export async function inspectUploadedFileStrict(
   beneficiary?: BeneficiaryValidationContext
 ): Promise<FileValidationInspectionResult> {
   const fileNameLower = file.name.toLowerCase();
-  const effectiveApplicantGu = beneficiary?.nameGu || 'હરિ પટેલ';
-  const effectiveApplicantEn = beneficiary?.nameEn || 'Hari Patel';
+  const effectiveApplicantGu = beneficiary?.nameGu || 'તૃષા સોમૈયા';
+  const effectiveApplicantEn = beneficiary?.nameEn || 'Trusha Somaiya';
   const effectiveRelationGu = beneficiary?.relationGu || 'સ્વયં';
 
   // 1. Primary Engine: Real-time Gemini Multimodal Vision API via backend (Supports Images & PDFs)
@@ -496,33 +496,33 @@ export async function inspectUploadedFileStrict(
 
   // 5. Cross-Person / Beneficiary Conflict Check
   if (beneficiary) {
+    const isTargetTrusha = effectiveApplicantEn.toLowerCase().includes('trusha') || effectiveApplicantGu.includes('તૃષા');
     const isTargetHari = effectiveApplicantEn.toLowerCase().includes('hari') || effectiveApplicantGu.includes('હરિ');
-    const isTargetGeeta = effectiveApplicantEn.toLowerCase().includes('geeta') || effectiveApplicantEn.toLowerCase().includes('gita') || effectiveApplicantGu.includes('ગીતા');
     const isTargetParsottam = effectiveApplicantEn.toLowerCase().includes('parsottam') || effectiveApplicantEn.toLowerCase().includes('purshottam') || effectiveApplicantGu.includes('પરસોત્તમ');
     const isTargetAayush = effectiveApplicantEn.toLowerCase().includes('aayush') || effectiveApplicantEn.toLowerCase().includes('ayush') || effectiveApplicantGu.includes('આયુષ');
 
-    // If application is for someone else (e.g. Parsottambhai, Geetaben, Aayush), but user uploaded Hari's file
-    if (!isTargetHari && (fileNameLower.includes('hari') || fileNameLower.includes('haripatel'))) {
+    // If application is for someone else (e.g. Hari Patel, Parsottambhai, Aayush), but user uploaded Trusha's file
+    if (!isTargetTrusha && (fileNameLower.includes('trusha') || fileNameLower.includes('trushasomaiya') || fileNameLower.includes('somaiya'))) {
       return {
         isValid: false,
         status: 'failed',
         confidenceScore: 0.98,
-        detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (હરિ પટેલ)',
-        reasonGu: `❌ નામમાં વિસંગતતા (Beneficiary Mismatch): અપલોડ કરેલ દસ્તાવેજ હરિ પટેલનો છે, જ્યારે તમે અરજી '${effectiveApplicantGu}' (${effectiveRelationGu}) માટે કરેલ છે! સરકારી નિયમ મુજબ માત્ર ${effectiveApplicantGu} નો જ અસલ દસ્તાવેજ અપલોડ કરો.`,
-        reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Hari Patel, but this application is for ${effectiveApplicantEn}. Please upload ${effectiveApplicantEn}'s document.`
+        detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (તૃષા સોમૈયા)',
+        reasonGu: `❌ નામમાં વિસંગતતા (Beneficiary Mismatch): અપલોડ કરેલ દસ્તાવેજ તૃષા સોમૈયાનો છે, જ્યારે તમે અરજી '${effectiveApplicantGu}' (${effectiveRelationGu}) માટે કરેલ છે! સરકારી નિયમ મુજબ માત્ર ${effectiveApplicantGu} નો જ અસલ દસ્તાવેજ અપલોડ કરો.`,
+        reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Trusha Somaiya, but this application is for ${effectiveApplicantEn}. Please upload ${effectiveApplicantEn}'s document.`
       };
     }
 
-    // If application is for Hari, but user uploaded another family member's file
-    if (isTargetHari) {
-      if (fileNameLower.includes('geeta') || fileNameLower.includes('gita')) {
+    // If application is for Trusha, but user uploaded another family member's file
+    if (isTargetTrusha) {
+      if (fileNameLower.includes('hari') || fileNameLower.includes('haripatel')) {
         return {
           isValid: false,
           status: 'failed',
           confidenceScore: 0.98,
-          detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (ગીતાબેન પટેલ)',
-          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ ગીતાબેન પટેલનો છે, જ્યારે અરજી હરિ પટેલ માટે છે! કૃપા કરીને હરિ પટેલનો જ દસ્તાવેજ અપલોડ કરો.`,
-          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Geetaben Patel, but application is for Hari Patel.`
+          detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (હરિ પટેલ - પતિ)',
+          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ હરિ પટેલ (પતિ) નો છે, જ્યારે અરજી તૃષા સોમૈયા માટે છે! કૃપા કરીને તૃષા સોમૈયાનો જ દસ્તાવેજ અપલોડ કરો.`,
+          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Hari Patel (Husband), but application is for Trusha Somaiya.`
         };
       }
       if (fileNameLower.includes('parsottam') || fileNameLower.includes('purshottam')) {
@@ -531,8 +531,8 @@ export async function inspectUploadedFileStrict(
           status: 'failed',
           confidenceScore: 0.98,
           detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (પરસોત્તમભાઈ પટેલ)',
-          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ પરસોત્તમભાઈ પટેલનો છે, જ્યારે અરજી હરિ પટેલ માટે છે! કૃપા કરીને હરિ પટેલનો જ દસ્તાવેજ અપલોડ કરો.`,
-          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Parsottambhai Patel, but application is for Hari Patel.`
+          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ પરસોત્તમભાઈ પટેલનો છે, જ્યારે અરજી તૃષા સોમૈયા માટે છે! કૃપા કરીને તૃષા સોમૈયાનો જ દસ્તાવેજ અપલોડ કરો.`,
+          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Parsottambhai Patel, but application is for Trusha Somaiya.`
         };
       }
       if (fileNameLower.includes('aayush') || fileNameLower.includes('ayush')) {
@@ -541,8 +541,8 @@ export async function inspectUploadedFileStrict(
           status: 'failed',
           confidenceScore: 0.98,
           detectedDocumentType: 'અન્ય વ્યક્તિનો દસ્તાવેજ (આયુષ પટેલ)',
-          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ આયુષ પટેલનો છે, જ્યારે અરજી હરિ પટેલ માટે છે! કૃપા કરીને હરિ પટેલનો જ દસ્તાવેજ અપલોડ કરો.`,
-          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Aayush Patel, but application is for Hari Patel.`
+          reasonGu: `❌ નામમાં વિસંગતતા: અપલોડ કરેલ દસ્તાવેજ આયુષ પટેલનો છે, જ્યારે અરજી તૃષા સોમૈયા માટે છે! કૃપા કરીને તૃષા સોમૈયાનો જ દસ્તાવેજ અપલોડ કરો.`,
+          reasonEn: `Beneficiary Mismatch: Uploaded document belongs to Aayush Patel, but application is for Trusha Somaiya.`
         };
       }
     }

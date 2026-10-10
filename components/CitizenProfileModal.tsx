@@ -1054,17 +1054,17 @@ export function CitizenProfileModal({
                   const memberName = isEn 
                     ? member.nameEn 
                     : isHi 
-                    ? (member.nameGu === 'હરિ પટેલ' ? 'हरि पटेल' : member.nameGu === 'મીરાબેન પટેલ' ? 'मीराबेन पटेल' : member.nameGu === 'આરવ પટેલ' ? 'आरव पटेल' : member.nameGu === 'દિનેશભાઈ પટેલ' ? 'दिनेशभाई पटेल' : member.nameEn)
+                    ? (member.nameGu === 'તૃષા સોમૈયા' ? 'तृषा सोमैया' : member.nameGu === 'હરિ પટેલ' ? 'हरि पटेल' : member.nameGu === 'આયુષ પટેલ' ? 'आयुष पटेल' : member.nameGu === 'પરસોત્તમભાઈ પટેલ' ? 'परसोत्तमभाई पटेल' : member.nameEn)
                     : isMr 
-                    ? (member.nameGu === 'હરિ પટેલ' ? 'हरी पटेल' : member.nameGu === 'મીરાબેન પટેલ' ? 'मीराबेन पटेल' : member.nameGu === 'આરવ પટેલ' ? 'आरव पटेल' : member.nameGu === 'દિનેશભાઈ પટેલ' ? 'दिनेशभाई पटेल' : member.nameEn)
+                    ? (member.nameGu === 'તૃષા સોમૈયા' ? 'तृषा सोमय्या' : member.nameGu === 'હરિ પટેલ' ? 'हरी पटेल' : member.nameGu === 'આયુષ પટેલ' ? 'आयुष पटेल' : member.nameGu === 'પરસોત્તમભાઈ પટેલ' ? 'परसोत्तमभाई पटेल' : member.nameEn)
                     : member.nameGu;
 
                   const memberRelation = isEn
                     ? member.relationEn
                     : isHi
-                    ? (member.relationType === 'self' ? 'स्वयं (મુખ્ય)' : member.relationType === 'spouse' ? 'पत्नी' : member.relationType === 'child' ? 'पुत्र' : member.relationType === 'parent' ? 'पिता (वरिष्ठ नागरिक)' : 'परिवार सदस्य')
+                    ? (member.relationType === 'self' ? 'स्वयं (મુખ્ય)' : member.relationType === 'spouse' ? 'पति (Husband)' : member.relationType === 'child' ? 'पुत्र' : member.relationType === 'parent' ? 'ससुर (वरिष्ठ नागरिक)' : 'परिवार सदस्य')
                     : isMr
-                    ? (member.relationType === 'self' ? 'स्वतः (प्रमुख)' : member.relationType === 'spouse' ? 'पत्नी' : member.relationType === 'child' ? 'मुलगा' : member.relationType === 'parent' ? 'वडील (ज्येष्ठ नागरिक)' : 'कुटुंब सदस्य')
+                    ? (member.relationType === 'self' ? 'स्वतः (प्रमुख)' : member.relationType === 'spouse' ? 'पती (Husband)' : member.relationType === 'child' ? 'मुलगा' : member.relationType === 'parent' ? 'सासरे (ज्येष्ठ नागरिक)' : 'कुटुंब सदस्य')
                     : member.relationGu;
 
                   return (
@@ -1078,7 +1078,7 @@ export function CitizenProfileModal({
                             ? 'bg-[#003366] text-white' 
                             : 'bg-blue-50 text-[#005A9C] border border-blue-200'
                         }`}>
-                          {member.relationType === 'self' ? '👤' : member.relationType === 'spouse' ? '👩' : member.relationType === 'child' ? '🧒' : '👴'}
+                          {member.relationType === 'self' ? '👩' : member.relationType === 'spouse' ? '👨' : member.relationType === 'child' ? '🧒' : '👴'}
                         </div>
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">

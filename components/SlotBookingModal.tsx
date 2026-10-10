@@ -235,7 +235,7 @@ export function SlotBookingModal({
   const [paymentMode, setPaymentMode] = useState<'ONLINE_CYBER_TREASURY' | 'CASH_AT_COUNTER'>('ONLINE_CYBER_TREASURY');
   const [onlineMethod, setOnlineMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
   const [upiApp, setUpiApp] = useState<'gpay' | 'phonepe' | 'paytm' | 'bhim'>('gpay');
-  const [cardHolder, setCardHolder] = useState<string>('HARI PARSOTTAMBHAI PATEL');
+  const [cardHolder, setCardHolder] = useState<string>('TRUSHA SOMAIYA');
   const [cardNumber, setCardNumber] = useState<string>('4591 •••• •••• 8842');
   const [selectedBank, setSelectedBank] = useState<string>('State Bank of India (SBI)');
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);

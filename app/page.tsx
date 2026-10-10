@@ -74,12 +74,12 @@ export default function Home() {
   // Localized Citizen Identity Helpers (Dynamic for gu, hi, en, mr, etc.)
   const getCitizenDisplayName = (l: Language, rawName?: string) => {
     const raw = (rawName || '').trim();
-    if (!raw || ['હરિ પટેલ', 'हरि पटेल', 'Hari Patel', 'हरी पटेल'].includes(raw)) {
+    if (!raw || ['તૃષા સોમૈયા', 'तृषा सोमैया', 'Trusha Somaiya', 'तृषा सोमय्या', 'Trush Somaiya', 'હરિ પટેલ', 'हरि पटेल', 'Hari Patel', 'हरी पटेल'].includes(raw)) {
       switch (l) {
-        case 'gu': return 'હરિ પટેલ';
-        case 'hi': return 'हरि पटेल';
-        case 'mr': return 'हरी पटेल';
-        case 'en': default: return 'Hari Patel';
+        case 'gu': return 'તૃષા સોમૈયા';
+        case 'hi': return 'तृषा सोमैया';
+        case 'mr': return 'तृषा सोमय्या';
+        case 'en': default: return 'Trusha Somaiya';
       }
     }
     return raw;
@@ -1878,7 +1878,7 @@ export default function Home() {
                                 {item.schemeTitleGu || (lang === 'en' ? (item.schemeTitleEn || 'જન સેવા પ્રમાણપત્ર') : 'જન સેવા પ્રમાણપત્ર')}
                               </h5>
                               <p className="text-[10px] text-slate-600 mt-0.5 truncate">
-                                👤 {item.beneficiaryNameGu || 'હરિ પટેલ'} {item.beneficiaryRelation ? `(${item.beneficiaryRelation})` : ''} • {item.applicationType === 'UPDATE' ? '🔄 સુધારો' : '🆕 નવી અરજી'}
+                                👤 {item.beneficiaryNameGu || 'તૃષા સોમૈયા'} {item.beneficiaryRelation ? `(${item.beneficiaryRelation})` : ''} • {item.applicationType === 'UPDATE' ? '🔄 સુધારો' : '🆕 નવી અરજી'}
                               </p>
                             </div>
 
@@ -2855,7 +2855,7 @@ export default function Home() {
                         {trackedBooking.tokenNumber}
                       </span>
                       <span>•</span>
-                      <span>👤 અરજદાર: {trackedBooking.beneficiaryNameGu || 'હરિ પટેલ'} {trackedBooking.beneficiaryRelation ? `(${trackedBooking.beneficiaryRelation})` : ''}</span>
+                      <span>👤 અરજદાર: {trackedBooking.beneficiaryNameGu || 'તૃષા સોમૈયા'} {trackedBooking.beneficiaryRelation ? `(${trackedBooking.beneficiaryRelation})` : ''}</span>
                     </p>
                   </div>
                 </div>

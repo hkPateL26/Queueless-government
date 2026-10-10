@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
       fileName = 'document', 
       targetDocNameGu, 
       targetDocNameEn, 
-      applicantName = 'હરિ પટેલ (Hari Patel)',
+      applicantName = 'તૃષા સોમૈયા (Trusha Somaiya)',
       targetBeneficiaryNameGu,
       targetBeneficiaryNameEn,
       beneficiaryRelation
@@ -86,7 +86,7 @@ CRITICAL VERIFICATION WORKFLOW:
      -> "qualityScore": 15
      -> "actionableAdvice": "❌ ખોટો દસ્તાવેજ: તમે [Detected Doc Name] અપલોડ કરેલ છે, જ્યારે અહીં '${targetDocNameGu}' અપલોડ કરવો અનિવાર્ય છે. કૃપા કરીને સાચો દસ્તાવેજ અપલોડ કરો."
 
-   - CASE C: PERSON / BENEFICIARY MISMATCH: If the document is for a DIFFERENT person than the target applicant "${effectiveTargetPersonGu}" (e.g. document shows Hari Patel when target applicant is Parsottambhai Patel or Geetaben Patel, or vice-versa):
+   - CASE C: PERSON / BENEFICIARY MISMATCH: If the document is for a DIFFERENT person than the target applicant "${effectiveTargetPersonGu}" (e.g. document shows Hari Patel when target applicant is Trusha Somaiya, or vice-versa):
      -> "matchesExpected": false
      -> "isValidForGovt": false
      -> "qualityScore": 10

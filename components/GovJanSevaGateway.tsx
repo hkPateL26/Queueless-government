@@ -216,7 +216,7 @@ export function GovJanSevaGateway({
                   <span className="text-[8px] sm:text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded border border-emerald-300 shrink-0">
                     {isKhi ? 'ચાલુ પાસ' : isGu ? 'સક્રિય પાસ' : isHi ? 'सक्रिय पास' : isMr ? 'सक्रिय पास' : 'ACTIVE PASS'}
                   </span>
-                  <p className="text-xs font-black text-[#003366] truncate">{isEn ? 'Hari Patel' : isHi ? 'हरि पटेल' : isMr ? 'हरी पटेल' : 'હરિ પટેલ'}</p>
+                  <p className="text-xs font-black text-[#003366] truncate">{currentUser?.name || (isEn ? 'Trusha Somaiya' : isHi ? 'तृषा सोमैया' : isMr ? 'तृषा सोमय्या' : 'તૃષા સોમૈયા')}</p>
                 </div>
                 <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
                   {activeBooking 

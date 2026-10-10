@@ -88,8 +88,8 @@ export interface GujaratKacheriMaster {
 }
 
 export const DEFAULT_CITIZEN_PROFILE: CitizenAadhaarProfile = {
-  nameGu: 'હરિ પટેલ',
-  nameEn: 'Hari Patel',
+  nameGu: 'તૃષા સોમૈયા',
+  nameEn: 'Trusha Somaiya',
   aadhaarMasked: 'XXXX XXXX 8842',
   mobile: '9876543210',
   villageGu: 'ગોમટા',
@@ -106,8 +106,8 @@ export const DEFAULT_CITIZEN_PROFILE: CitizenAadhaarProfile = {
   familyMembers: [
     {
       id: 'mem-1',
-      nameGu: 'હરિ પટેલ',
-      nameEn: 'Hari Patel',
+      nameGu: 'તૃષા સોમૈયા',
+      nameEn: 'Trusha Somaiya',
       relationGu: 'સ્વયં (મુખ્ય સભ્ય)',
       relationEn: 'Self (Head of Family)',
       relationType: 'self',
@@ -117,17 +117,17 @@ export const DEFAULT_CITIZEN_PROFILE: CitizenAadhaarProfile = {
       status: 'verified',
       documentProofType: 'aadhaar_family_sheet',
       documentProofNumber: 'AADH-GUJ-8842',
-      documentFileName: 'Aadhaar_Card_HariPatel.pdf',
+      documentFileName: 'Aadhaar_Card_TrushaSomaiya.pdf',
       documentFileSize: '1.2 MB',
       aiMatchConfidence: 99.8,
       addedAt: '2026-01-10'
     },
     {
       id: 'mem-2',
-      nameGu: 'ગીતાબેન પટેલ',
-      nameEn: 'Geetaben Patel',
-      relationGu: 'પત્ની',
-      relationEn: 'Spouse (Wife)',
+      nameGu: 'હરિ પટેલ',
+      nameEn: 'Hari Patel',
+      relationGu: 'પતિ',
+      relationEn: 'Spouse (Husband)',
       relationType: 'spouse',
       aadhaarMasked: 'XXXX XXXX 1294',
       mobile: '9876543210',
@@ -135,7 +135,7 @@ export const DEFAULT_CITIZEN_PROFILE: CitizenAadhaarProfile = {
       status: 'verified',
       documentProofType: 'marriage_certificate',
       documentProofNumber: 'MR-GUJ-2012-004812',
-      documentFileName: 'Marriage_Certificate_Form1.pdf',
+      documentFileName: 'Marriage_Certificate_Trusha_Hari.pdf',
       documentFileSize: '1.5 MB',
       aiMatchConfidence: 99.4,
       addedAt: '2026-01-15'
@@ -162,8 +162,8 @@ export const DEFAULT_CITIZEN_PROFILE: CitizenAadhaarProfile = {
       id: 'mem-4',
       nameGu: 'પરસોત્તમભાઈ પટેલ',
       nameEn: 'Parsottambhai Patel',
-      relationGu: 'પિતા (વરિષ્ઠ નાગરિક)',
-      relationEn: 'Parent (Father - Senior Citizen)',
+      relationGu: 'સસરા (વરિષ્ઠ નાગરિક)',
+      relationEn: 'Father-in-law (Senior Citizen)',
       relationType: 'parent',
       aadhaarMasked: 'XXXX XXXX 4410',
       mobile: '9825123456',

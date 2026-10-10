@@ -307,23 +307,25 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
 
     setTimeout(() => {
       if (scenario === 'valid') {
+        const targetNameEn = selectedMember?.nameEn || 'Trusha Somaiya';
+        const targetNameGu = selectedMember?.nameGu || 'તૃષા સોમૈયા';
         let extracted = '';
         if (docKey.includes('આવક') || docKey.includes('Income')) {
           extracted = isEn 
-            ? 'Cert No: INC/GND/2025/11904 • Applicant: Hari Patel • Issue: 22/04/2025 • Valid under 3-Yr Rule' 
-            : 'પ્રમાણપત્ર નં: INC/GND/2025/11904 • અરજદાર: હરિ પટેલ • ઇસ્યુ: 22/04/2025 • ૩ વર્ષની સરકારી મુદતમાં માન્ય';
+            ? `Cert No: INC/GND/2025/11904 • Applicant: ${targetNameEn} • Issue: 22/04/2025 • Valid under 3-Yr Rule` 
+            : `પ્રમાણપત્ર નં: INC/GND/2025/11904 • અરજદાર: ${targetNameGu} • ઇસ્યુ: 22/04/2025 • ૩ વર્ષની સરકારી મુદતમાં માન્ય`;
         } else if (docKey.includes('આધાર') || docKey.includes('Aadhaar')) {
           extracted = isEn 
-            ? 'Name: Hari Patel • Aadhaar: XXXX-XXXX-8842 • UIDAI Signed QR Verified' 
-            : 'અરજદાર: હરિ પટેલ • આધાર: XXXX-XXXX-8842 • UIDAI અધિકૃત QR કોડ પ્રમાણિત';
+            ? `Name: ${targetNameEn} • Aadhaar: XXXX-XXXX-8842 • UIDAI Signed QR Verified` 
+            : `અરજદાર: ${targetNameGu} • આધાર: XXXX-XXXX-8842 • UIDAI અધિકૃત QR કોડ પ્રમાણિત`;
         } else if (docKey.includes('રેશન') || docKey.includes('Ration')) {
           extracted = isEn 
-            ? 'Ration Card: 042100889231 • NFSA Category • Head: Mohanbhai Patel • Verified' 
-            : 'રેશન કાર્ડ નં: 042100889231 • NFSA કેટેગરી • મોહનભાઈ પટેલ • પ્રમાણિત';
+            ? `Ration Card: 042100889231 • NFSA Category • Head: ${targetNameEn} • Verified` 
+            : `રેશન કાર્ડ નં: 042100889231 • NFSA કેટેગરી • ${targetNameGu} • પ્રમાણિત`;
         } else {
           extracted = isEn 
-            ? 'Official Seal Verified • Matching Citizen Identity: Hari Patel' 
-            : 'સત્તાવાર મોહર પ્રમાણિત • નાગરિક ઓળખ મેચ: હરિ પટેલ';
+            ? `Official Seal Verified • Matching Citizen Identity: ${targetNameEn}` 
+            : `સત્તાવાર મોહર પ્રમાણિત • નાગરિક ઓળખ મેચ: ${targetNameGu}`;
         }
 
         setDocVerifications(prev => ({
@@ -357,13 +359,15 @@ export const SchemeDrawer: React.FC<SchemeDrawerProps> = ({
           lang
         );
       } else if (scenario === 'mismatch') {
+        const targetNameEn = selectedMember?.nameEn || 'Trusha Somaiya';
+        const targetNameGu = selectedMember?.nameGu || 'તૃષા સોમૈયા';
         setDocVerifications(prev => ({
           ...prev,
           [docKey]: {
             status: 'failed',
             fileName: 'Certificate_Wrong_Name.pdf',
-            reasonEn: 'Name Mismatch: The name on this document (Suresh K. Shah) does not match the applicant identity (Hari Patel).',
-            reasonGu: 'નામમાં વિસંગતતા (Name Mismatch): દસ્તાવેજમાં નામ (સુરેશ કે. શાહ) છે, જે અરજદારની ઓળખ (હરિ પટેલ) સાથે મેળ ખાતું નથી.'
+            reasonEn: `Name Mismatch: The name on this document (Suresh K. Shah) does not match the applicant identity (${targetNameEn}).`,
+            reasonGu: `નામમાં વિસંગતતા (Name Mismatch): દસ્તાવેજમાં નામ (સુરેશ કે. શાહ) છે, જે અરજદારની ઓળખ (${targetNameGu}) સાથે મેળ ખાતું નથી.`
           }
         }));
         setCheckedDocs(prev => ({ ...prev, [docKey]: false }));

@@ -124,7 +124,7 @@ export const APP_CHANGELOG_HISTORY: AppReleaseVersion[] = [
     titleGu: 'આધાર સરનામું વિરુદ્ધ કચેરી રડાર & ૬ કાઉન્ટર ડેશબોર્ડ',
     titleEn: 'Aadhaar Native Address vs Radar & 6-Counter Live Dashboard',
     isLatest: false,
-    highlightSummaryGu: 'આધાર નોંધાયેલ સરનામું, ૬ કાઉન્ટર લાઈવ લિસ્ટ અને અધિકૃત નાગરિક હરિ પટેલ લૉગિન સિસ્ટમ.',
+    highlightSummaryGu: 'આધાર નોંધાયેલ સરનામું, ૬ કાઉન્ટર લાઈવ લિસ્ટ અને અધિકૃત નાગરિક તૃષા સોમૈયા લૉગિન સિસ્ટમ.',
     highlightSummaryEn: 'Aadhaar registered jurisdiction comparison and live multi-counter visualization.',
     changes: [
       {
@@ -140,8 +140,8 @@ export const APP_CHANGELOG_HISTORY: AppReleaseVersion[] = [
         icon: '👤',
         categoryGu: 'નાગરિક ઓળખ',
         categoryEn: 'Citizen Identity',
-        titleGu: 'હરિ પટેલ • ગોમટા, ગોંડલ અધિકૃત નાગરિક પ્રોફાઇલ',
-        titleEn: 'Hari Patel • Gomta, Gondal Citizen Aadhaar Identity',
+        titleGu: 'તૃષા સોમૈયા • ગોમટા, ગોંડલ અધિકૃત નાગરિક પ્રોફાઇલ',
+        titleEn: 'Trusha Somaiya • Gomta, Gondal Citizen Aadhaar Identity',
         descriptionGu: 'વાસ્તવિક આધાર વિગતો સાથે સરકારી ઓળખ કાર્ડ.',
         descriptionEn: 'Authentic Aadhaar credentials with native jurisdiction mapping.'
       }
